@@ -21,6 +21,19 @@ import BrowseProjects from "@/pages/freelancer/BrowseProjects";
 import FreelancerMessages from "@/pages/freelancer/Messages";
 import FreelancerSubscription from "@/pages/freelancer/Subscription";
 import FreelancerEarnings from "@/pages/freelancer/Earnings";
+import FreelancerPortfolio from "@/pages/freelancer/Portfolio";
+import FreelancerApplications from "@/pages/freelancer/Applications";
+import FreelancerReviews from "@/pages/freelancer/Reviews";
+import FreelancerSettings from "@/pages/freelancer/Settings";
+import ClientPayments from "@/pages/client/Payments";
+import ClientReviews from "@/pages/client/Reviews";
+import ClientSettings from "@/pages/client/Settings";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import UserManagement from "@/pages/admin/UserManagement";
+import VerificationQueue from "@/pages/admin/VerificationQueue";
+import SubscriptionManagement from "@/pages/admin/SubscriptionManagement";
+import RazorpaySettings from "@/pages/admin/RazorpaySettings";
+import SendNotifications from "@/pages/admin/SendNotifications";
 
 function App() {
   return (
@@ -46,6 +59,9 @@ function App() {
       <Route path="/client/projects" element={<ClientProjects />} />
       <Route path="/client/project/:id" element={<ProjectDetails />} />
       <Route path="/client/messages" element={<ClientMessages />} />
+      <Route path="/client/payments" element={<ClientPayments />} />
+      <Route path="/client/reviews" element={<ClientReviews />} />
+      <Route path="/client/settings" element={<ClientSettings />} />
 
       {/* Freelancer Dashboard Pages */}
       <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
@@ -57,6 +73,21 @@ function App() {
         element={<FreelancerSubscription />}
       />
       <Route path="/freelancer/earnings" element={<FreelancerEarnings />} />
+      <Route path="/freelancer/portfolio" element={<FreelancerPortfolio />} />
+      <Route
+        path="/freelancer/applications"
+        element={<FreelancerApplications />}
+      />
+      <Route path="/freelancer/reviews" element={<FreelancerReviews />} />
+      <Route path="/freelancer/settings" element={<FreelancerSettings />} />
+
+      {/* Admin Dashboard Pages */}
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/users" element={<UserManagement />} />
+      <Route path="/admin/verifications" element={<VerificationQueue />} />
+      <Route path="/admin/subscriptions" element={<SubscriptionManagement />} />
+      <Route path="/admin/payments" element={<RazorpaySettings />} />
+      <Route path="/admin/notifications" element={<SendNotifications />} />
 
       <Route path="*" element={<Home />} />
     </Routes>
