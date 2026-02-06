@@ -15,6 +15,12 @@ import PostProject from "@/pages/client/PostProject";
 import ClientProjects from "@/pages/client/Projects";
 import ProjectDetails from "@/pages/client/ProjectDetails";
 import ClientMessages from "@/pages/client/Messages";
+import FreelancerDashboard from "@/pages/freelancer/Dashboard";
+import FreelancerProfileEdit from "@/pages/freelancer/ProfileEdit";
+import BrowseProjects from "@/pages/freelancer/BrowseProjects";
+import FreelancerMessages from "@/pages/freelancer/Messages";
+import FreelancerSubscription from "@/pages/freelancer/Subscription";
+import FreelancerEarnings from "@/pages/freelancer/Earnings";
 
 function App() {
   return (
@@ -40,6 +46,17 @@ function App() {
       <Route path="/client/projects" element={<ClientProjects />} />
       <Route path="/client/project/:id" element={<ProjectDetails />} />
       <Route path="/client/messages" element={<ClientMessages />} />
+
+      {/* Freelancer Dashboard Pages */}
+      <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
+      <Route path="/freelancer/profile" element={<FreelancerProfileEdit />} />
+      <Route path="/projects" element={<BrowseProjects />} />
+      <Route path="/freelancer/messages" element={<FreelancerMessages />} />
+      <Route
+        path="/freelancer/subscription"
+        element={<FreelancerSubscription />}
+      />
+      <Route path="/freelancer/earnings" element={<FreelancerEarnings />} />
 
       <Route path="*" element={<Home />} />
     </Routes>
