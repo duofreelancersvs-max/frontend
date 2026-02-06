@@ -22,8 +22,8 @@ const PublicNavbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Find Talent", href: "/find-talent" },
-    { name: "Post Project", href: "/post-project" },
+    { name: "Find Talent", href: "/freelancers" },
+    { name: "Post Project", href: "/client/post-project" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "Pricing", href: "/pricing" },
   ];
@@ -40,10 +40,10 @@ const PublicNavbar = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-navy flex items-center justify-center text-white font-bold text-xl">
-            S
+            C
           </div>
           <span className="font-bold text-xl text-navy hidden sm:block tracking-tight">
-            Stitch
+            ConnectMe
           </span>
         </Link>
 
@@ -62,15 +62,19 @@ const PublicNavbar = () => {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <Button
-            variant="outline"
-            className="border-royal-blue text-royal-blue hover:bg-royal-blue/5 hover:text-royal-blue"
-          >
-            Log In
-          </Button>
-          <Button className="bg-teal hover:bg-teal/90 text-white">
-            Sign Up
-          </Button>
+          <Link to="/login">
+            <Button
+              variant="outline"
+              className="border-royal-blue text-royal-blue hover:bg-royal-blue/5 hover:text-royal-blue"
+            >
+              Log In
+            </Button>
+          </Link>
+          <Link to="/register">
+            <Button className="bg-teal hover:bg-teal/90 text-white">
+              Sign Up
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -97,15 +101,19 @@ const PublicNavbar = () => {
               </Link>
             ))}
             <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-slate-100">
-              <Button
-                variant="outline"
-                className="w-full border-royal-blue text-royal-blue hover:bg-royal-blue/5"
-              >
-                Log In
-              </Button>
-              <Button className="w-full bg-teal hover:bg-teal/90 text-white">
-                Sign Up
-              </Button>
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="w-full border-royal-blue text-royal-blue hover:bg-royal-blue/5"
+                >
+                  Log In
+                </Button>
+              </Link>
+              <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full bg-teal hover:bg-teal/90 text-white">
+                  Sign Up
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
