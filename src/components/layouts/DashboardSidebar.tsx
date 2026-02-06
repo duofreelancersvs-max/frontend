@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
-  Users,
   MessageSquare,
   Settings,
   LogOut,
@@ -22,13 +21,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Projects", icon: Briefcase, href: "/dashboard/projects" },
-  { label: "Talent", icon: Users, href: "/dashboard/talent" },
-  { label: "Messages", icon: MessageSquare, href: "/dashboard/messages" },
-  { label: "Finance", icon: Wallet, href: "/dashboard/finance" },
-  { label: "Reports", icon: PieChart, href: "/dashboard/reports" },
-  { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/freelancer/dashboard" },
+  { label: "Browse Projects", icon: Briefcase, href: "/projects" },
+  { label: "Messages", icon: MessageSquare, href: "/freelancer/messages" },
+  { label: "Earnings", icon: Wallet, href: "/freelancer/earnings" },
+  { label: "Subscription", icon: PieChart, href: "/freelancer/subscription" },
+  { label: "Profile", icon: Settings, href: "/freelancer/profile" },
 ];
 
 const DashboardSidebar = () => {

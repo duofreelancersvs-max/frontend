@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Search, Bell, MessageSquare, Menu } from "lucide-react";
 import Breadcrumb, {
   type BreadcrumbItem,
@@ -60,17 +61,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
 
         {/* Messages */}
-        <div className="relative">
+        <Link to="/freelancer/messages" className="relative">
           <button className="p-2 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-full transition-all">
             <MessageSquare size={20} />
           </button>
           <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white"></span>
-        </div>
+        </Link>
 
         <div className="h-8 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
 
         {/* Profile Dropdown Trigger */}
-        <button className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
+        <Link
+          to="/freelancer/profile"
+          className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-lg transition-colors"
+        >
           <div className="w-9 h-9 rounded-full bg-slate-200 overflow-hidden border border-slate-100">
             <img
               src="https://ui-avatars.com/api/?name=Alex+Johnson&background=0D9488&color=fff"
@@ -82,9 +86,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <p className="text-sm font-semibold text-slate-700 leading-none">
               Alex Johnson
             </p>
-            <p className="text-xs text-slate-500 mt-1">Client Account</p>
+            <p className="text-xs text-slate-500 mt-1">Freelancer</p>
           </div>
-        </button>
+        </Link>
       </div>
     </header>
   );
