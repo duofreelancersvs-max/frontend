@@ -172,7 +172,6 @@ const Home = () => {
     {
       name: "Arun Kumar",
       title: "Senior VFX Artist",
-      rate: 1500,
       rating: 4.9,
       reviews: 89,
       skills: ["After Effects", "Nuke", "Houdini"],
@@ -181,7 +180,6 @@ const Home = () => {
     {
       name: "Meera Reddy",
       title: "Video Editor",
-      rate: 800,
       rating: 4.8,
       reviews: 156,
       skills: ["Premiere Pro", "DaVinci"],
@@ -190,7 +188,6 @@ const Home = () => {
     {
       name: "Karthik S.",
       title: "3D Generalist",
-      rate: 1200,
       rating: 5.0,
       reviews: 43,
       skills: ["Blender", "Maya", "C4D"],
@@ -199,7 +196,6 @@ const Home = () => {
     {
       name: "Lakshmi P.",
       title: "Motion Designer",
-      rate: 1000,
       rating: 4.9,
       reviews: 78,
       skills: ["After Effects", "Lottie"],
@@ -560,8 +556,7 @@ const Home = () => {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-2xl font-bold text-navy">₹1,500</span>
-                    <span className="text-slate-400 text-sm">/hour</span>
+                    
                   </div>
                   <Link to="/freelancer/1">
                     <Button className="bg-royal-blue hover:bg-royal-blue-hover text-white px-6">
@@ -858,13 +853,7 @@ const Home = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div>
-                      <span className="text-xl font-bold text-navy">
-                        ₹{freelancer.rate.toLocaleString()}
-                      </span>
-                      <span className="text-slate-400 text-sm">/hr</span>
-                    </div>
+                  <div className="flex items-center justify-end pt-4 border-t border-slate-100">
                     <Link to={`/freelancer/${idx + 1}`}>
                       <Button
                         size="sm"
@@ -1078,7 +1067,7 @@ const Home = () => {
                   size="lg"
                   className="bg-white text-teal hover:bg-slate-100 font-bold text-lg px-10 py-7 rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
                 >
-                  Get Started Free
+                  Find Work
                 </Button>
               </Link>
               <Link to="/how-it-works">
@@ -1087,7 +1076,7 @@ const Home = () => {
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
                 >
-                  Learn More
+                  Hire Talent
                 </Button>
               </Link>
             </div>

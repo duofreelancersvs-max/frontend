@@ -123,15 +123,15 @@ const PostProject = () => {
   const [formData, setFormData] = useState({
     // Step 1
     title: "",
-    category: "",
+    categories: [] as string[],
     description: "",
-    attachments: [] as File[],
     // Step 2
     skills: [] as string[],
     experienceLevel: "",
     duration: "",
     location: "remote",
     city: "",
+    autoDetectLocation: true,
     // Step 3
     budgetType: "fixed",
     minBudget: "",
@@ -160,20 +160,12 @@ const PostProject = () => {
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setFormData((prev) => ({
-        ...prev,
-        attachments: [...prev.attachments, ...files],
-      }));
-    }
-  };
-
-  const removeFile = (index: number) => {
+  const handleCategoryToggle = (category: string) => {
     setFormData((prev) => ({
       ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
     }));
   };
 
@@ -422,25 +414,46 @@ const PostProject = () => {
                       />
                     </div>
 
-                    {/* Project Category */}
+                    {/* Project Categories */}
                     <div>
-                      <label className="block text-sm font-semibold text-navy mb-2">
-                        Project Category <span className="text-red-500">*</span>
+                      <label className="block text-sm font-semibold text-navy mb-3">
+                        Project Categories <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) =>
-                          handleInputChange("category", e.target.value)
-                        }
-                        className="w-full h-12 px-4 rounded-lg border border-slate-200 focus:border-teal focus:ring-1 focus:ring-teal text-navy bg-white"
-                      >
-                        <option value="">Select a category</option>
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
+                      
+                      {/* Selected Categories */}
+                      {formData.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {formData.categories.map((category) => (
+                            <span
+                              key={category}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-teal/10 text-teal rounded-full text-sm font-medium"
+                            >
+                              {category}
+                              <button onClick={() => handleCategoryToggle(category)}>
+                                <X size={14} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Available Categories */}
+                      <div className="flex flex-wrap gap-2">
+                        {categories.map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => handleCategoryToggle(category)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                              formData.categories.includes(category)
+                                ? "bg-teal text-white"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                            )}
+                          >
+                            {category}
+                          </button>
                         ))}
-                      </select>
+                      </div>
                     </div>
 
                     {/* Project Description */}
@@ -473,64 +486,6 @@ const PostProject = () => {
                           {formData.description.length}/1000
                         </p>
                       </div>
-                    </div>
-
-                    {/* Attachments */}
-                    <div>
-                      <label className="block text-sm font-semibold text-navy mb-2">
-                        Attachments (Optional)
-                      </label>
-                      <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-teal/50 transition-colors">
-                        <input
-                          type="file"
-                          multiple
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          id="file-upload"
-                          accept=".pdf,.jpg,.jpeg,.png,.mp4"
-                        />
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center mx-auto mb-4">
-                            <Upload size={24} className="text-teal" />
-                          </div>
-                          <p className="text-sm font-medium text-navy mb-1">
-                            Drag & drop files here, or{" "}
-                            <span className="text-teal">browse</span>
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            Supported: PDF, JPG, PNG, MP4 (max 50MB each)
-                          </p>
-                        </label>
-                      </div>
-                      {formData.attachments.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                          {formData.attachments.map((file, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                            >
-                              <div className="flex items-center gap-3">
-                                <FileText
-                                  size={18}
-                                  className="text-slate-400"
-                                />
-                                <span className="text-sm text-navy">
-                                  {file.name}
-                                </span>
-                                <span className="text-xs text-slate-400">
-                                  ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                                </span>
-                              </div>
-                              <button
-                                onClick={() => removeFile(index)}
-                                className="text-slate-400 hover:text-red-500"
-                              >
-                                <X size={16} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -690,9 +645,34 @@ const PostProject = () => {
 
                     {/* Location Preference */}
                     <div>
-                      <label className="block text-sm font-semibold text-navy mb-3">
-                        Location Preference
-                      </label>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="block text-sm font-semibold text-navy">
+                          Location Preference
+                        </label>
+                        {formData.location === "onsite" && (
+                          <button
+                            onClick={() => {
+                              handleInputChange("autoDetectLocation", true);
+                              if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(
+                                  (position) => {
+                                    const { latitude, longitude } = position.coords;
+                                    // In a real app, you would use a reverse geocoding service
+                                    // For now, we'll just show a placeholder
+                                    handleInputChange("city", `Location detected (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`);
+                                  },
+                                  () => {
+                                    console.log("Location access denied");
+                                  }
+                                );
+                              }
+                            }}
+                            className="text-xs text-teal hover:underline"
+                          >
+                            Auto-detect Location
+                          </button>
+                        )}
+                      </div>
                       <div className="space-y-3">
                         {["remote", "onsite", "hybrid"].map((loc) => (
                           <label
@@ -890,89 +870,21 @@ const PostProject = () => {
                       <label className="block text-sm font-semibold text-navy mb-3">
                         Project Visibility
                       </label>
-                      <div className="space-y-3">
-                        <label
-                          className={cn(
-                            "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
-                            formData.visibility === "public"
-                              ? "border-teal bg-teal/5"
-                              : "border-slate-200 hover:border-slate-300",
-                          )}
-                        >
-                          <input
-                            type="radio"
-                            name="visibility"
-                            value="public"
-                            checked={formData.visibility === "public"}
-                            onChange={(e) =>
-                              handleInputChange("visibility", e.target.value)
-                            }
-                            className="sr-only"
-                          />
-                          <div
-                            className={cn(
-                              "w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
-                              formData.visibility === "public"
-                                ? "border-teal bg-teal"
-                                : "border-slate-300",
-                            )}
-                          >
-                            {formData.visibility === "public" && (
-                              <Check size={12} className="text-white" />
-                            )}
+                      <div className="p-4 rounded-xl border-2 border-teal bg-teal/5">
+                        <div className="flex items-start gap-3">
+                          <div className="w-5 h-5 mt-0.5 rounded-full bg-teal border-2 border-teal flex items-center justify-center flex-shrink-0">
+                            <Check size={12} className="text-white" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <Users size={16} className="text-slate-400" />
+                              <Users size={16} className="text-teal" />
                               <p className="font-semibold text-navy">Public</p>
                             </div>
                             <p className="text-sm text-slate-500 mt-1">
                               All freelancers can see and apply to this project
                             </p>
                           </div>
-                        </label>
-                        <label
-                          className={cn(
-                            "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
-                            formData.visibility === "invite"
-                              ? "border-teal bg-teal/5"
-                              : "border-slate-200 hover:border-slate-300",
-                          )}
-                        >
-                          <input
-                            type="radio"
-                            name="visibility"
-                            value="invite"
-                            checked={formData.visibility === "invite"}
-                            onChange={(e) =>
-                              handleInputChange("visibility", e.target.value)
-                            }
-                            className="sr-only"
-                          />
-                          <div
-                            className={cn(
-                              "w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
-                              formData.visibility === "invite"
-                                ? "border-teal bg-teal"
-                                : "border-slate-300",
-                            )}
-                          >
-                            {formData.visibility === "invite" && (
-                              <Check size={12} className="text-white" />
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Mail size={16} className="text-slate-400" />
-                              <p className="font-semibold text-navy">
-                                Invite Only
-                              </p>
-                            </div>
-                            <p className="text-sm text-slate-500 mt-1">
-                              Only freelancers you invite can see this project
-                            </p>
-                          </div>
-                        </label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1031,11 +943,24 @@ const PostProject = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-500 uppercase">
-                            Category
+                            Categories
                           </p>
-                          <p className="font-medium text-navy">
-                            {formData.category || "Not specified"}
-                          </p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {formData.categories.length > 0 ? (
+                              formData.categories.map((cat) => (
+                                <span
+                                  key={cat}
+                                  className="px-2 py-1 bg-teal/10 text-teal rounded-md text-xs font-medium"
+                                >
+                                  {cat}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-slate-400 text-sm">
+                                Not specified
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div>
                           <p className="text-xs text-slate-500 uppercase">
@@ -1045,16 +970,6 @@ const PostProject = () => {
                             {formData.description || "Not specified"}
                           </p>
                         </div>
-                        {formData.attachments.length > 0 && (
-                          <div>
-                            <p className="text-xs text-slate-500 uppercase">
-                              Attachments
-                            </p>
-                            <p className="font-medium text-navy">
-                              {formData.attachments.length} file(s)
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
 

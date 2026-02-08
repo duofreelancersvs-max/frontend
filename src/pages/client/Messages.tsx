@@ -758,12 +758,6 @@ const ClientMessages = () => {
                     {selectedConvo.freelancer.reviews} reviews
                   </span>
                 </div>
-                <div className="inline-flex items-baseline gap-0.5 px-4 py-2 bg-slate-100 rounded-xl">
-                  <span className="text-lg font-bold text-navy">
-                    ₹{selectedConvo.freelancer.hourlyRate.toLocaleString()}
-                  </span>
-                  <span className="text-sm text-slate-500">/hr</span>
-                </div>
               </div>
 
               {selectedConvo.project && (
