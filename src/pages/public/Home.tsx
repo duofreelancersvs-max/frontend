@@ -264,6 +264,7 @@ const Home = () => {
             <div className="hidden lg:flex items-center gap-1">
               {[
                 { label: "Find Talent", href: "/freelancers" },
+                { label: "Find Work", href: "/find-work" },
                 { label: "How It Works", href: "/how-it-works" },
                 { label: "Pricing", href: "/pricing" },
                 { label: "About", href: "/about" },
@@ -338,6 +339,7 @@ const Home = () => {
           <div className="p-4 space-y-2">
             {[
               { label: "Find Talent", href: "/freelancers" },
+              { label: "Find Work", href: "/find-work" },
               { label: "How It Works", href: "/how-it-works" },
               { label: "Pricing", href: "/pricing" },
               { label: "About", href: "/about" },

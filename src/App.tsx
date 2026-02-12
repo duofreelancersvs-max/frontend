@@ -44,6 +44,7 @@ function App() {
       <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/freelancers" element={<FreelancerDirectory />} />
+      <Route path="/find-work" element={<BrowseProjects />} />
       <Route path="/freelancer/:id" element={<FreelancerProfile />} />
       <Route path="/contact" element={<Contact />} />
 
