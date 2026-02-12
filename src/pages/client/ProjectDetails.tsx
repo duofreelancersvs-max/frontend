@@ -129,7 +129,6 @@ const applicationsData = [
       verified: true,
       location: "Mumbai, India",
     },
-    proposedRate: 18000,
     coverLetter:
       "Hi! I've been a professional video editor for over 6 years with expertise in e-commerce product videos. I've worked with brands like Nykaa, Myntra, and several D2C startups. I can deliver high-quality cinematic product videos that convert viewers into customers...",
     skills: ["Adobe Premiere Pro", "After Effects", "Color Grading"],
@@ -147,7 +146,6 @@ const applicationsData = [
       verified: true,
       location: "Delhi, India",
     },
-    proposedRate: 22000,
     coverLetter:
       "Hello! I specialize in creating stunning product videos with beautiful motion graphics and animations. My work has been featured on major e-commerce platforms and social media campaigns. I use After Effects and Cinema 4D for creating eye-catching visuals...",
     skills: ["After Effects", "Cinema 4D", "Motion Graphics"],
@@ -165,7 +163,6 @@ const applicationsData = [
       verified: false,
       location: "Bangalore, India",
     },
-    proposedRate: 15000,
     coverLetter:
       "I'm a passionate video producer with a keen eye for detail. I've created product videos for startups and established brands alike. My approach combines creative storytelling with professional editing techniques to create videos that engage and convert...",
     skills: ["Premiere Pro", "DaVinci Resolve", "Color Grading"],
@@ -183,7 +180,6 @@ const applicationsData = [
       verified: true,
       location: "Chennai, India",
     },
-    proposedRate: 20000,
     coverLetter:
       "As a creative video editor with a background in advertising, I understand how to create product videos that not only look beautiful but also drive sales. I pay attention to pacing, music selection, and visual storytelling to create impactful videos...",
     skills: ["Adobe Premiere Pro", "After Effects", "Motion Graphics"],
@@ -232,7 +228,6 @@ const similarFreelancers = [
     avatar: "RV",
     title: "Video Editor",
     rating: 4.8,
-    rate: "₹1,500/hr",
     skills: ["Premiere Pro", "After Effects"],
   },
   {
@@ -241,7 +236,6 @@ const similarFreelancers = [
     avatar: "AS",
     title: "Motion Designer",
     rating: 4.9,
-    rate: "₹2,000/hr",
     skills: ["After Effects", "Cinema 4D"],
   },
   {
@@ -250,7 +244,6 @@ const similarFreelancers = [
     avatar: "KM",
     title: "VFX Artist",
     rating: 4.7,
-    rate: "₹1,800/hr",
     skills: ["Nuke", "After Effects"],
   },
 ];
@@ -886,14 +879,11 @@ const ProjectDetails = () => {
                         </div>
                       </div>
 
-                      {/* Rate & Actions */}
+                      {/* Actions */}
                       <div className="lg:text-right lg:min-w-[200px] flex lg:flex-col justify-between lg:justify-start gap-4">
                         <div>
                           <p className="text-xs text-slate-500 mb-1">
-                            Proposed Rate
-                          </p>
-                          <p className="text-xl font-bold text-navy">
-                            ₹{application.proposedRate.toLocaleString()}
+                            Applied
                           </p>
                           <p className="text-xs text-slate-400">
                             {application.appliedAt}
@@ -991,16 +981,13 @@ const ProjectDetails = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-center mb-3">
                       <div className="flex items-center gap-1">
                         <Star size={14} className="text-gold fill-gold" />
                         <span className="text-sm font-medium">
                           {freelancer.rating}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-navy">
-                        {freelancer.rate}
-                      </span>
                     </div>
                     <div className="flex flex-wrap gap-1 mb-3">
                       {freelancer.skills.map((skill) => (

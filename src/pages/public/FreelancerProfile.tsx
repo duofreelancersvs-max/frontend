@@ -85,7 +85,6 @@ const FreelancerProfile = () => {
     location: "Hyderabad, Telangana",
     rating: 4.9,
     reviews: 127,
-    rate: 800,
     projectsCompleted: 45,
     successRate: 98,
     memberSince: "2023",
@@ -242,7 +241,6 @@ What sets me apart is my attention to detail and commitment to understanding eac
       title: "Video Editor",
       avatar: "KM",
       rating: 4.8,
-      rate: 600,
       verified: true,
     },
     {
@@ -251,7 +249,6 @@ What sets me apart is my attention to detail and commitment to understanding eac
       title: "Motion Designer",
       avatar: "SR",
       rating: 4.9,
-      rate: 900,
       verified: true,
     },
     {
@@ -260,7 +257,6 @@ What sets me apart is my attention to detail and commitment to understanding eac
       title: "Video Editor",
       avatar: "AK",
       rating: 4.7,
-      rate: 500,
       verified: false,
     },
   ];
@@ -440,9 +436,9 @@ What sets me apart is my attention to detail and commitment to understanding eac
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-navy">
-                ₹{freelancer.rate}
+                {freelancer.projectsCompleted}
               </div>
-              <div className="text-sm text-slate-500">Hourly Rate</div>
+              <div className="text-sm text-slate-500">Projects Completed</div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-navy">
@@ -759,12 +755,6 @@ What sets me apart is my attention to detail and commitment to understanding eac
             <div className="sticky top-24">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-6">
                 <div className="text-center mb-6">
-                  <div className="text-3xl font-bold text-navy mb-1">
-                    ₹{freelancer.rate}
-                    <span className="text-lg font-normal text-slate-400">
-                      /hr
-                    </span>
-                  </div>
                   <p className="text-sm text-slate-500">
                     Average response time: 2 hours
                   </p>
@@ -819,8 +809,6 @@ What sets me apart is my attention to detail and commitment to understanding eac
                         <div className="flex items-center gap-2 text-xs text-slate-400">
                           <Star size={12} className="text-gold fill-gold" />
                           <span>{fl.rating}</span>
-                          <span>•</span>
-                          <span>₹{fl.rate}/hr</span>
                         </div>
                       </div>
                     </Link>

@@ -120,7 +120,6 @@ const recentApplications = [
     id: 1,
     freelancer: { name: "Meera Reddy", avatar: "MR", title: "Video Editor" },
     project: "YouTube Channel Intro",
-    rate: "₹1,200/hr",
     appliedDate: "2 hours ago",
     status: "Pending",
   },
@@ -128,7 +127,6 @@ const recentApplications = [
     id: 2,
     freelancer: { name: "Karthik S.", avatar: "KS", title: "3D Designer" },
     project: "Product 3D Renders",
-    rate: "₹1,500/hr",
     appliedDate: "5 hours ago",
     status: "Shortlisted",
   },
@@ -136,7 +134,6 @@ const recentApplications = [
     id: 3,
     freelancer: { name: "Lakshmi P.", avatar: "LP", title: "Motion Designer" },
     project: "App Promo Video",
-    rate: "₹1,000/hr",
     appliedDate: "1 day ago",
     status: "Pending",
   },
@@ -149,7 +146,6 @@ const recommendedFreelancers = [
     avatar: "RV",
     title: "Senior VFX Artist",
     skills: ["After Effects", "Nuke", "Houdini"],
-    rate: "₹1,800/hr",
     rating: 4.9,
     reviews: 127,
   },
@@ -159,7 +155,6 @@ const recommendedFreelancers = [
     avatar: "AS",
     title: "Motion Graphics Expert",
     skills: ["Cinema 4D", "After Effects"],
-    rate: "₹1,400/hr",
     rating: 4.8,
     reviews: 89,
   },
@@ -169,7 +164,6 @@ const recommendedFreelancers = [
     avatar: "DP",
     title: "Video Editor",
     skills: ["Premiere Pro", "DaVinci"],
-    rate: "₹900/hr",
     rating: 5.0,
     reviews: 156,
   },
@@ -580,9 +574,6 @@ const ClientDashboard = () => {
                       Project
                     </th>
                     <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
-                      Proposed Rate
-                    </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
                       Applied
                     </th>
                     <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
@@ -616,9 +607,6 @@ const ClientDashboard = () => {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
                         {app.project}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-navy">
-                        {app.rate}
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-500">
                         {app.appliedDate}
@@ -713,12 +701,7 @@ const ClientDashboard = () => {
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                      <div>
-                        <span className="font-bold text-navy">
-                          {freelancer.rate}
-                        </span>
-                      </div>
+                    <div className="flex items-center justify-end pt-3 border-t border-slate-100">
                       <div className="flex items-center gap-1">
                         <Star size={14} className="text-gold fill-gold" />
                         <span className="text-sm font-semibold text-navy">
