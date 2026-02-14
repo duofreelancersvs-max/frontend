@@ -13,51 +13,43 @@ import {
   Building,
   Quote,
   CheckCircle,
+  Github,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import type { UserRole } from "@/types/auth.types";
 
-type UserRole = "client" | "freelancer" | null;
 type Step = "role" | "form";
 
 const Register = () => {
   const [step, setStep] = useState<Step>("role");
-  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const { register, signInWithOAuth, isLoading, error, clearError } = useAuth();
 
-  const [clientForm, setClientForm] = useState({
-    fullName: "",
-    companyName: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [freelancerForm, setFreelancerForm] = useState({
+  const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    companyName: "",
     email: "",
     phone: "",
     primarySkill: "Video Editing",
     password: "",
     confirmPassword: "",
+    city: "",
+    state: "",
   });
 
-  const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setClientForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFreelancerChange = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFreelancerForm((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) clearError();
   };
 
   const handleRoleSelect = (role: UserRole) => {
@@ -72,17 +64,46 @@ const Register = () => {
 
   const handleBack = () => {
     setStep("role");
+    setSelectedRole(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Navigate to OTP verification
-      window.location.href = "/verify-otp";
-    }, 1500);
+
+    if (!selectedRole) return;
+
+    if (formData.password !== formData.confirmPassword) {
+      // Show password mismatch error
+      return;
+    }
+
+    try {
+      await register({
+        email: formData.email,
+        password: formData.password,
+        role: selectedRole,
+        phone: formData.phone,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        city: formData.city,
+        state: formData.state,
+      });
+    } catch {
+      // Error is handled in the hook
+    }
+  };
+
+  const handleOAuthSignUp = async (provider: "google" | "github") => {
+    if (!selectedRole) {
+      // Should not happen if buttons are disabled, but good safety
+      return;
+    }
+
+    try {
+      await signInWithOAuth(provider, selectedRole);
+    } catch {
+      // Error is handled in the hook
+    }
   };
 
   return (
@@ -113,48 +134,27 @@ const Register = () => {
           {/* Center Content */}
           <div className="flex-1 flex flex-col justify-center">
             <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
-              Join Our
+              Start Your
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light to-sky-blue">
-                Community
+                Journey.
               </span>
             </h2>
-            <p className="text-slate-300 text-lg max-w-md mb-8">
-              {selectedRole === "client"
-                ? "Find the perfect creative talent for your projects."
-                : selectedRole === "freelancer"
-                  ? "Showcase your skills and connect with clients."
-                  : "Choose your path and start your journey with us."}
+            <p className="text-slate-300 text-lg max-w-md">
+              Join thousands of professionals connecting on India&apos;s leading
+              creative marketplace.
             </p>
 
-            {/* Benefits */}
-            <div className="space-y-4">
-              {(selectedRole === "client"
-                ? [
-                    "Access to 500+ verified freelancers",
-                    "Secure payment protection",
-                    "Post unlimited projects",
-                  ]
-                : selectedRole === "freelancer"
-                  ? [
-                      "Get discovered by top clients",
-                      "Secure milestone payments",
-                      "Build your portfolio",
-                    ]
-                  : [
-                      "500+ verified professionals",
-                      "Secure platform",
-                      "24/7 support",
-                    ]
-              ).map((benefit, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 text-white/80"
-                >
-                  <CheckCircle size={18} className="text-teal-light" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
+            {/* Stats */}
+            <div className="mt-12 grid grid-cols-2 gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                <div className="text-3xl font-bold text-white mb-1">10K+</div>
+                <div className="text-slate-400 text-sm">Active Users</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                <div className="text-3xl font-bold text-white mb-1">₹50Cr+</div>
+                <div className="text-slate-400 text-sm">Projects Completed</div>
+              </div>
             </div>
           </div>
 
@@ -162,33 +162,24 @@ const Register = () => {
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
             <Quote size={24} className="text-teal-light mb-3" />
             <p className="text-white/90 italic mb-4">
-              {selectedRole === "freelancer"
-                ? "I've doubled my income since joining ConnectMeIndia. The platform brings quality clients directly to me!"
-                : "Finding reliable creative talent has never been easier. ConnectMeIndia is a game-changer!"}
+              "I found my dream clients within the first month. The platform is
+              incredibly easy to use and the opportunities are endless!"
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-sm">
-                {selectedRole === "freelancer" ? "PS" : "RK"}
+                SP
               </div>
               <div>
-                <div className="text-white font-semibold">
-                  {selectedRole === "freelancer"
-                    ? "Priya Sharma"
-                    : "Rahul Kumar"}
-                </div>
-                <div className="text-white/60 text-sm">
-                  {selectedRole === "freelancer"
-                    ? "Video Editor"
-                    : "Founder, MediaWorks"}
-                </div>
+                <div className="text-white font-semibold">Sneha Patel</div>
+                <div className="text-white/60 text-sm">Video Editor</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* RIGHT SIDE - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 overflow-y-auto">
+      {/* RIGHT SIDE - Registration Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
         <div className="w-full max-w-lg">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
@@ -209,125 +200,123 @@ const Register = () => {
 
           {/* Form Card */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-            {/* STEP 1: Role Selection */}
-            {step === "role" && (
-              <>
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl font-bold text-navy mb-2">
-                    Join Our Community
-                  </h1>
-                  <p className="text-slate-500">I want to:</p>
-                </div>
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-navy mb-2">
+                Create Account
+              </h1>
+              <p className="text-slate-500">
+                {step === "role"
+                  ? "Choose your account type"
+                  : selectedRole === "client"
+                    ? "Tell us about your business"
+                    : "Tell us about yourself"}
+              </p>
+            </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {/* Client Card */}
-                  <button
-                    type="button"
-                    onClick={() => handleRoleSelect("client")}
-                    className={cn(
-                      "p-6 rounded-2xl border-2 transition-all duration-300 text-left group",
-                      selectedRole === "client"
-                        ? "border-teal bg-teal/5 shadow-lg"
-                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
-                    )}
-                  >
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            {step === "role" ? (
+              <div className="space-y-4">
+                {/* Role Selection Cards */}
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("client")}
+                  className={cn(
+                    "w-full p-6 rounded-xl border-2 text-left transition-all",
+                    selectedRole === "client"
+                      ? "border-teal bg-teal/5"
+                      : "border-slate-200 hover:border-teal/50",
+                  )}
+                >
+                  <div className="flex items-start gap-4">
                     <div
                       className={cn(
-                        "w-14 h-14 rounded-xl flex items-center justify-center mb-4",
+                        "w-12 h-12 rounded-xl flex items-center justify-center",
                         selectedRole === "client"
                           ? "bg-teal text-white"
-                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200",
+                          : "bg-slate-100 text-slate-600",
                       )}
                     >
-                      <Briefcase size={28} />
+                      <Building size={24} />
                     </div>
-                    <h3
-                      className={cn(
-                        "font-bold text-lg mb-1",
-                        selectedRole === "client" ? "text-teal" : "text-navy",
-                      )}
-                    >
-                      Hire Talent
-                    </h3>
-                    <p className="text-slate-500 text-sm">
-                      Post projects and find freelancers
-                    </p>
-                  </button>
-
-                  {/* Freelancer Card */}
-                  <button
-                    type="button"
-                    onClick={() => handleRoleSelect("freelancer")}
-                    className={cn(
-                      "p-6 rounded-2xl border-2 transition-all duration-300 text-left group",
-                      selectedRole === "freelancer"
-                        ? "border-teal bg-teal/5 shadow-lg"
-                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+                    <div className="flex-1">
+                      <h3 className="font-bold text-navy mb-1">
+                        I&apos;m a Client
+                      </h3>
+                      <p className="text-slate-500 text-sm">
+                        Looking to hire talented professionals for my projects
+                      </p>
+                    </div>
+                    {selectedRole === "client" && (
+                      <CheckCircle className="text-teal" size={24} />
                     )}
-                  >
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("freelancer")}
+                  className={cn(
+                    "w-full p-6 rounded-xl border-2 text-left transition-all",
+                    selectedRole === "freelancer"
+                      ? "border-teal bg-teal/5"
+                      : "border-slate-200 hover:border-teal/50",
+                  )}
+                >
+                  <div className="flex items-start gap-4">
                     <div
                       className={cn(
-                        "w-14 h-14 rounded-xl flex items-center justify-center mb-4",
+                        "w-12 h-12 rounded-xl flex items-center justify-center",
                         selectedRole === "freelancer"
                           ? "bg-teal text-white"
-                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200",
+                          : "bg-slate-100 text-slate-600",
                       )}
                     >
-                      <User size={28} />
+                      <Briefcase size={24} />
                     </div>
-                    <h3
-                      className={cn(
-                        "font-bold text-lg mb-1",
-                        selectedRole === "freelancer"
-                          ? "text-teal"
-                          : "text-navy",
-                      )}
-                    >
-                      Find Work
-                    </h3>
-                    <p className="text-slate-500 text-sm">
-                      Showcase skills and get hired
-                    </p>
-                  </button>
-                </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-navy mb-1">
+                        I&apos;m a Freelancer
+                      </h3>
+                      <p className="text-slate-500 text-sm">
+                        Looking for exciting projects and opportunities
+                      </p>
+                    </div>
+                    {selectedRole === "freelancer" && (
+                      <CheckCircle className="text-teal" size={24} />
+                    )}
+                  </div>
+                </button>
 
                 <Button
                   onClick={handleContinue}
                   disabled={!selectedRole}
-                  className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25 disabled:opacity-50"
+                  className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25 mt-6"
                 >
                   Continue
                   <ArrowRight size={18} className="ml-2" />
                 </Button>
-              </>
-            )}
-
-            {/* STEP 2: Registration Form */}
-            {step === "form" && (
-              <>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Back Button */}
                 <button
+                  type="button"
                   onClick={handleBack}
-                  className="flex items-center gap-2 text-slate-500 hover:text-navy mb-6 transition-colors"
+                  className="flex items-center text-slate-500 hover:text-navy transition-colors mb-4"
                 >
-                  <ArrowLeft size={18} />
-                  <span className="text-sm font-medium">Back</span>
+                  <ArrowLeft size={18} className="mr-1" />
+                  Back
                 </button>
 
-                <div className="text-center mb-6">
-                  <h1 className="text-2xl font-bold text-navy mb-2">
-                    Create {selectedRole === "client" ? "Client" : "Freelancer"}{" "}
-                    Account
-                  </h1>
-                  <p className="text-slate-500">
-                    Fill in your details to get started
-                  </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* CLIENT FORM */}
-                  {selectedRole === "client" && (
-                    <>
+                {selectedRole === "client" ? (
+                  <>
+                    {/* Client Fields */}
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">
                           Full Name
@@ -338,22 +327,19 @@ const Register = () => {
                             size={18}
                           />
                           <Input
-                            name="fullName"
-                            value={clientForm.fullName}
-                            onChange={handleClientChange}
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
                             placeholder="John Doe"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
+                            className="pl-11 h-12"
                             required
+                            disabled={isLoading}
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">
-                          Company Name{" "}
-                          <span className="text-slate-400 font-normal">
-                            (optional)
-                          </span>
+                          Company Name
                         </label>
                         <div className="relative">
                           <Building
@@ -362,341 +348,293 @@ const Register = () => {
                           />
                           <Input
                             name="companyName"
-                            value={clientForm.companyName}
-                            onChange={handleClientChange}
-                            placeholder="Your Company"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
+                            value={formData.companyName}
+                            onChange={handleChange}
+                            placeholder="Company Ltd"
+                            className="pl-11 h-12"
+                            disabled={isLoading}
                           />
                         </div>
                       </div>
-
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Freelancer Fields */}
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">
-                          Email Address
+                          First Name
                         </label>
                         <div className="relative">
-                          <Mail
+                          <User
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                             size={18}
                           />
                           <Input
-                            name="email"
-                            type="email"
-                            value={clientForm.email}
-                            onChange={handleClientChange}
-                            placeholder="john@company.com"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            placeholder="John"
+                            className="pl-11 h-12"
                             required
+                            disabled={isLoading}
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">
-                          Phone Number
+                          Last Name
                         </label>
                         <div className="relative">
-                          <Phone
+                          <User
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                             size={18}
                           />
-                          <Input
-                            name="phone"
-                            type="tel"
-                            value={clientForm.phone}
-                            onChange={handleClientChange}
-                            placeholder="+91 98765 43210"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            Password
-                          </label>
-                          <div className="relative">
-                            <Lock
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                              size={18}
-                            />
-                            <Input
-                              name="password"
-                              type={showPassword ? "text" : "password"}
-                              value={clientForm.password}
-                              onChange={handleClientChange}
-                              placeholder="••••••••"
-                              className="pl-11 pr-11 h-11 bg-slate-50 border-slate-200"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                            >
-                              {showPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            Confirm
-                          </label>
-                          <div className="relative">
-                            <Lock
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                              size={18}
-                            />
-                            <Input
-                              name="confirmPassword"
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={clientForm.confirmPassword}
-                              onChange={handleClientChange}
-                              placeholder="••••••••"
-                              className="pl-11 pr-11 h-11 bg-slate-50 border-slate-200"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                              }
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                            >
-                              {showConfirmPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* FREELANCER FORM */}
-                  {selectedRole === "freelancer" && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            First Name
-                          </label>
-                          <div className="relative">
-                            <User
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                              size={18}
-                            />
-                            <Input
-                              name="firstName"
-                              value={freelancerForm.firstName}
-                              onChange={handleFreelancerChange}
-                              placeholder="John"
-                              className="pl-11 h-11 bg-slate-50 border-slate-200"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            Last Name
-                          </label>
                           <Input
                             name="lastName"
-                            value={freelancerForm.lastName}
-                            onChange={handleFreelancerChange}
+                            value={formData.lastName}
+                            onChange={handleChange}
                             placeholder="Doe"
-                            className="h-11 bg-slate-50 border-slate-200"
+                            className="pl-11 h-12"
                             required
+                            disabled={isLoading}
                           />
                         </div>
                       </div>
+                    </div>
+                  </>
+                )}
 
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">
-                          Email Address
-                        </label>
-                        <div className="relative">
-                          <Mail
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                            size={18}
-                          />
-                          <Input
-                            name="email"
-                            type="email"
-                            value={freelancerForm.email}
-                            onChange={handleFreelancerChange}
-                            placeholder="john@example.com"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
-                            required
-                          />
-                        </div>
-                      </div>
+                {/* Email */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
+                    <Input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                      className="pl-11 h-12"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
 
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">
-                          Phone Number
-                        </label>
-                        <div className="relative">
-                          <Phone
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                            size={18}
-                          />
-                          <Input
-                            name="phone"
-                            type="tel"
-                            value={freelancerForm.phone}
-                            onChange={handleFreelancerChange}
-                            placeholder="+91 98765 43210"
-                            className="pl-11 h-11 bg-slate-50 border-slate-200"
-                            required
-                          />
-                        </div>
-                      </div>
+                {/* Phone */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
+                    <Input
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="9876543210"
+                      className="pl-11 h-12"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
 
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">
-                          Primary Skill Category
-                        </label>
-                        <select
-                          name="primarySkill"
-                          value={freelancerForm.primarySkill}
-                          onChange={handleFreelancerChange}
-                          className="flex h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
-                        >
-                          <option value="Video Editing">Video Editing</option>
-                          <option value="VFX & Motion Graphics">
-                            VFX & Motion Graphics
-                          </option>
-                          <option value="3D Design & Animation">
-                            3D Design & Animation
-                          </option>
-                          <option value="Color Grading">Color Grading</option>
-                          <option value="Sound Design">Sound Design</option>
-                        </select>
-                      </div>
+                {/* Password */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
+                    <Input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Create a password"
+                      className="pl-11 pr-11 h-12"
+                      required
+                      minLength={8}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            Password
-                          </label>
-                          <div className="relative">
-                            <Lock
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                              size={18}
-                            />
-                            <Input
-                              name="password"
-                              type={showPassword ? "text" : "password"}
-                              value={freelancerForm.password}
-                              onChange={handleFreelancerChange}
-                              placeholder="••••••••"
-                              className="pl-11 pr-11 h-11 bg-slate-50 border-slate-200"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                            >
-                              {showPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
+                    <Input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm your password"
+                      className="pl-11 pr-11 h-12"
+                      required
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-                        <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700">
-                            Confirm
-                          </label>
-                          <div className="relative">
-                            <Lock
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                              size={18}
-                            />
-                            <Input
-                              name="confirmPassword"
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={freelancerForm.confirmPassword}
-                              onChange={handleFreelancerChange}
-                              placeholder="••••••••"
-                              className="pl-11 pr-11 h-11 bg-slate-50 border-slate-200"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                              }
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                            >
-                              {showConfirmPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                {/* Terms Checkbox */}
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-teal focus:ring-teal mt-0.5"
+                    required
+                    disabled={isLoading}
+                  />
+                  <span className="text-sm text-slate-600">
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-teal hover:underline">
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="text-teal hover:underline">
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25"
+                  disabled={isLoading || !agreedToTerms}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Creating Account...
+                    </span>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight size={18} className="ml-2" />
                     </>
                   )}
+                </Button>
 
-                  {/* Terms Checkbox */}
-                  <label className="flex items-start gap-3 cursor-pointer pt-2">
-                    <input
-                      type="checkbox"
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal mt-0.5"
-                      required
-                    />
-                    <span className="text-sm text-slate-600">
-                      I agree to the{" "}
-                      <Link to="/terms" className="text-teal hover:underline">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link to="/privacy" className="text-teal hover:underline">
-                        Privacy Policy
-                      </Link>
-                    </span>
-                  </label>
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-slate-500">OR</span>
+                  </div>
+                </div>
 
-                  {/* Submit Button */}
+                {/* OAuth Buttons */}
+                <div className="space-y-3">
                   <Button
-                    type="submit"
-                    className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25"
-                    disabled={isLoading || !agreedToTerms}
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    onClick={() => handleOAuthSignUp("google")}
+                    disabled={isLoading}
                   >
-                    {isLoading ? (
-                      "Creating Account..."
-                    ) : (
-                      <>
-                        Create Account
-                        <ArrowRight size={18} className="ml-2" />
-                      </>
-                    )}
+                    <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      />
+                    </svg>
+                    Sign up with Google
                   </Button>
-                </form>
-              </>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    onClick={() => handleOAuthSignUp("github")}
+                    disabled={isLoading}
+                  >
+                    <Github className="w-5 h-5 mr-3" />
+                    Sign up with GitHub
+                  </Button>
+                </div>
+              </form>
             )}
 
             {/* Sign In Link */}
-            <p className="text-center mt-6 text-slate-500">
+            <p className="text-center mt-8 text-slate-500">
               Already have an account?{" "}
               <Link
                 to="/login"

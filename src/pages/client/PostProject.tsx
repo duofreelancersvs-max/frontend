@@ -14,7 +14,6 @@ import {
   LogOut,
   User,
   Check,
-  Upload,
   X,
   Menu,
   FileText,
@@ -34,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 // Sidebar Navigation Items
 const sidebarNavItems = [
@@ -117,6 +117,15 @@ const PostProject = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Form State
@@ -247,7 +256,11 @@ const PostProject = () => {
                 </p>
                 <p className="text-xs text-white/50">Client Account</p>
               </div>
-              <button className="text-white/50 hover:text-white transition-colors">
+              <button
+                onClick={handleLogout}
+                className="text-white/50 hover:text-white transition-colors"
+                title="Log Out"
+              >
                 <LogOut size={18} />
               </button>
             </div>
@@ -328,7 +341,10 @@ const PostProject = () => {
                       Settings
                     </Link>
                     <hr className="my-2 border-slate-100" />
-                    <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                    >
                       <LogOut size={16} />
                       Logout
                     </button>
@@ -417,9 +433,10 @@ const PostProject = () => {
                     {/* Project Categories */}
                     <div>
                       <label className="block text-sm font-semibold text-navy mb-3">
-                        Project Categories <span className="text-red-500">*</span>
+                        Project Categories{" "}
+                        <span className="text-red-500">*</span>
                       </label>
-                      
+
                       {/* Selected Categories */}
                       {formData.categories.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
@@ -429,7 +446,9 @@ const PostProject = () => {
                               className="inline-flex items-center gap-1 px-3 py-1 bg-teal/10 text-teal rounded-full text-sm font-medium"
                             >
                               {category}
-                              <button onClick={() => handleCategoryToggle(category)}>
+                              <button
+                                onClick={() => handleCategoryToggle(category)}
+                              >
                                 <X size={14} />
                               </button>
                             </span>
@@ -656,14 +675,18 @@ const PostProject = () => {
                               if (navigator.geolocation) {
                                 navigator.geolocation.getCurrentPosition(
                                   (position) => {
-                                    const { latitude, longitude } = position.coords;
+                                    const { latitude, longitude } =
+                                      position.coords;
                                     // In a real app, you would use a reverse geocoding service
                                     // For now, we'll just show a placeholder
-                                    handleInputChange("city", `Location detected (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`);
+                                    handleInputChange(
+                                      "city",
+                                      `Location detected (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
+                                    );
                                   },
                                   () => {
                                     console.log("Location access denied");
-                                  }
+                                  },
                                 );
                               }
                             }}

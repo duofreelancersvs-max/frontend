@@ -3,20 +3,21 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, CheckCircle, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { resetPassword, isLoading, error, clearError } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await resetPassword(email);
       setIsSubmitted(true);
-    }, 1500);
+    } catch {
+      // Error is handled in the hook
+    }
   };
 
   return (
@@ -53,7 +54,7 @@ const ForgotPassword = () => {
               Forgot Your Password?
             </h2>
             <p className="text-slate-300 text-lg max-w-md">
-              Don't worry, it happens to the best of us. We'll help you reset it
+              Don&apos;t worry, it happens to the best of us. We&apos;ll help you reset it
               in no time.
             </p>
           </div>
@@ -114,10 +115,16 @@ const ForgotPassword = () => {
                     Reset Password
                   </h1>
                   <p className="text-slate-500">
-                    Enter your email address and we'll send you instructions to
+                    Enter your email address and we&apos;ll send you instructions to
                     reset your password.
                   </p>
                 </div>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {error}
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Email */}
@@ -137,10 +144,14 @@ const ForgotPassword = () => {
                         id="email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (error) clearError();
+                        }}
                         placeholder="john@example.com"
                         className="pl-11 h-12 bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -151,7 +162,17 @@ const ForgotPassword = () => {
                     className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Sending..." : "Send Reset Link"}
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      "Send Reset Link"
+                    )}
                   </Button>
                 </form>
 
@@ -176,16 +197,15 @@ const ForgotPassword = () => {
                   Check Your Email
                 </h1>
                 <p className="text-slate-500 mb-6">
-                  We've sent password reset instructions to
+                  We&apos;ve sent password reset instructions to
                   <br />
                   <span className="font-semibold text-navy">{email}</span>
                 </p>
                 <p className="text-sm text-slate-400 mb-6">
-                  Didn't receive the email? Check your spam folder or{" "}
+                  Didn&apos;t receive the email? Check your spam folder or{" "}
                   <button
                     onClick={() => {
                       setIsSubmitted(false);
-                      setIsLoading(false);
                     }}
                     className="text-teal hover:underline"
                   >

@@ -8,8 +8,8 @@ import FreelancerProfile from "@/pages/public/FreelancerProfile";
 import Contact from "@/pages/public/Contact";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
-import VerifyOTP from "@/pages/auth/VerifyOTP";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
+import OAuthCallback from "@/pages/auth/OAuthCallback";
 import ClientDashboard from "@/pages/client/Dashboard";
 import PostProject from "@/pages/client/PostProject";
 import ClientProjects from "@/pages/client/Projects";
@@ -34,64 +34,234 @@ import VerificationQueue from "@/pages/admin/VerificationQueue";
 import SubscriptionManagement from "@/pages/admin/SubscriptionManagement";
 import RazorpaySettings from "@/pages/admin/RazorpaySettings";
 import SendNotifications from "@/pages/admin/SendNotifications";
+import {
+  ClientRoute,
+  FreelancerRoute,
+  AdminRoute,
+} from "@/components/auth/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
-    <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<Home />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/how-it-works" element={<HowItWorks />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/freelancers" element={<FreelancerDirectory />} />
-      <Route path="/find-work" element={<BrowseProjects />} />
-      <Route path="/freelancer/:id" element={<FreelancerProfile />} />
-      <Route path="/contact" element={<Contact />} />
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
+      <Routes>
+        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/freelancers" element={<FreelancerDirectory />} />
+        <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+        <Route path="/contact" element={<Contact />} />
 
-      {/* Auth Pages */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* Auth Pages */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/callback" element={<OAuthCallback />} />
 
-      {/* Client Dashboard Pages */}
-      <Route path="/client/dashboard" element={<ClientDashboard />} />
-      <Route path="/client/post-project" element={<PostProject />} />
-      <Route path="/client/projects" element={<ClientProjects />} />
-      <Route path="/client/project/:id" element={<ProjectDetails />} />
-      <Route path="/client/messages" element={<ClientMessages />} />
-      <Route path="/client/payments" element={<ClientPayments />} />
-      <Route path="/client/reviews" element={<ClientReviews />} />
-      <Route path="/client/settings" element={<ClientSettings />} />
+        {/* Client Dashboard Pages */}
+        <Route
+          path="/client/dashboard"
+          element={
+            <ClientRoute>
+              <ClientDashboard />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/post-project"
+          element={
+            <ClientRoute>
+              <PostProject />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/projects"
+          element={
+            <ClientRoute>
+              <ClientProjects />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/project/:id"
+          element={
+            <ClientRoute>
+              <ProjectDetails />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/messages"
+          element={
+            <ClientRoute>
+              <ClientMessages />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/payments"
+          element={
+            <ClientRoute>
+              <ClientPayments />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/reviews"
+          element={
+            <ClientRoute>
+              <ClientReviews />
+            </ClientRoute>
+          }
+        />
+        <Route
+          path="/client/settings"
+          element={
+            <ClientRoute>
+              <ClientSettings />
+            </ClientRoute>
+          }
+        />
 
-      {/* Freelancer Dashboard Pages */}
-      <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
-      <Route path="/freelancer/profile" element={<FreelancerProfileEdit />} />
-      <Route path="/projects" element={<BrowseProjects />} />
-      <Route path="/freelancer/messages" element={<FreelancerMessages />} />
-      <Route
-        path="/freelancer/subscription"
-        element={<FreelancerSubscription />}
-      />
-      <Route path="/freelancer/earnings" element={<FreelancerEarnings />} />
-      <Route path="/freelancer/portfolio" element={<FreelancerPortfolio />} />
-      <Route
-        path="/freelancer/applications"
-        element={<FreelancerApplications />}
-      />
-      <Route path="/freelancer/reviews" element={<FreelancerReviews />} />
-      <Route path="/freelancer/settings" element={<FreelancerSettings />} />
+        {/* Freelancer Dashboard Pages */}
+        <Route
+          path="/freelancer/dashboard"
+          element={
+            <FreelancerRoute>
+              <FreelancerDashboard />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/profile"
+          element={
+            <FreelancerRoute>
+              <FreelancerProfileEdit />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <FreelancerRoute>
+              <BrowseProjects />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/messages"
+          element={
+            <FreelancerRoute>
+              <FreelancerMessages />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/subscription"
+          element={
+            <FreelancerRoute>
+              <FreelancerSubscription />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/earnings"
+          element={
+            <FreelancerRoute>
+              <FreelancerEarnings />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/portfolio"
+          element={
+            <FreelancerRoute>
+              <FreelancerPortfolio />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/applications"
+          element={
+            <FreelancerRoute>
+              <FreelancerApplications />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/reviews"
+          element={
+            <FreelancerRoute>
+              <FreelancerReviews />
+            </FreelancerRoute>
+          }
+        />
+        <Route
+          path="/freelancer/settings"
+          element={
+            <FreelancerRoute>
+              <FreelancerSettings />
+            </FreelancerRoute>
+          }
+        />
 
-      {/* Admin Dashboard Pages */}
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      <Route path="/admin/users" element={<UserManagement />} />
-      <Route path="/admin/verifications" element={<VerificationQueue />} />
-      <Route path="/admin/subscriptions" element={<SubscriptionManagement />} />
-      <Route path="/admin/payments" element={<RazorpaySettings />} />
-      <Route path="/admin/notifications" element={<SendNotifications />} />
+        {/* Admin Dashboard Pages */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <UserManagement />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/verifications"
+          element={
+            <AdminRoute>
+              <VerificationQueue />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/subscriptions"
+          element={
+            <AdminRoute>
+              <SubscriptionManagement />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/payments"
+          element={
+            <AdminRoute>
+              <RazorpaySettings />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/notifications"
+          element={
+            <AdminRoute>
+              <SendNotifications />
+            </AdminRoute>
+          }
+        />
 
-      <Route path="*" element={<Home />} />
-    </Routes>
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </>
   );
 }
 
