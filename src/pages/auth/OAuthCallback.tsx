@@ -64,9 +64,8 @@ export default function OAuthCallback() {
 
         // Verify that the returned user role matches the intended role
         if (storedRole && user.role !== storedRole) {
-          throw new Error(
-            `Account already exists as a ${user.role}. Please log in as a ${user.role}.`,
-          );
+          toast.info(`Logged in as ${user.role} (account already exists).`);
+          // We don't throw error anymore, just proceed with the actual role
         }
 
         // Set auth state in Zustand store
