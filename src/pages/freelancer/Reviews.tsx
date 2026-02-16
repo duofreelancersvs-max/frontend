@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -20,7 +20,10 @@ import {
   TrendingUp,
   Calendar,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { reviewService } from "@/services";
+import type { Review } from "@/services";
 
 const sidebarNavItems = [
   {
@@ -120,9 +123,38 @@ const reviewsData = [
 
 const FreelancerReviews = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const data = await reviewService.getMyReviews();
+        setReviews(data.reviews || []);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const reviewsData = reviews.map(r => ({
+    id: r.id,
+    project: r.project?.title || "Project",
+    client: r.reviewer?.fullName || "Client",
+    rating: r.rating,
+    comment: r.comment || "",
+    date: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    helpful: 0,
+  }));
+
   const totalReviews = reviewsData.length;
-  const averageRating =
-    reviewsData.reduce((acc, r) => acc + r.rating, 0) / totalReviews;
+  const averageRating = totalReviews > 0
+    ? reviewsData.reduce((acc, r) => acc + r.rating, 0) / totalReviews
+    : 0;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">

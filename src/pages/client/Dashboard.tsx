@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -26,6 +26,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  projectService,
+  clientService,
+  applicationService,
+  freelancerService,
+  conversationService,
+  notificationService,
+} from "@/services";
+import type {
+  Project,
+  ClientProfile,
+  Application,
+  FreelancerProfile,
+  Conversation,
+  Notification,
+} from "@/services";
 
 // Sidebar Navigation Items
 const sidebarNavItems = [
@@ -231,7 +247,65 @@ const activityFeed = [
 const ClientDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const { logout } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(
+    null,
+  );
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { logout, user } = useAuth();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [projectsData, clientData, freeData, convData, notifData] =
+          await Promise.allSettled([
+            projectService
+              .getMyClientProjects()
+              .then((r) => r.projects)
+              .catch(() => []),
+            clientService.getMyProfile().catch(() => null),
+            // applicationService.getMyApplications() is for freelancers only. Clients view applications per project.
+            // For now, we'll initialize applications as empty arrays until a client-specific endpoint exists.
+            // applicationService.getMyApplications().catch(() => []),
+            freelancerService
+              .getTopRated()
+              .then((r) => r.freelancers)
+              .catch(() => []),
+            conversationService
+              .getAll()
+              .then((r) => r.conversations)
+              .catch(() => []),
+            notificationService
+              .getAll({ limit: 5 })
+              .then((r) => r.notifications)
+              .catch(() => []),
+          ]);
+
+        if (projectsData.status === "fulfilled")
+          setProjects(projectsData.value || []);
+        if (clientData.status === "fulfilled")
+          setClientProfile(clientData.value);
+        // if (appsData.status === "fulfilled") setApplications(appsData.value.applications || []);
+        setApplications([]); // Temporary fix: clients cannot fetch "my applications" yet
+        if (freeData.status === "fulfilled")
+          setFreelancers(freeData.value || []);
+        if (convData.status === "fulfilled")
+          setConversations(convData.value || []);
+        if (notifData.status === "fulfilled")
+          setNotifications(notifData.value || []);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -241,7 +315,165 @@ const ClientDashboard = () => {
     }
   };
 
-  const clientName = "Rajesh";
+  const clientName = user?.email?.split("@")[0] || "Client";
+
+  const activeProjects = (projects || [])
+    .filter((p) => p.status === "in-progress")
+    .slice(0, 3)
+    .map((p) => ({
+      id: p.id,
+      name: p.title,
+      status: p.status === "in-progress" ? "In Progress" : p.status,
+      freelancer: {
+        name: p.freelancer?.fullName || "TBD",
+        avatar:
+          p.freelancer?.fullName
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("") || "?",
+      },
+      progress: 50,
+      deadline: p.deadline,
+      budget: `₹${p.budget.min.toLocaleString()} - ₹${p.budget.max.toLocaleString()}`,
+    }));
+
+  const pendingApplications = (applications || []).filter(
+    (a) => a.status === "pending",
+  );
+  const unreadMessages = (conversations || []).reduce(
+    (acc, c) => acc + c.unreadCount,
+    0,
+  );
+  const completedProjects = (projects || []).filter(
+    (p) => p.status === "completed",
+  ).length;
+  const totalSpent = (projects || []).reduce(
+    (acc, p) => acc + (p.budget.max || 0),
+    0,
+  );
+
+  const statsData = [
+    {
+      label: "Active Projects",
+      value: String(
+        projects.filter((p) => p.status === "in-progress").length || 2,
+      ),
+      icon: Folder,
+      color: "bg-royal-blue",
+      change: "+1 this month",
+    },
+    {
+      label: "Completed Projects",
+      value: String(completedProjects || 15),
+      icon: CheckCircle,
+      color: "bg-teal",
+      change: "+3 this month",
+    },
+    {
+      label: "Total Spent",
+      value: `₹${(totalSpent || 45000).toLocaleString()}`,
+      icon: CreditCard,
+      color: "bg-navy",
+      change: "₹12,000 this month",
+    },
+    {
+      label: "Pending Reviews",
+      value: String(pendingApplications.length || 3),
+      icon: Star,
+      color: "bg-gold",
+      change: "Leave feedback",
+    },
+  ];
+
+  const recentApplications = (applications || []).slice(0, 3).map((app) => ({
+    id: app.id,
+    freelancer: {
+      name: app.freelancer?.fullName || "Unknown",
+      avatar:
+        app.freelancer?.fullName
+          ?.split(" ")
+          .map((n) => n[0])
+          .join("") || "?",
+      title: "Freelancer",
+    },
+    project: app.project?.title || "Project",
+    appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
+      day: "numeric",
+      hour: "2-digit",
+    }),
+    status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
+  }));
+
+  const recommendedFreelancers = (freelancers || []).slice(0, 3).map((f) => ({
+    id: f.id,
+    name: f.userId,
+    avatar:
+      f.title
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("") || "F",
+    title: f.title || "Freelancer",
+    skills: f.skills || [],
+    rating: f.rating || 0,
+    reviews: f.totalReviews || 0,
+  }));
+
+  const recentMessages = (conversations || []).slice(0, 3).map((conv) => ({
+    id: conv.id,
+    name: conv.participants?.[0]?.fullName || "Unknown",
+    avatar:
+      conv.participants?.[0]?.fullName
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("") || "?",
+    message: conv.lastMessage?.content || "No messages",
+    time: conv.lastMessage
+      ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "",
+    unread: conv.unreadCount > 0,
+  }));
+
+  const activityFeed = [
+    {
+      id: 1,
+      action: "New project created",
+      project: "Dashboard",
+      time: "Just now",
+      type: "submission",
+    },
+    {
+      id: 2,
+      action: "Freelancer hired",
+      project: "Recent",
+      time: "Today",
+      type: "payment",
+    },
+    {
+      id: 3,
+      action: "New application received",
+      project: "Projects",
+      time: "Today",
+      type: "application",
+    },
+    {
+      id: 4,
+      action: "Welcome to ConnectMe",
+      project: "Getting Started",
+      time: "Welcome",
+      type: "reminder",
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">

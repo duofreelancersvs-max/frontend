@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -213,8 +213,23 @@ const FreelancerEarnings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState("this-month");
   const [showBankDetails, setShowBankDetails] = useState(false);
+  const [subscriptionPlan] = useState<"pro" | "free">("pro");
+  const [loading, setLoading] = useState(true);
 
-  const [subscriptionPlan] = useState<"Pro" | "Free">("Pro");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch earnings data from services
+        // For now, we'll use the mock data structure
+      } catch (error) {
+        console.error("Error fetching earnings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Stats
   const stats = {
@@ -287,19 +302,19 @@ const FreelancerEarnings = () => {
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg",
-                subscriptionPlan === "Free" ? "bg-slate-500/20" : "bg-gold/20",
+                subscriptionPlan === "free" ? "bg-slate-500/20" : "bg-gold/20",
               )}
             >
               <Award
                 size={16}
                 className={
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold"
+                  subscriptionPlan === "free" ? "text-slate-400" : "text-gold"
                 }
               />
               <span
                 className={cn(
                   "text-xs font-semibold",
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold",
+                  subscriptionPlan === "free" ? "text-slate-400" : "text-gold",
                 )}
               >
                 {subscriptionPlan} Plan

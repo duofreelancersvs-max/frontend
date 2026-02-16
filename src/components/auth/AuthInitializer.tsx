@@ -53,6 +53,9 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
       // clean up the stale Supabase session so the user can re-register
       const status = error?.response?.status;
       if (status === 401 || status === 404) {
+        if (isOAuthCallbackRef.current) {
+          return false;
+        }
         try {
           await supabase.auth.signOut();
         } catch {
@@ -69,57 +72,59 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     setLoading(true);
 
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const { isLoading: storeIsLoading, isAuthenticated: storeAuthenticated } =
-          useAuthStore.getState();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const { isLoading: storeIsLoading, isAuthenticated: storeAuthenticated } =
+        useAuthStore.getState();
 
-        // Skip on OAuth callback route or if we're already mid-login in useAuth
-        if (isOAuthCallbackRef.current || (storeIsLoading && !isInitialized)) {
-          setIsInitialized(true);
+      // Skip on OAuth callback route or if we're already mid-login in useAuth
+      if (isOAuthCallbackRef.current || (storeIsLoading && !isInitialized)) {
+        setIsInitialized(true);
+        setLoading(false);
+        return;
+      }
+
+      if (session?.user) {
+        // If we're already authenticated in the store, we don't need to sync again on every state change
+        // unless it's the very first initialization.
+        if (storeAuthenticated && isInitialized) {
           setLoading(false);
           return;
         }
 
-        if (session?.user) {
-          // If we're already authenticated in the store, we don't need to sync again on every state change
-          // unless it's the very first initialization.
-          if (storeAuthenticated && isInitialized) {
-            setLoading(false);
-            return;
-          }
+        try {
+          const synced = await syncSessionWithBackend(
+            session.access_token,
+            session.refresh_token,
+          );
 
-          try {
-            const synced = await syncSessionWithBackend(
-              session.access_token,
-              session.refresh_token,
-            );
-
-            if (!synced) {
-              // Session invalid on backend, clear it
-              await supabase.auth.signOut();
-              logout();
-            }
-          } catch (error) {
-            console.error("Session sync failed:", error);
+          if (!synced) {
+            // Session invalid on backend, clear it
+            await supabase.auth.signOut();
             logout();
           }
-        } else {
-          // No Supabase user — clear auth state if we thought we were logged in
-          if (storeAuthenticated) {
-            logout();
-          }
+        } catch (error) {
+          console.error("Session sync failed:", error);
+          logout();
         }
-
-        setLoading(false);
-        setIsInitialized(true);
+      } else {
+        // No Supabase user — clear auth state if we thought we were logged in
+        if (storeAuthenticated) {
+          logout();
+        }
       }
-    );
+
+      setLoading(false);
+      setIsInitialized(true);
+    });
 
     // Check for existing session on mount
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         setLoading(false);
         setIsInitialized(true);

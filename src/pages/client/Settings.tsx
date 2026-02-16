@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { userService, clientService, notificationService } from "@/services";
+import type { User as UserType, ClientProfile, Notification } from "@/services";
 
 const sidebarNavItems = [
   { icon: Home, label: "Dashboard", href: "/client/dashboard", active: false },
@@ -58,6 +60,28 @@ const sidebarNavItems = [
 const ClientSettings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("account");
+  const [user, setUser] = useState<UserType | null>(null);
+  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [userData, profileData] = await Promise.allSettled([
+          userService.getMe().catch(() => null),
+          clientService.getMyProfile().catch(() => null),
+        ]);
+        if (userData.status === "fulfilled") setUser(userData.value);
+        if (profileData.status === "fulfilled") setClientProfile(profileData.value);
+      } catch (error) {
+        console.error("Error fetching settings data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const settingsSections = [
     { id: "account", label: "Account", icon: User },

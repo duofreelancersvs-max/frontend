@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { applicationService } from "@/services";
+import type { Application } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -71,93 +73,39 @@ const sidebarNavItems = [
   },
 ];
 
-// Mock applications data
-const applicationsData = [
-  {
-    id: 1,
-    projectTitle: "E-commerce Product Video",
-    client: "TechMart Solutions",
-    appliedDate: "Dec 18, 2024",
-    budget: { min: 15000, max: 25000 },
-    status: "pending",
-    proposedRate: 22000,
-    coverLetter: "I have extensive experience in product videography...",
-    deadline: "5 days",
-  },
-  {
-    id: 2,
-    projectTitle: "Corporate Explainer Animation",
-    client: "InnovateCorp",
-    appliedDate: "Dec 15, 2024",
-    budget: { min: 30000, max: 45000 },
-    status: "accepted",
-    proposedRate: 40000,
-    coverLetter: "As a motion graphics specialist with 5 years...",
-    deadline: "2 weeks",
-  },
-  {
-    id: 3,
-    projectTitle: "YouTube Channel Intro",
-    client: "TechReview Pro",
-    appliedDate: "Dec 14, 2024",
-    budget: { min: 5000, max: 10000 },
-    status: "pending",
-    proposedRate: 8000,
-    coverLetter: "I create dynamic intros that capture attention...",
-    deadline: "7 days",
-  },
-  {
-    id: 4,
-    projectTitle: "Wedding Highlight Reel",
-    client: "Moments Photography",
-    appliedDate: "Dec 10, 2024",
-    budget: { min: 20000, max: 35000 },
-    status: "rejected",
-    proposedRate: 30000,
-    coverLetter: "I specialize in cinematic wedding videos...",
-    deadline: "14 days",
-  },
-  {
-    id: 5,
-    projectTitle: "Social Media Ad Campaign",
-    client: "Brand Boost Agency",
-    appliedDate: "Dec 8, 2024",
-    budget: { min: 8000, max: 15000 },
-    status: "withdrawn",
-    proposedRate: 12000,
-    coverLetter: "I have created numerous successful ad campaigns...",
-    deadline: "10 days",
-  },
-];
-
-const statusTabs = [
-  { id: "all", label: "All", count: applicationsData.length },
-  {
-    id: "pending",
-    label: "Pending",
-    count: applicationsData.filter((a) => a.status === "pending").length,
-  },
-  {
-    id: "accepted",
-    label: "Accepted",
-    count: applicationsData.filter((a) => a.status === "accepted").length,
-  },
-  {
-    id: "rejected",
-    label: "Rejected",
-    count: applicationsData.filter((a) => a.status === "rejected").length,
-  },
-];
-
 const FreelancerApplications = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [subscriptionPlan] = useState<"Pro" | "Free">("Pro");
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        const data = await applicationService.getMyApplications();
+        setApplications(data.applications || []);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApplications();
+  }, []);
 
   const filteredApplications =
     activeTab === "all"
-      ? applicationsData
-      : applicationsData.filter((app) => app.status === activeTab);
+      ? applications
+      : applications.filter((app) => app.status === activeTab);
+
+  const statusTabs = [
+    { id: "all", label: "All", count: applications.length },
+    { id: "pending", label: "Pending", count: applications.filter((a) => a.status === "pending").length },
+    { id: "accepted", label: "Accepted", count: applications.filter((a) => a.status === "accepted").length },
+    { id: "rejected", label: "Rejected", count: applications.filter((a) => a.status === "rejected").length },
+  ];
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -377,7 +325,7 @@ const FreelancerApplications = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-semibold text-navy">
-                              {application.projectTitle}
+                              {application.project?.title || "Untitled Project"}
                             </h3>
                             <span
                               className={cn(
@@ -391,16 +339,16 @@ const FreelancerApplications = () => {
                             </span>
                           </div>
                           <p className="text-sm text-slate-500 mt-1">
-                            {application.client}
+                            {application.freelancer?.fullName || "Unknown"}
                           </p>
                           <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
                             <span className="flex items-center gap-1">
                               <Calendar size={14} />
-                              Applied: {application.appliedDate}
+                              Applied: {new Date(application.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock size={14} />
-                              Deadline: {application.deadline}
+                              Deadline: {application.project?.deadline || "N/A"}
                             </span>
                           </div>
                         </div>
@@ -411,11 +359,11 @@ const FreelancerApplications = () => {
                       <div className="text-right">
                         <p className="text-xs text-slate-500">Your Bid</p>
                         <p className="text-lg font-bold text-navy">
-                          ₹{application.proposedRate.toLocaleString()}
+                          ₹{(application.proposedRate || 0).toLocaleString()}
                         </p>
                         <p className="text-xs text-slate-400">
-                          Budget: ₹{application.budget.min.toLocaleString()} - ₹
-                          {application.budget.max.toLocaleString()}
+                          Budget: ₹{(application.project?.budget.min || 0).toLocaleString()} - ₹
+                          {(application.project?.budget.max || 0).toLocaleString()}
                         </p>
                       </div>
 

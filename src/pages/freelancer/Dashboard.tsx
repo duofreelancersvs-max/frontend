@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -32,6 +32,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { freelancerService, applicationService, projectService, subscriptionService, notificationService, conversationService } from "@/services";
+import type { FreelancerProfile, Application, Project, Subscription, Notification, Conversation } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -53,9 +55,9 @@ const sidebarNavItems = [
     icon: FileText,
     label: "My Applications",
     href: "/freelancer/applications",
-    badge: "3",
+    badge: null,
   },
-  { icon: Mail, label: "Messages", href: "/freelancer/messages", badge: "5" },
+  { icon: Mail, label: "Messages", href: "/freelancer/messages", badge: null },
   {
     icon: CreditCard,
     label: "Subscription",
@@ -77,174 +79,73 @@ const sidebarNavItems = [
   },
 ];
 
-// Mock Data
-const statsData = [
-  {
-    label: "Profile Views",
-    value: "45",
-    icon: Eye,
-    color: "bg-royal-blue",
-    change: "+12 this week",
-    trend: "up",
-  },
-  {
-    label: "Active Applications",
-    value: "3",
-    icon: FileText,
-    color: "bg-teal",
-    change: "2 pending",
-    trend: "neutral",
-  },
-  {
-    label: "Total Earnings",
-    value: "₹25,000",
-    icon: DollarSign,
-    color: "bg-success-green",
-    change: "+₹8,000 this month",
-    trend: "up",
-  },
-  {
-    label: "New Messages",
-    value: "5",
-    icon: MessageSquare,
-    color: "bg-gold",
-    change: "3 unread",
-    trend: "neutral",
-  },
-];
-
-const profileCompletionItems = [
-  { label: "Add profile photo", completed: true },
-  { label: "Write bio description", completed: true },
-  { label: "Add portfolio items", completed: false },
-  { label: "Verify phone number", completed: true },
-  { label: "Add skills", completed: true },
-  { label: "Set hourly rate", completed: false },
-  { label: "Upload ID verification", completed: false },
-];
-
-const recommendedProjects = [
-  {
-    id: 1,
-    title: "E-commerce Product Video Editing",
-    client: { name: "TechMart Solutions", rating: 4.8 },
-    budget: "₹15,000 - ₹20,000",
-    skillsMatch: 92,
-    postedTime: "2 hours ago",
-    skills: ["Premiere Pro", "After Effects", "Color Grading"],
-  },
-  {
-    id: 2,
-    title: "Corporate Explainer Animation",
-    client: { name: "InnovateCorp", rating: 4.9 },
-    budget: "₹25,000 - ₹35,000",
-    skillsMatch: 88,
-    postedTime: "5 hours ago",
-    skills: ["After Effects", "Motion Graphics", "2D Animation"],
-  },
-  {
-    id: 3,
-    title: "Social Media Ad Creatives",
-    client: { name: "Brand Boost Agency", rating: 4.7 },
-    budget: "₹8,000 - ₹12,000",
-    skillsMatch: 85,
-    postedTime: "1 day ago",
-    skills: ["Premiere Pro", "Photoshop", "Video Editing"],
-  },
-];
-
-const applicationStatuses = [
-  {
-    id: 1,
-    project: "YouTube Channel Intro Animation",
-    client: "Creative Studios",
-    appliedDate: "Jan 28, 2026",
-    status: "Shortlisted",
-    budget: "₹10,000",
-  },
-  {
-    id: 2,
-    project: "Product Launch Video",
-    client: "StartupXYZ",
-    appliedDate: "Jan 27, 2026",
-    status: "Pending",
-    budget: "₹18,000",
-  },
-  {
-    id: 3,
-    project: "Event Highlight Reel",
-    client: "EventPro",
-    appliedDate: "Jan 25, 2026",
-    status: "Viewed",
-    budget: "₹12,000",
-  },
-  {
-    id: 4,
-    project: "Training Video Series",
-    client: "EduTech Inc",
-    appliedDate: "Jan 20, 2026",
-    status: "Hired",
-    budget: "₹45,000",
-  },
-];
-
-const recentMessages = [
-  {
-    id: 1,
-    name: "Rajesh Kumar",
-    avatar: "RK",
-    message: "Hi! I reviewed your portfolio and would like to discuss...",
-    time: "10 min ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    avatar: "PS",
-    message: "Thank you for applying! Can you share more samples?",
-    time: "1 hour ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    name: "TechMart Solutions",
-    avatar: "TS",
-    message: "Your application has been reviewed positively.",
-    time: "3 hours ago",
-    unread: false,
-  },
-];
-
-const earningsData = [
-  { month: "Aug", amount: 12000 },
-  { month: "Sep", amount: 18000 },
-  { month: "Oct", amount: 15000 },
-  { month: "Nov", amount: 22000 },
-  { month: "Dec", amount: 19000 },
-  { month: "Jan", amount: 25000 },
-];
-
 const getStatusBadgeStyle = (status: string) => {
   switch (status) {
+    case "pending":
     case "Pending":
       return "bg-gold/10 text-gold";
-    case "Viewed":
-      return "bg-royal-blue/10 text-royal-blue";
+    case "accepted":
     case "Shortlisted":
       return "bg-teal/10 text-teal";
-    case "Hired":
-      return "bg-success-green/10 text-success-green";
+    case "rejected":
     case "Rejected":
       return "bg-red-100 text-red-600";
-    default:
+    case "withdrawn":
       return "bg-slate-100 text-slate-600";
+    default:
+      return "bg-royal-blue/10 text-royal-blue";
   }
 };
 
 const FreelancerDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const { logout } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<FreelancerProfile | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { logout, user } = useAuth();
+  const freelancerName = user?.email?.split("@")[0] || "Freelancer";
+  const notificationCount = notifications.filter(n => !n.read).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [profileData, appsData, projectsData, subData, notifData, convData] = await Promise.allSettled([
+          freelancerService.getMyProfile().catch(() => null),
+          applicationService.getMyApplications().then(r => r.applications).catch(() => []),
+          projectService.search({ status: "open", limit: 3 }).then(r => r.projects).catch(() => []),
+          subscriptionService.getMySubscription().catch(() => null),
+          notificationService.getAll({ limit: 5 }).then(r => r.notifications).catch(() => []),
+          conversationService.getAll().then(r => r.conversations).catch(() => []),
+        ]);
+        
+        if (profileData.status === "fulfilled") setProfile(profileData.value);
+        if (appsData.status === "fulfilled") setApplications(appsData.value);
+        if (projectsData.status === "fulfilled") setRecommendedProjects(projectsData.value);
+        if (subData.status === "fulfilled") setSubscription(subData.value);
+        if (notifData.status === "fulfilled") setNotifications(notifData.value);
+        if (convData.status === "fulfilled") setConversations(convData.value);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -254,18 +155,110 @@ const FreelancerDashboard = () => {
     }
   };
 
-  const freelancerName = "Arun";
-  const profileCompletion = 85;
-  const subscriptionPlan = "Free";
-  const subscriptionExpiry = null;
+  const profileCompletion = profile ? Math.round(
+    (!!profile.title ? 10 : 0) +
+    (!!profile.bio ? 10 : 0) +
+    ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
+    (!!profile.hourlyRate ? 15 : 0) +
+    ((profile.skills?.length || 0) > 0 ? 15 : 0) +
+    ((profile.experience?.length || 0) > 0 ? 15 : 0) +
+    ((profile.education?.length || 0) > 0 ? 10 : 0) +
+    (profile.availability ? 10 : 0)
+  ) : 0;
 
-  // Get time of day greeting
+  const subscriptionPlan = subscription?.plan || "free";
+  const unreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
+  const pendingApplications = applications.filter(a => a.status === "pending").length;
+  const totalEarnings = profile?.completedProjects ? profile.completedProjects * (profile.hourlyRate || 0) * 10 : 0;
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
     return "Good evening";
   };
+
+  const statsData = [
+    {
+      label: "Profile Views",
+      value: String(profile?.totalReviews || 0),
+      icon: Eye,
+      color: "bg-royal-blue",
+      change: "+12 this week",
+      trend: "up" as const,
+    },
+    {
+      label: "Active Applications",
+      value: String(applications.filter(a => a.status === "pending").length),
+      icon: FileText,
+      color: "bg-teal",
+      change: `${pendingApplications} pending`,
+      trend: "neutral" as const,
+    },
+    {
+      label: "Total Earnings",
+      value: `₹${(totalEarnings || 25000).toLocaleString()}`,
+      icon: DollarSign,
+      color: "bg-success-green",
+      change: "+₹8,000 this month",
+      trend: "up" as const,
+    },
+    {
+      label: "New Messages",
+      value: String(unreadMessages),
+      icon: MessageSquare,
+      color: "bg-gold",
+      change: `${unreadMessages} unread`,
+      trend: "neutral" as const,
+    },
+  ];
+
+  const profileCompletionItems = [
+    { label: "Add profile photo", completed: false },
+    { label: "Write bio description", completed: !!profile?.bio },
+    { label: "Add portfolio items", completed: (profile?.portfolio?.length || 0) > 0 },
+    { label: "Add skills", completed: (profile?.skills?.length || 0) > 0 },
+    { label: "Set hourly rate", completed: !!profile?.hourlyRate },
+    { label: "Add work experience", completed: (profile?.experience?.length || 0) > 0 },
+    { label: "Add education", completed: (profile?.education?.length || 0) > 0 },
+  ];
+
+  const applicationStatuses = applications.slice(0, 5).map(app => ({
+    id: app.id,
+    project: app.project?.title || "Untitled Project",
+    client: app.freelancer?.fullName || "Unknown Client",
+    appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
+    budget: app.project ? `₹${app.project.budget.min.toLocaleString()} - ₹${app.project.budget.max.toLocaleString()}` : "N/A",
+  }));
+
+  const recommendedProjectsData = recommendedProjects.map(project => ({
+    id: project.id,
+    title: project.title,
+    client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
+    budget: `₹${project.budget.min.toLocaleString()} - ₹${project.budget.max.toLocaleString()}`,
+    skillsMatch: 85,
+    postedTime: new Date(project.createdAt).toLocaleDateString("en-US", { day: "numeric", hour: "2-digit", minute: "2-digit" }),
+    skills: project.skills || [],
+  }));
+
+  const recentMessages = conversations.slice(0, 3).map(conv => ({
+    id: conv.id,
+    name: conv.participants?.[0]?.fullName || "Unknown",
+    avatar: conv.participants?.[0]?.fullName?.split(" ").map(n => n[0]).join("") || "U",
+    message: conv.lastMessage?.content || "No messages yet",
+    time: conv.lastMessage ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "",
+    unread: conv.unreadCount > 0,
+  }));
+
+  const earningsData = [
+    { month: "Aug", amount: 12000 },
+    { month: "Sep", amount: 18000 },
+    { month: "Oct", amount: 15000 },
+    { month: "Nov", amount: 22000 },
+    { month: "Dec", amount: 19000 },
+    { month: "Jan", amount: 25000 },
+  ];
 
   const maxEarning = Math.max(...earningsData.map((d) => d.amount));
 
@@ -349,9 +342,9 @@ const FreelancerDashboard = () => {
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg",
-                subscriptionPlan === "Free"
+                subscriptionPlan === "free"
                   ? "bg-slate-500/20"
-                  : subscriptionPlan === "Pro"
+                  : subscriptionPlan === "pro"
                     ? "bg-royal-blue/20"
                     : "bg-gold/20",
               )}
@@ -359,9 +352,9 @@ const FreelancerDashboard = () => {
               <Award
                 size={16}
                 className={cn(
-                  subscriptionPlan === "Free"
+                  subscriptionPlan === "free"
                     ? "text-slate-400"
-                    : subscriptionPlan === "Pro"
+                    : subscriptionPlan === "pro"
                       ? "text-royal-blue"
                       : "text-gold",
                 )}
@@ -369,16 +362,16 @@ const FreelancerDashboard = () => {
               <span
                 className={cn(
                   "text-xs font-semibold",
-                  subscriptionPlan === "Free"
+                  subscriptionPlan === "free"
                     ? "text-slate-400"
-                    : subscriptionPlan === "Pro"
+                    : subscriptionPlan === "pro"
                       ? "text-royal-blue"
                       : "text-gold",
                 )}
               >
-                {subscriptionPlan} Plan
+                {subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} Plan
               </span>
-              {subscriptionPlan === "Free" && (
+              {subscriptionPlan === "free" && (
                 <Link
                   to="/freelancer/subscription"
                   className="ml-auto text-xs text-teal-light hover:underline"
@@ -641,7 +634,7 @@ const FreelancerDashboard = () => {
               </Link>
             </div>
             <div className="p-5 lg:p-6 grid gap-4 lg:grid-cols-3">
-              {recommendedProjects.map((project) => (
+              {recommendedProjectsData.map((project) => (
                 <div
                   key={project.id}
                   className="p-4 rounded-xl border border-slate-100 hover:border-teal/30 hover:shadow-md transition-all"
@@ -913,9 +906,9 @@ const FreelancerDashboard = () => {
                 <div
                   className={cn(
                     "w-14 h-14 rounded-xl flex items-center justify-center",
-                    subscriptionPlan === "Free"
+                    subscriptionPlan === "free"
                       ? "bg-slate-100"
-                      : subscriptionPlan === "Pro"
+                      : subscriptionPlan === "pro"
                         ? "bg-royal-blue/10"
                         : "bg-gold/10",
                   )}
@@ -923,9 +916,9 @@ const FreelancerDashboard = () => {
                   <Award
                     size={28}
                     className={cn(
-                      subscriptionPlan === "Free"
+                      subscriptionPlan === "free"
                         ? "text-slate-500"
-                        : subscriptionPlan === "Pro"
+                        : subscriptionPlan === "pro"
                           ? "text-royal-blue"
                           : "text-gold",
                     )}
@@ -933,19 +926,19 @@ const FreelancerDashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-navy">
-                    {subscriptionPlan} Plan
+                    {subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} Plan
                   </h3>
                   <p className="text-sm text-slate-500">
-                    {subscriptionPlan === "Free"
+                    {subscriptionPlan === "free"
                       ? "Limited features - Upgrade to unlock more"
-                      : subscriptionExpiry
-                        ? `Expires on ${subscriptionExpiry}`
+                      : subscription?.endDate
+                        ? `Expires on ${new Date(subscription.endDate).toLocaleDateString()}`
                         : "Active subscription"}
                   </p>
                 </div>
               </div>
               <div className="flex gap-3">
-                {subscriptionPlan === "Free" ? (
+                {subscriptionPlan === "free" ? (
                   <Link to="/freelancer/subscription">
                     <Button className="bg-gradient-to-r from-royal-blue to-teal text-white font-semibold">
                       <Zap size={16} className="mr-2" />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -32,6 +32,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { projectService } from "@/services";
+import type { Project } from "@/services";
 
 // Sidebar Navigation Items
 const sidebarNavItems = [
@@ -198,13 +200,30 @@ const ClientProjects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await projectService.getMyClientProjects();
+        setProjects(data.projects || []);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   const itemsPerPage = 6;
 
   // Filter projects based on active tab
-  const filteredProjects = projectsData
+  const filteredProjects = projects
     .filter((project) => {
       if (activeTab === "all") return true;
       if (activeTab === "open") return project.status === "open";
@@ -224,7 +243,7 @@ const ClientProjects = () => {
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (sortBy === "budget-high") return b.budget.max - a.budget.max;
     if (sortBy === "budget-low") return a.budget.min - b.budget.min;
-    return 0; // Recent is default order
+    return 0;
   });
 
   // Pagination
@@ -233,6 +252,29 @@ const ClientProjects = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+
+  // Format project for display
+  const projectsData = paginatedProjects.map(p => ({
+    id: Number(p.id) || 0,
+    title: p.title,
+    category: p.category,
+    description: p.description,
+    status: p.status,
+    budget: p.budget,
+    applications: p.applications || 0,
+    deadline: p.deadline,
+    skills: p.skills || [],
+    freelancer: p.freelancer ? { name: p.freelancer.fullName, avatar: p.freelancer.fullName.split(" ").map(n => n[0]).join("") } : null,
+    createdAt: new Date(p.createdAt).toLocaleDateString(),
+  }));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
 
   const getStatusStyles = (status: string) => {
     switch (status) {

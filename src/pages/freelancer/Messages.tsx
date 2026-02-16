@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { conversationService } from "@/services";
+import type { Conversation, Message } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -276,64 +278,104 @@ By accepting these terms, you agree to abide by all platform rules and guideline
 
 const FreelancerMessages = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState(
-    mockConversations[0],
-  );
-  const [messages, setMessages] = useState(mockMessages);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showInfoPanel, setShowInfoPanel] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [pendingConversation, setPendingConversation] = useState<
-    (typeof mockConversations)[0] | null
-  >(null);
+  const [pendingConversation, setPendingConversation] = useState<Conversation | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const subscriptionPlan = "Free";
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        setLoading(true);
+        const data = await conversationService.getAll();
+        setConversations(data.conversations || []);
+        if (data.conversations?.length > 0) {
+          setSelectedConversation(data.conversations[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedConversation) return;
+      try {
+        const data = await conversationService.getMessages(selectedConversation.id);
+        setMessages(data.messages || []);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
+  }, [selectedConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSelectConversation = (
-    conversation: (typeof mockConversations)[0],
-  ) => {
-    if (!conversation.termsAccepted) {
-      setPendingConversation(conversation);
-      setShowTermsModal(true);
-      setTermsAccepted(false);
-    } else {
-      setSelectedConversation(conversation);
+  const mockConversations = conversations.map(conv => ({
+    id: conv.id,
+    client: {
+      name: conv.participants?.[0]?.fullName || "Unknown",
+      avatar: conv.participants?.[0]?.avatar,
+      verified: true,
+      rating: 4.5,
+      reviews: 10,
+      company: "Company",
+      location: "Location",
+    },
+    project: {
+      id: conv.projectId || "",
+      title: conv.project?.title || "Project",
+    },
+    lastMessage: conv.lastMessage?.content || "No messages",
+    lastMessageTime: conv.lastMessage ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "",
+    unreadCount: conv.unreadCount,
+    termsAccepted: true,
+  }));
+
+  const handleSelectConversation = (conversation: typeof mockConversations[0]) => {
+    const conv = conversations.find(c => c.id === conversation.id);
+    if (conv) {
+      setSelectedConversation(conv);
     }
   };
 
-  const handleAcceptTerms = () => {
-    if (pendingConversation) {
-      // In real app, would update the backend
-      setSelectedConversation(pendingConversation);
-      setShowTermsModal(false);
-      setPendingConversation(null);
+  const handleAcceptTerms = async () => {
+    if (pendingConversation && selectedConversation) {
+      try {
+        await conversationService.acceptTerms(selectedConversation.id);
+        setShowTermsModal(false);
+        setPendingConversation(null);
+      } catch (error) {
+        console.error("Error accepting terms:", error);
+      }
     }
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation) return;
 
-    const newMsg = {
-      id: messages.length + 1,
-      senderId: "me",
-      text: newMessage,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      status: "sent",
-    };
-
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
+    try {
+      const msg = await conversationService.sendMessage(selectedConversation.id, newMessage);
+      setMessages(prev => [...prev, msg]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

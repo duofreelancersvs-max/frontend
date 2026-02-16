@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { freelancerService } from "@/services";
+import type { PortfolioItem } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -155,12 +157,29 @@ const FreelancerPortfolio = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [subscriptionPlan] = useState<"Pro" | "Free">("Pro");
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [subscriptionPlan] = useState<"pro" | "free">("pro");
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        setLoading(true);
+        const profile = await freelancerService.getMyProfile();
+        setPortfolioItems(profile.portfolio || []);
+      } catch (error) {
+        console.error("Error fetching portfolio:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPortfolio();
+  }, []);
 
   const filteredItems =
     selectedCategory === "All"
       ? portfolioItems
-      : portfolioItems.filter((item) => item.category === selectedCategory);
+      : portfolioItems.filter((item) => item.title === selectedCategory);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -222,19 +241,19 @@ const FreelancerPortfolio = () => {
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg",
-                subscriptionPlan === "Free" ? "bg-slate-500/20" : "bg-gold/20",
+                subscriptionPlan === "free" ? "bg-slate-500/20" : "bg-gold/20",
               )}
             >
               <Award
                 size={16}
                 className={
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold"
+                  subscriptionPlan === "free" ? "text-slate-400" : "text-gold"
                 }
               />
               <span
                 className={cn(
                   "text-xs font-semibold",
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold",
+                  subscriptionPlan === "free" ? "text-slate-400" : "text-gold",
                 )}
               >
                 {subscriptionPlan} Plan

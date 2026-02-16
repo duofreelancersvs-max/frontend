@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -29,6 +29,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
+import { projectService } from "@/services";
+import type { Project } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -253,6 +255,8 @@ const BrowseProjects = () => {
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("relevance");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -263,15 +267,32 @@ const BrowseProjects = () => {
   const [selectedPostedDate, setSelectedPostedDate] = useState("Any Time");
 
   // Saved projects state
-  const [savedProjects, setSavedProjects] = useState<number[]>(
-    mockProjects.filter((p) => p.saved).map((p) => p.id),
-  );
+  const [savedProjects, setSavedProjects] = useState<(string | number)[]>([]);
 
   // Application modal state
   const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<
-    (typeof mockProjects)[0] | null
-  >(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const params: any = { status: "open" };
+        if (searchQuery) params.search = searchQuery;
+        if (selectedCategory !== "All Categories") params.category = selectedCategory;
+        if (budgetMin) params.minBudget = Number(budgetMin);
+        if (budgetMax) params.maxBudget = Number(budgetMax);
+        
+        const data = await projectService.search(params);
+        setProjects(data.projects || []);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, [searchQuery, selectedCategory, budgetMin, budgetMax]);
 
   const subscriptionPlan = "Free";
 

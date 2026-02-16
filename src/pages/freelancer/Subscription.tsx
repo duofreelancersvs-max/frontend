@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { subscriptionService } from "@/services";
+import type { Subscription } from "@/services";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -239,10 +241,28 @@ const FreelancerSubscription = () => {
     "monthly",
   );
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Current user's plan (mock data)
-  const currentPlan = "Free" as any as "Free" | "Pro" | "Premium"; // Could be "Free", "Pro", or "Premium"
-  const renewalDate = "January 15, 2025";
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        setLoading(true);
+        const data = await subscriptionService.getMySubscription();
+        setCurrentSubscription(data);
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubscription();
+  }, []);
+
+  const currentPlan = (currentSubscription?.plan || "free") as "free" | "pro" | "premium";
+  const renewalDate = currentSubscription?.endDate 
+    ? new Date(currentSubscription.endDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : "N/A";
 
   const prices = {
     pro: {
@@ -378,12 +398,12 @@ const FreelancerSubscription = () => {
         {/* Main Content Area */}
         <main className="p-4 lg:p-8 space-y-8">
           {/* CURRENT PLAN CARD (if subscribed) */}
-          {currentPlan !== "Free" && (
+          {currentPlan !== "free" && (
             <section className="bg-gradient-to-r from-teal/10 to-teal-light/10 rounded-2xl border border-teal/20 p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-teal flex items-center justify-center">
-                    {currentPlan === "Premium" ? (
+                    {currentPlan === "premium" ? (
                       <Crown size={24} className="text-white" />
                     ) : (
                       <Zap size={24} className="text-white" />
@@ -462,7 +482,7 @@ const FreelancerSubscription = () => {
                   Get started and explore the platform
                 </p>
 
-                {currentPlan === "Free" ? (
+                {currentPlan === "free" ? (
                   <Button
                     disabled
                     className="w-full bg-slate-100 text-slate-500 cursor-not-allowed"
@@ -533,7 +553,7 @@ const FreelancerSubscription = () => {
                   For serious freelancers ready to grow
                 </p>
 
-                {currentPlan === "Pro" ? (
+                {currentPlan === "pro" ? (
                   <Button
                     disabled
                     className="w-full bg-teal/20 text-teal cursor-not-allowed"
@@ -542,7 +562,7 @@ const FreelancerSubscription = () => {
                   </Button>
                 ) : (
                   <Button className="w-full bg-teal hover:bg-teal-light text-white">
-                    {currentPlan === "Premium"
+                    {currentPlan === "premium"
                       ? "Downgrade to Pro"
                       : "Upgrade to Pro"}
                   </Button>
@@ -607,7 +627,7 @@ const FreelancerSubscription = () => {
                   For top freelancers who want it all
                 </p>
 
-                {currentPlan === "Premium" ? (
+                {currentPlan === "premium" ? (
                   <Button
                     disabled
                     className="w-full bg-gold/20 text-gold cursor-not-allowed"

@@ -28,12 +28,14 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { projectService } from "@/services";
 
 // Sidebar Navigation Items
 const sidebarNavItems = [
@@ -117,6 +119,7 @@ const PostProject = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { logout } = useAuth();
 
   const handleLogout = async () => {
@@ -181,8 +184,26 @@ const PostProject = () => {
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  const handleSubmit = () => {
-    setShowSuccessModal(true);
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      await projectService.create({
+        title: formData.title,
+        description: formData.description,
+        category: formData.categories[0] || "",
+        skills: formData.skills,
+        budget: {
+          min: Number(formData.minBudget) || 0,
+          max: Number(formData.maxBudget) || 0,
+        },
+        deadline: formData.deadline,
+      });
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error creating project:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredSkills = skillOptions.filter((skill) =>

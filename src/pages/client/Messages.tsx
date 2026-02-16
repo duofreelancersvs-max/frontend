@@ -34,6 +34,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { conversationService } from "@/services";
+import type { Conversation, Message } from "@/services";
 
 // Sidebar Navigation Items
 const sidebarNavItems = [
@@ -253,20 +255,86 @@ const ClientMessages = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const [selectedConversation, setSelectedConversation] = useState<
-    number | null
-  >(1);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        setLoading(true);
+        const data = await conversationService.getAll();
+        setConversations(data.conversations || []);
+        if (data.conversations?.length > 0) {
+          setSelectedConversation(data.conversations[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedConversation) return;
+      try {
+        const data = await conversationService.getMessages(selectedConversation.id);
+        setMessages(data.messages || []);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
+  }, [selectedConversation]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const conversationsData = conversations.map(conv => ({
+    id: Number(conv.id) || 0,
+    freelancer: {
+      name: conv.participants?.[0]?.fullName || "Unknown",
+      avatar: conv.participants?.[0]?.avatar,
+      verified: true,
+      rating: 4.5,
+      reviews: 10,
+      skills: ["Video Editing"],
+    },
+    project: {
+      id: conv.projectId || "",
+      title: conv.project?.title || "Project",
+    },
+    lastMessage: conv.lastMessage?.content || "No messages",
+    lastMessageTime: conv.lastMessage ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "",
+    unread: conv.unreadCount,
+    termsAccepted: true,
+  }));
+
   const selectedConvo = conversationsData.find(
-    (c) => c.id === selectedConversation,
+    (c) => c.id === (selectedConversation ? Number(selectedConversation.id) : 1),
   );
-  const messages = selectedConversation
-    ? messagesData[selectedConversation] || []
+  
+  const messagesData: Record<number, any[]> = {};
+  messagesData[selectedConvo?.id || 1] = messages.map(m => ({
+    id: m.id,
+    senderId: m.senderId,
+    text: m.content,
+    timestamp: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+    status: "sent",
+  }));
+
+  const currentMessages = selectedConvo
+    ? messagesData[selectedConvo.id] || []
     : [];
 
   const filteredConversations = conversationsData.filter((conv) => {
@@ -278,29 +346,34 @@ const ClientMessages = () => {
     return matchesSearch && matchesFilter;
   });
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   const handleSelectConversation = (id: number) => {
-    const convo = conversationsData.find((c) => c.id === id);
-    if (convo && !convo.termsAccepted) {
-      setSelectedConversation(id);
-      setShowTermsModal(true);
-    } else {
-      setSelectedConversation(id);
+    const convo = conversations.find(c => Number(c.id) === id);
+    if (convo) {
+      setSelectedConversation(convo);
       setMobileView("chat");
     }
   };
 
-  const handleAcceptTerms = () => {
+  const handleAcceptTerms = async () => {
+    if (selectedConversation) {
+      try {
+        await conversationService.acceptTerms(selectedConversation.id);
+      } catch (error) {
+        console.error("Error accepting terms:", error);
+      }
+    }
     setShowTermsModal(false);
     setMobileView("chat");
   };
 
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !selectedConversation) return;
+    try {
+      const msg = await conversationService.sendMessage(selectedConversation.id, messageInput);
+      setMessages(prev => [...prev, msg]);
       setMessageInput("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 

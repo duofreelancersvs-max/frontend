@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
+import { adminService } from "@/services";
+import type { AdminStats } from "@/services";
 
 // ============ DATA ============
 
@@ -648,6 +650,63 @@ const getStatusLabel = (status: RecentProject["status"]) => {
 // ============ MAIN COMPONENT ============
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const data = await adminService.getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const metricsData = stats ? [
+    {
+      id: "users",
+      label: "Total Users",
+      value: String(stats.totalUsers || 0),
+      icon: Users,
+      iconColor: "indigo" as const,
+      trend: "+12% this month",
+      trendType: "positive" as const,
+    },
+    {
+      id: "revenue",
+      label: "Monthly Revenue",
+      value: `₹${(stats.revenue?.monthly || 0).toLocaleString()}`,
+      icon: Wallet,
+      iconColor: "cyan" as const,
+      trend: "+8% from last month",
+      trendType: "positive" as const,
+    },
+    {
+      id: "projects",
+      label: "Active Projects",
+      value: String(stats.totalProjects || 0),
+      icon: Briefcase,
+      iconColor: "violet" as const,
+      trend: "+23 new this week",
+      trendType: "positive" as const,
+    },
+    {
+      id: "pending",
+      label: "Pending Actions",
+      value: String(stats.totalApplications - stats.totalProjects || 0),
+      icon: AlertCircle,
+      iconColor: "amber" as const,
+      trend: "Requires attention",
+      trendType: "warning" as const,
+    },
+  ] : [];
+
   return (
     <AdminLayout title="Dashboard" breadcrumb="Overview">
       {/* Welcome Banner */}
