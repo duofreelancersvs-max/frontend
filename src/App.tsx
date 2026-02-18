@@ -11,6 +11,7 @@ import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import OAuthCallback from "@/pages/auth/OAuthCallback";
 import ClientDashboard from "@/pages/client/Dashboard";
+import ClientFreelancers from "@/pages/client/ClientFreelancers";
 import PostProject from "@/pages/client/PostProject";
 import ClientProjects from "@/pages/client/Projects";
 import ProjectDetails from "@/pages/client/ProjectDetails";
@@ -40,6 +41,7 @@ import {
   AdminRoute,
 } from "@/components/auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
+import ClientLayout from "@/layouts/ClientLayout";
 
 function App() {
   return (
@@ -63,69 +65,24 @@ function App() {
 
         {/* Client Dashboard Pages */}
         <Route
-          path="/client/dashboard"
+          path="/client"
           element={
             <ClientRoute>
-              <ClientDashboard />
+              <ClientLayout />
             </ClientRoute>
           }
-        />
-        <Route
-          path="/client/post-project"
-          element={
-            <ClientRoute>
-              <PostProject />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/projects"
-          element={
-            <ClientRoute>
-              <ClientProjects />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/project/:id"
-          element={
-            <ClientRoute>
-              <ProjectDetails />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/messages"
-          element={
-            <ClientRoute>
-              <ClientMessages />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/payments"
-          element={
-            <ClientRoute>
-              <ClientPayments />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/reviews"
-          element={
-            <ClientRoute>
-              <ClientReviews />
-            </ClientRoute>
-          }
-        />
-        <Route
-          path="/client/settings"
-          element={
-            <ClientRoute>
-              <ClientSettings />
-            </ClientRoute>
-          }
-        />
+        >
+          <Route path="dashboard" element={<ClientDashboard />} />
+          <Route path="post-project" element={<PostProject />} />
+          <Route path="projects" element={<ClientProjects />} />
+          <Route path="project/:id" element={<ProjectDetails />} />
+          <Route path="project/:id/edit" element={<PostProject />} />
+          <Route path="freelancers" element={<ClientFreelancers />} />
+          <Route path="messages" element={<ClientMessages />} />
+          <Route path="payments" element={<ClientPayments />} />
+          <Route path="reviews" element={<ClientReviews />} />
+          <Route path="settings" element={<ClientSettings />} />
+        </Route>
 
         {/* Freelancer Dashboard Pages */}
         <Route

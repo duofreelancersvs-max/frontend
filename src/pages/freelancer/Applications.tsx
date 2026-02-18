@@ -362,8 +362,8 @@ const FreelancerApplications = () => {
                           ₹{(application.proposedRate || 0).toLocaleString()}
                         </p>
                         <p className="text-xs text-slate-400">
-                          Budget: ₹{(application.project?.budget.min || 0).toLocaleString()} - ₹
-                          {(application.project?.budget.max || 0).toLocaleString()}
+                          Budget: ₹{((application.project?.budget as any)?.minAmount || 0).toLocaleString()} - ₹
+                          {((application.project?.budget as any)?.maxAmount || 0).toLocaleString()}
                         </p>
                       </div>
 

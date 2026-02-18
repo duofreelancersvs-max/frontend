@@ -1,19 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
-  Home,
-  Folder,
   PlusCircle,
   Search,
-  Mail,
-  CreditCard,
-  Star,
-  Settings,
-  Bell,
   ChevronDown,
   LogOut,
   User,
-  X,
   Menu,
   MoreVertical,
   Grid3X3,
@@ -24,48 +17,18 @@ import {
   ChevronRight,
   Edit2,
   Trash2,
-  Copy,
   Eye,
   CheckCircle,
   Briefcase,
+  CreditCard,
+  Bell,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
 import type { Project } from "@/services";
-
-// Sidebar Navigation Items
-const sidebarNavItems = [
-  { icon: Home, label: "Dashboard", href: "/client/dashboard", active: false },
-  {
-    icon: Folder,
-    label: "My Projects",
-    href: "/client/projects",
-    active: true,
-  },
-  {
-    icon: PlusCircle,
-    label: "Post Project",
-    href: "/client/post-project",
-    badge: null,
-  },
-  {
-    icon: Search,
-    label: "Find Freelancers",
-    href: "/freelancers",
-    badge: null,
-  },
-  { icon: Mail, label: "Messages", href: "/client/messages", badge: "3" },
-  {
-    icon: CreditCard,
-    label: "Payments",
-    href: "/client/payments",
-    badge: null,
-  },
-  { icon: Star, label: "Reviews", href: "/client/reviews", badge: null },
-  { icon: Settings, label: "Settings", href: "/client/settings", badge: null },
-];
 
 // Tabs
 const tabs = [
@@ -77,124 +40,8 @@ const tabs = [
   { id: "cancelled", label: "Cancelled", count: null },
 ];
 
-// Mock Projects Data
-const projectsData = [
-  {
-    id: 1,
-    title: "E-commerce Product Video",
-    category: "Video Editing",
-    description:
-      "Need a professional product video for our new e-commerce store. Must include product shots, lifestyle scenes, and a compelling call-to-action.",
-    status: "in-progress",
-    budget: { min: 15000, max: 25000 },
-    applications: 12,
-    deadline: "5 days",
-    skills: ["Adobe Premiere Pro", "After Effects", "Color Grading"],
-    freelancer: { name: "Arun Kumar", avatar: "AK" },
-    createdAt: "2 days ago",
-  },
-  {
-    id: 2,
-    title: "Corporate Explainer Animation",
-    category: "Motion Graphics",
-    description:
-      "Looking for an experienced animator to create a 2-minute explainer video for our enterprise software product.",
-    status: "in-progress",
-    budget: { min: 30000, max: 45000 },
-    applications: 8,
-    deadline: "2 days",
-    skills: ["After Effects", "Cinema 4D", "Illustration"],
-    freelancer: { name: "Priya Sharma", avatar: "PS" },
-    createdAt: "5 days ago",
-  },
-  {
-    id: 3,
-    title: "YouTube Channel Intro",
-    category: "Motion Graphics",
-    description:
-      "Need a catchy 10-second intro for my tech review YouTube channel. Modern, sleek, and professional.",
-    status: "open",
-    budget: { min: 5000, max: 10000 },
-    applications: 24,
-    deadline: "7 days",
-    skills: ["After Effects", "Motion Graphics"],
-    freelancer: null,
-    createdAt: "1 day ago",
-  },
-  {
-    id: 4,
-    title: "Wedding Highlight Video",
-    category: "Video Editing",
-    description:
-      "Beautiful wedding highlight video from our destination wedding in Goa. Cinematic style with drone footage integration.",
-    status: "open",
-    budget: { min: 20000, max: 35000 },
-    applications: 18,
-    deadline: "14 days",
-    skills: ["Premiere Pro", "DaVinci Resolve", "Drone Editing"],
-    freelancer: null,
-    createdAt: "3 days ago",
-  },
-  {
-    id: 5,
-    title: "Social Media Ad Creatives",
-    category: "Video Editing",
-    description:
-      "Create 5 short-form video ads for Instagram and Facebook campaigns. Each video 15-30 seconds.",
-    status: "open",
-    budget: { min: 8000, max: 15000 },
-    applications: 31,
-    deadline: "10 days",
-    skills: ["Premiere Pro", "After Effects"],
-    freelancer: null,
-    createdAt: "6 hours ago",
-  },
-  {
-    id: 6,
-    title: "Product 3D Renders",
-    category: "3D Design",
-    description:
-      "Need photorealistic 3D renders of our new furniture line. 5 products, multiple angles each.",
-    status: "completed",
-    budget: { min: 40000, max: 60000 },
-    applications: 15,
-    deadline: "Completed",
-    skills: ["Blender", "Cinema 4D", "V-Ray"],
-    freelancer: { name: "Vikram R.", avatar: "VR" },
-    createdAt: "2 weeks ago",
-  },
-  {
-    id: 7,
-    title: "App Promo Video",
-    category: "Motion Graphics",
-    description:
-      "Create an engaging app promo video showcasing our new fitness app features and user interface.",
-    status: "completed",
-    budget: { min: 25000, max: 40000 },
-    applications: 22,
-    deadline: "Completed",
-    skills: ["After Effects", "Figma", "UI Animation"],
-    freelancer: { name: "Meera Reddy", avatar: "MR" },
-    createdAt: "3 weeks ago",
-  },
-  {
-    id: 8,
-    title: "Brand Identity Animation",
-    category: "Motion Graphics",
-    description:
-      "Animate our new brand identity including logo animation and brand guidelines motion pack.",
-    status: "draft",
-    budget: { min: 15000, max: 25000 },
-    applications: 0,
-    deadline: "Not set",
-    skills: ["After Effects", "Illustrator"],
-    freelancer: null,
-    createdAt: "1 week ago",
-  },
-];
-
 const ClientProjects = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,6 +51,8 @@ const ClientProjects = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -219,6 +68,28 @@ const ClientProjects = () => {
     };
     fetchProjects();
   }, []);
+
+  const handleDelete = async (projectId: string) => {
+    if (!window.confirm("Are you sure you want to delete this project?"))
+      return;
+
+    try {
+      setDeletingId(projectId);
+      await projectService.delete(projectId);
+      setProjects(projects.filter((p) => p._id !== projectId));
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert("Failed to delete project. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleEdit = (projectId: string) => {
+    setOpenMenuId(null);
+    navigate(`/client/project/${projectId}/edit`);
+  };
 
   const itemsPerPage = 6;
 
@@ -241,8 +112,10 @@ const ClientProjects = () => {
 
   // Sort projects
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === "budget-high") return b.budget.max - a.budget.max;
-    if (sortBy === "budget-low") return a.budget.min - b.budget.min;
+    if (sortBy === "budget-high")
+      return (b.budget?.maxAmount || 0) - (a.budget?.maxAmount || 0);
+    if (sortBy === "budget-low")
+      return (a.budget?.minAmount || 0) - (b.budget?.minAmount || 0);
     return 0;
   });
 
@@ -254,19 +127,6 @@ const ClientProjects = () => {
   );
 
   // Format project for display
-  const projectsData = paginatedProjects.map(p => ({
-    id: Number(p.id) || 0,
-    title: p.title,
-    category: p.category,
-    description: p.description,
-    status: p.status,
-    budget: p.budget,
-    applications: p.applications || 0,
-    deadline: p.deadline,
-    skills: p.skills || [],
-    freelancer: p.freelancer ? { name: p.freelancer.fullName, avatar: p.freelancer.fullName.split(" ").map(n => n[0]).join("") } : null,
-    createdAt: new Date(p.createdAt).toLocaleDateString(),
-  }));
 
   if (loading) {
     return (
@@ -311,90 +171,9 @@ const ClientProjects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto text-white/60 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  item.active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* User Profile Card */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                RK
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  Rajesh Kumar
-                </p>
-                <p className="text-xs text-white/50">Client Account</p>
-              </div>
-              <button className="text-white/50 hover:text-white transition-colors">
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* SIDEBAR OVERLAY (Mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
       {/* MAIN CONTENT */}
-      <div className="lg:ml-64">
+      <div>
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -580,7 +359,7 @@ const ClientProjects = () => {
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                   {paginatedProjects.map((project) => (
                     <div
-                      key={project.id}
+                      key={project._id}
                       className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
                     >
                       {/* Card Header */}
@@ -596,25 +375,38 @@ const ClientProjects = () => {
                           </span>
                           <div className="relative">
                             <button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setOpenMenuId(
-                                  openMenuId === project.id ? null : project.id,
-                                )
-                              }
+                                  openMenuId === project._id
+                                    ? null
+                                    : project._id,
+                                );
+                              }}
                               className="p-1 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors"
                             >
                               <MoreVertical size={18} />
                             </button>
-                            {openMenuId === project.id && (
-                              <div className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-10">
-                                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                            {openMenuId === project._id && (
+                              <div
+                                className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  onClick={() => handleEdit(project._id)}
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                                >
                                   <Edit2 size={14} /> Edit
                                 </button>
-                                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
-                                  <Copy size={14} /> Duplicate
-                                </button>
-                                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50">
-                                  <Trash2 size={14} /> Delete
+                                <button
+                                  onClick={() => handleDelete(project._id)}
+                                  disabled={deletingId === project._id}
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 disabled:opacity-50"
+                                >
+                                  <Trash2 size={14} />{" "}
+                                  {deletingId === project._id
+                                    ? "Deleting..."
+                                    : "Delete"}
                                 </button>
                               </div>
                             )}
@@ -633,7 +425,7 @@ const ClientProjects = () => {
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-1.5 mb-4">
-                          {project.skills.slice(0, 3).map((skill) => (
+                          {(project.skills || []).slice(0, 3).map((skill) => (
                             <span
                               key={skill}
                               className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 rounded-md text-xs font-medium"
@@ -641,9 +433,9 @@ const ClientProjects = () => {
                               {skill}
                             </span>
                           ))}
-                          {project.skills.length > 3 && (
+                          {(project.skills || []).length > 3 && (
                             <span className="px-2 py-0.5 bg-slate-50 text-slate-400 rounded-md text-xs border border-transparent">
-                              +{project.skills.length - 3}
+                              +{(project.skills || []).length - 3}
                             </span>
                           )}
                         </div>
@@ -653,14 +445,18 @@ const ClientProjects = () => {
                           {project.freelancer ? (
                             <div className="flex items-center gap-2.5">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-white">
-                                {project.freelancer.avatar}
+                                {project.freelancer.avatar ||
+                                  project.freelancer.fullName
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
                               </div>
                               <div className="flex flex-col">
                                 <span className="text-xs text-slate-400 font-medium">
                                   Assigned to
                                 </span>
                                 <span className="text-sm font-semibold text-navy leading-none">
-                                  {project.freelancer.name}
+                                  {project.freelancer.fullName}
                                 </span>
                               </div>
                             </div>
@@ -688,7 +484,10 @@ const ClientProjects = () => {
                           <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200/50 shadow-sm">
                             <CreditCard size={12} className="text-slate-400" />
                             <span className="text-navy">
-                              ₹{project.budget.max.toLocaleString()}
+                              ₹
+                              {(
+                                project.budget?.maxAmount || 0
+                              ).toLocaleString()}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -703,7 +502,7 @@ const ClientProjects = () => {
 
                         <div className="flex gap-2">
                           <Link
-                            to={`/client/project/${project.id}`}
+                            to={`/client/project/${project._id}`}
                             className="flex-1"
                           >
                             <Button
@@ -716,7 +515,7 @@ const ClientProjects = () => {
 
                           {project.status === "open" ? (
                             <Link
-                              to={`/client/project/${project.id}/applications`}
+                              to={`/client/project/${project._id}/applications`}
                               className="flex-1"
                             >
                               <Button className="w-full h-9 text-xs bg-teal hover:bg-teal-light text-white shadow-sm shadow-teal/20">
@@ -774,7 +573,7 @@ const ClientProjects = () => {
                       <tbody className="divide-y divide-slate-100">
                         {paginatedProjects.map((project) => (
                           <tr
-                            key={project.id}
+                            key={project._id}
                             className="hover:bg-slate-50 transition-colors"
                           >
                             <td className="px-6 py-4">
@@ -799,8 +598,10 @@ const ClientProjects = () => {
                             </td>
                             <td className="px-6 py-4">
                               <p className="text-sm font-medium text-navy">
-                                ₹{project.budget.min.toLocaleString()} - ₹
-                                {project.budget.max.toLocaleString()}
+                                {project.budget?.minAmount !== undefined &&
+                                project.budget?.maxAmount !== undefined
+                                  ? `₹${project.budget.minAmount.toLocaleString()} - ₹${project.budget.maxAmount.toLocaleString()}`
+                                  : "Budget not set"}
                               </p>
                             </td>
                             <td className="px-6 py-4">
@@ -817,7 +618,7 @@ const ClientProjects = () => {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <Link to={`/client/project/${project.id}`}>
+                                <Link to={`/client/project/${project._id}`}>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -837,6 +638,8 @@ const ClientProjects = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                  onClick={() => handleDelete(project._id)}
+                                  disabled={deletingId === project._id}
                                 >
                                   <Trash2 size={16} />
                                 </Button>

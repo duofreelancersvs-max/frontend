@@ -399,15 +399,19 @@ const FreelancerPortfolio = () => {
                   <div className="absolute top-3 right-3">
                     <div className="relative">
                       <button
-                        onClick={() =>
-                          setOpenMenuId(openMenuId === item.id ? null : item.id)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === item.id ? null : item.id);
+                        }}
                         className="p-1.5 bg-white/90 rounded-lg text-slate-600 hover:bg-white transition-colors"
                       >
                         <MoreVertical size={16} />
                       </button>
                       {openMenuId === item.id && (
-                        <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-10">
+                        <div
+                          className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-50"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
                             <Edit2 size={14} /> Edit
                           </button>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
+import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
-  Home,
   Folder,
   PlusCircle,
   Search,
@@ -20,7 +20,6 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
-  X,
   Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,276 +27,54 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import {
   projectService,
-  clientService,
-  applicationService,
   freelancerService,
   conversationService,
-  notificationService,
 } from "@/services";
 import type {
   Project,
-  ClientProfile,
   Application,
   FreelancerProfile,
   Conversation,
-  Notification,
 } from "@/services";
 
-// Sidebar Navigation Items
-const sidebarNavItems = [
-  { icon: Home, label: "Dashboard", href: "/client/dashboard", active: true },
-  { icon: Folder, label: "My Projects", href: "/client/projects", badge: null },
-  {
-    icon: PlusCircle,
-    label: "Post Project",
-    href: "/client/post-project",
-    badge: null,
-  },
-  {
-    icon: Search,
-    label: "Find Freelancers",
-    href: "/freelancers",
-    badge: null,
-  },
-  { icon: Mail, label: "Messages", href: "/client/messages", badge: "3" },
-  {
-    icon: CreditCard,
-    label: "Payments",
-    href: "/client/payments",
-    badge: null,
-  },
-  { icon: Star, label: "Reviews", href: "/client/reviews", badge: null },
-  { icon: Settings, label: "Settings", href: "/client/settings", badge: null },
-];
-
 // Mock Data
-const statsData = [
-  {
-    label: "Active Projects",
-    value: "2",
-    icon: Folder,
-    color: "bg-royal-blue",
-    change: "+1 this month",
-  },
-  {
-    label: "Completed Projects",
-    value: "15",
-    icon: CheckCircle,
-    color: "bg-teal",
-    change: "+3 this month",
-  },
-  {
-    label: "Total Spent",
-    value: "₹45,000",
-    icon: CreditCard,
-    color: "bg-navy",
-    change: "₹12,000 this month",
-  },
-  {
-    label: "Pending Reviews",
-    value: "3",
-    icon: Star,
-    color: "bg-gold",
-    change: "Leave feedback",
-  },
-];
-
-const activeProjects = [
-  {
-    id: 1,
-    name: "E-commerce Product Video",
-    status: "In Progress",
-    freelancer: { name: "Arun Kumar", avatar: "AK" },
-    progress: 65,
-    deadline: "5 days",
-    budget: "₹15,000",
-  },
-  {
-    id: 2,
-    name: "Corporate Explainer Animation",
-    status: "In Review",
-    freelancer: { name: "Priya Sharma", avatar: "PS" },
-    progress: 90,
-    deadline: "2 days",
-    budget: "₹25,000",
-  },
-  {
-    id: 3,
-    name: "Social Media Ad Creatives",
-    status: "Just Started",
-    freelancer: { name: "Vikram R.", avatar: "VR" },
-    progress: 20,
-    deadline: "10 days",
-    budget: "₹8,000",
-  },
-];
-
-const recentApplications = [
-  {
-    id: 1,
-    freelancer: { name: "Meera Reddy", avatar: "MR", title: "Video Editor" },
-    project: "YouTube Channel Intro",
-    appliedDate: "2 hours ago",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    freelancer: { name: "Karthik S.", avatar: "KS", title: "3D Designer" },
-    project: "Product 3D Renders",
-    appliedDate: "5 hours ago",
-    status: "Shortlisted",
-  },
-  {
-    id: 3,
-    freelancer: { name: "Lakshmi P.", avatar: "LP", title: "Motion Designer" },
-    project: "App Promo Video",
-    appliedDate: "1 day ago",
-    status: "Pending",
-  },
-];
-
-const recommendedFreelancers = [
-  {
-    id: 1,
-    name: "Rahul Verma",
-    avatar: "RV",
-    title: "Senior VFX Artist",
-    skills: ["After Effects", "Nuke", "Houdini"],
-    rating: 4.9,
-    reviews: 127,
-  },
-  {
-    id: 2,
-    name: "Ananya Singh",
-    avatar: "AS",
-    title: "Motion Graphics Expert",
-    skills: ["Cinema 4D", "After Effects"],
-    rating: 4.8,
-    reviews: 89,
-  },
-  {
-    id: 3,
-    name: "Dev Patel",
-    avatar: "DP",
-    title: "Video Editor",
-    skills: ["Premiere Pro", "DaVinci"],
-    rating: 5.0,
-    reviews: 156,
-  },
-];
-
-const recentMessages = [
-  {
-    id: 1,
-    name: "Arun Kumar",
-    avatar: "AK",
-    message: "I've uploaded the first draft for your review...",
-    time: "5 min ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    avatar: "PS",
-    message: "The revisions are complete. Please check!",
-    time: "1 hour ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    name: "Vikram R.",
-    avatar: "VR",
-    message: "Started working on the project today.",
-    time: "3 hours ago",
-    unread: false,
-  },
-];
-
-const activityFeed = [
-  {
-    id: 1,
-    action: "Arun Kumar submitted first draft",
-    project: "E-commerce Video",
-    time: "30 min ago",
-    type: "submission",
-  },
-  {
-    id: 2,
-    action: "You approved milestone payment",
-    project: "Corporate Animation",
-    time: "2 hours ago",
-    type: "payment",
-  },
-  {
-    id: 3,
-    action: "New application received",
-    project: "YouTube Intro",
-    time: "4 hours ago",
-    type: "application",
-  },
-  {
-    id: 4,
-    action: "Project deadline reminder",
-    project: "Social Media Ads",
-    time: "Yesterday",
-    type: "reminder",
-  },
-];
 
 const ClientDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(
-    null,
-  );
   const [applications, setApplications] = useState<Application[]>([]);
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { logout, user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [projectsData, clientData, freeData, convData, notifData] =
-          await Promise.allSettled([
-            projectService
-              .getMyClientProjects()
-              .then((r) => r.projects)
-              .catch(() => []),
-            clientService.getMyProfile().catch(() => null),
-            // applicationService.getMyApplications() is for freelancers only. Clients view applications per project.
-            // For now, we'll initialize applications as empty arrays until a client-specific endpoint exists.
-            // applicationService.getMyApplications().catch(() => []),
-            freelancerService
-              .getTopRated()
-              .then((r) => r.freelancers)
-              .catch(() => []),
-            conversationService
-              .getAll()
-              .then((r) => r.conversations)
-              .catch(() => []),
-            notificationService
-              .getAll({ limit: 5 })
-              .then((r) => r.notifications)
-              .catch(() => []),
-          ]);
+        const [projectsData, freeData, convData] = await Promise.allSettled([
+          projectService
+            .getMyClientProjects()
+            .then((r) => r.projects)
+            .catch(() => []),
+          freelancerService
+            .getTopRated()
+            .then((r) => r.freelancers)
+            .catch(() => []),
+          conversationService
+            .getAll()
+            .then((r) => r.conversations)
+            .catch(() => []),
+        ]);
 
         if (projectsData.status === "fulfilled")
           setProjects(projectsData.value || []);
-        if (clientData.status === "fulfilled")
-          setClientProfile(clientData.value);
-        // if (appsData.status === "fulfilled") setApplications(appsData.value.applications || []);
-        setApplications([]); // Temporary fix: clients cannot fetch "my applications" yet
+        setApplications([]); // Temporary fix
         if (freeData.status === "fulfilled")
           setFreelancers(freeData.value || []);
         if (convData.status === "fulfilled")
           setConversations(convData.value || []);
-        if (notifData.status === "fulfilled")
-          setNotifications(notifData.value || []);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -321,7 +98,7 @@ const ClientDashboard = () => {
     .filter((p) => p.status === "in-progress")
     .slice(0, 3)
     .map((p) => ({
-      id: p.id,
+      id: p._id,
       name: p.title,
       status: p.status === "in-progress" ? "In Progress" : p.status,
       freelancer: {
@@ -334,21 +111,21 @@ const ClientDashboard = () => {
       },
       progress: 50,
       deadline: p.deadline,
-      budget: `₹${p.budget.min.toLocaleString()} - ₹${p.budget.max.toLocaleString()}`,
+      budget:
+        p.budget?.minAmount !== undefined && p.budget?.maxAmount !== undefined
+          ? `₹${p.budget.minAmount.toLocaleString()} - ₹${p.budget.maxAmount.toLocaleString()}`
+          : "Budget not set",
     }));
 
   const pendingApplications = (applications || []).filter(
     (a) => a.status === "pending",
   );
-  const unreadMessages = (conversations || []).reduce(
-    (acc, c) => acc + c.unreadCount,
-    0,
-  );
+
   const completedProjects = (projects || []).filter(
     (p) => p.status === "completed",
   ).length;
   const totalSpent = (projects || []).reduce(
-    (acc, p) => acc + (p.budget.max || 0),
+    (acc, p) => acc + (p.budget?.maxAmount || 0),
     0,
   );
 
@@ -476,94 +253,9 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto text-white/60 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  item.active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* User Profile Card */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                RK
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  Rajesh Kumar
-                </p>
-                <p className="text-xs text-white/50">Client Account</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-white/50 hover:text-white transition-colors"
-                title="Log Out"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* SIDEBAR OVERLAY (Mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
       {/* MAIN CONTENT */}
-      <div className="lg:ml-64">
+      <div>
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -679,10 +371,10 @@ const ClientDashboard = () => {
                     Post New Project
                   </Button>
                 </Link>
-                <Link to="/freelancers">
+                <Link to="/client/freelancers">
                   <Button
                     variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10"
+                    className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50"
                   >
                     <Search size={18} className="mr-2" />
                     Find Freelancers
@@ -915,7 +607,7 @@ const ClientDashboard = () => {
                   </h3>
                 </div>
                 <Link
-                  to="/freelancers"
+                  to="/client/freelancers"
                   className="text-sm text-teal font-medium hover:underline flex items-center gap-1"
                 >
                   View All <ArrowRight size={14} />
@@ -1068,7 +760,7 @@ const ClientDashboard = () => {
                   />
                 </Link>
                 <Link
-                  to="/freelancers"
+                  to="/client/freelancers"
                   className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-royal-blue hover:bg-royal-blue/5 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue group-hover:bg-royal-blue group-hover:text-white transition-colors">

@@ -1,18 +1,30 @@
 import { api } from "@/lib/api";
 
 export interface Project {
-  id: string;
+  _id: string;
+  id?: string;
   title: string;
   description: string;
   category: string;
   skills: string[];
-  budget: { min: number; max: number };
+  budget: {
+    type: string;
+    minAmount: number;
+    maxAmount: number;
+    currency: string;
+  };
   deadline: string;
   status: "draft" | "open" | "in-progress" | "completed" | "cancelled";
   applications: number;
   createdAt: string;
   updatedAt: string;
   clientId: string;
+  location?: {
+    type: string;
+    city?: string;
+    state?: string;
+  };
+  visibility?: string;
   client?: {
     id: string;
     fullName: string;
@@ -40,8 +52,18 @@ export interface CreateProjectRequest {
   description: string;
   category: string;
   skills: string[];
-  budget: { min: number; max: number };
+  budget: {
+    type: string;
+    minAmount: number;
+    maxAmount: number;
+    currency?: string;
+  };
   deadline: string;
+  location?: {
+    type: string;
+    city?: string;
+    state?: string;
+  };
 }
 
 export interface ProjectFilters {
@@ -57,32 +79,31 @@ export interface ProjectFilters {
 export const projectService = {
   search: (params?: ProjectFilters) =>
     api.get<{ projects: Project[]; total: number }>("/projects", { params }),
-  
+
   getById: (id: string) => api.get<Project>(`/projects/${id}`),
-  
+
   getMyClientProjects: () =>
     api.get<{ projects: Project[] }>("/projects/me/client"),
-  
+
   getMyClientStats: () => api.get<ProjectStats>("/projects/me/stats"),
-  
+
   getMyFreelancerProjects: () =>
     api.get<{ projects: Project[] }>("/projects/me/freelancer"),
-  
-  create: (data: CreateProjectRequest) =>
-    api.post<Project>("/projects", data),
-  
+
+  create: (data: CreateProjectRequest) => api.post<Project>("/projects", data),
+
   update: (id: string, data: Partial<CreateProjectRequest>) =>
     api.patch<Project>(`/projects/${id}`, data),
-  
+
   delete: (id: string) => api.delete<void>(`/projects/${id}`),
-  
+
   publish: (id: string) => api.post<Project>(`/projects/${id}/publish`, {}),
-  
+
   hire: (id: string, freelancerId: string) =>
     api.post<Project>(`/projects/${id}/hire`, { freelancerId }),
-  
+
   complete: (id: string) => api.post<Project>(`/projects/${id}/complete`, {}),
-  
+
   cancel: (id: string) => api.post<Project>(`/projects/${id}/cancel`, {}),
 };
 

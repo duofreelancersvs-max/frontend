@@ -817,8 +817,8 @@ const BrowseProjects = () => {
                       <div className="flex items-center gap-1">
                         <DollarSign size={14} />
                         <span className="font-semibold text-navy">
-                          ₹{project.budget.min.toLocaleString()} - ₹
-                          {project.budget.max.toLocaleString()}
+                          ₹{(project.budget as any).minAmount?.toLocaleString() || 0} - ₹
+                          {(project.budget as any).maxAmount?.toLocaleString() || 0}
                         </span>
                         <span className="text-xs text-slate-400">
                           ({project.budget.type})

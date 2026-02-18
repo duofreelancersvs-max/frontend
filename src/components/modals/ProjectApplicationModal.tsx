@@ -233,8 +233,8 @@ const ProjectApplicationModal = ({
                     <div className="flex items-center gap-1">
                       <DollarSign size={14} className="text-success-green" />
                       <span className="font-medium text-navy text-sm">
-                        ₹{project.budget.min.toLocaleString()} - ₹
-                        {project.budget.max.toLocaleString()}
+                        ₹{((project.budget as any).minAmount || 0).toLocaleString()} - ₹
+                        {((project.budget as any).maxAmount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>

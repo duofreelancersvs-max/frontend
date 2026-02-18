@@ -229,14 +229,14 @@ const FreelancerDashboard = () => {
     client: app.freelancer?.fullName || "Unknown Client",
     appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
-    budget: app.project ? `₹${app.project.budget.min.toLocaleString()} - ₹${app.project.budget.max.toLocaleString()}` : "N/A",
+    budget: app.project ? `₹${(app.project.budget as any).minAmount?.toLocaleString() || 0} - ₹${(app.project.budget as any).maxAmount?.toLocaleString() || 0}` : "N/A",
   }));
 
   const recommendedProjectsData = recommendedProjects.map(project => ({
     id: project.id,
     title: project.title,
     client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
-    budget: `₹${project.budget.min.toLocaleString()} - ₹${project.budget.max.toLocaleString()}`,
+    budget: `₹${(project.budget as any).minAmount?.toLocaleString() || 0} - ₹${(project.budget as any).maxAmount?.toLocaleString() || 0}`,
     skillsMatch: 85,
     postedTime: new Date(project.createdAt).toLocaleDateString("en-US", { day: "numeric", hour: "2-digit", minute: "2-digit" }),
     skills: project.skills || [],

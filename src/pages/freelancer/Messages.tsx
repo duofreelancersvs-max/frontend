@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -23,7 +23,6 @@ import {
   Video,
   Check,
   CheckCheck,
-  Clock,
   BadgeCheck,
   Building2,
   ExternalLink,
@@ -34,6 +33,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
 import type { Conversation, Message } from "@/services";
+import { useAuth } from "@/hooks/useAuth";
+import { useSocket } from "@/hooks/useSocket";
+import type { SocketMessage, SocketConversation } from "@/lib/socket";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -85,166 +87,6 @@ const sidebarNavItems = [
   },
 ];
 
-// Mock conversations data
-const mockConversations = [
-  {
-    id: 1,
-    client: {
-      name: "TechMart Solutions",
-      avatar: null,
-      verified: true,
-      rating: 4.8,
-      reviews: 45,
-      company: "TechMart Solutions Pvt Ltd",
-      location: "Mumbai, Maharashtra",
-    },
-    project: {
-      id: 101,
-      title: "E-commerce Product Video",
-      status: "In Progress",
-      budget: "₹15,000 - ₹20,000",
-    },
-    lastMessage: "Great! Looking forward to seeing the first draft.",
-    lastMessageTime: "2 min ago",
-    unreadCount: 2,
-    isOnline: true,
-    hireStatus: "Hired",
-    termsAccepted: true,
-  },
-  {
-    id: 2,
-    client: {
-      name: "InnovateCorp",
-      avatar: null,
-      verified: true,
-      rating: 4.9,
-      reviews: 72,
-      company: "InnovateCorp Technologies",
-      location: "Bangalore, Karnataka",
-    },
-    project: {
-      id: 102,
-      title: "Corporate Explainer Animation",
-      status: "Pending",
-      budget: "₹25,000 - ₹35,000",
-    },
-    lastMessage: "Can you share your portfolio for motion graphics?",
-    lastMessageTime: "1 hour ago",
-    unreadCount: 0,
-    isOnline: false,
-    hireStatus: "Interviewing",
-    termsAccepted: true,
-  },
-  {
-    id: 3,
-    client: {
-      name: "Brand Boost Agency",
-      avatar: null,
-      verified: true,
-      rating: 4.6,
-      reviews: 89,
-      company: "Brand Boost Digital Agency",
-      location: "Delhi NCR",
-    },
-    project: {
-      id: 103,
-      title: "Social Media Ad Creatives",
-      status: "New",
-      budget: "₹10,000 - ₹15,000",
-    },
-    lastMessage: "Hi! I saw your application and would like to discuss.",
-    lastMessageTime: "3 hours ago",
-    unreadCount: 1,
-    isOnline: true,
-    hireStatus: "New Inquiry",
-    termsAccepted: false,
-  },
-  {
-    id: 4,
-    client: {
-      name: "Moments Photography",
-      avatar: null,
-      verified: false,
-      rating: 4.7,
-      reviews: 56,
-      company: "Moments Wedding Photography",
-      location: "Chennai, Tamil Nadu",
-    },
-    project: {
-      id: 104,
-      title: "Wedding Highlight Reel",
-      status: "Completed",
-      budget: "₹800 - ₹1,200/hr",
-    },
-    lastMessage: "Thank you for the amazing work!",
-    lastMessageTime: "2 days ago",
-    unreadCount: 0,
-    isOnline: false,
-    hireStatus: "Completed",
-    termsAccepted: true,
-  },
-];
-
-// Mock messages for selected conversation
-const mockMessages = [
-  {
-    id: 1,
-    senderId: "client",
-    text: "Hi! I loved your portfolio and would like to discuss my project with you.",
-    timestamp: "10:30 AM",
-    status: "read",
-  },
-  {
-    id: 2,
-    senderId: "me",
-    text: "Thank you! I'd be happy to discuss your project. Can you share more details about what you're looking for?",
-    timestamp: "10:35 AM",
-    status: "read",
-  },
-  {
-    id: 3,
-    senderId: "client",
-    text: "Sure! We need a product video for our e-commerce platform. About 60-90 seconds, showcasing 5 products.",
-    timestamp: "10:40 AM",
-    status: "read",
-  },
-  {
-    id: 4,
-    senderId: "client",
-    text: "We want a modern, clean look with some motion graphics for transitions.",
-    timestamp: "10:41 AM",
-    status: "read",
-  },
-  {
-    id: 5,
-    senderId: "me",
-    text: "That sounds great! I have experience with similar projects. I can definitely help with this. Do you have any reference videos in mind?",
-    timestamp: "10:45 AM",
-    status: "read",
-  },
-  {
-    id: 6,
-    senderId: "client",
-    text: "Yes, I'll share some references. Also, what would be your timeline and rate for this?",
-    timestamp: "11:00 AM",
-    status: "read",
-  },
-  {
-    id: 7,
-    senderId: "me",
-    text: "Based on the scope, I can complete this in about 1-2 weeks. My rate would be ₹1,200/hour or we can discuss a fixed price.",
-    timestamp: "11:10 AM",
-    status: "read",
-  },
-  {
-    id: 8,
-    senderId: "client",
-    text: "Great! Looking forward to seeing the first draft.",
-    timestamp: "11:15 AM",
-    status: "delivered",
-  },
-];
-
 const termsText = `
 TERMS AND CONDITIONS FOR FREELANCER MESSAGING
 
@@ -277,24 +119,92 @@ By accepting these terms, you agree to abide by all platform rules and guideline
 `;
 
 const FreelancerMessages = () => {
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showInfoPanel, setShowInfoPanel] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [pendingConversation, setPendingConversation] = useState<Conversation | null>(null);
+  const [pendingConversation, setPendingConversation] =
+    useState<Conversation | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [_loading, _setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ─── Socket.IO integration ──────────────────────────────────────
+
+  const handleNewMessage = useCallback(
+    (socketMsg: SocketMessage, _conv: SocketConversation) => {
+      const mapped: Message = {
+        id: socketMsg._id,
+        conversationId: socketMsg.conversationId,
+        senderId: socketMsg.senderId,
+        content: socketMsg.content,
+        read: socketMsg.isRead,
+        createdAt: socketMsg.createdAt,
+      };
+      if (
+        selectedConversation &&
+        socketMsg.conversationId === selectedConversation.id
+      ) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === mapped.id)) return prev;
+          return [...prev, mapped];
+        });
+      }
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === socketMsg.conversationId
+            ? {
+                ...c,
+                lastMessage: mapped,
+                unreadCount:
+                  c.id === selectedConversation?.id
+                    ? c.unreadCount
+                    : c.unreadCount + 1,
+              }
+            : c,
+        ),
+      );
+    },
+    [selectedConversation],
+  );
+
+  const handleMessageRead = useCallback(
+    (data: { conversationId: string; userId: string; readAt: string }) => {
+      if (data.conversationId === selectedConversation?.id) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.senderId === user?._id ? { ...m, read: true } : m,
+          ),
+        );
+      }
+    },
+    [selectedConversation, user],
+  );
+
+  const {
+    isConnected,
+    onlineUsers,
+    sendMessage: socketSendMessage,
+    markAsRead,
+  } = useSocket({
+    conversationId: selectedConversation?.id || null,
+    onNewMessage: handleNewMessage,
+    onMessageRead: handleMessageRead,
+  });
+
+  // ─── Data fetching ──────────────────────────────────────────────
 
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        setLoading(true);
+        _setLoading(true);
         const data = await conversationService.getAll();
         setConversations(data.conversations || []);
         if (data.conversations?.length > 0) {
@@ -303,7 +213,7 @@ const FreelancerMessages = () => {
       } catch (error) {
         console.error("Error fetching conversations:", error);
       } finally {
-        setLoading(false);
+        _setLoading(false);
       }
     };
     fetchConversations();
@@ -313,22 +223,26 @@ const FreelancerMessages = () => {
     const fetchMessages = async () => {
       if (!selectedConversation) return;
       try {
-        const data = await conversationService.getMessages(selectedConversation.id);
+        const data = await conversationService.getMessages(
+          selectedConversation.id,
+        );
         setMessages(data.messages || []);
+        markAsRead(selectedConversation.id);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
     fetchMessages();
-  }, [selectedConversation]);
+  }, [selectedConversation, markAsRead]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const mockConversations = conversations.map(conv => ({
+  const conversationsDataMapped = conversations.map((conv) => ({
     id: conv.id,
     client: {
+      userId: conv.participants?.[0]?.id || "",
       name: conv.participants?.[0]?.fullName || "Unknown",
       avatar: conv.participants?.[0]?.avatar,
       verified: true,
@@ -342,13 +256,21 @@ const FreelancerMessages = () => {
       title: conv.project?.title || "Project",
     },
     lastMessage: conv.lastMessage?.content || "No messages",
-    lastMessageTime: conv.lastMessage ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "",
+    lastMessageTime: conv.lastMessage
+      ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "",
     unreadCount: conv.unreadCount,
+    isOnline: onlineUsers.has(conv.participants?.[0]?.id || ""),
     termsAccepted: true,
   }));
 
-  const handleSelectConversation = (conversation: typeof mockConversations[0]) => {
-    const conv = conversations.find(c => c.id === conversation.id);
+  const handleSelectConversation = (
+    conversation: (typeof conversationsDataMapped)[0],
+  ) => {
+    const conv = conversations.find((c) => c.id === conversation.id);
     if (conv) {
       setSelectedConversation(conv);
     }
@@ -367,55 +289,23 @@ const FreelancerMessages = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!newMessage.trim() || !selectedConversation || !isConnected) return;
 
-    try {
-      const msg = await conversationService.sendMessage(selectedConversation.id, newMessage);
-      setMessages(prev => [...prev, msg]);
-      setNewMessage("");
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+    const content = newMessage;
+    setNewMessage("");
+    socketSendMessage(selectedConversation.id, content);
+    // Incoming message arrives via message:new socket event
   };
+  // Helper: get mapped data for the currently selected conversation
+  const selectedConvData = selectedConversation
+    ? conversationsDataMapped.find((c) => c.id === selectedConversation.id)
+    : undefined;
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const filteredConversations = mockConversations.filter(
+  const filteredConversations = conversationsDataMapped.filter(
     (conv) =>
       conv.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conv.project.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "In Progress":
-        return "bg-teal/10 text-teal";
-      case "Completed":
-        return "bg-success-green/10 text-success-green";
-      case "Pending":
-        return "bg-gold/10 text-gold";
-      default:
-        return "bg-slate-100 text-slate-600";
-    }
-  };
-
-  const getHireStatusColor = (status: string) => {
-    switch (status) {
-      case "Hired":
-        return "bg-success-green text-white";
-      case "Interviewing":
-        return "bg-royal-blue text-white";
-      case "Completed":
-        return "bg-slate-500 text-white";
-      default:
-        return "bg-gold text-white";
-    }
-  };
 
   const emojis = [
     "😊",
@@ -492,22 +382,12 @@ const FreelancerMessages = () => {
             <div
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg",
-                subscriptionPlan === "Free" ? "bg-slate-500/20" : "bg-gold/20",
+                "bg-gold/20",
               )}
             >
-              <Award
-                size={16}
-                className={
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold"
-                }
-              />
-              <span
-                className={cn(
-                  "text-xs font-semibold",
-                  subscriptionPlan === "Free" ? "text-slate-400" : "text-gold",
-                )}
-              >
-                {subscriptionPlan} Plan
+              <Award size={16} className="text-gold" />
+              <span className={cn("text-xs font-semibold", "text-gold")}>
+                Pro Plan
               </span>
             </div>
           </div>
@@ -600,7 +480,8 @@ const FreelancerMessages = () => {
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                         {conv.client.name.charAt(0)}
                       </div>
-                      {conv.isOnline && (
+                      {(conv.isOnline ||
+                        onlineUsers.has(conv.client.userId || "")) && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-success-green rounded-full border-2 border-white" />
                       )}
                     </div>
@@ -638,10 +519,10 @@ const FreelancerMessages = () => {
                         <span
                           className={cn(
                             "ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium",
-                            getStatusColor(conv.project.status),
+                            "bg-teal/10 text-teal",
                           )}
                         >
-                          {conv.project.status}
+                          Active
                         </span>
                       </div>
 
@@ -672,33 +553,33 @@ const FreelancerMessages = () => {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                        {selectedConversation.client.name.charAt(0)}
+                        {(
+                          selectedConvData?.client.name ||
+                          selectedConversation.participants?.[0]?.fullName ||
+                          "U"
+                        ).charAt(0)}
                       </div>
-                      {selectedConversation.isOnline && (
+                      {onlineUsers.has(
+                        selectedConvData?.client.userId || "",
+                      ) && (
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success-green rounded-full border-2 border-white" />
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-navy">
-                          {selectedConversation.client.name}
+                          {selectedConvData?.client.name ||
+                            selectedConversation.participants?.[0]?.fullName ||
+                            "Unknown"}
                         </h3>
-                        {selectedConversation.client.verified && (
-                          <BadgeCheck size={14} className="text-teal" />
-                        )}
-                        <span
-                          className={cn(
-                            "px-2 py-0.5 rounded text-xs font-medium",
-                            getHireStatusColor(selectedConversation.hireStatus),
-                          )}
-                        >
-                          {selectedConversation.hireStatus}
-                        </span>
+                        <BadgeCheck size={14} className="text-teal" />
                       </div>
                       <p className="text-xs text-slate-500">
-                        {selectedConversation.isOnline ? "Online" : "Offline"}
+                        {onlineUsers.has(selectedConvData?.client.userId || "")
+                          ? "Online"
+                          : "Offline"}
                         {" • "}
-                        {selectedConversation.project.title}
+                        {selectedConversation.project?.title || "Project"}
                       </p>
                     </div>
                   </div>
@@ -731,22 +612,24 @@ const FreelancerMessages = () => {
                       key={msg.id}
                       className={cn(
                         "flex",
-                        msg.senderId === "me" ? "justify-end" : "justify-start",
+                        msg.senderId === user?._id
+                          ? "justify-end"
+                          : "justify-start",
                       )}
                     >
                       <div
                         className={cn(
                           "max-w-[70%] rounded-2xl px-4 py-3",
-                          msg.senderId === "me"
+                          msg.senderId === user?._id
                             ? "bg-teal text-white rounded-br-sm"
                             : "bg-white text-navy shadow-sm rounded-bl-sm",
                         )}
                       >
-                        <p className="text-sm">{msg.text}</p>
+                        <p className="text-sm">{msg.content}</p>
                         <div
                           className={cn(
                             "flex items-center gap-1 mt-1",
-                            msg.senderId === "me"
+                            msg.senderId === user?._id
                               ? "justify-end"
                               : "justify-start",
                           )}
@@ -754,21 +637,22 @@ const FreelancerMessages = () => {
                           <span
                             className={cn(
                               "text-xs",
-                              msg.senderId === "me"
+                              msg.senderId === user?._id
                                 ? "text-white/70"
                                 : "text-slate-400",
                             )}
                           >
-                            {msg.timestamp}
+                            {new Date(msg.createdAt).toLocaleTimeString(
+                              "en-US",
+                              { hour: "2-digit", minute: "2-digit" },
+                            )}
                           </span>
-                          {msg.senderId === "me" && (
+                          {msg.senderId === user?._id && (
                             <span className="text-white/70">
-                              {msg.status === "read" ? (
+                              {msg.read ? (
                                 <CheckCheck size={14} />
-                              ) : msg.status === "delivered" ? (
-                                <Check size={14} />
                               ) : (
-                                <Clock size={12} />
+                                <Check size={14} />
                               )}
                             </span>
                           )}
@@ -794,10 +678,13 @@ const FreelancerMessages = () => {
                       <textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
                         placeholder="Type a message..."
-                        rows={1}
-                        className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none resize-none text-navy"
                       />
                       {/* Emoji Button */}
                       <div className="absolute right-3 bottom-3">
@@ -862,19 +749,19 @@ const FreelancerMessages = () => {
               {/* Client Header */}
               <div className="p-6 border-b border-slate-100 text-center">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-2xl mb-3">
-                  {selectedConversation.client.name.charAt(0)}
+                  {(selectedConvData?.client.name || "U").charAt(0)}
                 </div>
                 <h3 className="font-bold text-navy text-lg flex items-center justify-center gap-1">
-                  {selectedConversation.client.name}
-                  {selectedConversation.client.verified && (
-                    <BadgeCheck size={16} className="text-teal" />
-                  )}
+                  {selectedConvData?.client.name ||
+                    selectedConversation.participants?.[0]?.fullName ||
+                    "Unknown"}
+                  <BadgeCheck size={16} className="text-teal" />
                 </h3>
                 <div className="flex items-center justify-center gap-1 mt-1">
                   <Star size={14} className="text-gold fill-gold" />
                   <span className="text-sm text-slate-600">
-                    {selectedConversation.client.rating} (
-                    {selectedConversation.client.reviews} reviews)
+                    {selectedConvData?.client.rating || 0} (
+                    {selectedConvData?.client.reviews || 0} reviews)
                   </span>
                 </div>
               </div>
@@ -890,7 +777,7 @@ const FreelancerMessages = () => {
                     <div>
                       <p className="text-sm text-slate-500">Company</p>
                       <p className="text-sm font-medium text-navy">
-                        {selectedConversation.client.company}
+                        {selectedConvData?.client.company || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -899,7 +786,7 @@ const FreelancerMessages = () => {
                     <div>
                       <p className="text-sm text-slate-500">Location</p>
                       <p className="text-sm font-medium text-navy">
-                        {selectedConversation.client.location}
+                        {selectedConvData?.client.location || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -913,35 +800,13 @@ const FreelancerMessages = () => {
                 </h4>
                 <div className="bg-slate-50 rounded-xl p-4">
                   <h5 className="font-medium text-navy mb-2">
-                    {selectedConversation.project.title}
+                    {selectedConversation.project?.title || "Project"}
                   </h5>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Budget</span>
-                      <span className="font-medium text-navy">
-                        {selectedConversation.project.budget}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-slate-500">Status</span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded text-xs font-medium",
-                          getStatusColor(selectedConversation.project.status),
-                        )}
-                      >
-                        {selectedConversation.project.status}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Hire Status</span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded text-xs font-medium",
-                          getHireStatusColor(selectedConversation.hireStatus),
-                        )}
-                      >
-                        {selectedConversation.hireStatus}
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal/10 text-teal">
+                        Active
                       </span>
                     </div>
                   </div>
@@ -961,12 +826,10 @@ const FreelancerMessages = () => {
                     <ExternalLink size={16} className="mr-2" />
                     View Project
                   </Button>
-                  {selectedConversation.hireStatus === "Interviewing" && (
-                    <Button className="w-full justify-start bg-teal hover:bg-teal-light text-white">
-                      <FileSignature size={16} className="mr-2" />
-                      Send Proposal
-                    </Button>
-                  )}
+                  <Button className="w-full justify-start bg-teal hover:bg-teal-light text-white">
+                    <FileSignature size={16} className="mr-2" />
+                    Send Proposal
+                  </Button>
                 </div>
               </div>
             </div>

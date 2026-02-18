@@ -13,7 +13,7 @@ export interface Application {
   project?: {
     id: string;
     title: string;
-    budget: { min: number; max: number };
+    budget: { type: string; minAmount: number; maxAmount: number; currency: string };
     status: string;
     deadline?: string;
   };
