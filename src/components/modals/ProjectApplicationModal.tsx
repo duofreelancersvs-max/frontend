@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { applicationService } from "@/services";
 
 interface ProjectData {
-  id: number;
+  id: string;
   title: string;
   client: {
     name: string;
@@ -25,8 +26,9 @@ interface ProjectData {
   };
   budget: {
     type: string;
-    min: number;
-    max: number;
+    minAmount: number;
+    maxAmount: number;
+    currency?: string;
   };
   deadline?: string;
   questions?: string[];
@@ -42,11 +44,11 @@ interface ProjectApplicationModalProps {
 }
 
 const durationOptions = [
-  { value: "less-than-1-week", label: "Less than 1 week" },
-  { value: "1-2-weeks", label: "1-2 weeks" },
-  { value: "2-4-weeks", label: "2-4 weeks" },
-  { value: "1-2-months", label: "1-2 months" },
-  { value: "2-plus-months", label: "2+ months" },
+  { value: "7", label: "Less than 1 week" },
+  { value: "14", label: "1-2 weeks" },
+  { value: "28", label: "2-4 weeks" },
+  { value: "60", label: "1-2 months" },
+  { value: "90", label: "2+ months" },
 ];
 
 const ProjectApplicationModal = ({
@@ -67,6 +69,7 @@ const ProjectApplicationModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const maxCoverLetterLength = 1000;
   const maxFiles = 5;
@@ -123,12 +126,30 @@ const ProjectApplicationModal = ({
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    try {
+      await applicationService.apply({
+        projectId: String(project.id),
+        coverLetter: coverLetter.trim(),
+        proposedRate: parseFloat(proposedRate),
+        estimatedDuration: parseInt(estimatedDuration, 10),
+      });
+      setIsSuccess(true);
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          data?: { message?: string; error?: { message?: string } };
+        };
+      };
+      const msg =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.message ||
+        "Failed to submit application. Please try again.";
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -139,6 +160,7 @@ const ProjectApplicationModal = ({
     setAttachments([]);
     setQuestionAnswers({});
     setErrors({});
+    setSubmitError(null);
     setIsSuccess(false);
     onClose();
   };
@@ -233,8 +255,8 @@ const ProjectApplicationModal = ({
                     <div className="flex items-center gap-1">
                       <DollarSign size={14} className="text-success-green" />
                       <span className="font-medium text-navy text-sm">
-                        ₹{((project.budget as any).minAmount || 0).toLocaleString()} - ₹
-                        {((project.budget as any).maxAmount || 0).toLocaleString()}
+                        ₹{(project.budget.minAmount || 0).toLocaleString()} - ₹
+                        {(project.budget.maxAmount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -476,6 +498,17 @@ const ProjectApplicationModal = ({
 
             {/* FOOTER */}
             <div className="p-5 lg:p-6 border-t border-slate-100 bg-slate-50">
+              {/* Submit Error */}
+              {submitError && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded-lg mb-4">
+                  <AlertCircle
+                    size={16}
+                    className="text-red-500 shrink-0 mt-0.5"
+                  />
+                  <p className="text-sm text-red-600">{submitError}</p>
+                </div>
+              )}
+
               {/* Applications Remaining (for Free plan) */}
               {subscriptionPlan === "Free" && (
                 <p className="text-xs text-slate-500 text-center mb-4 flex items-center justify-center gap-1">

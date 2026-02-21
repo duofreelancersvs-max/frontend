@@ -35,23 +35,52 @@ export interface CreateConversationRequest {
   initialMessage?: string;
 }
 
+// Helper to normalize _id → id on conversation objects
+const normalizeConversation = (conv: any): Conversation => ({
+  ...conv,
+  id: conv.id || conv._id,
+});
+
+const normalizeMessage = (msg: any): Message => ({
+  ...msg,
+  id: msg.id || msg._id,
+});
+
 export const conversationService = {
-  getAll: () => api.get<{ conversations: Conversation[] }>("/conversations"),
-  
-  create: (data: CreateConversationRequest) =>
-    api.post<Conversation>("/conversations", data),
-  
-  getById: (id: string) => api.get<Conversation>(`/conversations/${id}`),
-  
-  getMessages: (conversationId: string) =>
-    api.get<{ messages: Message[] }>(`/conversations/${conversationId}/messages`),
-  
+  getAll: async () => {
+    const data = await api.get<{ conversations: any[] }>("/conversations");
+    return {
+      ...data,
+      conversations: (data.conversations || []).map(normalizeConversation),
+    };
+  },
+
+  create: async (data: CreateConversationRequest) => {
+    const conv = await api.post<any>("/conversations", data);
+    return normalizeConversation(conv);
+  },
+
+  getById: async (id: string) => {
+    const conv = await api.get<any>(`/conversations/${id}`);
+    return normalizeConversation(conv);
+  },
+
+  getMessages: async (conversationId: string) => {
+    const data = await api.get<{ messages: any[] }>(
+      `/conversations/${conversationId}/messages`,
+    );
+    return {
+      ...data,
+      messages: (data.messages || []).map(normalizeMessage),
+    };
+  },
+
   sendMessage: (conversationId: string, content: string) =>
     api.post<Message>(`/conversations/${conversationId}/messages`, { content }),
-  
+
   markAsRead: (conversationId: string) =>
     api.post<Conversation>(`/conversations/${conversationId}/read`, {}),
-  
+
   acceptTerms: (conversationId: string) =>
     api.post<Conversation>(`/conversations/${conversationId}/accept-terms`, {}),
 };

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
+import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 import type { LoginCredentials, RegisterData, User } from "@/types/auth.types";
 import { toast } from "react-toastify";
 
@@ -77,7 +78,9 @@ export function useAuth(): UseAuthReturn {
             email: credentials.email,
             password: credentials.password,
           },
-          { skipAuth: true } as any,
+          {
+            skipAuth: true,
+          } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
         setAuth(data.data.user, {
@@ -95,10 +98,14 @@ export function useAuth(): UseAuthReturn {
         } else if (role === "admin") {
           navigate("/admin/dashboard");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as {
+          response?: { data?: { error?: { message?: string } } };
+          message?: string;
+        };
         const message =
-          err.response?.data?.error?.message ||
-          err.message ||
+          error.response?.data?.error?.message ||
+          error.message ||
           "Invalid email or password";
         setError(message);
         toast.error(message);
@@ -139,7 +146,9 @@ export function useAuth(): UseAuthReturn {
             city: data.city,
             state: data.state,
           },
-          { skipAuth: true } as any,
+          {
+            skipAuth: true,
+          } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
         // Sign in with Supabase to get the session
@@ -170,12 +179,18 @@ export function useAuth(): UseAuthReturn {
         } else {
           navigate("/freelancer/dashboard");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as {
+          response?: {
+            data?: { error?: { message?: string }; message?: string };
+          };
+          message?: string;
+        };
         let message = "Registration failed";
-        if (err.response?.data?.error?.message) {
-          message = err.response.data.error.message;
-        } else if (err.message) {
-          message = err.message;
+        if (error.response?.data?.error?.message) {
+          message = error.response.data.error.message;
+        } else if (error.message) {
+          message = error.message;
         }
         setError(message);
         toast.error(message);
@@ -229,11 +244,17 @@ export function useAuth(): UseAuthReturn {
         }
 
         // Note: The actual auth handling happens in OAuthCallback page after redirect
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as {
+          response?: {
+            data?: { error?: { message?: string }; message?: string };
+          };
+          message?: string;
+        };
         const message =
-          err.response?.data?.error?.message ||
-          err.response?.data?.message ||
-          err.message ||
+          error.response?.data?.error?.message ||
+          error.response?.data?.message ||
+          error.message ||
           "OAuth sign in failed";
 
         setError(message);
@@ -265,10 +286,11 @@ export function useAuth(): UseAuthReturn {
         }
 
         toast.success("Password reset email sent!");
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string };
         let message = "Password reset failed";
-        if (err.message) {
-          message = err.message;
+        if (error.message) {
+          message = error.message;
         }
         setError(message);
         throw err;
@@ -295,10 +317,11 @@ export function useAuth(): UseAuthReturn {
         }
 
         toast.success("Password updated successfully!");
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string };
         let message = "Password update failed";
-        if (err.message) {
-          message = err.message;
+        if (error.message) {
+          message = error.message;
         }
         setError(message);
         throw err;

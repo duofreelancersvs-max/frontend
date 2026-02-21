@@ -42,6 +42,7 @@ import {
 } from "@/components/auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import ClientLayout from "@/layouts/ClientLayout";
+import FreelancerLayout from "@/layouts/FreelancerLayout";
 
 function App() {
   return (
@@ -76,6 +77,7 @@ function App() {
           <Route path="post-project" element={<PostProject />} />
           <Route path="projects" element={<ClientProjects />} />
           <Route path="project/:id" element={<ProjectDetails />} />
+          <Route path="project/:id/applications" element={<ProjectDetails />} />
           <Route path="project/:id/edit" element={<PostProject />} />
           <Route path="freelancers" element={<ClientFreelancers />} />
           <Route path="messages" element={<ClientMessages />} />
@@ -86,85 +88,38 @@ function App() {
 
         {/* Freelancer Dashboard Pages */}
         <Route
-          path="/freelancer/dashboard"
           element={
             <FreelancerRoute>
-              <FreelancerDashboard />
+              <FreelancerLayout />
             </FreelancerRoute>
           }
-        />
-        <Route
-          path="/freelancer/profile"
-          element={
-            <FreelancerRoute>
-              <FreelancerProfileEdit />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/projects"
-          element={
-            <FreelancerRoute>
-              <BrowseProjects />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/messages"
-          element={
-            <FreelancerRoute>
-              <FreelancerMessages />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/subscription"
-          element={
-            <FreelancerRoute>
-              <FreelancerSubscription />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/earnings"
-          element={
-            <FreelancerRoute>
-              <FreelancerEarnings />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/portfolio"
-          element={
-            <FreelancerRoute>
-              <FreelancerPortfolio />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/applications"
-          element={
-            <FreelancerRoute>
-              <FreelancerApplications />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/reviews"
-          element={
-            <FreelancerRoute>
-              <FreelancerReviews />
-            </FreelancerRoute>
-          }
-        />
-        <Route
-          path="/freelancer/settings"
-          element={
-            <FreelancerRoute>
-              <FreelancerSettings />
-            </FreelancerRoute>
-          }
-        />
+        >
+          <Route
+            path="/freelancer/dashboard"
+            element={<FreelancerDashboard />}
+          />
+          <Route
+            path="/freelancer/profile"
+            element={<FreelancerProfileEdit />}
+          />
+          <Route path="/projects" element={<BrowseProjects />} />
+          <Route path="/freelancer/messages" element={<FreelancerMessages />} />
+          <Route
+            path="/freelancer/subscription"
+            element={<FreelancerSubscription />}
+          />
+          <Route path="/freelancer/earnings" element={<FreelancerEarnings />} />
+          <Route
+            path="/freelancer/portfolio"
+            element={<FreelancerPortfolio />}
+          />
+          <Route
+            path="/freelancer/applications"
+            element={<FreelancerApplications />}
+          />
+          <Route path="/freelancer/reviews" element={<FreelancerReviews />} />
+          <Route path="/freelancer/settings" element={<FreelancerSettings />} />
+        </Route>
 
         {/* Admin Dashboard Pages */}
         <Route

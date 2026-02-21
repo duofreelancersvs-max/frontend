@@ -74,12 +74,20 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     // Set up auth state listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(
+        "[AuthInitializer] Auth state change:",
+        event,
+        session?.user?.email,
+      );
       const { isLoading: storeIsLoading, isAuthenticated: storeAuthenticated } =
         useAuthStore.getState();
 
       // Skip on OAuth callback route or if we're already mid-login in useAuth
       if (isOAuthCallbackRef.current || (storeIsLoading && !isInitialized)) {
+        console.log(
+          "[AuthInitializer] Skipping sync (OAuth callback or mid-login)",
+        );
         setIsInitialized(true);
         setLoading(false);
         return;
@@ -89,26 +97,33 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         // If we're already authenticated in the store, we don't need to sync again on every state change
         // unless it's the very first initialization.
         if (storeAuthenticated && isInitialized) {
+          console.log(
+            "[AuthInitializer] Already authenticated and initialized",
+          );
           setLoading(false);
           return;
         }
 
         try {
+          console.log("[AuthInitializer] Syncing session with backend...");
           const synced = await syncSessionWithBackend(
             session.access_token,
             session.refresh_token,
           );
+          console.log("[AuthInitializer] Session synced:", synced);
 
           if (!synced) {
             // Session invalid on backend, clear it
+            console.warn("[AuthInitializer] Session sync failed, signing out");
             await supabase.auth.signOut();
             logout();
           }
         } catch (error) {
-          console.error("Session sync failed:", error);
+          console.error("[AuthInitializer] Session sync error:", error);
           logout();
         }
       } else {
+        console.log("[AuthInitializer] No session");
         // No Supabase user — clear auth state if we thought we were logged in
         if (storeAuthenticated) {
           logout();
@@ -117,6 +132,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
       setLoading(false);
       setIsInitialized(true);
+      console.log("[AuthInitializer] Initialization complete");
     });
 
     // Check for existing session on mount

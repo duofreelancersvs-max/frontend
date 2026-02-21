@@ -2,24 +2,46 @@ import { api } from "@/lib/api";
 
 export interface Application {
   id: string;
+  _id?: string;
   projectId: string;
   freelancerId: string;
   coverLetter: string;
   proposedRate: number;
-  estimatedDuration: string;
-  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  estimatedDuration: number; // in days
+  status:
+    | "pending"
+    | "accepted"
+    | "rejected"
+    | "withdrawn"
+    | "shortlisted"
+    | "hired";
   createdAt: string;
   updatedAt: string;
   project?: {
-    id: string;
+    _id?: string;
+    id?: string;
     title: string;
-    budget: { type: string; minAmount: number; maxAmount: number; currency: string };
+    budget: {
+      type: string;
+      minAmount: number;
+      maxAmount: number;
+      currency?: string;
+    };
     status: string;
     deadline?: string;
+    clientId?: {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      avatar?: string;
+    };
   };
   freelancer?: {
-    id: string;
-    fullName: string;
+    _id?: string;
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
     avatar?: string;
     title?: string;
     rating?: number;
@@ -37,26 +59,31 @@ export interface CreateApplicationRequest {
   projectId: string;
   coverLetter: string;
   proposedRate: number;
-  estimatedDuration: string;
+  estimatedDuration: number;
 }
 
 export const applicationService = {
   apply: (data: CreateApplicationRequest) =>
     api.post<Application>("/applications", data),
-  
+
   getMyApplications: () =>
     api.get<{ applications: Application[] }>("/applications/me"),
-  
-  withdraw: (id: string) => api.post<Application>(`/applications/${id}/withdraw`, {}),
-  
+
+  withdraw: (id: string) =>
+    api.post<Application>(`/applications/${id}/withdraw`, {}),
+
   getByProject: (projectId: string) =>
-    api.get<{ applications: Application[] }>(`/applications/project/${projectId}`),
-  
+    api.get<{ applications: Application[] }>(
+      `/applications/project/${projectId}`,
+    ),
+
   getProjectStats: (projectId: string) =>
     api.get<ApplicationStats>(`/applications/project/${projectId}/stats`),
-  
-  updateStatus: (id: string, status: "accepted" | "rejected") =>
-    api.patch<Application>(`/applications/${id}/status`, { status }),
+
+  updateStatus: (
+    id: string,
+    status: "accepted" | "rejected" | "shortlisted" | "hired",
+  ) => api.patch<Application>(`/applications/${id}/status`, { status }),
 };
 
 export default applicationService;

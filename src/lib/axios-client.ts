@@ -6,10 +6,17 @@ import { supabase } from "@/lib/supabase";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
 // Extend AxiosRequestConfig to include custom properties
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
   skipAuth?: boolean;
   _manualAuth?: boolean; // Set when caller provides explicit Authorization header
+}
+
+// Typed API error response shape from backend
+interface ApiErrorResponse {
+  error?: {
+    message?: string;
+  };
 }
 
 // Create axios instance
@@ -18,6 +25,7 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Request interceptor: inject auth token
@@ -64,7 +72,8 @@ axiosClient.interceptors.response.use(
     ) {
       // Don't retry if the backend specifically returned a logical error message
       // like "Account already exists" or role mismatch
-      const errorMessage = (error.response?.data as any)?.error?.message || "";
+      const errorData = error.response?.data as ApiErrorResponse | undefined;
+      const errorMessage = errorData?.error?.message ?? "";
       if (
         errorMessage.includes("Account already exists") ||
         errorMessage.includes("role")
@@ -76,7 +85,10 @@ axiosClient.interceptors.response.use(
 
       try {
         // Use Supabase to refresh the session
-        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+        const {
+          data: { session },
+          error: refreshError,
+        } = await supabase.auth.refreshSession();
 
         if (refreshError || !session) {
           throw new Error("Failed to refresh session");

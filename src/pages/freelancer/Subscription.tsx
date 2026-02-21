@@ -1,78 +1,25 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
-  Home,
-  User,
-  FolderOpen,
-  Search,
-  FileText,
-  Mail,
-  CreditCard,
-  DollarSign,
   Star,
-  Settings,
-  LogOut,
+  User,
   X,
   Menu,
   Check,
   Crown,
   Zap,
   Shield,
-  ChevronDown,
-  ChevronUp,
   Sparkles,
   Clock,
+  ChevronDown,
+  ChevronUp,
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { subscriptionService } from "@/services";
 import type { Subscription } from "@/services";
-
-// Sidebar Navigation Items for Freelancer
-const sidebarNavItems = [
-  {
-    icon: Home,
-    label: "Dashboard",
-    href: "/freelancer/dashboard",
-    active: false,
-  },
-  { icon: User, label: "My Profile", href: "/freelancer/profile", badge: null },
-  {
-    icon: FolderOpen,
-    label: "Portfolio",
-    href: "/freelancer/portfolio",
-    badge: null,
-  },
-  { icon: Search, label: "Browse Projects", href: "/projects", badge: null },
-  {
-    icon: FileText,
-    label: "My Applications",
-    href: "/freelancer/applications",
-    badge: "3",
-  },
-  { icon: Mail, label: "Messages", href: "/freelancer/messages", badge: "5" },
-  {
-    icon: CreditCard,
-    label: "Subscription",
-    href: "/freelancer/subscription",
-    active: true,
-    badge: null,
-  },
-  {
-    icon: DollarSign,
-    label: "Earnings",
-    href: "/freelancer/earnings",
-    badge: null,
-  },
-  { icon: Star, label: "Reviews", href: "/freelancer/reviews", badge: null },
-  {
-    icon: Settings,
-    label: "Settings",
-    href: "/freelancer/settings",
-    badge: null,
-  },
-];
+import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 
 // Plan features
 const planFeatures = {
@@ -236,32 +183,35 @@ const testimonials = [
 ];
 
 const FreelancerSubscription = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [currentSubscription, setCurrentSubscription] =
+    useState<Subscription | null>(null);
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        setLoading(true);
         const data = await subscriptionService.getMySubscription();
         setCurrentSubscription(data);
       } catch (error) {
         console.error("Error fetching subscription:", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchSubscription();
   }, []);
 
-  const currentPlan = (currentSubscription?.plan || "free") as "free" | "pro" | "premium";
-  const renewalDate = currentSubscription?.endDate 
-    ? new Date(currentSubscription.endDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  const currentPlan = (currentSubscription?.plan || "free") as
+    | "free"
+    | "pro"
+    | "premium";
+  const renewalDate = currentSubscription?.endDate
+    ? new Date(currentSubscription.endDate).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
     : "N/A";
 
   const prices = {
@@ -289,90 +239,8 @@ const FreelancerSubscription = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto text-white/60 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  item.active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* User Profile Card */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                AK
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  Arun Kumar
-                </p>
-                <p className="text-xs text-white/50">Freelancer</p>
-              </div>
-              <button className="text-white/50 hover:text-white transition-colors">
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* SIDEBAR OVERLAY (Mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* MAIN CONTENT */}
-      <div className="lg:ml-64">
+    <div className="w-full bg-slate-50">
+      <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">

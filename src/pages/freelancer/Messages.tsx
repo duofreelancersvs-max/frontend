@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import {
   Home,
   User,
@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
 import type { Conversation, Message } from "@/services";
+import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
@@ -120,7 +121,7 @@ By accepting these terms, you agree to abide by all platform rules and guideline
 
 const FreelancerMessages = () => {
   const { user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -323,105 +324,8 @@ const FreelancerMessages = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto text-white/60 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  item.active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Subscription Badge */}
-          <div className="px-4 pb-2">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg",
-                "bg-gold/20",
-              )}
-            >
-              <Award size={16} className="text-gold" />
-              <span className={cn("text-xs font-semibold", "text-gold")}>
-                Pro Plan
-              </span>
-            </div>
-          </div>
-
-          {/* User Profile Card */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                AK
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  Arun Kumar
-                </p>
-                <p className="text-xs text-white/50">Freelancer</p>
-              </div>
-              <button className="text-white/50 hover:text-white transition-colors">
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* SIDEBAR OVERLAY (Mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* MAIN CONTENT - Three Column Layout */}
-      <div className="lg:ml-64 h-screen flex flex-col">
+    <div className="w-full h-screen flex flex-col bg-slate-50 overflow-hidden relative">
+      <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
         {/* Header Bar */}
         <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">

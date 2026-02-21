@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import {
-  Home,
   User,
   Briefcase,
   Search,
   FileText,
-  Mail,
-  CreditCard,
   Star,
   Settings,
   Bell,
@@ -18,12 +15,10 @@ import {
   TrendingUp,
   CheckCircle,
   AlertCircle,
-  X,
   Menu,
   Eye,
   DollarSign,
   MessageSquare,
-  FolderOpen,
   Award,
   Zap,
   Plus,
@@ -32,52 +27,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { freelancerService, applicationService, projectService, subscriptionService, notificationService, conversationService } from "@/services";
-import type { FreelancerProfile, Application, Project, Subscription, Notification, Conversation } from "@/services";
-
-// Sidebar Navigation Items for Freelancer
-const sidebarNavItems = [
-  {
-    icon: Home,
-    label: "Dashboard",
-    href: "/freelancer/dashboard",
-    active: true,
-  },
-  { icon: User, label: "My Profile", href: "/freelancer/profile", badge: null },
-  {
-    icon: FolderOpen,
-    label: "Portfolio",
-    href: "/freelancer/portfolio",
-    badge: null,
-  },
-  { icon: Search, label: "Browse Projects", href: "/projects", badge: null },
-  {
-    icon: FileText,
-    label: "My Applications",
-    href: "/freelancer/applications",
-    badge: null,
-  },
-  { icon: Mail, label: "Messages", href: "/freelancer/messages", badge: null },
-  {
-    icon: CreditCard,
-    label: "Subscription",
-    href: "/freelancer/subscription",
-    badge: null,
-  },
-  {
-    icon: DollarSign,
-    label: "Earnings",
-    href: "/freelancer/earnings",
-    badge: null,
-  },
-  { icon: Star, label: "Reviews", href: "/freelancer/reviews", badge: null },
-  {
-    icon: Settings,
-    label: "Settings",
-    href: "/freelancer/settings",
-    badge: null,
-  },
-];
+import {
+  freelancerService,
+  applicationService,
+  projectService,
+  subscriptionService,
+  notificationService,
+  conversationService,
+} from "@/services";
+import type {
+  FreelancerProfile,
+  Application,
+  Project,
+  Subscription,
+  Notification,
+  Conversation,
+} from "@/services";
+import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 
 const getStatusBadgeStyle = (status: string) => {
   switch (status) {
@@ -98,7 +64,7 @@ const getStatusBadgeStyle = (status: string) => {
 };
 
 const FreelancerDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
@@ -109,32 +75,43 @@ const FreelancerDashboard = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const { logout, user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
-  const notificationCount = notifications.filter(n => !n.read).length;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
-      </div>
-    );
-  }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profileData, appsData, projectsData, subData, notifData, convData] = await Promise.allSettled([
+        const [
+          profileData,
+          appsData,
+          projectsData,
+          subData,
+          notifData,
+          convData,
+        ] = await Promise.allSettled([
           freelancerService.getMyProfile().catch(() => null),
-          applicationService.getMyApplications().then(r => r.applications).catch(() => []),
-          projectService.search({ status: "open", limit: 3 }).then(r => r.projects).catch(() => []),
+          applicationService
+            .getMyApplications()
+            .then((r) => r.applications)
+            .catch(() => []),
+          projectService
+            .search({ status: "open", limit: 3 })
+            .then((r) => r.projects)
+            .catch(() => []),
           subscriptionService.getMySubscription().catch(() => null),
-          notificationService.getAll({ limit: 5 }).then(r => r.notifications).catch(() => []),
-          conversationService.getAll().then(r => r.conversations).catch(() => []),
+          notificationService
+            .getAll({ limit: 5 })
+            .then((r) => r.notifications)
+            .catch(() => []),
+          conversationService
+            .getAll()
+            .then((r) => r.conversations)
+            .catch(() => []),
         ]);
-        
+
         if (profileData.status === "fulfilled") setProfile(profileData.value);
         if (appsData.status === "fulfilled") setApplications(appsData.value);
-        if (projectsData.status === "fulfilled") setRecommendedProjects(projectsData.value);
+        if (projectsData.status === "fulfilled")
+          setRecommendedProjects(projectsData.value);
         if (subData.status === "fulfilled") setSubscription(subData.value);
         if (notifData.status === "fulfilled") setNotifications(notifData.value);
         if (convData.status === "fulfilled") setConversations(convData.value);
@@ -155,21 +132,30 @@ const FreelancerDashboard = () => {
     }
   };
 
-  const profileCompletion = profile ? Math.round(
-    (!!profile.title ? 10 : 0) +
-    (!!profile.bio ? 10 : 0) +
-    ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
-    (!!profile.hourlyRate ? 15 : 0) +
-    ((profile.skills?.length || 0) > 0 ? 15 : 0) +
-    ((profile.experience?.length || 0) > 0 ? 15 : 0) +
-    ((profile.education?.length || 0) > 0 ? 10 : 0) +
-    (profile.availability ? 10 : 0)
-  ) : 0;
+  const profileCompletion = profile
+    ? Math.round(
+        (!!profile.title ? 10 : 0) +
+          (!!profile.bio ? 10 : 0) +
+          ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
+          (!!profile.hourlyRate ? 15 : 0) +
+          ((profile.skills?.length || 0) > 0 ? 15 : 0) +
+          ((profile.experience?.length || 0) > 0 ? 15 : 0) +
+          ((profile.education?.length || 0) > 0 ? 10 : 0) +
+          (profile.availability ? 10 : 0),
+      )
+    : 0;
 
   const subscriptionPlan = subscription?.plan || "free";
-  const unreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
-  const pendingApplications = applications.filter(a => a.status === "pending").length;
-  const totalEarnings = profile?.completedProjects ? profile.completedProjects * (profile.hourlyRate || 0) * 10 : 0;
+  const unreadMessages = conversations.reduce(
+    (acc, c) => acc + c.unreadCount,
+    0,
+  );
+  const pendingApplications = applications.filter(
+    (a) => a.status === "pending",
+  ).length;
+  const totalEarnings = profile?.completedProjects
+    ? profile.completedProjects * (profile.hourlyRate || 0) * 10
+    : 0;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -189,7 +175,7 @@ const FreelancerDashboard = () => {
     },
     {
       label: "Active Applications",
-      value: String(applications.filter(a => a.status === "pending").length),
+      value: String(applications.filter((a) => a.status === "pending").length),
       icon: FileText,
       color: "bg-teal",
       change: `${pendingApplications} pending`,
@@ -216,38 +202,66 @@ const FreelancerDashboard = () => {
   const profileCompletionItems = [
     { label: "Add profile photo", completed: false },
     { label: "Write bio description", completed: !!profile?.bio },
-    { label: "Add portfolio items", completed: (profile?.portfolio?.length || 0) > 0 },
+    {
+      label: "Add portfolio items",
+      completed: (profile?.portfolio?.length || 0) > 0,
+    },
     { label: "Add skills", completed: (profile?.skills?.length || 0) > 0 },
     { label: "Set hourly rate", completed: !!profile?.hourlyRate },
-    { label: "Add work experience", completed: (profile?.experience?.length || 0) > 0 },
-    { label: "Add education", completed: (profile?.education?.length || 0) > 0 },
+    {
+      label: "Add work experience",
+      completed: (profile?.experience?.length || 0) > 0,
+    },
+    {
+      label: "Add education",
+      completed: (profile?.education?.length || 0) > 0,
+    },
   ];
 
-  const applicationStatuses = applications.slice(0, 5).map(app => ({
+  const applicationStatuses = applications.slice(0, 5).map((app) => ({
     id: app.id,
     project: app.project?.title || "Untitled Project",
     client: app.freelancer?.fullName || "Unknown Client",
-    appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
     status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
-    budget: app.project ? `₹${(app.project.budget as any).minAmount?.toLocaleString() || 0} - ₹${(app.project.budget as any).maxAmount?.toLocaleString() || 0}` : "N/A",
+    budget: app.project
+      ? `₹${app.project.budget.minAmount?.toLocaleString() || 0} - ₹${app.project.budget.maxAmount?.toLocaleString() || 0}`
+      : "N/A",
   }));
 
-  const recommendedProjectsData = recommendedProjects.map(project => ({
+  const recommendedProjectsData = recommendedProjects.map((project) => ({
     id: project.id,
     title: project.title,
     client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
-    budget: `₹${(project.budget as any).minAmount?.toLocaleString() || 0} - ₹${(project.budget as any).maxAmount?.toLocaleString() || 0}`,
+    budget: `₹${project.budget.minAmount?.toLocaleString() || 0} - ₹${project.budget.maxAmount?.toLocaleString() || 0}`,
     skillsMatch: 85,
-    postedTime: new Date(project.createdAt).toLocaleDateString("en-US", { day: "numeric", hour: "2-digit", minute: "2-digit" }),
+    postedTime: new Date(project.createdAt).toLocaleDateString("en-US", {
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     skills: project.skills || [],
   }));
 
-  const recentMessages = conversations.slice(0, 3).map(conv => ({
+  const recentMessages = conversations.slice(0, 3).map((conv) => ({
     id: conv.id,
     name: conv.participants?.[0]?.fullName || "Unknown",
-    avatar: conv.participants?.[0]?.fullName?.split(" ").map(n => n[0]).join("") || "U",
+    avatar:
+      conv.participants?.[0]?.fullName
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("") || "U",
     message: conv.lastMessage?.content || "No messages yet",
-    time: conv.lastMessage ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "",
+    time: conv.lastMessage
+      ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "",
     unread: conv.unreadCount > 0,
   }));
 
@@ -262,160 +276,17 @@ const FreelancerDashboard = () => {
 
   const maxEarning = Math.max(...earningsData.map((d) => d.amount));
 
+  if (loading) {
+    return (
+      <div className="w-full bg-slate-50 flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden ml-auto text-white/60 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  item.active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Profile Completeness Indicator */}
-          <div className="px-4 py-4 border-t border-white/10">
-            <div className="bg-white/5 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-white/70">
-                  Profile Complete
-                </span>
-                <span className="text-sm font-bold text-teal-light">
-                  {profileCompletion}%
-                </span>
-              </div>
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-teal to-teal-light rounded-full transition-all"
-                  style={{ width: `${profileCompletion}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Subscription Badge */}
-          <div className="px-4 pb-2">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg",
-                subscriptionPlan === "free"
-                  ? "bg-slate-500/20"
-                  : subscriptionPlan === "pro"
-                    ? "bg-royal-blue/20"
-                    : "bg-gold/20",
-              )}
-            >
-              <Award
-                size={16}
-                className={cn(
-                  subscriptionPlan === "free"
-                    ? "text-slate-400"
-                    : subscriptionPlan === "pro"
-                      ? "text-royal-blue"
-                      : "text-gold",
-                )}
-              />
-              <span
-                className={cn(
-                  "text-xs font-semibold",
-                  subscriptionPlan === "free"
-                    ? "text-slate-400"
-                    : subscriptionPlan === "pro"
-                      ? "text-royal-blue"
-                      : "text-gold",
-                )}
-              >
-                {subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} Plan
-              </span>
-              {subscriptionPlan === "free" && (
-                <Link
-                  to="/freelancer/subscription"
-                  className="ml-auto text-xs text-teal-light hover:underline"
-                >
-                  Upgrade
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* User Profile Card */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                AK
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  Arun Kumar
-                </p>
-                <p className="text-xs text-white/50">Freelancer</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-white/50 hover:text-white transition-colors"
-                title="Log Out"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* SIDEBAR OVERLAY (Mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* MAIN CONTENT */}
-      <div className="lg:ml-64">
+    <div className="w-full bg-slate-50">
+      <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -926,7 +797,9 @@ const FreelancerDashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-navy">
-                    {subscriptionPlan.charAt(0).toUpperCase() + subscriptionPlan.slice(1)} Plan
+                    {subscriptionPlan.charAt(0).toUpperCase() +
+                      subscriptionPlan.slice(1)}{" "}
+                    Plan
                   </h3>
                   <p className="text-sm text-slate-500">
                     {subscriptionPlan === "free"

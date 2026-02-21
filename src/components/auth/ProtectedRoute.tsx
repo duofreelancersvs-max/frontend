@@ -1,6 +1,6 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@/stores/auth.store';
-import type { UserRole } from '@/types/auth.types';
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/auth.store";
+import type { UserRole } from "@/types/auth.types";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({
   children,
   allowedRoles,
-  redirectTo = '/login',
+  redirectTo = "/login",
 }: ProtectedRouteProps) {
   const location = useLocation();
   const { isAuthenticated, user, isLoading } = useAuthStore();
@@ -30,46 +30,45 @@ export function ProtectedRoute({
 
   // Check role-based access
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    console.warn(
+      `[ProtectedRoute] Access denied. User role: ${user.role}, Allowed: ${allowedRoles}`,
+    );
     // Redirect to appropriate dashboard based on role
-    if (user.role === 'client') {
+    if (user.role === "client") {
       return <Navigate to="/client/dashboard" replace />;
-    } else if (user.role === 'freelancer') {
+    } else if (user.role === "freelancer") {
       return <Navigate to="/freelancer/dashboard" replace />;
-    } else if (user.role === 'admin') {
+    } else if (user.role === "admin") {
       return <Navigate to="/admin/dashboard" replace />;
     }
-    
+
     return <Navigate to="/" replace />;
   }
+
+  console.log(`[ProtectedRoute] Access granted to ${location.pathname}`);
 
   return <>{children}</>;
 }
 
 // Pre-configured route wrappers
 export function ClientRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute allowedRoles={['client']}>
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute allowedRoles={["client"]}>{children}</ProtectedRoute>;
 }
 
 export function FreelancerRoute({ children }: { children: React.ReactNode }) {
   return (
-    <ProtectedRoute allowedRoles={['freelancer']}>
-      {children}
-    </ProtectedRoute>
+    <ProtectedRoute allowedRoles={["freelancer"]}>{children}</ProtectedRoute>
   );
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute allowedRoles={['admin']}>
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute allowedRoles={["admin"]}>{children}</ProtectedRoute>;
 }
 
-export function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
+export function AuthenticatedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return <ProtectedRoute>{children}</ProtectedRoute>;
 }

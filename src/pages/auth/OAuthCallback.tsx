@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
+import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 import type { User } from "@/types/auth.types";
 import { toast } from "react-toastify";
 
@@ -58,7 +59,9 @@ export default function OAuthCallback() {
               expiresIn: number;
             };
           };
-        }>("/auth/oauth/callback", requestBody, { skipAuth: true } as any);
+        }>("/auth/oauth/callback", requestBody, {
+          skipAuth: true,
+        } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
 
         const { user, tokens } = response.data.data;
 
@@ -85,12 +88,18 @@ export default function OAuthCallback() {
         } else {
           navigate("/");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("OAuth Callback Error:", err);
+        const error = err as {
+          response?: {
+            data?: { error?: { message?: string }; message?: string };
+          };
+          message?: string;
+        };
         const message =
-          err.response?.data?.error?.message ||
-          err.response?.data?.message ||
-          err.message ||
+          error.response?.data?.error?.message ||
+          error.response?.data?.message ||
+          error.message ||
           "Authentication failed";
 
         setError(message);
