@@ -65,7 +65,9 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-5">
       <div className="flex items-start justify-between mb-3">
         <div className="w-14 h-14 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-lg">
-          {freelancer.title?.charAt(0) || "F"}
+          {(freelancer.displayName || freelancer.firstName || "F")
+            .charAt(0)
+            .toUpperCase()}
         </div>
         {freelancer.availability === "available" && (
           <span className="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-xs font-medium">
@@ -75,20 +77,26 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
       </div>
 
       <h3 className="font-semibold text-navy mb-1 line-clamp-1">
-        {freelancer.title}
+        {freelancer.displayName ||
+          `${freelancer.firstName || ""} ${freelancer.lastName || ""}`.trim() ||
+          "Freelancer"}
       </h3>
       <p className="text-sm text-slate-500 mb-3 flex items-center gap-1">
         <MapPin size={14} />
-        {freelancer.location}
+        {freelancer.headline || "Remote"}
       </p>
 
       <div className="flex flex-wrap gap-1 mb-4">
-        {(freelancer.skills || []).slice(0, 3).map((skill) => (
+        {(freelancer.skills || []).slice(0, 3).map((skill, index) => (
           <span
-            key={skill}
+            key={
+              typeof skill === "string"
+                ? skill
+                : skill.skillId || skill.name || index
+            }
             className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs"
           >
-            {skill}
+            {typeof skill === "string" ? skill : skill.name}
           </span>
         ))}
       </div>
@@ -96,9 +104,11 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
       <div className="flex items-center justify-between pt-3 border-t border-slate-100">
         <div className="flex items-center gap-1">
           <Star size={14} className="text-yellow-400 fill-yellow-400" />
-          <span className="font-semibold text-navy">{freelancer.rating}</span>
+          <span className="font-semibold text-navy">
+            {freelancer.averageRating || 0}
+          </span>
           <span className="text-slate-400 text-xs">
-            ({freelancer.totalReviews})
+            ({freelancer.reviewCount || 0})
           </span>
         </div>
         <span className="font-bold text-teal">₹{freelancer.hourlyRate}/hr</span>
@@ -112,6 +122,7 @@ const ClientFreelancers = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
+  const [totalFreelancers, setTotalFreelancers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -140,7 +151,8 @@ const ClientFreelancers = () => {
         if (selectedSkills.length) params.skills = selectedSkills.join(",");
 
         const data = await freelancerService.search(params);
-        setFreelancers(data.freelancers || []);
+        setFreelancers(data.profiles || []);
+        setTotalFreelancers(data.pagination?.totalItems || 0);
       } catch (error) {
         console.error("Error fetching freelancers:", error);
       } finally {
@@ -414,7 +426,7 @@ const ClientFreelancers = () => {
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
                   {freelancers.map((freelancer) => (
                     <FreelancerCard
-                      key={freelancer.id}
+                      key={freelancer._id || freelancer.id}
                       freelancer={freelancer}
                     />
                   ))}
@@ -444,18 +456,29 @@ const ClientFreelancers = () => {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {freelancers.map((freelancer) => (
-                          <tr key={freelancer.id} className="hover:bg-slate-50">
+                          <tr
+                            key={freelancer._id || freelancer.id}
+                            className="hover:bg-slate-50"
+                          >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold">
-                                  {freelancer.title?.charAt(0) || "F"}
+                                  {(
+                                    freelancer.displayName ||
+                                    freelancer.firstName ||
+                                    "F"
+                                  )
+                                    .charAt(0)
+                                    .toUpperCase()}
                                 </div>
                                 <div>
                                   <p className="font-medium text-navy">
-                                    {freelancer.title}
+                                    {freelancer.displayName ||
+                                      `${freelancer.firstName || ""} ${freelancer.lastName || ""}`.trim() ||
+                                      "Freelancer"}
                                   </p>
                                   <p className="text-sm text-slate-500">
-                                    {freelancer.location}
+                                    {freelancer.headline || "Remote"}
                                   </p>
                                 </div>
                               </div>
@@ -464,12 +487,18 @@ const ClientFreelancers = () => {
                               <div className="flex flex-wrap gap-1">
                                 {(freelancer.skills || [])
                                   .slice(0, 3)
-                                  .map((skill) => (
+                                  .map((skill, index) => (
                                     <span
-                                      key={skill}
+                                      key={
+                                        typeof skill === "string"
+                                          ? skill
+                                          : skill.skillId || skill.name || index
+                                      }
                                       className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs"
                                     >
-                                      {skill}
+                                      {typeof skill === "string"
+                                        ? skill
+                                        : skill.name}
                                     </span>
                                   ))}
                               </div>
@@ -484,15 +513,15 @@ const ClientFreelancers = () => {
                                   className="text-yellow-400 fill-yellow-400"
                                 />
                                 <span className="font-medium text-navy">
-                                  {freelancer.rating}
+                                  {freelancer.averageRating || 0}
                                 </span>
                                 <span className="text-slate-400 text-sm">
-                                  ({freelancer.totalReviews})
+                                  ({freelancer.reviewCount || 0})
                                 </span>
                               </div>
                             </td>
                             <td className="px-6 py-4 text-slate-600">
-                              {freelancer.completedProjects}
+                              {freelancer.totalProjects || 0}
                             </td>
                           </tr>
                         ))}
@@ -505,9 +534,10 @@ const ClientFreelancers = () => {
               {/* Pagination */}
               <div className="flex items-center justify-between mt-8">
                 <p className="text-sm text-slate-500">
-                  Showing {(currentPage - 1) * 12 + 1} to{" "}
-                  {Math.min(currentPage * 12, freelancers.length)} of{" "}
-                  {freelancers.length} freelancers
+                  Showing{" "}
+                  {totalFreelancers > 0 ? (currentPage - 1) * 12 + 1 : 0} to{" "}
+                  {Math.min(currentPage * 12, totalFreelancers)} of{" "}
+                  {totalFreelancers} freelancers
                 </p>
                 <div className="flex items-center gap-2">
                   <Button
@@ -525,7 +555,10 @@ const ClientFreelancers = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    disabled={freelancers.length < 12}
+                    disabled={
+                      currentPage >= Math.ceil(totalFreelancers / 12) ||
+                      totalFreelancers === 0
+                    }
                   >
                     <ChevronRight size={16} />
                   </Button>

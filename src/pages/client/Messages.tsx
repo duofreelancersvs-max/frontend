@@ -157,33 +157,38 @@ const ClientMessages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const conversationsData = conversations.map((conv) => ({
-    id: conv.id,
-    freelancer: {
-      userId: conv.participants?.[0]?.id || "",
-      name: conv.participants?.[0]?.fullName || "Unknown",
-      avatar: conv.participants?.[0]?.avatar,
-      verified: true,
-      rating: 4.5,
-      reviews: 10,
-      skills: ["Video Editing"],
-      online: false,
-      title: "Freelancer",
-    },
-    project: {
-      id: conv.projectId || "",
-      title: conv.project?.title || "Project",
-    },
-    lastMessage: conv.lastMessage?.content || "No messages",
-    lastMessageTime: conv.lastMessage
-      ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "",
-    unread: conv.unreadCount,
-    termsAccepted: true,
-  }));
+  const conversationsData = conversations.map((conv) => {
+    // Find the freelancer participant (role: 'freelancer')
+    const freelancerParticipant = conv.participants?.find((p) => p.role === 'freelancer') || conv.participants?.[0];
+
+    return {
+      id: conv.id,
+      freelancer: {
+        userId: freelancerParticipant?.id || "",
+        name: freelancerParticipant?.fullName || "Unknown",
+        avatar: freelancerParticipant?.avatar,
+        verified: true,
+        rating: 4.5,
+        reviews: 10,
+        skills: ["Video Editing"],
+        online: false,
+        title: "Freelancer",
+      },
+      project: {
+        id: conv.projectId || "",
+        title: conv.project?.title || "Project",
+      },
+      lastMessage: conv.lastMessage?.content || "No messages",
+      lastMessageTime: conv.lastMessage
+        ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+      unread: conv.unreadCount,
+      termsAccepted: true,
+    };
+  });
 
   const selectedConvo = conversationsData.find(
     (c) => c.id === (selectedConversation ? selectedConversation.id : null),

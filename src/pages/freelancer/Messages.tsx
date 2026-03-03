@@ -240,33 +240,38 @@ const FreelancerMessages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const conversationsDataMapped = conversations.map((conv) => ({
-    id: conv.id,
-    client: {
-      userId: conv.participants?.[0]?.id || "",
-      name: conv.participants?.[0]?.fullName || "Unknown",
-      avatar: conv.participants?.[0]?.avatar,
-      verified: true,
-      rating: 4.5,
-      reviews: 10,
-      company: "Company",
-      location: "Location",
-    },
-    project: {
-      id: conv.projectId || "",
-      title: conv.project?.title || "Project",
-    },
-    lastMessage: conv.lastMessage?.content || "No messages",
-    lastMessageTime: conv.lastMessage
-      ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "",
-    unreadCount: conv.unreadCount,
-    isOnline: onlineUsers.has(conv.participants?.[0]?.id || ""),
-    termsAccepted: true,
-  }));
+  const conversationsDataMapped = conversations.map((conv) => {
+    // Find the client participant (role: 'client')
+    const clientParticipant = conv.participants?.find((p) => p.role === 'client') || conv.participants?.[0];
+
+    return {
+      id: conv.id,
+      client: {
+        userId: clientParticipant?.id || "",
+        name: clientParticipant?.fullName || "Unknown",
+        avatar: clientParticipant?.avatar,
+        verified: true,
+        rating: 4.5,
+        reviews: 10,
+        company: "Company",
+        location: "Location",
+      },
+      project: {
+        id: conv.projectId || "",
+        title: conv.project?.title || "Project",
+      },
+      lastMessage: conv.lastMessage?.content || "No messages",
+      lastMessageTime: conv.lastMessage
+        ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+      unreadCount: conv.unreadCount,
+      isOnline: onlineUsers.has(clientParticipant?.id || ""),
+      termsAccepted: true,
+    };
+  });
 
   const handleSelectConversation = (
     conversation: (typeof conversationsDataMapped)[0],
@@ -568,69 +573,28 @@ const FreelancerMessages = () => {
                 </div>
 
                 {/* Message Input */}
-                <div className="bg-white border-t border-slate-200 p-4">
-                  <div className="flex items-end gap-3">
-                    {/* Attachment Button */}
-                    <div className="relative">
-                      <button className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors text-slate-500">
-                        <Paperclip size={20} />
-                      </button>
-                    </div>
-
-                    {/* Input */}
-                    <div className="flex-1 relative">
-                      <textarea
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage();
-                          }
-                        }}
-                        placeholder="Type a message..."
-                      />
-                      {/* Emoji Button */}
-                      <div className="absolute right-3 bottom-3">
-                        <button
-                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                          className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400"
-                        >
-                          <Smile size={20} />
-                        </button>
-
-                        {/* Emoji Picker */}
-                        {showEmojiPicker && (
-                          <div className="absolute bottom-10 right-0 bg-white rounded-xl shadow-lg border border-slate-200 p-3 z-10">
-                            <div className="grid grid-cols-6 gap-2">
-                              {emojis.map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => {
-                                    setNewMessage((prev) => prev + emoji);
-                                    setShowEmojiPicker(false);
-                                  }}
-                                  className="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-lg"
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Send Button */}
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={!newMessage.trim()}
-                      className="bg-teal hover:bg-teal-light text-white px-4"
-                    >
-                      <Send size={18} />
-                    </Button>
-                  </div>
+              <div className="bg-white border-t border-slate-200 p-4 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <Paperclip size={20} />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    className="flex-1 h-10 px-4 rounded-full bg-slate-100 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                    className="h-10 w-10 p-0 rounded-full bg-teal hover:bg-teal-light text-white disabled:opacity-50"
+                  >
+                    <Send size={18} />
+                  </Button>
                 </div>
+              </div>
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">

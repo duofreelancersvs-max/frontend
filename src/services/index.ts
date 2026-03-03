@@ -1,5 +1,6 @@
 export { authService } from "./auth.service";
 export { userService } from "./user.service";
+export { settingsService } from "./settings.service";
 export { projectService } from "./project.service";
 export { freelancerService } from "./freelancer.service";
 export { clientService } from "./client.service";
@@ -17,10 +18,7 @@ export type {
   AuthResponse,
 } from "./auth.service";
 
-export type {
-  User,
-  UserStats,
-} from "./user.service";
+export type { User, UserStats } from "./user.service";
 
 export type {
   Project,
@@ -31,10 +29,11 @@ export type {
 
 export type {
   PortfolioItem,
-  Experience,
+  WorkExperience,
   Education,
   FreelancerProfile,
   FreelancerFilters,
+  SkillRef,
 } from "./freelancer.service";
 
 export type {
@@ -54,15 +53,9 @@ export type {
   CreateConversationRequest,
 } from "./conversation.service";
 
-export type {
-  Subscription,
-  SubscriptionPlan,
-} from "./subscription.service";
+export type { Subscription, SubscriptionPlan } from "./subscription.service";
 
-export type {
-  Notification,
-  NotificationCount,
-} from "./notification.service";
+export type { Notification, NotificationCount } from "./notification.service";
 
 export type {
   Review,
@@ -70,8 +63,4 @@ export type {
   ReviewFilters,
 } from "./review.service";
 
-export type {
-  AdminStats,
-  AdminUser,
-  AdminProject,
-} from "./admin.service";
+export type { AdminStats, AdminUser, AdminProject } from "./admin.service";

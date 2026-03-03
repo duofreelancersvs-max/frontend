@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link, useParams, useOutletContext } from "react-router-dom";
+import {
+  Link,
+  useParams,
+  useOutletContext,
+  useNavigate,
+} from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
   CreditCard,
-  Star,
   Settings,
   Bell,
   ChevronDown,
@@ -22,7 +26,6 @@ import {
   MessageSquare,
   Heart,
   CheckCircle,
-  Eye,
   ThumbsDown,
   Award,
 } from "lucide-react";
@@ -33,6 +36,7 @@ import type { Project, Application } from "@/services";
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [applicationFilter, setApplicationFilter] = useState("all");
@@ -89,6 +93,11 @@ const ProjectDetails = () => {
             : app,
         ),
       );
+
+      // Redirect to messages after hiring
+      if (status === "accepted") {
+        navigate("/client/messages");
+      }
     } catch (err) {
       console.error(`Failed to update application to ${status}:`, err);
       alert(`Failed to update application. Please try again.`);
@@ -468,117 +477,119 @@ const ProjectDetails = () => {
                     className="p-6 hover:bg-slate-50/50 transition-colors"
                   >
                     <div className="flex flex-col lg:flex-row gap-6">
-                      {/* Freelancer Info */}
-                      <div className="flex gap-4 flex-1">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                          {application.freelancer?.firstName?.[0]}
-                          {application.freelancer?.lastName?.[0]}
-                          {!application.freelancer?.firstName &&
-                            !application.freelancer?.lastName &&
-                            (application.freelancer?.fullName
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") ||
-                              "?")}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-navy">
-                              {application.freelancer?.firstName ||
-                              application.freelancer?.lastName
-                                ? `${application.freelancer?.firstName || ""} ${application.freelancer?.lastName || ""}`.trim()
-                                : application.freelancer?.fullName ||
+                      {/* Avatar */}
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm">
+                        {application.freelancer?.avatar ? (
+                          <img
+                            src={application.freelancer.avatar}
+                            alt="Avatar"
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        ) : (
+                          application.freelancer?.fullName?.charAt(0) || "?"
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <h3 className="text-base font-bold text-navy">
+                                {application.freelancer?.fullName ||
                                   "Unknown Freelancer"}
-                            </h3>
-                            <span
-                              className={cn(
-                                "px-2 py-0.5 rounded-full text-xs font-semibold",
-                                application.status === "accepted"
-                                  ? "bg-gold/10 text-gold"
-                                  : application.status === "pending"
-                                    ? "bg-teal/10 text-teal"
-                                    : "bg-slate-100 text-slate-500",
+                              </h3>
+                              {(application.status === "accepted" ||
+                                application.status === "hired" ||
+                                application.status === "shortlisted") && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-500 border border-orange-100">
+                                  {application.status === "shortlisted"
+                                    ? "Shortlisted"
+                                    : "Hired"}
+                                </span>
                               )}
-                            >
-                              {application.status === "accepted" ||
-                              application.status === "hired"
-                                ? "Hired"
-                                : application.status === "shortlisted"
-                                  ? "Shortlisted"
-                                  : application.status === "pending"
-                                    ? "New"
-                                    : application.status}
+                            </div>
+                            <p className="text-sm text-slate-500 font-medium">
+                              {application.freelancer?.title || "Freelancer"}
+                            </p>
+                          </div>
+
+                          {/* Right Side Info & Actions Header */}
+                          <div className="flex flex-col sm:items-end text-sm text-slate-500">
+                            <span className="text-[11px] uppercase tracking-wider text-slate-400 mb-0.5">
+                              Applied
+                            </span>
+                            <span className="font-medium">
+                              {new Date(
+                                application.createdAt,
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-500 mb-2">
-                            {application.freelancer?.title || "Freelancer"}
-                          </p>
-                          {application.freelancer?.rating && (
-                            <div className="flex items-center gap-1 text-sm mb-3">
-                              <Star size={14} className="text-gold fill-gold" />
-                              <span className="font-medium text-navy">
-                                {application.freelancer.rating}
-                              </span>
-                            </div>
-                          )}
-                          <p className="text-sm text-slate-600 line-clamp-2 mb-3">
-                            {application.coverLetter}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                        </div>
+
+                        {/* Cover Letter */}
+                        <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                          {application.coverLetter}
+                        </p>
+
+                        {/* Footer Info & Actions */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
                             <span>
-                              Proposed: ₹
-                              {application.proposedRate?.toLocaleString() ||
-                                "N/A"}
+                              Proposed:{" "}
+                              <strong className="text-slate-700 font-semibold">
+                                ₹
+                                {application.proposedRate?.toLocaleString() ||
+                                  "N/A"}
+                              </strong>
                             </span>
                             <span>
                               Duration:{" "}
-                              {application.estimatedDuration
-                                ? `${application.estimatedDuration} days`
-                                : "N/A"}
+                              <strong className="text-slate-700 font-semibold">
+                                {application.estimatedDuration
+                                  ? `${application.estimatedDuration} days`
+                                  : "N/A"}
+                              </strong>
                             </span>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Actions */}
-                      <div className="lg:text-right lg:min-w-[200px] flex lg:flex-col justify-between lg:justify-start gap-4">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Applied</p>
-                          <p className="text-xs text-slate-400">
-                            {new Date(application.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
+                          <div className="flex items-center gap-4">
+                            {application.status !== "rejected" && (
+                              <button
+                                disabled={
+                                  actionLoading ===
+                                  `${application._id || application.id}-rejected`
+                                }
+                                onClick={() =>
+                                  handleApplicationAction(
+                                    application._id || application.id,
+                                    "rejected",
+                                  )
+                                }
+                                className="flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+                              >
+                                <ThumbsDown size={14} /> Handle Reject
+                              </button>
                             )}
-                          </p>
-                        </div>
-                        <div className="flex lg:flex-col gap-2">
-                          {application.freelancer?.id && (
-                            <Link
-                              to={`/freelancer/${application.freelancer.id}`}
-                            >
+
+                            <Link to="/client/messages">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full border-slate-200"
+                                className="h-9 px-4 border-slate-200 text-navy hover:bg-slate-50 shadow-sm font-medium"
                               >
-                                <Eye size={14} className="mr-1" /> View Profile
+                                <MessageSquare
+                                  size={16}
+                                  className="mr-2 text-slate-400"
+                                />
+                                Message
                               </Button>
                             </Link>
-                          )}
-                          <Link to="/client/messages">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-slate-200"
-                            >
-                              <MessageSquare size={14} className="mr-1" />{" "}
-                              Message
-                            </Button>
-                          </Link>
-                          <div className="flex gap-2">
+
+                            {/* Additional Actions (Hire/Shortlist) if pending */}
                             {application.status === "pending" && (
                               <Button
                                 size="sm"
@@ -586,7 +597,7 @@ const ProjectDetails = () => {
                                   actionLoading ===
                                   `${application._id || application.id}-shortlisted`
                                 }
-                                className="flex-1 bg-gold hover:bg-gold/90 text-white"
+                                className="h-9 bg-gold hover:bg-gold/90 text-white shadow-sm"
                                 onClick={() =>
                                   handleApplicationAction(
                                     application._id || application.id,
@@ -594,50 +605,29 @@ const ProjectDetails = () => {
                                   )
                                 }
                               >
-                                <Heart size={14} className="mr-1" /> Shortlist
+                                <Heart size={14} className="mr-1.5" /> Shortlist
                               </Button>
                             )}
-                            {application.status !== "hired" &&
-                              application.status !== "accepted" &&
-                              application.status !== "rejected" && (
-                                <Button
-                                  size="sm"
-                                  disabled={
-                                    actionLoading ===
-                                    `${application._id || application.id}-accepted`
-                                  }
-                                  className="flex-1 bg-teal hover:bg-teal-light text-white"
-                                  onClick={() =>
-                                    handleApplicationAction(
-                                      application._id || application.id,
-                                      "accepted",
-                                    )
-                                  }
-                                >
-                                  <CheckCircle size={14} className="mr-1" />{" "}
-                                  Hire
-                                </Button>
-                              )}
+                            {application.status === "pending" && (
+                              <Button
+                                size="sm"
+                                disabled={
+                                  actionLoading ===
+                                  `${application._id || application.id}-accepted`
+                                }
+                                className="h-9 bg-teal hover:bg-teal-light text-white shadow-sm"
+                                onClick={() =>
+                                  handleApplicationAction(
+                                    application._id || application.id,
+                                    "accepted",
+                                  )
+                                }
+                              >
+                                <CheckCircle size={14} className="mr-1.5" />{" "}
+                                Hire
+                              </Button>
+                            )}
                           </div>
-                          {application.status !== "rejected" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={
-                                actionLoading ===
-                                `${application._id || application.id}-rejected`
-                              }
-                              className="text-red-500 hover:bg-red-50"
-                              onClick={() =>
-                                handleApplicationAction(
-                                  application._id || application.id,
-                                  "rejected",
-                                )
-                              }
-                            >
-                              <ThumbsDown size={14} className="mr-1" /> Reject
-                            </Button>
-                          )}
                         </div>
                       </div>
                     </div>

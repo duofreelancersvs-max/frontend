@@ -7,7 +7,7 @@ export interface Application {
   freelancerId: string;
   coverLetter: string;
   proposedRate: number;
-  estimatedDuration: number; // in days
+  estimatedDuration: number;
   status:
     | "pending"
     | "accepted"

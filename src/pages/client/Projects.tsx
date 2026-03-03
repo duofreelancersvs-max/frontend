@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Grid3X3,
   List,
-  Clock,
+  Calendar,
   Users,
   ChevronLeft,
   ChevronRight,
@@ -20,25 +20,29 @@ import {
   Eye,
   CheckCircle,
   Briefcase,
-  CreditCard,
   Bell,
   Settings,
+  MapPin,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
-import type { Project } from "@/services";
+import type { Project, ProjectStats } from "@/services";
 
-// Tabs
-const tabs = [
-  { id: "all", label: "All", count: null },
-  { id: "open", label: "Open", count: 3 },
-  { id: "in-progress", label: "In Progress", count: 2 },
-  { id: "completed", label: "Completed", count: 15 },
-  { id: "drafts", label: "Drafts", count: 1 },
-  { id: "cancelled", label: "Cancelled", count: null },
-];
+// Helper to format deadline as a clean date string
+const formatDeadline = (deadline: string) => {
+  try {
+    return new Date(deadline).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return deadline;
+  }
+};
 
 const ClientProjects = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
@@ -52,21 +56,40 @@ const ClientProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
+  const [stats, setStats] = useState<ProjectStats | null>(null);
   const navigate = useNavigate();
 
+  // Build tabs dynamically from stats
+  const tabs = [
+    { id: "all", label: "All", count: stats?.total ?? null },
+    { id: "open", label: "Open", count: stats?.open ?? null },
+    {
+      id: "in-progress",
+      label: "In Progress",
+      count: stats?.inProgress ?? null,
+    },
+    { id: "completed", label: "Completed", count: stats?.completed ?? null },
+    { id: "cancelled", label: "Cancelled", count: stats?.cancelled ?? null },
+  ];
+
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await projectService.getMyClientProjects();
-        setProjects(data.projects || []);
+        const [projectsData, statsData] = await Promise.all([
+          projectService.getMyClientProjects(),
+          projectService.getMyClientStats(),
+        ]);
+        setProjects(projectsData.projects || []);
+        setStats(statsData);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+    fetchData();
   }, []);
 
   const handleDelete = async (projectId: string) => {
@@ -91,6 +114,41 @@ const ClientProjects = () => {
     navigate(`/client/project/${projectId}/edit`);
   };
 
+  const handleComplete = async (projectId: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to mark this project as completed?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setCompletingId(projectId);
+      await projectService.complete(projectId);
+
+      // Update local state instantly
+      setProjects((prev) =>
+        prev.map((p) =>
+          p._id === projectId ? { ...p, status: "completed" } : p,
+        ),
+      );
+
+      if (stats) {
+        setStats({
+          ...stats,
+          inProgress: Math.max(0, (stats.inProgress || 0) - 1),
+          completed: (stats.completed || 0) + 1,
+        });
+      }
+    } catch (error) {
+      console.error("Error completing project:", error);
+      alert("Failed to mark project as completed. Please try again.");
+    } finally {
+      setCompletingId(null);
+    }
+  };
+
   const itemsPerPage = 6;
 
   // Filter projects based on active tab
@@ -100,7 +158,6 @@ const ClientProjects = () => {
       if (activeTab === "open") return project.status === "open";
       if (activeTab === "in-progress") return project.status === "in-progress";
       if (activeTab === "completed") return project.status === "completed";
-      if (activeTab === "drafts") return project.status === "draft";
       if (activeTab === "cancelled") return project.status === "cancelled";
       return true;
     })
@@ -416,9 +473,24 @@ const ClientProjects = () => {
                         <h3 className="font-semibold text-navy mb-1 line-clamp-1 text-lg">
                           {project.title}
                         </h3>
-                        <span className="inline-block px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-xs font-medium mb-3 w-fit">
-                          {project.category}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <span className="inline-block px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-xs font-medium w-fit">
+                            {project.category}
+                          </span>
+                          {project.location &&
+                            (project.location.city ||
+                              project.location.country) && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 bg-teal/5 text-teal border border-teal/10 rounded-md text-xs font-medium w-fit">
+                                <MapPin size={12} className="mr-1" />
+                                {project.location.city}
+                                {project.location.city &&
+                                project.location.country
+                                  ? ", "
+                                  : ""}
+                                {project.location.country}
+                              </span>
+                            )}
+                        </div>
                         <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">
                           {project.description}
                         </p>
@@ -479,24 +551,34 @@ const ClientProjects = () => {
                       </div>
 
                       {/* Card Footer */}
-                      <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100 backdrop-blur-sm">
-                        <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-4">
-                          <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded border border-slate-200/50 shadow-sm">
-                            <CreditCard size={12} className="text-slate-400" />
-                            <span className="text-navy">
+                      <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100">
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                          <div className="flex flex-col items-center text-center">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                              Budget
+                            </span>
+                            <span className="text-sm font-semibold text-navy">
                               ₹
                               {(
                                 project.budget?.maxAmount || 0
                               ).toLocaleString()}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Users size={12} />
-                            {project.applications} applicants
+                          <div className="flex flex-col items-center text-center border-x border-slate-200/60">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                              Applicants
+                            </span>
+                            <span className="text-sm font-semibold text-navy">
+                              {project.applications}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock size={12} />
-                            {project.deadline}
+                          <div className="flex flex-col items-center text-center">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                              Deadline
+                            </span>
+                            <span className="text-sm font-semibold text-navy">
+                              {formatDeadline(project.deadline)}
+                            </span>
                           </div>
                         </div>
 
@@ -524,9 +606,22 @@ const ClientProjects = () => {
                               </Button>
                             </Link>
                           ) : project.status === "in-progress" ? (
-                            <Button className="flex-1 h-9 text-xs bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm shadow-royal-blue/20">
-                              <CheckCircle size={14} className="mr-1.5" />{" "}
-                              Complete
+                            <Button
+                              className="flex-1 h-9 text-xs bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm shadow-royal-blue/20"
+                              onClick={() => handleComplete(project._id)}
+                              disabled={completingId === project._id}
+                            >
+                              {completingId === project._id ? (
+                                <Loader2
+                                  size={14}
+                                  className="mr-1.5 animate-spin"
+                                />
+                              ) : (
+                                <CheckCircle size={14} className="mr-1.5" />
+                              )}{" "}
+                              {completingId === project._id
+                                ? "Completing..."
+                                : "Complete"}
                             </Button>
                           ) : (
                             <Button
@@ -581,9 +676,24 @@ const ClientProjects = () => {
                                 <p className="font-medium text-navy">
                                   {project.title}
                                 </p>
-                                <p className="text-xs text-slate-500">
-                                  {project.category}
-                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-slate-500">
+                                    {project.category}
+                                  </p>
+                                  {project.location &&
+                                    (project.location.city ||
+                                      project.location.country) && (
+                                      <span className="flex items-center text-xs text-teal bg-teal/5 border border-teal/10 px-1.5 py-0.5 rounded">
+                                        <MapPin size={10} className="mr-1" />
+                                        {project.location.city}
+                                        {project.location.city &&
+                                        project.location.country
+                                          ? ", "
+                                          : ""}
+                                        {project.location.country}
+                                      </span>
+                                    )}
+                                </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
@@ -612,8 +722,11 @@ const ClientProjects = () => {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-1 text-sm text-slate-600">
-                                <Clock size={14} className="text-slate-400" />
-                                {project.deadline}
+                                <Calendar
+                                  size={14}
+                                  className="text-slate-400"
+                                />
+                                {formatDeadline(project.deadline)}
                               </div>
                             </td>
                             <td className="px-6 py-4">
@@ -643,6 +756,25 @@ const ClientProjects = () => {
                                 >
                                   <Trash2 size={16} />
                                 </Button>
+                                {project.status === "in-progress" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2 text-royal-blue hover:text-royal-blue/90 hover:bg-royal-blue/10"
+                                    onClick={() => handleComplete(project._id)}
+                                    disabled={completingId === project._id}
+                                    title="Mark as Complete"
+                                  >
+                                    {completingId === project._id ? (
+                                      <Loader2
+                                        size={16}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <CheckCircle size={16} />
+                                    )}
+                                  </Button>
+                                )}
                               </div>
                             </td>
                           </tr>

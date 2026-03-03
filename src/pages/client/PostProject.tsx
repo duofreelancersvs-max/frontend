@@ -27,6 +27,7 @@ import {
   X,
   Menu,
   Check,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,6 +99,7 @@ const PostProject = () => {
   const [loadingProject, setLoadingProject] = useState(isEditing);
   const { logout } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -119,6 +121,7 @@ const PostProject = () => {
     duration: "",
     location: "remote",
     city: "",
+    country: "",
     autoDetectLocation: true,
     // Step 3
     budgetType: "fixed",
@@ -145,6 +148,7 @@ const PostProject = () => {
             duration: "",
             location: project.location?.type || "remote",
             city: project.location?.city || "",
+            country: project.location?.country || "",
             autoDetectLocation: true,
             budgetType: project.budget?.type || "fixed",
             minBudget: project.budget?.minAmount?.toString() || "",
@@ -163,6 +167,67 @@ const PostProject = () => {
       fetchProject();
     }
   }, [isEditing, projectId, navigate]);
+
+  // Reverse geocoding helper using OpenStreetMap Nominatim (free, no API key)
+  const reverseGeocode = async (lat: number, lon: number) => {
+    try {
+      setLocationLoading(true);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`,
+      );
+      const data = await res.json();
+      const city =
+        data.address?.city ||
+        data.address?.town ||
+        data.address?.village ||
+        data.address?.county ||
+        "";
+      const country = data.address?.country || "";
+      setFormData((prev) => ({
+        ...prev,
+        city,
+        country,
+      }));
+    } catch (error) {
+      console.error("Reverse geocoding failed:", error);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  // Auto-detect location on mount
+  useEffect(() => {
+    if (!isEditing && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          reverseGeocode(latitude, longitude);
+        },
+        (error) => {
+          console.log("Location access denied or unavailable:", error.message);
+        },
+      );
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAutoDetectLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          reverseGeocode(latitude, longitude);
+        },
+        (error) => {
+          console.log("Location access denied:", error.message);
+          alert(
+            "Unable to detect location. Please allow location access or enter manually.",
+          );
+        },
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
 
   const [skillSearch, setSkillSearch] = useState("");
 
@@ -217,6 +282,7 @@ const PostProject = () => {
         location: {
           type: formData.location,
           city: formData.city,
+          country: formData.country,
         },
       };
 
@@ -715,6 +781,85 @@ const PostProject = () => {
                       />
                     )}
                   </div>
+
+                  {/* Project Location (Mandatory) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-semibold text-navy">
+                        Project Location <span className="text-red-500">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleAutoDetectLocation}
+                        disabled={locationLoading}
+                        className="text-xs text-teal hover:underline flex items-center gap-1 disabled:opacity-50"
+                      >
+                        {locationLoading ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            Detecting...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin size={12} />
+                            Auto-detect Location
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          City
+                        </label>
+                        <div className="relative">
+                          <MapPin
+                            size={16}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                          />
+                          <Input
+                            placeholder="e.g., Hyderabad"
+                            value={formData.city}
+                            onChange={(e) =>
+                              handleInputChange("city", e.target.value)
+                            }
+                            className="h-12 pl-10 border-slate-200 focus:border-teal focus:ring-teal"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          Country
+                        </label>
+                        <div className="relative">
+                          <MapPin
+                            size={16}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                          />
+                          <Input
+                            placeholder="e.g., India"
+                            value={formData.country}
+                            onChange={(e) =>
+                              handleInputChange("country", e.target.value)
+                            }
+                            className="h-12 pl-10 border-slate-200 focus:border-teal focus:ring-teal"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {locationLoading && (
+                      <p className="text-xs text-teal mt-2 flex items-center gap-1">
+                        <Loader2 size={12} className="animate-spin" />
+                        Detecting your location...
+                      </p>
+                    )}
+                    {!locationLoading && formData.city && formData.country && (
+                      <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                        <CheckCircle size={12} className="text-teal" />
+                        {formData.city}, {formData.country}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Navigation */}
@@ -1014,13 +1159,24 @@ const PostProject = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-500 uppercase">
-                            Location
+                            Location Preference
                           </p>
                           <p className="font-medium text-navy capitalize">
                             {formData.location}
-                            {formData.city && ` (${formData.city})`}
                           </p>
                         </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase">
+                          Project Location
+                        </p>
+                        <p className="font-medium text-navy">
+                          {formData.city && formData.country
+                            ? `${formData.city}, ${formData.country}`
+                            : formData.city ||
+                              formData.country ||
+                              "Not specified"}
+                        </p>
                       </div>
                     </div>
                   </div>

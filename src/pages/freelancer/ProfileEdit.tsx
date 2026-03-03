@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import {
   User,
@@ -21,10 +21,21 @@ import {
   Lightbulb,
   ChevronRight,
   Image,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
+import { freelancerService } from "@/services/freelancer.service";
+import type {
+  FreelancerProfile,
+  SkillRef,
+  PortfolioItem,
+  WorkExperience,
+  Education,
+} from "@/services/freelancer.service";
+import { useAuth } from "@/hooks/useAuth";
 
 // Tab definitions
 const tabs = [
@@ -35,15 +46,17 @@ const tabs = [
   { id: "education", label: "Education", icon: GraduationCap },
 ];
 
-// Mock data
-const categories = [
-  "Video Editing",
-  "Motion Graphics",
-  "3D Animation",
+const categoryOptions = [
+  "Editing",
   "VFX",
+  "3D Design",
+  "Motion Graphics",
   "Color Grading",
-  "Audio Editing",
-  "Graphic Design",
+  "Web Development",
+  "Mobile Development",
+  "UI/UX Design",
+  "Content Writing",
+  "Digital Marketing",
 ];
 
 const availabilityOptions = [
@@ -75,121 +88,164 @@ const suggestedSkills = [
   "Illustrator",
 ];
 
-// Initial form data
-const initialFormData = {
-  displayName: "Arun Kumar",
-  headline: "Professional Video Editor & Motion Graphics Artist",
-  bio: "Passionate video editor with 5+ years of experience in creating compelling visual stories. Specialized in corporate videos, social media content, and motion graphics.",
-  hourlyRate: 1200,
-  availability: "full-time",
-  category: "Video Editing",
-  city: "Bangalore",
-  state: "Karnataka",
-  languages: ["English", "Hindi", "Kannada"],
-};
-
-const initialSkills = [
-  { name: "Adobe Premiere Pro", proficiency: 5 },
-  { name: "After Effects", proficiency: 4 },
-  { name: "DaVinci Resolve", proficiency: 4 },
-  { name: "Photoshop", proficiency: 3 },
-];
-
-const initialPortfolio = [
-  {
-    id: 1,
-    title: "E-commerce Product Video",
-    description: "Product showcase video for online store",
-    url: "https://vimeo.com/example1",
-    thumbnail: null,
-    skills: ["Premiere Pro", "After Effects"],
-  },
-  {
-    id: 2,
-    title: "Corporate Brand Film",
-    description: "Company introduction video",
-    url: "https://youtube.com/example2",
-    thumbnail: null,
-    skills: ["Premiere Pro", "Color Grading"],
-  },
-];
-
-const initialExperience = [
-  {
-    id: 1,
-    company: "Creative Studios",
-    title: "Senior Video Editor",
-    startDate: "Jan 2022",
-    endDate: "Present",
-    description: "Lead editor for commercial and corporate projects",
-  },
-  {
-    id: 2,
-    company: "Media House Productions",
-    title: "Video Editor",
-    startDate: "Mar 2019",
-    endDate: "Dec 2021",
-    description: "Edited promotional videos and social media content",
-  },
-];
-
-const initialEducation = [
-  {
-    id: 1,
-    institution: "Film and Television Institute",
-    degree: "Diploma",
-    field: "Film Editing",
-    year: "2019",
-  },
-  {
-    id: 2,
-    institution: "Delhi University",
-    degree: "Bachelor's",
-    field: "Mass Communication",
-    year: "2018",
-  },
-];
-
-const profileCompletionItems = [
-  { label: "Profile photo", completed: true },
-  { label: "Professional headline", completed: true },
-  { label: "Bio description", completed: true },
-  { label: "Skills added", completed: true },
-  { label: "Portfolio items", completed: true },
-  { label: "Work experience", completed: true },
-  { label: "Hourly rate set", completed: true },
-  { label: "Phone verified", completed: false },
-  { label: "ID verified", completed: false },
-];
-
 const FreelancerProfileEdit = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("basic");
-  const [formData, setFormData] = useState(initialFormData);
-  const [skills, setSkills] = useState(initialSkills);
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
-  const [experience, setExperience] = useState(initialExperience);
-  const [education, setEducation] = useState(initialEducation);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Profile data state
+  const [profile, setProfile] = useState<FreelancerProfile | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    displayName: "",
+    headline: "",
+    bio: "",
+    hourlyRate: 0,
+    availability: "full-time",
+    category: "Editing",
+  });
+  const [skills, setSkills] = useState<SkillRef[]>([]);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [experience, setExperience] = useState<WorkExperience[]>([]);
+  const [education, setEducation] = useState<Education[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showExperienceModal, setShowExperienceModal] = useState(false);
   const [showEducationModal, setShowEducationModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  const subscriptionPlan = "Free";
+  // Modal form refs
+  const portfolioTitleRef = useRef<HTMLInputElement>(null);
+  const portfolioDescRef = useRef<HTMLTextAreaElement>(null);
+  const portfolioUrlRef = useRef<HTMLInputElement>(null);
+  const portfolioSkillsRef = useRef<HTMLInputElement>(null);
+  const expTitleRef = useRef<HTMLInputElement>(null);
+  const expCompanyRef = useRef<HTMLInputElement>(null);
+  const expStartRef = useRef<HTMLInputElement>(null);
+  const expEndRef = useRef<HTMLInputElement>(null);
+  const expDescRef = useRef<HTMLTextAreaElement>(null);
+  const eduInstRef = useRef<HTMLInputElement>(null);
+  const eduDegreeRef = useRef<HTMLInputElement>(null);
+  const eduFieldRef = useRef<HTMLInputElement>(null);
+  const eduYearRef = useRef<HTMLInputElement>(null);
+
+  // ---------- FETCH PROFILE ----------
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await freelancerService.ensureProfile();
+        applyProfileToState(data);
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        toast.error("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const applyProfileToState = (data: FreelancerProfile) => {
+    setProfile(data);
+    setFormData({
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      displayName: data.displayName || "",
+      headline: data.headline || "",
+      bio: data.bio || "",
+      hourlyRate: data.hourlyRate || 0,
+      availability: data.availability || "full-time",
+      category: data.category || "Editing",
+    });
+    setSkills(data.skills || []);
+    setPortfolio(data.portfolio || []);
+    setExperience(data.workExperience || []);
+    setEducation(data.education || []);
+  };
+
+  // ---------- PROFILE COMPLETENESS ----------
+  const profileCompletionItems = [
+    { label: "Profile photo", completed: !!profile?.profilePicture },
+    { label: "Professional headline", completed: !!formData.headline },
+    { label: "Bio description", completed: !!formData.bio },
+    { label: "Skills added", completed: skills.length > 0 },
+    { label: "Portfolio items", completed: portfolio.length > 0 },
+    { label: "Work experience", completed: experience.length > 0 },
+    { label: "Hourly rate set", completed: formData.hourlyRate > 0 },
+    {
+      label: "Phone verified",
+      completed: user?.isPhoneVerified || false,
+    },
+    { label: "ID verified", completed: profile?.isVerified || false },
+  ];
+
   const profileCompletion = Math.round(
     (profileCompletionItems.filter((item) => item.completed).length /
       profileCompletionItems.length) *
       100,
   );
 
+  // ---------- BASIC INFO HANDLERS ----------
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSaveChanges = async () => {
+    console.log(
+      "[ProfileEdit] Save Changes clicked, sending to backend...",
+      formData,
+    );
+    try {
+      setSaving(true);
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        displayName: formData.displayName,
+        headline: formData.headline,
+        bio: formData.bio,
+        hourlyRate: Number(formData.hourlyRate),
+        availability: formData.availability,
+        category: formData.category,
+        skills: skills.map((s) => ({
+          ...s,
+          skillId:
+            s.skillId ||
+            [...Array(24)]
+              .map(() => Math.floor(Math.random() * 16).toString(16))
+              .join(""),
+        })),
+      };
+      console.log("[ProfileEdit] Payload:", payload);
+      const data = await freelancerService.updateProfile(payload as any);
+      console.log("[ProfileEdit] Save success:", data);
+      applyProfileToState(data);
+      toast.success("Profile saved successfully!");
+    } catch (err: any) {
+      console.error("[ProfileEdit] Failed to save profile:", err);
+      const msg =
+        err?.data?.error?.message || err?.message || "Failed to save profile";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ---------- SKILLS HANDLERS ----------
   const addSkill = (skillName: string) => {
     if (skillName && !skills.find((s) => s.name === skillName)) {
-      setSkills((prev) => [...prev, { name: skillName, proficiency: 3 }]);
+      // Generate a dummy valid 24-character hex ObjectId for the backend schema
+      const dummyId = [...Array(24)]
+        .map(() => Math.floor(Math.random() * 16).toString(16))
+        .join("");
+      setSkills((prev) => [
+        ...prev,
+        { skillId: dummyId, name: skillName, proficiency: 3 },
+      ]);
       setNewSkill("");
     }
   };
@@ -204,17 +260,148 @@ const FreelancerProfileEdit = () => {
     );
   };
 
-  const deletePortfolioItem = (id: number) => {
-    setPortfolio((prev) => prev.filter((item) => item.id !== id));
+  // ---------- PORTFOLIO HANDLERS ----------
+  const handleAddPortfolio = async () => {
+    const title = portfolioTitleRef.current?.value?.trim();
+    if (!title) {
+      toast.error("Project title is required");
+      return;
+    }
+    try {
+      setActionLoading("portfolio-add");
+      const data = await freelancerService.addPortfolio({
+        title,
+        description: portfolioDescRef.current?.value?.trim() || undefined,
+        projectUrl: portfolioUrlRef.current?.value?.trim() || undefined,
+        skills: portfolioSkillsRef.current?.value
+          ? portfolioSkillsRef.current.value.split(",").map((s) => s.trim())
+          : [],
+      });
+      applyProfileToState(data);
+      setShowPortfolioModal(false);
+      toast.success("Portfolio item added!");
+    } catch (err) {
+      console.error("Failed to add portfolio:", err);
+      toast.error("Failed to add portfolio item");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const deleteExperienceItem = (id: number) => {
-    setExperience((prev) => prev.filter((item) => item.id !== id));
+  const handleDeletePortfolio = async (itemId: string) => {
+    try {
+      setActionLoading(`portfolio-del-${itemId}`);
+      const data = await freelancerService.removePortfolio(itemId);
+      applyProfileToState(data);
+      toast.success("Portfolio item removed");
+    } catch (err) {
+      console.error("Failed to remove portfolio:", err);
+      toast.error("Failed to remove portfolio item");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const deleteEducationItem = (id: number) => {
-    setEducation((prev) => prev.filter((item) => item.id !== id));
+  // ---------- EXPERIENCE HANDLERS ----------
+  const handleAddExperience = async () => {
+    const title = expTitleRef.current?.value?.trim();
+    const company = expCompanyRef.current?.value?.trim();
+    if (!title || !company) {
+      toast.error("Job title and company are required");
+      return;
+    }
+    const startDateVal = expStartRef.current?.value?.trim();
+    try {
+      setActionLoading("experience-add");
+      const data = await freelancerService.addExperience({
+        title,
+        company,
+        startDate: startDateVal || new Date().toISOString(),
+        endDate: expEndRef.current?.value?.trim() || undefined,
+        description: expDescRef.current?.value?.trim() || undefined,
+      });
+      applyProfileToState(data);
+      setShowExperienceModal(false);
+      toast.success("Experience added!");
+    } catch (err) {
+      console.error("Failed to add experience:", err);
+      toast.error("Failed to add experience");
+    } finally {
+      setActionLoading(null);
+    }
   };
+
+  const handleDeleteExperience = async (itemId: string) => {
+    try {
+      setActionLoading(`experience-del-${itemId}`);
+      const data = await freelancerService.removeExperience(itemId);
+      applyProfileToState(data);
+      toast.success("Experience removed");
+    } catch (err) {
+      console.error("Failed to remove experience:", err);
+      toast.error("Failed to remove experience");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // ---------- EDUCATION HANDLERS ----------
+  const handleAddEducation = async () => {
+    const institution = eduInstRef.current?.value?.trim();
+    if (!institution) {
+      toast.error("Institution name is required");
+      return;
+    }
+    try {
+      setActionLoading("education-add");
+      const data = await freelancerService.addEducation({
+        institution,
+        degree: eduDegreeRef.current?.value?.trim() || undefined,
+        fieldOfStudy: eduFieldRef.current?.value?.trim() || undefined,
+        year: eduYearRef.current?.value
+          ? parseInt(eduYearRef.current.value)
+          : undefined,
+      });
+      applyProfileToState(data);
+      setShowEducationModal(false);
+      toast.success("Education added!");
+    } catch (err) {
+      console.error("Failed to add education:", err);
+      toast.error("Failed to add education");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeleteEducation = async (itemId: string) => {
+    try {
+      setActionLoading(`education-del-${itemId}`);
+      const data = await freelancerService.removeEducation(itemId);
+      applyProfileToState(data);
+      toast.success("Education removed");
+    } catch (err) {
+      console.error("Failed to remove education:", err);
+      toast.error("Failed to remove education");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // ---------- LOADING STATE ----------
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={36} className="animate-spin text-teal" />
+          <p className="text-slate-500 text-sm">Loading your profile…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const initials =
+    `${formData.firstName?.[0] || ""}${formData.lastName?.[0] || ""}`.toUpperCase() ||
+    "?";
 
   return (
     <div className="w-full bg-slate-50">
@@ -249,9 +436,17 @@ const FreelancerProfileEdit = () => {
                   Preview Profile
                 </Button>
               </Link>
-              <Button className="bg-teal hover:bg-teal-light text-white">
-                <Save size={16} className="mr-2" />
-                Save Changes
+              <Button
+                className="bg-teal hover:bg-teal-light text-white"
+                onClick={handleSaveChanges}
+                disabled={saving}
+              >
+                {saving ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : (
+                  <Save size={16} className="mr-2" />
+                )}
+                {saving ? "Saving…" : "Save Changes"}
               </Button>
             </div>
           </div>
@@ -275,9 +470,17 @@ const FreelancerProfileEdit = () => {
                 {/* Profile Photo */}
                 <div className="relative px-6 pb-6">
                   <div className="relative -mt-12 lg:-mt-16 w-24 h-24 lg:w-32 lg:h-32">
-                    <div className="w-full h-full rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-3xl lg:text-4xl border-4 border-white shadow-lg">
-                      AK
-                    </div>
+                    {profile?.profilePicture ? (
+                      <img
+                        src={profile.profilePicture}
+                        alt="Profile"
+                        className="w-full h-full rounded-2xl object-cover border-4 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-3xl lg:text-4xl border-4 border-white shadow-lg">
+                        {initials}
+                      </div>
+                    )}
                     <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-teal hover:bg-teal-light rounded-full flex items-center justify-center text-white shadow-lg transition-colors">
                       <Camera size={14} />
                     </button>
@@ -289,13 +492,37 @@ const FreelancerProfileEdit = () => {
                       <CheckCircle size={14} />
                       Email Verified
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold/10 text-gold rounded-full text-sm font-medium">
-                      <AlertCircle size={14} />
-                      Phone Pending
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                        user?.isPhoneVerified
+                          ? "bg-success-green/10 text-success-green"
+                          : "bg-gold/10 text-gold",
+                      )}
+                    >
+                      {user?.isPhoneVerified ? (
+                        <CheckCircle size={14} />
+                      ) : (
+                        <AlertCircle size={14} />
+                      )}
+                      {user?.isPhoneVerified
+                        ? "Phone Verified"
+                        : "Phone Pending"}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-sm font-medium">
-                      <AlertCircle size={14} />
-                      ID Not Verified
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                        profile?.isVerified
+                          ? "bg-success-green/10 text-success-green"
+                          : "bg-slate-100 text-slate-500",
+                      )}
+                    >
+                      {profile?.isVerified ? (
+                        <CheckCircle size={14} />
+                      ) : (
+                        <AlertCircle size={14} />
+                      )}
+                      {profile?.isVerified ? "ID Verified" : "ID Not Verified"}
                     </span>
                   </div>
                 </div>
@@ -328,10 +555,44 @@ const FreelancerProfileEdit = () => {
                   {activeTab === "basic" && (
                     <div className="space-y-6">
                       <div className="grid sm:grid-cols-2 gap-5">
+                        {/* First Name */}
+                        <div>
+                          <label className="block text-sm font-medium text-navy mb-2">
+                            First Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.firstName}
+                            onChange={(e) =>
+                              handleInputChange("firstName", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            placeholder="First name"
+                          />
+                        </div>
+
+                        {/* Last Name */}
+                        <div>
+                          <label className="block text-sm font-medium text-navy mb-2">
+                            Last Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lastName}
+                            onChange={(e) =>
+                              handleInputChange("lastName", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            placeholder="Last name"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-5">
                         {/* Display Name */}
                         <div>
                           <label className="block text-sm font-medium text-navy mb-2">
-                            Display Name *
+                            Display Name
                           </label>
                           <input
                             type="text"
@@ -340,7 +601,7 @@ const FreelancerProfileEdit = () => {
                               handleInputChange("displayName", e.target.value)
                             }
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                            placeholder="Your name"
+                            placeholder="Public display name"
                           />
                         </div>
 
@@ -357,7 +618,10 @@ const FreelancerProfileEdit = () => {
                               type="number"
                               value={formData.hourlyRate}
                               onChange={(e) =>
-                                handleInputChange("hourlyRate", e.target.value)
+                                handleInputChange(
+                                  "hourlyRate",
+                                  Number(e.target.value),
+                                )
                               }
                               className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                               placeholder="1000"
@@ -393,12 +657,12 @@ const FreelancerProfileEdit = () => {
                             handleInputChange("bio", e.target.value)
                           }
                           rows={4}
-                          maxLength={500}
+                          maxLength={2000}
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
                           placeholder="Tell clients about yourself..."
                         />
                         <p className="text-xs text-slate-400 mt-1">
-                          {formData.bio.length}/500 characters
+                          {formData.bio.length}/2000 characters
                         </p>
                       </div>
 
@@ -435,76 +699,12 @@ const FreelancerProfileEdit = () => {
                             }
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy bg-white"
                           >
-                            {categories.map((cat) => (
+                            {categoryOptions.map((cat) => (
                               <option key={cat} value={cat}>
                                 {cat}
                               </option>
                             ))}
                           </select>
-                        </div>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-5">
-                        {/* City */}
-                        <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
-                            City
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.city}
-                            onChange={(e) =>
-                              handleInputChange("city", e.target.value)
-                            }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                            placeholder="Your city"
-                          />
-                        </div>
-
-                        {/* State */}
-                        <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
-                            State
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.state}
-                            onChange={(e) =>
-                              handleInputChange("state", e.target.value)
-                            }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                            placeholder="Your state"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Languages */}
-                      <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
-                          Languages
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                          {languages.map((lang) => (
-                            <button
-                              key={lang}
-                              onClick={() => {
-                                const newLangs = formData.languages.includes(
-                                  lang,
-                                )
-                                  ? formData.languages.filter((l) => l !== lang)
-                                  : [...formData.languages, lang];
-                                handleInputChange("languages", newLangs);
-                              }}
-                              className={cn(
-                                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                                formData.languages.includes(lang)
-                                  ? "bg-teal text-white"
-                                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                              )}
-                            >
-                              {lang}
-                            </button>
-                          ))}
                         </div>
                       </div>
                     </div>
@@ -547,7 +747,9 @@ const FreelancerProfileEdit = () => {
                         <div className="h-2 w-32 bg-slate-100 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-teal rounded-full transition-all"
-                            style={{ width: `${(skills.length / 15) * 100}%` }}
+                            style={{
+                              width: `${(skills.length / 15) * 100}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -595,6 +797,12 @@ const FreelancerProfileEdit = () => {
                             </button>
                           </div>
                         ))}
+                        {skills.length === 0 && (
+                          <p className="text-sm text-slate-400 py-4 text-center">
+                            No skills added yet. Add skills from the suggestions
+                            below or type your own.
+                          </p>
+                        )}
                       </div>
 
                       {/* Suggested Skills */}
@@ -616,6 +824,13 @@ const FreelancerProfileEdit = () => {
                               </button>
                             ))}
                         </div>
+                      </div>
+
+                      <div className="bg-gold/5 border border-gold/20 rounded-xl p-4">
+                        <p className="text-sm text-gold">
+                          💡 Remember to click <strong>Save Changes</strong>{" "}
+                          after updating your skills.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -642,7 +857,7 @@ const FreelancerProfileEdit = () => {
                       <div className="grid sm:grid-cols-2 gap-4">
                         {portfolio.map((item) => (
                           <div
-                            key={item.id}
+                            key={item._id}
                             className="group relative rounded-xl border border-slate-200 overflow-hidden hover:border-teal/30 hover:shadow-md transition-all"
                           >
                             {/* Thumbnail */}
@@ -659,7 +874,7 @@ const FreelancerProfileEdit = () => {
                                 {item.description}
                               </p>
                               <div className="flex flex-wrap gap-1">
-                                {item.skills.map((skill) => (
+                                {(item.skills || []).map((skill) => (
                                   <span
                                     key={skill}
                                     className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded"
@@ -673,24 +888,40 @@ const FreelancerProfileEdit = () => {
                             {/* Actions Overlay */}
                             <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
-                                onClick={() => {
-                                  setEditingItem(item);
-                                  setShowPortfolioModal(true);
-                                }}
-                                className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
-                              >
-                                <Edit3 size={14} className="text-slate-600" />
-                              </button>
-                              <button
-                                onClick={() => deletePortfolioItem(item.id)}
+                                onClick={() =>
+                                  item._id && handleDeletePortfolio(item._id)
+                                }
+                                disabled={
+                                  actionLoading === `portfolio-del-${item._id}`
+                                }
                                 className="p-2 bg-white rounded-lg shadow-md hover:bg-red-50 transition-colors"
                               >
-                                <Trash2 size={14} className="text-red-500" />
+                                {actionLoading ===
+                                `portfolio-del-${item._id}` ? (
+                                  <Loader2
+                                    size={14}
+                                    className="animate-spin text-red-500"
+                                  />
+                                ) : (
+                                  <Trash2 size={14} className="text-red-500" />
+                                )}
                               </button>
                             </div>
                           </div>
                         ))}
                       </div>
+
+                      {portfolio.length === 0 && (
+                        <div className="text-center py-12">
+                          <Image
+                            size={40}
+                            className="mx-auto text-slate-300 mb-3"
+                          />
+                          <p className="text-sm text-slate-500">
+                            No portfolio items yet. Add your best work!
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -716,7 +947,7 @@ const FreelancerProfileEdit = () => {
                       <div className="space-y-4">
                         {experience.map((item) => (
                           <div
-                            key={item.id}
+                            key={item._id}
                             className="relative pl-6 pb-6 border-l-2 border-slate-200 last:pb-0"
                           >
                             {/* Timeline dot */}
@@ -733,26 +964,49 @@ const FreelancerProfileEdit = () => {
                                   </p>
                                 </div>
                                 <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded">
-                                  {item.startDate} - {item.endDate}
+                                  {item.startDate
+                                    ? new Date(
+                                        item.startDate,
+                                      ).toLocaleDateString("en-IN", {
+                                        month: "short",
+                                        year: "numeric",
+                                      })
+                                    : "N/A"}{" "}
+                                  -{" "}
+                                  {item.endDate
+                                    ? new Date(item.endDate).toLocaleDateString(
+                                        "en-IN",
+                                        {
+                                          month: "short",
+                                          year: "numeric",
+                                        },
+                                      )
+                                    : "Present"}
                                 </span>
                               </div>
-                              <p className="text-sm text-slate-500 mb-3">
-                                {item.description}
-                              </p>
+                              {item.description && (
+                                <p className="text-sm text-slate-500 mb-3">
+                                  {item.description}
+                                </p>
+                              )}
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => {
-                                    setEditingItem(item);
-                                    setShowExperienceModal(true);
-                                  }}
-                                  className="text-xs text-royal-blue hover:underline"
+                                  onClick={() =>
+                                    item._id && handleDeleteExperience(item._id)
+                                  }
+                                  disabled={
+                                    actionLoading ===
+                                    `experience-del-${item._id}`
+                                  }
+                                  className="text-xs text-red-500 hover:underline flex items-center gap-1"
                                 >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => deleteExperienceItem(item.id)}
-                                  className="text-xs text-red-500 hover:underline"
-                                >
+                                  {actionLoading ===
+                                  `experience-del-${item._id}` ? (
+                                    <Loader2
+                                      size={12}
+                                      className="animate-spin"
+                                    />
+                                  ) : null}
                                   Delete
                                 </button>
                               </div>
@@ -760,6 +1014,18 @@ const FreelancerProfileEdit = () => {
                           </div>
                         ))}
                       </div>
+
+                      {experience.length === 0 && (
+                        <div className="text-center py-12">
+                          <Briefcase
+                            size={40}
+                            className="mx-auto text-slate-300 mb-3"
+                          />
+                          <p className="text-sm text-slate-500">
+                            No experience entries yet.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -785,7 +1051,7 @@ const FreelancerProfileEdit = () => {
                       <div className="space-y-4">
                         {education.map((item) => (
                           <div
-                            key={item.id}
+                            key={item._id}
                             className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl"
                           >
                             <div className="w-12 h-12 rounded-xl bg-royal-blue/10 flex items-center justify-center shrink-0">
@@ -796,35 +1062,54 @@ const FreelancerProfileEdit = () => {
                             </div>
                             <div className="flex-1">
                               <h5 className="font-semibold text-navy">
-                                {item.degree} in {item.field}
+                                {item.degree && item.fieldOfStudy
+                                  ? `${item.degree} in ${item.fieldOfStudy}`
+                                  : item.degree ||
+                                    item.fieldOfStudy ||
+                                    "Education"}
                               </h5>
                               <p className="text-sm text-slate-600">
                                 {item.institution}
                               </p>
-                              <p className="text-xs text-slate-500 mt-1">
-                                {item.year}
-                              </p>
+                              {item.year && (
+                                <p className="text-xs text-slate-500 mt-1">
+                                  {item.year}
+                                </p>
+                              )}
                             </div>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => {
-                                  setEditingItem(item);
-                                  setShowEducationModal(true);
-                                }}
-                                className="p-2 text-slate-400 hover:text-royal-blue hover:bg-royal-blue/10 rounded-lg transition-colors"
-                              >
-                                <Edit3 size={16} />
-                              </button>
-                              <button
-                                onClick={() => deleteEducationItem(item.id)}
+                                onClick={() =>
+                                  item._id && handleDeleteEducation(item._id)
+                                }
+                                disabled={
+                                  actionLoading === `education-del-${item._id}`
+                                }
                                 className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                               >
-                                <Trash2 size={16} />
+                                {actionLoading ===
+                                `education-del-${item._id}` ? (
+                                  <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={16} />
+                                )}
                               </button>
                             </div>
                           </div>
                         ))}
                       </div>
+
+                      {education.length === 0 && (
+                        <div className="text-center py-12">
+                          <GraduationCap
+                            size={40}
+                            className="mx-auto text-slate-300 mb-3"
+                          />
+                          <p className="text-sm text-slate-500">
+                            No education entries yet.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -966,7 +1251,7 @@ const FreelancerProfileEdit = () => {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
               <h3 className="text-lg font-bold text-navy">
-                {editingItem ? "Edit Portfolio Item" : "Add Portfolio Item"}
+                Add Portfolio Item
               </h3>
               <button
                 onClick={() => setShowPortfolioModal(false)}
@@ -982,10 +1267,10 @@ const FreelancerProfileEdit = () => {
                   Project Title *
                 </label>
                 <input
+                  ref={portfolioTitleRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="Enter project title"
-                  defaultValue={editingItem?.title || ""}
                 />
               </div>
 
@@ -994,10 +1279,10 @@ const FreelancerProfileEdit = () => {
                   Description
                 </label>
                 <textarea
+                  ref={portfolioDescRef}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
                   rows={3}
                   placeholder="Describe your project"
-                  defaultValue={editingItem?.description || ""}
                 />
               </div>
 
@@ -1006,26 +1291,11 @@ const FreelancerProfileEdit = () => {
                   Project URL
                 </label>
                 <input
+                  ref={portfolioUrlRef}
                   type="url"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="https://..."
-                  defaultValue={editingItem?.url || ""}
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-navy mb-2">
-                  Thumbnail
-                </label>
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-teal/50 transition-colors cursor-pointer">
-                  <Upload size={32} className="mx-auto mb-2 text-slate-400" />
-                  <p className="text-sm text-slate-500">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    PNG, JPG up to 5MB
-                  </p>
-                </div>
               </div>
 
               <div>
@@ -1033,10 +1303,10 @@ const FreelancerProfileEdit = () => {
                   Skills Used
                 </label>
                 <input
+                  ref={portfolioSkillsRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="e.g., Premiere Pro, After Effects"
-                  defaultValue={editingItem?.skills?.join(", ") || ""}
                 />
               </div>
             </div>
@@ -1051,9 +1321,13 @@ const FreelancerProfileEdit = () => {
               </Button>
               <Button
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
-                onClick={() => setShowPortfolioModal(false)}
+                onClick={handleAddPortfolio}
+                disabled={actionLoading === "portfolio-add"}
               >
-                {editingItem ? "Save Changes" : "Add Project"}
+                {actionLoading === "portfolio-add" ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : null}
+                Add Project
               </Button>
             </div>
           </div>
@@ -1065,9 +1339,7 @@ const FreelancerProfileEdit = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">
-                {editingItem ? "Edit Experience" : "Add Experience"}
-              </h3>
+              <h3 className="text-lg font-bold text-navy">Add Experience</h3>
               <button
                 onClick={() => setShowExperienceModal(false)}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -1082,10 +1354,10 @@ const FreelancerProfileEdit = () => {
                   Job Title *
                 </label>
                 <input
+                  ref={expTitleRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="e.g., Senior Video Editor"
-                  defaultValue={editingItem?.title || ""}
                 />
               </div>
 
@@ -1094,10 +1366,10 @@ const FreelancerProfileEdit = () => {
                   Company Name *
                 </label>
                 <input
+                  ref={expCompanyRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="Company name"
-                  defaultValue={editingItem?.company || ""}
                 />
               </div>
 
@@ -1107,10 +1379,9 @@ const FreelancerProfileEdit = () => {
                     Start Date
                   </label>
                   <input
-                    type="text"
+                    ref={expStartRef}
+                    type="date"
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                    placeholder="e.g., Jan 2022"
-                    defaultValue={editingItem?.startDate || ""}
                   />
                 </div>
                 <div>
@@ -1118,10 +1389,10 @@ const FreelancerProfileEdit = () => {
                     End Date
                   </label>
                   <input
-                    type="text"
+                    ref={expEndRef}
+                    type="date"
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                    placeholder="Present"
-                    defaultValue={editingItem?.endDate || ""}
+                    placeholder="Leave empty for Present"
                   />
                 </div>
               </div>
@@ -1131,10 +1402,10 @@ const FreelancerProfileEdit = () => {
                   Description
                 </label>
                 <textarea
+                  ref={expDescRef}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
                   rows={3}
                   placeholder="Describe your role and achievements"
-                  defaultValue={editingItem?.description || ""}
                 />
               </div>
             </div>
@@ -1149,9 +1420,13 @@ const FreelancerProfileEdit = () => {
               </Button>
               <Button
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
-                onClick={() => setShowExperienceModal(false)}
+                onClick={handleAddExperience}
+                disabled={actionLoading === "experience-add"}
               >
-                {editingItem ? "Save Changes" : "Add Experience"}
+                {actionLoading === "experience-add" ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : null}
+                Add Experience
               </Button>
             </div>
           </div>
@@ -1163,9 +1438,7 @@ const FreelancerProfileEdit = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">
-                {editingItem ? "Edit Education" : "Add Education"}
-              </h3>
+              <h3 className="text-lg font-bold text-navy">Add Education</h3>
               <button
                 onClick={() => setShowEducationModal(false)}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -1180,22 +1453,22 @@ const FreelancerProfileEdit = () => {
                   Institution *
                 </label>
                 <input
+                  ref={eduInstRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="University/College name"
-                  defaultValue={editingItem?.institution || ""}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy mb-2">
-                  Degree *
+                  Degree
                 </label>
                 <input
+                  ref={eduDegreeRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="e.g., Bachelor's, Master's, Diploma"
-                  defaultValue={editingItem?.degree || ""}
                 />
               </div>
 
@@ -1204,10 +1477,10 @@ const FreelancerProfileEdit = () => {
                   Field of Study
                 </label>
                 <input
+                  ref={eduFieldRef}
                   type="text"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="e.g., Film Production, Computer Science"
-                  defaultValue={editingItem?.field || ""}
                 />
               </div>
 
@@ -1216,10 +1489,10 @@ const FreelancerProfileEdit = () => {
                   Year of Completion
                 </label>
                 <input
-                  type="text"
+                  ref={eduYearRef}
+                  type="number"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
                   placeholder="e.g., 2020"
-                  defaultValue={editingItem?.year || ""}
                 />
               </div>
             </div>
@@ -1234,9 +1507,13 @@ const FreelancerProfileEdit = () => {
               </Button>
               <Button
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
-                onClick={() => setShowEducationModal(false)}
+                onClick={handleAddEducation}
+                disabled={actionLoading === "education-add"}
               >
-                {editingItem ? "Save Changes" : "Add Education"}
+                {actionLoading === "education-add" ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : null}
+                Add Education
               </Button>
             </div>
           </div>

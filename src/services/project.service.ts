@@ -22,6 +22,7 @@ export interface Project {
   location?: {
     type: string;
     city?: string;
+    country?: string;
     state?: string;
   };
   visibility?: string;
@@ -62,6 +63,7 @@ export interface CreateProjectRequest {
   location?: {
     type: string;
     city?: string;
+    country?: string;
     state?: string;
   };
 }

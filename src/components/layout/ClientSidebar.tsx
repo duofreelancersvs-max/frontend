@@ -10,9 +10,11 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { conversationService } from "@/services/conversation.service";
 
 interface ClientSidebarProps {
   isOpen: boolean;
@@ -24,7 +26,7 @@ const sidebarNavItems = [
   { icon: Folder, label: "My Projects", href: "/client/projects" },
   { icon: PlusCircle, label: "Post Project", href: "/client/post-project" },
   { icon: Search, label: "Find Freelancers", href: "/client/freelancers" },
-  { icon: Mail, label: "Messages", href: "/client/messages", badge: "3" },
+  { icon: Mail, label: "Messages", href: "/client/messages", id: "messages" },
   { icon: CreditCard, label: "Payments", href: "/client/payments" },
   { icon: Star, label: "Reviews", href: "/client/reviews" },
   { icon: Settings, label: "Settings", href: "/client/settings" },
@@ -33,6 +35,23 @@ const sidebarNavItems = [
 const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const { conversations } = await conversationService.getAll();
+        const totalUnread = (conversations || []).reduce(
+          (acc: number, curr: any) => acc + (curr.unreadCount || 0),
+          0,
+        );
+        setUnreadCount(totalUnread);
+      } catch (err) {
+        console.error("Failed to fetch unread messages count", err);
+      }
+    };
+    fetchUnreadCount();
+  }, [location.pathname]); // Refresh count when navigation changes
 
   const handleLogout = async () => {
     try {
@@ -79,6 +98,9 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {sidebarNavItems.map((item) => {
             const isActive = location.pathname === item.href;
+            const itemBadge =
+              item.id === "messages" && unreadCount > 0 ? unreadCount : null;
+
             return (
               <Link
                 key={item.label}
@@ -95,9 +117,9 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
               >
                 <item.icon size={20} />
                 <span className="flex-1">{item.label}</span>
-                {item.badge && (
+                {itemBadge && (
                   <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
+                    {itemBadge}
                   </span>
                 )}
               </Link>
@@ -109,11 +131,11 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
         <div className="p-4 border-t border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-              RK
+              {clientInitial}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">
-                Rajesh Kumar
+                {user?.fullName || clientName}
               </p>
               <p className="text-xs text-white/50">Client Account</p>
             </div>

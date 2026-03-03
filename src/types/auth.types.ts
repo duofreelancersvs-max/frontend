@@ -5,6 +5,7 @@ export type UserStatus = "pending" | "active" | "suspended" | "inactive";
 export interface User {
   _id: string;
   email: string;
+  fullName?: string;
   phone: string;
   role: UserRole;
   status: UserStatus;

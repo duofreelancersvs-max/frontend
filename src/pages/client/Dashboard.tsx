@@ -29,6 +29,8 @@ import {
   projectService,
   freelancerService,
   conversationService,
+  userService,
+  clientService,
 } from "@/services";
 import type {
   Project,
@@ -48,12 +50,14 @@ const ClientDashboard = () => {
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const { logout, user } = useAuth();
+  const [clientProfile, setClientProfile] = useState<any>(null);
+  const [userFullName, setUserFullName] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [projectsData, freeData, convData] = await Promise.allSettled([
+        const [projectsData, freeData, convData, userData, profileData] = await Promise.allSettled([
           projectService
             .getMyClientProjects()
             .then((r) => r.projects)
@@ -66,6 +70,8 @@ const ClientDashboard = () => {
             .getAll()
             .then((r) => r.conversations)
             .catch(() => []),
+          userService.getMe().catch(() => null),
+          clientService.getMyProfile().catch(() => null),
         ]);
 
         if (projectsData.status === "fulfilled")
@@ -75,6 +81,12 @@ const ClientDashboard = () => {
           setFreelancers(freeData.value || []);
         if (convData.status === "fulfilled")
           setConversations(convData.value || []);
+        if (userData.status === "fulfilled" && userData.value) {
+          setUserFullName(userData.value.fullName || "");
+        }
+        if (profileData.status === "fulfilled" && profileData.value) {
+          setClientProfile(profileData.value);
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -92,7 +104,13 @@ const ClientDashboard = () => {
     }
   };
 
-  const clientName = user?.email?.split("@")[0] || "Client";
+  const getClientName = () => {
+    if (userFullName) return userFullName;
+    if (clientProfile?.companyName) return clientProfile.companyName;
+    return user?.email?.split("@")[0] || "Client";
+  };
+
+  const clientName = getClientName();
 
   const activeProjects = (projects || [])
     .filter((p) => p.status === "in-progress")

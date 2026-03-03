@@ -1,52 +1,71 @@
 import { api } from "@/lib/api";
 
-export interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string;
-  url?: string;
-  imageUrl?: string;
-  createdAt: string;
+export interface SkillRef {
+  skillId?: string;
+  name: string;
+  proficiency: number;
 }
 
-export interface Experience {
-  id: string;
+export interface PortfolioItem {
+  _id?: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  projectUrl?: string;
+  skills: string[];
+  createdAt?: string;
+}
+
+export interface WorkExperience {
+  _id?: string;
   company: string;
-  position: string;
+  title: string;
   startDate: string;
   endDate?: string;
-  current: boolean;
   description?: string;
 }
 
 export interface Education {
-  id: string;
+  _id?: string;
   institution: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate?: string;
-  current: boolean;
+  degree?: string;
+  fieldOfStudy?: string;
+  year?: number;
 }
 
 export interface FreelancerProfile {
-  id: string;
+  _id: string;
+  id?: string;
   userId: string;
-  title: string;
-  bio: string;
+  firstName: string;
+  lastName: string;
+  displayName?: string;
+  headline?: string;
+  bio?: string;
+  profilePicture?: string;
   hourlyRate: number;
-  skills: string[];
-  location: string;
-  availability: "available" | "busy" | "unavailable";
-  rating: number;
-  totalReviews: number;
-  completedProjects: number;
+  availability: string;
+  category: string;
+  experienceLevel: string;
+  skills: SkillRef[];
+  totalEarnings: number;
+  totalProjects: number;
+  successRate: number;
+  averageRating: number;
+  reviewCount: number;
+  isVerified: boolean;
+  verificationBadge: string;
   portfolio: PortfolioItem[];
-  experience: Experience[];
+  workExperience: WorkExperience[];
   education: Education[];
-  languages: { name: string; proficiency: string }[];
   createdAt: string;
   updatedAt: string;
+  // Search-only fields used by ClientFreelancers card
+  title?: string;
+  location?: string;
+  rating?: number;
+  totalReviews?: number;
+  completedProjects?: number;
 }
 
 export interface FreelancerFilters {
@@ -56,53 +75,67 @@ export interface FreelancerFilters {
   location?: string;
   availability?: string;
   search?: string;
+  category?: string;
   page?: number;
   limit?: number;
 }
 
 export const freelancerService = {
   search: (params?: FreelancerFilters) =>
-    api.get<{ freelancers: FreelancerProfile[]; total: number }>(
-      "/freelancer-profiles",
-      { params }
-    ),
-  
+    api.get<{
+      profiles: FreelancerProfile[];
+      pagination: {
+        totalItems: number;
+        totalPages: number;
+        page: number;
+        limit: number;
+      };
+    }>("/freelancer-profiles", { params }),
+
   getTopRated: () =>
-    api.get<{ freelancers: FreelancerProfile[] }>(
-      "/freelancer-profiles/top-rated"
+    api.get<{ profiles: FreelancerProfile[] }>(
+      "/freelancer-profiles/top-rated",
     ),
-  
-  getById: (id: string) => api.get<FreelancerProfile>(`/freelancer-profiles/${id}`),
-  
+
+  getById: (id: string) =>
+    api.get<FreelancerProfile>(`/freelancer-profiles/${id}`),
+
   getMyProfile: () => api.get<FreelancerProfile>("/freelancer-profiles/me"),
-  
-  ensureProfile: () => api.get<FreelancerProfile>("/freelancer-profiles/me/ensure"),
-  
+
+  ensureProfile: () =>
+    api.get<FreelancerProfile>("/freelancer-profiles/me/ensure"),
+
   createProfile: (data: Partial<FreelancerProfile>) =>
     api.post<FreelancerProfile>("/freelancer-profiles/me", data),
-  
+
   updateProfile: (data: Partial<FreelancerProfile>) =>
     api.patch<FreelancerProfile>("/freelancer-profiles/me", data),
-  
+
   deleteProfile: () => api.delete<void>("/freelancer-profiles/me"),
-  
+
   addPortfolio: (data: Partial<PortfolioItem>) =>
-    api.post<PortfolioItem>("/freelancer-profiles/me/portfolio", data),
-  
+    api.post<FreelancerProfile>("/freelancer-profiles/me/portfolio", data),
+
   removePortfolio: (itemId: string) =>
-    api.delete<void>(`/freelancer-profiles/me/portfolio/${itemId}`),
-  
-  addExperience: (data: Partial<Experience>) =>
-    api.post<Experience>("/freelancer-profiles/me/experience", data),
-  
+    api.delete<FreelancerProfile>(
+      `/freelancer-profiles/me/portfolio/${itemId}`,
+    ),
+
+  addExperience: (data: Partial<WorkExperience>) =>
+    api.post<FreelancerProfile>("/freelancer-profiles/me/experience", data),
+
   removeExperience: (experienceId: string) =>
-    api.delete<void>(`/freelancer-profiles/me/experience/${experienceId}`),
-  
+    api.delete<FreelancerProfile>(
+      `/freelancer-profiles/me/experience/${experienceId}`,
+    ),
+
   addEducation: (data: Partial<Education>) =>
-    api.post<Education>("/freelancer-profiles/me/education", data),
-  
+    api.post<FreelancerProfile>("/freelancer-profiles/me/education", data),
+
   removeEducation: (educationId: string) =>
-    api.delete<void>(`/freelancer-profiles/me/education/${educationId}`),
+    api.delete<FreelancerProfile>(
+      `/freelancer-profiles/me/education/${educationId}`,
+    ),
 };
 
 export default freelancerService;
