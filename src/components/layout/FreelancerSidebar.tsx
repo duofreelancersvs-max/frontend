@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { freelancerService, subscriptionService } from "@/services";
 import type { FreelancerProfile, Subscription } from "@/services";
+import { useUnreadStore } from "@/stores/unread.store";
 
 const sidebarNavItems = [
   {
@@ -41,7 +42,7 @@ const sidebarNavItems = [
     href: "/freelancer/applications",
     badge: null,
   },
-  { icon: Mail, label: "Messages", href: "/freelancer/messages", badge: null },
+  { icon: Mail, label: "Messages", href: "/freelancer/messages", id: "messages" },
   {
     icon: CreditCard,
     label: "Subscription",
@@ -71,6 +72,7 @@ export interface FreelancerSidebarProps {
 const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
   const location = useLocation();
   const { logout, user } = useAuth();
+  const unreadCount = useUnreadStore((s) => s.totalUnreadCount);
 
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -106,7 +108,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
           ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
           (!!profile.hourlyRate ? 15 : 0) +
           ((profile.skills?.length || 0) > 0 ? 15 : 0) +
-          ((profile.experience?.length || 0) > 0 ? 15 : 0) +
+          ((profile.workExperience?.length || 0) > 0 ? 15 : 0) +
           ((profile.education?.length || 0) > 0 ? 10 : 0) +
           (profile.availability ? 10 : 0),
       )
@@ -152,6 +154,9 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
             const isActive =
               location.pathname === item.href ||
               location.pathname.startsWith(item.href + "/");
+            const itemBadge =
+              item.id === "messages" && unreadCount > 0 ? unreadCount : null;
+
             return (
               <Link
                 key={item.label}
@@ -169,9 +174,9 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
               >
                 <item.icon size={20} />
                 <span className="flex-1">{item.label}</span>
-                {item.badge && (
+                {itemBadge && (
                   <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {item.badge}
+                    {itemBadge}
                   </span>
                 )}
               </Link>

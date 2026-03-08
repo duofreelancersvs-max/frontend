@@ -1,40 +1,23 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
-import {
-  Search,
-  Settings,
-  Bell,
-  ChevronDown,
-  LogOut,
-  User,
-  Menu,
-  Send,
-  Paperclip,
-  MoreVertical,
-  Phone,
-  Video,
-  Check,
-  CheckCheck,
-  Image,
-  Smile,
-  MessageSquare,
-  ExternalLink,
-  Shield,
-  Ban,
-  Verified,
-  ArrowLeft,
-  CreditCard,
-  Star,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Bell, ChevronDown, LogOut, User, Settings, Menu } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
 import type { Conversation, Message } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
+import { ConversationList, ChatArea, ChatInfoPanel } from "@/components/chat";
+import type {
+  ConversationItem,
+  ChatParticipant,
+  InfoPanelParticipant,
+} from "@/components/chat";
+import { TermsModal } from "@/components/modals/TermsModal";
+import { useEffect } from "react";
+import { useUnreadStore } from "@/stores/unread.store";
 
 const ClientMessages = () => {
   const { user } = useAuth();
@@ -48,62 +31,99 @@ const ClientMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Sync active conversation with unread store
+  useEffect(() => {
+    setActiveConversation(selectedConversation?.id || null);
+    return () => setActiveConversation(null);
+  }, [selectedConversation, setActiveConversation]);
 
   // ─── Socket.IO integration ──────────────────────────────────────
 
   const handleNewMessage = useCallback(
     (socketMsg: SocketMessage, _conv: SocketConversation) => {
+      console.log("[Socket] New message received:", (socketMsg as any).id || socketMsg._id);
+      
       const mapped: Message = {
-        id: socketMsg._id,
-        conversationId: socketMsg.conversationId,
-        senderId: socketMsg.senderId,
+        id: (socketMsg._id || (socketMsg as any).id || "").toString(),
+        conversationId: (socketMsg.conversationId || "").toString(),
+        senderId: ((socketMsg.senderId as any)?._id || socketMsg.senderId || "").toString(),
         content: socketMsg.content,
-        read: socketMsg.isRead,
-        createdAt: socketMsg.createdAt,
+        read: socketMsg.isRead ?? (socketMsg as any).read ?? false,
+        createdAt: socketMsg.createdAt || socketMsg.sentAt || new Date().toISOString(),
       };
-      // Add to message list if it's for the active conversation
-      if (
-        selectedConversation &&
-        socketMsg.conversationId === selectedConversation.id
-      ) {
+
+      // Always add to pending messages store (for when user is on another page)
+      addPendingMessage(mapped);
+
+      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
+      const msgConvId = mapped.conversationId;
+      const isCurrentConv = selId && msgConvId === selId;
+
+      if (isCurrentConv) {
+        // If it's for the current conversation and from the OTHER person, mark as read immediately
+        if (mapped.senderId !== user?._id?.toString()) {
+          markAsRead(mapped.conversationId);
+        }
+
         setMessages((prev) => {
-          // Avoid duplicates
-          if (prev.some((m) => m.id === mapped.id)) return prev;
-          return [...prev, mapped];
+          // Clean up optimistic temp message if it exists
+          const filtered = prev.filter(m => 
+            !(m.id.startsWith("temp-") && m.content === mapped.content && m.senderId === user?._id)
+          );
+
+          if (filtered.some((m) => (m.id === mapped.id))) {
+            console.log("[Socket] Message already exists in state, skipping append.");
+            return filtered;
+          }
+          console.log("[Socket] Appending new message to chat area.");
+          return [...filtered, mapped];
         });
+      } else {
+        console.log("[Socket] Received message for different conversation:", socketMsg.conversationId);
       }
-      // Update conversation list last message
+
       setConversations((prev) =>
-        prev.map((c) =>
-          c.id === socketMsg.conversationId
+        prev.map((c) => {
+          const cid = (c.id || (c as any)._id || "").toString();
+          return cid === mapped.conversationId
             ? {
                 ...c,
-                lastMessage: mapped,
-                unreadCount:
-                  c.id === selectedConversation?.id
-                    ? c.unreadCount
-                    : c.unreadCount + 1,
+                lastMessage: {
+                  ...mapped,
+                  createdAt: mapped.createdAt
+                } as any,
+                unreadCount: cid === selId ? 0 : (c.unreadCount || 0) + 1,
               }
-            : c,
-        ),
+            : c;
+        }),
       );
     },
-    [selectedConversation],
+    [selectedConversation, user, addPendingMessage],
   );
 
   const handleMessageRead = useCallback(
     (data: { conversationId: string; userId: string; readAt: string }) => {
-      if (data.conversationId === selectedConversation?.id) {
+      const readConvId = data.conversationId.toString();
+      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
+      // Update message read status
+      if (readConvId === selId) {
         setMessages((prev) =>
           prev.map((m) =>
             m.senderId === user?._id ? { ...m, read: true } : m,
           ),
         );
       }
+      // Reset unread count for this conversation
+      setConversations((prev) =>
+        prev.map((c) => {
+          const cid = (c.id || (c as any)._id || "").toString();
+          return cid === readConvId ? { ...c, unreadCount: 0 } : c;
+        }),
+      );
     },
     [selectedConversation, user],
   );
@@ -125,9 +145,20 @@ const ClientMessages = () => {
     const fetchConversations = async () => {
       try {
         const data = await conversationService.getAll();
-        setConversations(data.conversations || []);
-        if (data.conversations?.length > 0) {
-          setSelectedConversation(data.conversations[0]);
+        let convs = data.conversations || [];
+        
+        // Sort conversations by most recent message (newest first)
+        convs = convs.sort((a, b) => {
+          const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+          const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setConversations(convs);
+        
+        // Auto-select the conversation with the most recent message (first after sort)
+        if (convs.length > 0) {
+          setSelectedConversation(convs[0]);
         }
       } catch (error) {
         console.error("Error fetching conversations:", error);
@@ -138,72 +169,147 @@ const ClientMessages = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedConversation) return;
+      if (!selectedConversation?.id) return;
+      
+      // Clear messages from other conversations immediately
+      // but keep any that were already received for THIS conversation (e.g. via socket)
+      setMessages((prev) => 
+        prev.filter(m => m.conversationId.toString() === selectedConversation.id.toString())
+      );
+
+      // Get pending messages from store (messages received while on another page)
+      const pendingMsgs = getPendingMessages(selectedConversation.id.toString());
+
       try {
         const data = await conversationService.getMessages(
           selectedConversation.id,
         );
-        setMessages(data.messages || []);
-        // Mark as read when opening a conversation
+        // Deduplicate and merge, ensuring we only keep messages for the current conversation
+        setMessages((prev) => {
+          const apiMessages = data.messages || [];
+          const apiIds = new Set(apiMessages.map((m: any) => (m.id || m._id).toString()));
+          
+          const cid = selectedConversation.id.toString();
+
+          // Keep local messages that:
+          // 1. Belong to THIS conversation
+          // 2. Are not already in the API response (dedup)
+          const uniqueLocal = prev.filter(m => 
+            m.conversationId.toString() === cid && 
+            !apiIds.has(m.id.toString())
+          );
+
+          // Also filter out pending messages that are already in API response
+          const uniquePending = pendingMsgs.filter(p => !apiIds.has(p.id.toString()));
+          
+          const combined = [...apiMessages, ...uniqueLocal, ...uniquePending];
+          return combined.sort((a, b) => 
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+
+        // Clear pending messages after merging
+        clearPendingMessages(selectedConversation.id.toString());
+
         markAsRead(selectedConversation.id);
+        // Also call the REST endpoint to reset server-side unread count
+        conversationService.markAsRead(selectedConversation.id).catch(() => {});
+        // Immediately reset unread count in local state
+        setConversations((prev) =>
+          prev.map((c) =>
+            (c.id === selectedConversation.id || (c as any)._id === selectedConversation.id) 
+              ? { ...c, unreadCount: 0 } 
+              : c,
+          ),
+        );
+        // Reset unread store for this conversation as well
+        resetCount(selectedConversation.id);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
     fetchMessages();
-  }, [selectedConversation, markAsRead]);
+  }, [selectedConversation?.id, markAsRead, resetCount]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // ─── Derived data ───────────────────────────────────────────────
 
-  const conversationsData = conversations.map((conv) => {
-    // Find the freelancer participant (role: 'freelancer')
-    const freelancerParticipant = conv.participants?.find((p) => p.role === 'freelancer') || conv.participants?.[0];
+  const getFreelancerParticipant = (conv: Conversation) =>
+    conv.participants?.find((p) => p.role === "freelancer") ||
+    conv.participants?.[0];
 
+  const conversationItems: ConversationItem[] = conversations.map((conv) => {
+    const freelancer = getFreelancerParticipant(conv);
+    // Safe date formatting: handle invalid dates
+    let lastMessageTime = "";
+    if (conv.lastMessage?.createdAt) {
+      const date = new Date(conv.lastMessage.createdAt);
+      if (!isNaN(date.getTime())) {
+        lastMessageTime = date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    }
     return {
       id: conv.id,
-      freelancer: {
-        userId: freelancerParticipant?.id || "",
-        name: freelancerParticipant?.fullName || "Unknown",
-        avatar: freelancerParticipant?.avatar,
+      participant: {
+        userId: freelancer?.id || "",
+        name: freelancer?.fullName || "User",
+        avatar: freelancer?.avatar,
         verified: true,
         rating: 4.5,
         reviews: 10,
-        skills: ["Video Editing"],
-        online: false,
-        title: "Freelancer",
       },
       project: {
         id: conv.projectId || "",
         title: conv.project?.title || "Project",
       },
       lastMessage: conv.lastMessage?.content || "No messages",
-      lastMessageTime: conv.lastMessage
-        ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
+      lastMessageTime,
       unread: conv.unreadCount,
-      termsAccepted: true,
+      termsAccepted: conv.termsAccepted?.clientAccepted ?? true,
     };
   });
 
-  const selectedConvo = conversationsData.find(
-    (c) => c.id === (selectedConversation ? selectedConversation.id : null),
-  );
+  const selectedFreelancer = selectedConversation
+    ? getFreelancerParticipant(selectedConversation)
+    : null;
 
-  const filteredConversations = conversationsData.filter((conv) => {
-    const matchesSearch = conv.freelancer.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesFilter =
-      filter === "all" || (filter === "unread" && conv.unread > 0);
-    return matchesSearch && matchesFilter;
-  });
+  const chatParticipant: ChatParticipant | null = selectedFreelancer
+    ? {
+        name: selectedFreelancer.fullName || "User",
+        avatar: selectedFreelancer.avatar,
+        verified: true,
+        online: onlineUsers.has(selectedFreelancer.id || ""),
+      }
+    : null;
 
-  const handleSelectConversation = (id: string | number) => {
+  const infoPanelParticipant: InfoPanelParticipant | null = selectedFreelancer
+    ? {
+        userId: selectedFreelancer.id || "",
+        name: selectedFreelancer.fullName || "User",
+        avatar: selectedFreelancer.avatar,
+        verified: true,
+        rating: 4.5,
+        reviews: 10,
+        online: onlineUsers.has(selectedFreelancer.id || ""),
+        title: "Freelancer",
+      }
+    : null;
+
+  const chatProject = selectedConversation?.project
+    ? {
+        id: selectedConversation.projectId || "",
+        title: selectedConversation.project.title,
+      }
+    : null;
+
+  const clientTermsAccepted =
+    selectedConversation?.termsAccepted?.clientAccepted ?? true;
+
+  // ─── Handlers ───────────────────────────────────────────────────
+
+  const handleSelectConversation = (id: string) => {
     const convo = conversations.find((c) => c.id === id);
     if (convo) {
       setSelectedConversation(convo);
@@ -215,21 +321,78 @@ const ClientMessages = () => {
     if (selectedConversation) {
       try {
         await conversationService.acceptTerms(selectedConversation.id);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === selectedConversation.id
+              ? {
+                  ...c,
+                  termsAccepted: {
+                    ...c.termsAccepted!,
+                    clientAccepted: true,
+                  },
+                }
+              : c,
+          ),
+        );
+        setSelectedConversation((prev) =>
+          prev
+            ? {
+                ...prev,
+                termsAccepted: {
+                  ...prev.termsAccepted!,
+                  clientAccepted: true,
+                },
+              }
+            : prev,
+        );
       } catch (error) {
         console.error("Error accepting terms:", error);
       }
     }
     setShowTermsModal(false);
-    setMobileView("chat");
   };
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedConversation || !isConnected) return;
-
     const content = messageInput;
     setMessageInput("");
-    socketSendMessage(selectedConversation.id, content);
-    // Incoming message arrives via message:new socket event
+
+    // Optimistically update current chat view
+    const optimisticMsg: Message = {
+      id: `temp-${Date.now()}`,
+      conversationId: selectedConversation.id,
+      senderId: user?._id || "",
+      content,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    
+    // Update conversation's last message in the sidebar promptly
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === selectedConversation.id
+          ? {
+              ...c,
+              lastMessage: optimisticMsg,
+            }
+          : c,
+      ),
+    );
+
+    console.log("[Socket] Emitting message:send for content:", content);
+    socketSendMessage(selectedConversation.id, content).then((res) => {
+        if (!res.success) {
+            console.error("[Socket] Failed to send message via socket:", res.error);
+            // Optionally handle UI rollback or error state
+        } else {
+            console.log("[Socket] message:send confirmed by server.");
+            // When server confirms, handleNewMessage will eventually append the official message
+            // and we rely on the duplicate-ID filtering there to clean up/swap.
+            // Note: Since temp-id won't match official id, we need careful filtering.
+        }
+    });
   };
 
   return (
@@ -259,7 +422,7 @@ const ClientMessages = () => {
               className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
             >
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                RK
+                {user?.fullName?.charAt(0) || "U"}
               </div>
               <ChevronDown
                 size={16}
@@ -269,8 +432,10 @@ const ClientMessages = () => {
             {profileDropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                 <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="font-semibold text-navy">Rajesh Kumar</p>
-                  <p className="text-sm text-slate-500">rajesh@company.com</p>
+                  <p className="font-semibold text-navy">
+                    {user?.fullName || "User"}
+                  </p>
+                  <p className="text-sm text-slate-500">{user?.email || ""}</p>
                 </div>
                 <Link
                   to="/client/profile"
@@ -294,471 +459,61 @@ const ClientMessages = () => {
         </div>
       </header>
 
-      {/* Chat Container - Fixed Height */}
+      {/* Chat Container */}
       <div className="flex-1 flex overflow-hidden bg-slate-100">
-        {/* COLUMN 1 - CONVERSATION LIST */}
-        <div
+        {/* Conversation List */}
+        <ConversationList
+          conversations={conversationItems}
+          selectedId={selectedConversation?.id || null}
+          onSelect={handleSelectConversation}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filter={filter}
+          onFilterChange={setFilter}
+          onlineUsers={onlineUsers}
+          role="client"
           className={cn(
-            "w-full md:w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0",
+            "w-full md:w-80 flex-shrink-0",
             mobileView === "chat" && "hidden md:flex",
           )}
-        >
-          {/* Search */}
-          <div className="p-4 border-b border-slate-100">
-            <div className="relative mb-3">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <Input
-                placeholder="Search conversations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-slate-50 border-slate-200 text-sm"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilter("all")}
-                className={cn(
-                  "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-                  filter === "all"
-                    ? "bg-teal text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                )}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter("unread")}
-                className={cn(
-                  "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-                  filter === "unread"
-                    ? "bg-teal text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                )}
-              >
-                Unread
-              </button>
-            </div>
-          </div>
+        />
 
-          {/* Conversations */}
-          <div className="flex-1 overflow-y-auto">
-            {filteredConversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => handleSelectConversation(conv.id)}
-                className={cn(
-                  "w-full px-4 py-3 flex gap-3 hover:bg-slate-50 transition-colors text-left border-l-3",
-                  selectedConversation?.id === conv.id
-                    ? "bg-teal/5 border-l-teal border-l-[3px]"
-                    : "border-l-transparent",
-                )}
-              >
-                <div className="relative flex-shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-semibold text-sm">
-                    {conv.freelancer.avatar}
-                  </div>
-                  {(conv.freelancer.online ||
-                    onlineUsers.has(conv.freelancer.userId || "")) && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-navy text-sm">
-                        {conv.freelancer.name}
-                      </span>
-                      {conv.freelancer.verified && (
-                        <Verified size={14} className="text-teal" />
-                      )}
-                    </div>
-                    <span className="text-[11px] text-slate-400">
-                      {conv.lastMessageTime}
-                    </span>
-                  </div>
-                  {conv.project && (
-                    <p className="text-xs text-teal font-medium mb-0.5 truncate">
-                      {conv.project.title}
-                    </p>
-                  )}
-                  <p className="text-xs text-slate-500 truncate">
-                    {conv.lastMessage}
-                  </p>
-                </div>
-                {conv.unread > 0 && (
-                  <span className="self-center px-2 py-0.5 bg-teal text-white text-xs font-bold rounded-full min-w-[20px] text-center">
-                    {conv.unread}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Chat Area */}
+        <ChatArea
+          participant={chatParticipant}
+          project={chatProject}
+          messages={messages}
+          messageInput={messageInput}
+          setMessageInput={setMessageInput}
+          onSend={handleSendMessage}
+          onBack={() => setMobileView("list")}
+          isConnected={isConnected}
+          currentUserId={user?._id}
+          role="client"
+          termsAccepted={clientTermsAccepted}
+          onAcceptTermsClick={() => setShowTermsModal(true)}
+          showInfoPanel={showInfoPanel}
+          onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
+          className={cn(mobileView === "list" && "hidden md:flex")}
+        />
 
-        {/* COLUMN 2 - CHAT AREA */}
-        <div
-          className={cn(
-            "flex-1 flex flex-col bg-slate-50 min-w-0",
-            mobileView === "list" && "hidden md:flex",
-          )}
-        >
-          {selectedConvo ? (
-            <>
-              {/* Chat Header */}
-              <div className="h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setMobileView("list")}
-                    className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-                  >
-                    <ArrowLeft size={20} />
-                  </button>
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-semibold text-sm">
-                      {selectedConvo.freelancer.avatar}
-                    </div>
-                    {selectedConvo.freelancer.online && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="font-semibold text-navy text-sm">
-                        {selectedConvo.freelancer.name}
-                      </h3>
-                      {selectedConvo.freelancer.verified && (
-                        <Verified size={14} className="text-teal" />
-                      )}
-                    </div>
-                    {selectedConvo.project ? (
-                      <p className="text-xs text-teal">
-                        {selectedConvo.project.title}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-slate-500">
-                        {selectedConvo.freelancer.online ? "Online" : "Offline"}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <Phone size={18} />
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <Video size={18} />
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <MoreVertical size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
-                {messages.map((msg, index) => {
-                  const msgDate = new Date(msg.createdAt).toLocaleDateString();
-                  const msgTime = new Date(msg.createdAt).toLocaleTimeString(
-                    "en-US",
-                    {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    },
-                  );
-                  const prevMsgDate =
-                    index > 0
-                      ? new Date(
-                          messages[index - 1].createdAt,
-                        ).toLocaleDateString()
-                      : null;
-                  const showDate = index === 0 || msgDate !== prevMsgDate;
-                  const isClient = msg.senderId === user?._id;
-
-                  return (
-                    <div key={msg.id}>
-                      {showDate && (
-                        <div className="flex justify-center my-4">
-                          <span className="px-3 py-1 bg-slate-200/80 text-slate-500 text-xs font-medium rounded-full">
-                            {msgDate}
-                          </span>
-                        </div>
-                      )}
-                      <div
-                        className={cn(
-                          "flex mb-3",
-                          isClient ? "justify-end" : "justify-start",
-                        )}
-                      >
-                        <div className={cn("max-w-[70%]")}>
-                          <div
-                            className={cn(
-                              "px-4 py-2.5 rounded-2xl text-sm",
-                              isClient
-                                ? "bg-teal text-white rounded-br-sm"
-                                : "bg-white text-slate-700 rounded-bl-sm shadow-sm border border-slate-100",
-                            )}
-                          >
-                            {msg.content}
-                          </div>
-                          <div
-                            className={cn(
-                              "flex items-center gap-1 mt-1 px-1",
-                              isClient ? "justify-end" : "justify-start",
-                            )}
-                          >
-                            <span className="text-[10px] text-slate-400">
-                              {msgTime}
-                            </span>
-                            {isClient &&
-                              (msg.read ? (
-                                <CheckCheck size={12} className="text-teal" />
-                              ) : (
-                                <Check size={12} className="text-slate-400" />
-                              ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <div className="bg-white border-t border-slate-200 p-4 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <Paperclip size={20} />
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg hidden sm:block">
-                    <Image size={20} />
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg hidden sm:block">
-                    <Smile size={20} />
-                  </button>
-                  <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    className="flex-1 h-10 px-4 rounded-full bg-slate-100 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30"
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
-                    className="h-10 w-10 p-0 rounded-full bg-teal hover:bg-teal-light text-white disabled:opacity-50"
-                  >
-                    <Send size={18} />
-                  </Button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center mb-4">
-                <MessageSquare size={28} className="text-slate-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-navy mb-1">
-                Select a conversation
-              </h3>
-              <p className="text-sm text-slate-500">
-                Choose a conversation to start messaging
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* COLUMN 3 - FREELANCER INFO */}
-        {selectedConvo && (
-          <div className="hidden xl:flex w-72 bg-white border-l border-slate-200 flex-col flex-shrink-0">
-            <div className="p-6 text-center border-b border-slate-100">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
-                {selectedConvo.freelancer.avatar}
-              </div>
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <h3 className="font-bold text-navy">
-                  {selectedConvo.freelancer.name}
-                </h3>
-                {selectedConvo.freelancer.verified && (
-                  <Verified size={16} className="text-teal" />
-                )}
-              </div>
-              <p className="text-sm text-slate-500 mb-3">
-                {selectedConvo.freelancer.title}
-              </p>
-              <div className="flex items-center justify-center gap-3 text-sm mb-4">
-                <div className="flex items-center gap-1">
-                  <Star size={14} className="text-gold fill-gold" />
-                  <span className="font-semibold text-navy">
-                    {selectedConvo.freelancer.rating}
-                  </span>
-                </div>
-                <span className="text-slate-300">•</span>
-                <span className="text-slate-500">
-                  {selectedConvo.freelancer.reviews} reviews
-                </span>
-              </div>
-            </div>
-
-            {selectedConvo.project && (
-              <div className="p-5 border-b border-slate-100">
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  Related Project
-                </h4>
-                <Link
-                  to={`/client/project/${selectedConvo.project.id}`}
-                  className="block p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-                >
-                  <p className="font-medium text-navy text-sm mb-1">
-                    {selectedConvo.project.title}
-                  </p>
-                  <span className="text-xs text-teal flex items-center gap-1">
-                    <ExternalLink size={12} /> View Project
-                  </span>
-                </Link>
-              </div>
-            )}
-
-            <div className="p-5 space-y-2">
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                Quick Actions
-              </h4>
-              <Link to={`/freelancer/${selectedConvo.id}`} className="block">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start h-9 text-sm border-slate-200"
-                >
-                  <User size={14} className="mr-2" /> View Profile
-                </Button>
-              </Link>
-              <Button
-                size="sm"
-                className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white"
-              >
-                <CreditCard size={14} className="mr-2" /> Hire Freelancer
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50"
-              >
-                <Ban size={14} className="mr-2" /> Block User
-              </Button>
-            </div>
-
-            <div className="mt-auto p-5 border-t border-slate-100">
-              <div className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "w-2.5 h-2.5 rounded-full",
-                    selectedConvo.freelancer.online
-                      ? "bg-green-500"
-                      : "bg-slate-300",
-                  )}
-                />
-                <span className="text-sm text-slate-500">
-                  {selectedConvo.freelancer.online
-                    ? "Online now"
-                    : "Last seen recently"}
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Info Panel */}
+        {showInfoPanel && infoPanelParticipant && (
+          <ChatInfoPanel
+            participant={infoPanelParticipant}
+            project={chatProject}
+            role="client"
+            className="hidden xl:flex w-72"
+          />
         )}
       </div>
 
-      {/* TERMS MODAL */}
-      {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="p-5 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
-                <Shield size={20} className="text-teal" />
-              </div>
-              <div>
-                <h3 className="font-bold text-navy">Terms & Conditions</h3>
-                <p className="text-xs text-slate-500">
-                  Please read and accept before chatting
-                </p>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-5 text-sm text-slate-600 leading-relaxed">
-              <h4 className="font-semibold text-navy mb-2">
-                Communication Guidelines
-              </h4>
-              <ul className="list-disc pl-5 space-y-2 mb-4">
-                <li>
-                  <strong>Professional Conduct:</strong> All communications must
-                  remain professional and respectful.
-                </li>
-                <li>
-                  <strong>No Off-Platform Transactions:</strong> All payments
-                  must be processed through ConnectMe.
-                </li>
-                <li>
-                  <strong>Privacy Protection:</strong> Do not share personal
-                  contact information until a contract is in place.
-                </li>
-                <li>
-                  <strong>Message Retention:</strong> All messages are stored
-                  securely for dispute resolution.
-                </li>
-              </ul>
-              <h4 className="font-semibold text-navy mb-2">
-                User Responsibilities
-              </h4>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Providing accurate project information</li>
-                <li>Responding to queries in a timely manner</li>
-                <li>Making payments as per agreed terms</li>
-              </ul>
-            </div>
-
-            <div className="p-5 border-t border-slate-100 space-y-4">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal"
-                />
-                <span className="text-sm text-slate-600">
-                  I agree to the{" "}
-                  <span className="text-teal font-medium">
-                    Terms and Conditions
-                  </span>
-                </span>
-              </label>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowTermsModal(false);
-                    setSelectedConversation(null);
-                    setTermsAccepted(false);
-                  }}
-                  className="flex-1 h-10 border-slate-200"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAcceptTerms}
-                  disabled={!termsAccepted}
-                  className="flex-1 h-10 bg-teal hover:bg-teal-light text-white disabled:opacity-50"
-                >
-                  Start Chat
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Terms Modal */}
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAgree={handleAcceptTerms}
+      />
     </div>
   );
 };

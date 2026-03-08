@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { projectService } from "@/services";
+import { toast } from "react-toastify";
 
 // Form Options
 const categories = [
@@ -261,10 +262,31 @@ const PostProject = () => {
 
   const handleSubmit = async () => {
     try {
-      if (!formData.categories[0]) {
-        alert("Please select a category");
+      const missingFields: string[] = [];
+
+      if (!formData.title?.trim()) missingFields.push("Title");
+      if (formData.categories.length === 0) missingFields.push("Category");
+      if (!formData.description?.trim()) missingFields.push("Description");
+      if (formData.skills.length === 0) missingFields.push("Skills");
+      if (!formData.experienceLevel) missingFields.push("Experience Level");
+      if (!formData.duration) missingFields.push("Duration");
+      if (!formData.minBudget || !formData.maxBudget)
+        missingFields.push("Budget Range");
+      if (!formData.deadline) missingFields.push("Deadline");
+      if (
+        formData.location === "onsite" &&
+        (!formData.city?.trim() || !formData.country?.trim())
+      ) {
+        missingFields.push("Location (City & Country)");
+      }
+
+      if (missingFields.length > 0) {
+        toast.error(
+          `Please provide all mandatory fields: ${missingFields.join(", ")}`,
+        );
         return;
       }
+
       setIsSubmitting(true);
 
       const projectData = {

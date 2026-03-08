@@ -43,10 +43,12 @@ import {
 import { ToastContainer } from "react-toastify";
 import ClientLayout from "@/layouts/ClientLayout";
 import FreelancerLayout from "@/layouts/FreelancerLayout";
+import { UnreadListener } from "@/components/chat/UnreadListener";
 
 function App() {
   return (
     <>
+      <UnreadListener />
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Public Pages */}

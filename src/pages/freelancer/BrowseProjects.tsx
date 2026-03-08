@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import {
   Search,
   Star,
@@ -20,7 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
-import { projectService } from "@/services";
+import { TermsModal } from "@/components/modals/TermsModal";
+import { projectService, conversationService } from "@/services";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 
@@ -224,6 +225,11 @@ const BrowseProjects = () => {
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  // Terms & Conditions flow state
+  const [showTermsForApply, setShowTermsForApply] = useState(false);
+
+  const navigate = useNavigate();
+
   // Fetch real projects from backend
   const fetchProjects = useCallback(async () => {
     setLoading(true);
@@ -245,7 +251,33 @@ const BrowseProjects = () => {
 
   const handleApplyClick = (project: Project) => {
     setSelectedProject(project);
+    setShowTermsForApply(true);
+  };
+
+  const handleTermsAccepted = () => {
+    setShowTermsForApply(false);
     setShowApplicationModal(true);
+  };
+
+  const handleApplicationSuccess = async () => {
+    if (!selectedProject) return;
+    try {
+      // Create a conversation with the project client
+      const clientId = selectedProject.client?.id || selectedProject.clientId;
+      const projectId = selectedProject._id || selectedProject.id;
+      if (clientId && projectId) {
+        await conversationService.create({
+          participantId: clientId,
+          projectId,
+        });
+      }
+    } catch (err) {
+      console.error("Error creating conversation:", err);
+    }
+    setShowApplicationModal(false);
+    setSelectedProject(null);
+    // Redirect to messages inbox
+    navigate("/freelancer/messages");
   };
 
   const toggleSaveProject = (projectId: string) => {
@@ -822,6 +854,16 @@ const BrowseProjects = () => {
         </main>
       </div>
 
+      {/* Terms & Conditions Modal for Apply flow */}
+      <TermsModal
+        isOpen={showTermsForApply}
+        onClose={() => {
+          setShowTermsForApply(false);
+          setSelectedProject(null);
+        }}
+        onAgree={handleTermsAccepted}
+      />
+
       {/* Project Application Modal */}
       {selectedProject && (
         <ProjectApplicationModal
@@ -830,6 +872,7 @@ const BrowseProjects = () => {
             setShowApplicationModal(false);
             setSelectedProject(null);
           }}
+          onSuccess={handleApplicationSuccess}
           project={{
             id: selectedProject._id || selectedProject.id || "",
             title: selectedProject.title,

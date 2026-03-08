@@ -37,6 +37,7 @@ interface ProjectData {
 interface ProjectApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   project: ProjectData;
   userHourlyRate?: number;
   applicationsRemaining?: number;
@@ -54,6 +55,7 @@ const durationOptions = [
 const ProjectApplicationModal = ({
   isOpen,
   onClose,
+  onSuccess,
   project,
   userHourlyRate = 800,
   applicationsRemaining = 5,
@@ -192,12 +194,15 @@ const ProjectApplicationModal = ({
               <Button
                 onClick={() => {
                   handleClose();
-                  // Navigate to applications page
-                  window.location.href = "/freelancer/applications";
+                  if (onSuccess) {
+                    onSuccess();
+                  } else {
+                    window.location.href = "/freelancer/applications";
+                  }
                 }}
                 className="w-full bg-teal hover:bg-teal-light text-white"
               >
-                View My Applications
+                {onSuccess ? "Go to Messages" : "View My Applications"}
               </Button>
               <Button
                 variant="outline"

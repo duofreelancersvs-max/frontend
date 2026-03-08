@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   connectSocket,
-  disconnectSocket,
   type AppSocket,
   type SocketMessage,
   type SocketConversation,
 } from "@/lib/socket";
 import { useAuthStore } from "@/stores/auth.store";
+import { useUnreadStore } from "@/stores/unread.store";
 
 // ─── Types ─────────────────────────────────────────────────────────
 
@@ -47,7 +47,8 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     options;
 
   const [isConnected, setIsConnected] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const { addOnlineUser, removeOnlineUser, setOnlineUsers, onlineUsers } =
+    useUnreadStore();
 
   const socketRef = useRef<AppSocket | null>(null);
   const prevConversationIdRef = useRef<string | null>(null);
@@ -70,56 +71,74 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     const s = connectSocket();
     socketRef.current = s;
 
-    // Connection state
+    // Handle connect/disconnect
     const handleConnect = () => setIsConnected(true);
     const handleDisconnect = () => setIsConnected(false);
 
+    // ─── Socket Event Handlers ───
+    
+    const handleNewMessage = (data: { message: any; conversation: any }) => {
+      onNewMessageRef.current?.(data.message, data.conversation);
+    };
+
+    const handleMessageRead = (data: any) => {
+      onMessageReadRef.current?.(data);
+    };
+
+    const handleUserOnline = (data: { userId: string }) => {
+      addOnlineUser(data.userId);
+    };
+
+    const handleUserOffline = (data: { userId: string }) => {
+      removeOnlineUser(data.userId);
+    };
+
+    const handleUsersOnline = (data: { userIds: string[] }) => {
+      setOnlineUsers(data.userIds);
+    };
+
+    const handleConversationCreated = (conv: any) => {
+      onConversationCreatedRef.current?.(conv);
+    };
+
+    const handleError = (err: any) => {
+      console.error("[Socket] Server error:", err.message);
+    };
+
+    // Connection state
     s.on("connect", handleConnect);
     s.on("disconnect", handleDisconnect);
-
-    // If already connected (reconnection scenario)
     if (s.connected) setIsConnected(true);
 
-    // ─── Server → Client listeners ─────────────────────────────
+    // Register listeners
+    s.on("message:new", handleNewMessage);
+    s.on("message:read", handleMessageRead);
+    s.on("user:online", handleUserOnline);
+    s.on("user:offline", handleUserOffline);
+    s.on("users:online", handleUsersOnline);
+    s.on("conversation:created", handleConversationCreated);
+    s.on("error", handleError);
 
-    s.on("message:new", (data) => {
-      onNewMessageRef.current?.(data.message, data.conversation);
-    });
-
-    s.on("message:read", (data) => {
-      onMessageReadRef.current?.(data);
-    });
-
-    s.on("user:online", ({ userId }) => {
-      setOnlineUsers((prev) => new Set(prev).add(userId));
-    });
-
-    s.on("user:offline", ({ userId }) => {
-      setOnlineUsers((prev) => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
-    });
-
-    s.on("conversation:created", (conv) => {
-      onConversationCreatedRef.current?.(conv);
-    });
-
-    s.on("error", (err) => {
-      console.error("[Socket] Server error:", err.message);
-    });
+    // Request current online users if already connected
+    if (s.connected) {
+      s.emit("users:get_online" as any);
+    }
 
     return () => {
+      // Unsubscribe specifically from the handlers we registered
+      // to avoid memory leaks and multiple listeners, but DON'T
+      // disconnect the global socket as other components (like UnreadListener)
+      // are still using it.
       s.off("connect", handleConnect);
       s.off("disconnect", handleDisconnect);
-      s.off("message:new");
-      s.off("message:read");
-      s.off("user:online");
-      s.off("user:offline");
-      s.off("conversation:created");
-      s.off("error");
-      disconnectSocket();
+      s.off("message:new", handleNewMessage);
+      s.off("message:read", handleMessageRead);
+      s.off("user:online", handleUserOnline);
+      s.off("user:offline", handleUserOffline);
+      s.off("users:online", handleUsersOnline);
+      s.off("conversation:created", handleConversationCreated);
+      s.off("error", handleError);
+      
       socketRef.current = null;
       setIsConnected(false);
     };

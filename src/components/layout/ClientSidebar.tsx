@@ -10,11 +10,11 @@ import {
   LogOut,
   X,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { conversationService } from "@/services/conversation.service";
+import { useUnreadStore } from "@/stores/unread.store";
 
 interface ClientSidebarProps {
   isOpen: boolean;
@@ -35,23 +35,7 @@ const sidebarNavItems = [
 const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const { conversations } = await conversationService.getAll();
-        const totalUnread = (conversations || []).reduce(
-          (acc: number, curr: any) => acc + (curr.unreadCount || 0),
-          0,
-        );
-        setUnreadCount(totalUnread);
-      } catch (err) {
-        console.error("Failed to fetch unread messages count", err);
-      }
-    };
-    fetchUnreadCount();
-  }, [location.pathname]); // Refresh count when navigation changes
+  const unreadCount = useUnreadStore((s) => s.totalUnreadCount);
 
   const handleLogout = async () => {
     try {

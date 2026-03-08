@@ -103,6 +103,7 @@ interface ServerToClientEvents {
 
   "user:online": (data: { userId: string }) => void;
   "user:offline": (data: { userId: string }) => void;
+  "users:online": (data: { userIds: string[] }) => void;
 
   "conversation:created": (data: SocketConversation) => void;
 

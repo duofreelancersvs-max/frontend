@@ -37,6 +37,7 @@ import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
+import { useUnreadStore } from "@/stores/unread.store";
 
 // Sidebar Navigation Items for Freelancer
 const sidebarNavItems = [
@@ -122,6 +123,7 @@ By accepting these terms, you agree to abide by all platform rules and guideline
 const FreelancerMessages = () => {
   const { user } = useAuth();
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const { setActiveConversation, addPendingMessage, getPendingMessages, clearPendingMessages, resetCount } = useUnreadStore();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -149,6 +151,10 @@ const FreelancerMessages = () => {
         read: socketMsg.isRead,
         createdAt: socketMsg.createdAt,
       };
+
+      // Always add to pending messages store (for when user is on another page)
+      addPendingMessage(mapped);
+
       if (
         selectedConversation &&
         socketMsg.conversationId === selectedConversation.id
@@ -202,14 +208,31 @@ const FreelancerMessages = () => {
 
   // ─── Data fetching ──────────────────────────────────────────────
 
+  // Sync active conversation with unread store
+  useEffect(() => {
+    setActiveConversation(selectedConversation?.id || null);
+    return () => setActiveConversation(null);
+  }, [selectedConversation, setActiveConversation]);
+
   useEffect(() => {
     const fetchConversations = async () => {
       try {
         _setLoading(true);
         const data = await conversationService.getAll();
-        setConversations(data.conversations || []);
-        if (data.conversations?.length > 0) {
-          setSelectedConversation(data.conversations[0]);
+        let convs = data.conversations || [];
+        
+        // Sort conversations by most recent message (newest first)
+        convs = convs.sort((a, b) => {
+          const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+          const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setConversations(convs);
+        
+        // Auto-select the conversation with the most recent message (first after sort)
+        if (convs.length > 0) {
+          setSelectedConversation(convs[0]);
         }
       } catch (error) {
         console.error("Error fetching conversations:", error);
@@ -223,18 +246,49 @@ const FreelancerMessages = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedConversation) return;
+
+      // Get pending messages from store (messages received while on another page)
+      const pendingMsgs = getPendingMessages(selectedConversation.id);
+
       try {
         const data = await conversationService.getMessages(
           selectedConversation.id,
         );
-        setMessages(data.messages || []);
+        
+        // Merge API messages with pending messages
+        const apiMessages = data.messages || [];
+        const apiIds = new Set(apiMessages.map((m: any) => (m.id || m._id).toString()));
+        
+        // Filter out pending messages that are already in API response
+        const uniquePending = pendingMsgs.filter(p => !apiIds.has(p.id.toString()));
+        
+        const combined = [...apiMessages, ...uniquePending];
+        setMessages(combined.sort((a, b) => 
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ));
+
+        // Clear pending messages after merging
+        clearPendingMessages(selectedConversation.id);
+
         markAsRead(selectedConversation.id);
+        // Also call the REST endpoint to reset server-side unread count
+        conversationService.markAsRead(selectedConversation.id).catch(() => {});
+        // Immediately reset unread count in local state
+        setConversations((prev) =>
+          prev.map((c) =>
+            (c.id === selectedConversation.id || (c as any)._id === selectedConversation.id) 
+              ? { ...c, unreadCount: 0 } 
+              : c,
+          ),
+        );
+        // Reset unread store for this conversation as well
+        resetCount(selectedConversation.id);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
     fetchMessages();
-  }, [selectedConversation, markAsRead]);
+  }, [selectedConversation, markAsRead, getPendingMessages, clearPendingMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
