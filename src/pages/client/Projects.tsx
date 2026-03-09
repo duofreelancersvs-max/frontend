@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
+import { useUnreadStore } from "@/stores/unread.store";
 import {
+  MessageSquare,
   PlusCircle,
   Search,
   ChevronDown,
@@ -29,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
+import { useAuth } from "@/hooks/useAuth";
 import type { Project, ProjectStats } from "@/services";
 
 // Helper to format deadline as a clean date string
@@ -45,6 +48,7 @@ const formatDeadline = (deadline: string) => {
 };
 
 const ClientProjects = () => {
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -58,6 +62,7 @@ const ClientProjects = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [stats, setStats] = useState<ProjectStats | null>(null);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // Build tabs dynamically from stats
@@ -231,9 +236,8 @@ const ClientProjects = () => {
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
       {/* MAIN CONTENT */}
       <div>
-        {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -262,7 +266,17 @@ const ClientProjects = () => {
                 </Button>
               </Link>
 
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+              <Link
+                to="/client/messages"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+              >
+                <MessageSquare size={20} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                )}
+              </Link>
+
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -273,7 +287,13 @@ const ClientProjects = () => {
                   className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    RK
+                    {user?.fullName
+                      ? user.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : (user?.email?.[0] || "U").toUpperCase()}
                   </div>
                   <ChevronDown
                     size={16}
@@ -284,9 +304,11 @@ const ClientProjects = () => {
                 {profileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">Rajesh Kumar</p>
+                      <p className="font-semibold text-navy">
+                        {user?.fullName || user?.email?.split("@")[0] || "User"}
+                      </p>
                       <p className="text-sm text-slate-500">
-                        rajesh@company.com
+                        {user?.email}
                       </p>
                     </div>
                     <Link
@@ -304,7 +326,10 @@ const ClientProjects = () => {
                       Settings
                     </Link>
                     <hr className="my-2 border-slate-100" />
-                    <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full">
+                    <button
+                      onClick={logout}
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    >
                       <LogOut size={16} />
                       Logout
                     </button>

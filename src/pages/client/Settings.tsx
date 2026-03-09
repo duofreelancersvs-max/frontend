@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
   User,
@@ -9,10 +9,16 @@ import {
   Palette,
   Building2,
   Menu,
+  MessageSquare,
+  User as UserIcon,
+  Settings,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import { userService, settingsService, clientService } from "@/services";
 import type { ClientProfile } from "@/services/client.service";
 import type {
@@ -20,14 +26,27 @@ import type {
   PrivacySettings,
   PreferenceSettings,
 } from "@/services/settings.service";
+import { useUnreadStore } from "@/stores/unread.store";
 
 const ClientSettings = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const [activeSection, setActiveSection] = useState("account");
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(
-    null
+    null,
   );
 
   const [accountForm, setAccountForm] = useState({
@@ -59,12 +78,11 @@ const ClientSettings = () => {
     showOnlineStatus: true,
   });
 
-  const [preferencesForm, setPreferencesForm] =
-    useState<PreferenceSettings>({
-      language: "en",
-      timezone: "Asia/Kolkata",
-      currency: "INR",
-    });
+  const [preferencesForm, setPreferencesForm] = useState<PreferenceSettings>({
+    language: "en",
+    timezone: "Asia/Kolkata",
+    currency: "INR",
+  });
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -84,7 +102,11 @@ const ClientSettings = () => {
 
         if (userData.status === "fulfilled" && userData.value) {
           let displayName = userData.value.fullName || "";
-          if (!displayName && clientData.status === "fulfilled" && clientData.value) {
+          if (
+            !displayName &&
+            clientData.status === "fulfilled" &&
+            clientData.value
+          ) {
             displayName = clientData.value.companyName || "";
           }
           setAccountForm({
@@ -218,7 +240,7 @@ const ClientSettings = () => {
       const { authService } = await import("@/services");
       await authService.changePassword(
         passwordForm.currentPassword,
-        passwordForm.newPassword
+        passwordForm.newPassword,
       );
       alert("Password updated successfully!");
       setPasswordForm({
@@ -268,20 +290,95 @@ const ClientSettings = () => {
   return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
       <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-          >
-            <Menu size={24} />
-          </button>
-          <div>
-            <h1 className="text-xl lg:text-2xl font-bold text-navy">
-              Settings
-            </h1>
-            <p className="text-sm text-slate-500 hidden sm:block">
-              Manage your account preferences
-            </p>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+            >
+              <Menu size={24} />
+            </button>
+            <div>
+              <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                Settings
+              </h1>
+              <p className="text-sm text-slate-500 hidden sm:block">
+                Manage your account preferences
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 lg:gap-4">
+            <Link
+              to="/client/messages"
+              className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+            >
+              <MessageSquare size={20} />
+              {totalUnreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+              )}
+            </Link>
+            
+            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <Bell size={20} />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
+                  {user?.fullName
+                    ? user.fullName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    : (user?.email?.[0] || "U").toUpperCase()}
+                </div>
+                <ChevronDown
+                  size={16}
+                  className="text-slate-500 hidden sm:block"
+                />
+              </button>
+
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-slate-100">
+                    <p className="font-semibold text-navy">
+                      {user?.fullName || user?.email?.split("@")[0] || "Client"}
+                    </p>
+                    <p className="text-sm text-slate-500 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <Link
+                    to="/client/profile"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  >
+                    <UserIcon size={16} />
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/client/settings"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  >
+                    <Settings size={16} />
+                    Settings
+                  </Link>
+                  <hr className="my-2 border-slate-100" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -297,7 +394,7 @@ const ClientSettings = () => {
                     "flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
                     activeSection === section.id
                       ? "bg-teal/10 text-teal"
-                      : "text-slate-600 hover:bg-slate-50"
+                      : "text-slate-600 hover:bg-slate-50",
                   )}
                 >
                   <section.icon size={18} />
@@ -469,35 +566,52 @@ const ClientSettings = () => {
                 </h2>
                 <div className="space-y-4">
                   {[
-                    { key: "email", label: "Email notifications for new applications" },
+                    {
+                      key: "email",
+                      label: "Email notifications for new applications",
+                    },
                     { key: "push", label: "Push notifications" },
                     { key: "sms", label: "SMS alerts for urgent updates" },
-                    { key: "projectUpdates", label: "Project milestone notifications" },
-                    { key: "messages", label: "Freelancer message notifications" },
+                    {
+                      key: "projectUpdates",
+                      label: "Project milestone notifications",
+                    },
+                    {
+                      key: "messages",
+                      label: "Freelancer message notifications",
+                    },
                   ].map((item) => (
                     <div
                       key={item.key}
                       className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
                     >
-                      <span className="text-sm text-slate-600">{item.label}</span>
+                      <span className="text-sm text-slate-600">
+                        {item.label}
+                      </span>
                       <button
                         type="button"
                         onClick={() =>
-                          toggleNotification(item.key as keyof NotificationSettings)
+                          toggleNotification(
+                            item.key as keyof NotificationSettings,
+                          )
                         }
                         className={cn(
                           "w-12 h-6 rounded-full relative transition-colors",
-                          notificationsForm[item.key as keyof NotificationSettings]
+                          notificationsForm[
+                            item.key as keyof NotificationSettings
+                          ]
                             ? "bg-teal"
-                            : "bg-slate-300"
+                            : "bg-slate-300",
                         )}
                       >
                         <span
                           className={cn(
                             "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                            notificationsForm[item.key as keyof NotificationSettings]
+                            notificationsForm[
+                              item.key as keyof NotificationSettings
+                            ]
                               ? "right-1"
-                              : "left-1"
+                              : "left-1",
                           )}
                         />
                       </button>
@@ -587,16 +701,30 @@ const ClientSettings = () => {
                 </h2>
                 <div className="space-y-4">
                   {[
-                    { key: "showInSearch", label: "Show company profile in search results" },
-                    { key: "allowMessages", label: "Allow freelancers to send messages" },
-                    { key: "displayEarnings", label: "Display project history publicly" },
-                    { key: "showOnlineStatus", label: "Share reviews publicly" },
+                    {
+                      key: "showInSearch",
+                      label: "Show company profile in search results",
+                    },
+                    {
+                      key: "allowMessages",
+                      label: "Allow freelancers to send messages",
+                    },
+                    {
+                      key: "displayEarnings",
+                      label: "Display project history publicly",
+                    },
+                    {
+                      key: "showOnlineStatus",
+                      label: "Share reviews publicly",
+                    },
                   ].map((item) => (
                     <div
                       key={item.key}
                       className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
                     >
-                      <span className="text-sm text-slate-600">{item.label}</span>
+                      <span className="text-sm text-slate-600">
+                        {item.label}
+                      </span>
                       <button
                         type="button"
                         onClick={() =>
@@ -606,7 +734,7 @@ const ClientSettings = () => {
                           "w-12 h-6 rounded-full relative transition-colors",
                           privacyForm[item.key as keyof PrivacySettings]
                             ? "bg-teal"
-                            : "bg-slate-300"
+                            : "bg-slate-300",
                         )}
                       >
                         <span
@@ -614,7 +742,7 @@ const ClientSettings = () => {
                             "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
                             privacyForm[item.key as keyof PrivacySettings]
                               ? "right-1"
-                              : "left-1"
+                              : "left-1",
                           )}
                         />
                       </button>

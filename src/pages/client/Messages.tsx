@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
-import { Bell, ChevronDown, LogOut, User, Settings, Menu } from "lucide-react";
+import { Bell, ChevronDown, LogOut, User, Settings, Menu, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
@@ -15,12 +15,13 @@ import type {
   ChatParticipant,
   InfoPanelParticipant,
 } from "@/components/chat";
+import { ChatAvatar } from "@/components/chat";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
 
 const ClientMessages = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,8 +33,8 @@ const ClientMessages = () => {
   const [messageInput, setMessageInput] = useState("");
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
-  const [showInfoPanel, setShowInfoPanel] = useState(true);
-  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, totalUnreadCount } = useUnreadStore();
 
   // Sync active conversation with unread store
   useEffect(() => {
@@ -107,13 +108,20 @@ const ClientMessages = () => {
 
   const handleMessageRead = useCallback(
     (data: { conversationId: string; userId: string; readAt: string }) => {
+      console.log("[Socket] Received message:read event", data);
+      if (data.userId === user?._id?.toString()) {
+        console.log("[Socket] Ignored message:read because I triggered it");
+        return; // We triggered this read, ignore it meant for other user's UI
+      }
+
       const readConvId = data.conversationId.toString();
       const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
       // Update message read status
       if (readConvId === selId) {
+        console.log("[Socket] Marking messages as read in UI for conversation", selId);
         setMessages((prev) =>
           prev.map((m) =>
-            m.senderId === user?._id ? { ...m, read: true } : m,
+            m.senderId?.toString() === user?._id?.toString() ? { ...m, read: true } : m,
           ),
         );
       }
@@ -412,6 +420,12 @@ const ClientMessages = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <MessageSquare size={20} />
+            {totalUnreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
+            )}
+          </Link>
           <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
             <Bell size={20} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
@@ -421,9 +435,11 @@ const ClientMessages = () => {
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
               className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
             >
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                {user?.fullName?.charAt(0) || "U"}
-              </div>
+              <ChatAvatar
+                name={user?.fullName || "U"}
+                size="sm"
+                showOnlineIndicator={false}
+              />
               <ChevronDown
                 size={16}
                 className="text-slate-500 hidden sm:block"
@@ -450,7 +466,16 @@ const ClientMessages = () => {
                   <Settings size={16} /> Settings
                 </Link>
                 <hr className="my-2 border-slate-100" />
-                <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full">
+                <button 
+                  onClick={async () => {
+                    try {
+                      await logout();
+                    } catch (error) {
+                      console.error("Logout failed:", error);
+                    }
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                >
                   <LogOut size={16} /> Logout
                 </button>
               </div>

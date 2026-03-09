@@ -34,44 +34,7 @@ interface MetricData {
   trendType: "positive" | "warning" | "negative";
 }
 
-const metricsData: MetricData[] = [
-  {
-    id: "users",
-    label: "Total Users",
-    value: "2,840",
-    icon: Users,
-    iconColor: "indigo",
-    trend: "+12% this month",
-    trendType: "positive",
-  },
-  {
-    id: "revenue",
-    label: "Monthly Revenue",
-    value: "₹1,85,000",
-    icon: Wallet,
-    iconColor: "cyan",
-    trend: "+8% from last month",
-    trendType: "positive",
-  },
-  {
-    id: "projects",
-    label: "Active Projects",
-    value: "156",
-    icon: Briefcase,
-    iconColor: "violet",
-    trend: "+23 new this week",
-    trendType: "positive",
-  },
-  {
-    id: "pending",
-    label: "Pending Actions",
-    value: "28",
-    icon: AlertCircle,
-    iconColor: "amber",
-    trend: "Requires attention",
-    trendType: "warning",
-  },
-];
+
 
 interface RecentProject {
   id: string;
@@ -651,18 +614,14 @@ const getStatusLabel = (status: RecentProject["status"]) => {
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        setLoading(true);
         const data = await adminService.getDashboardStats();
         setStats(data);
       } catch (error) {
         console.error("Error fetching stats:", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchStats();

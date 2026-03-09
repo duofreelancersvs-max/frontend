@@ -32,6 +32,7 @@ import {
   userService,
   clientService,
 } from "@/services";
+import { useUnreadStore } from "@/stores/unread.store";
 import type {
   Project,
   Application,
@@ -52,6 +53,7 @@ const ClientDashboard = () => {
   const { logout, user } = useAuth();
   const [clientProfile, setClientProfile] = useState<any>(null);
   const [userFullName, setUserFullName] = useState<string>("");
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +66,7 @@ const ClientDashboard = () => {
             .catch(() => []),
           freelancerService
             .getTopRated()
-            .then((r) => r.freelancers)
+            .then((r) => r.profiles || (r as any).freelancers)
             .catch(() => []),
           conversationService
             .getAll()
@@ -208,7 +210,7 @@ const ClientDashboard = () => {
         .map((n) => n[0])
         .join("") || "F",
     title: f.title || "Freelancer",
-    skills: f.skills || [],
+    skills: (f.skills || []).map((s: any) => typeof s === 'string' ? s : s.name || 'Skill'),
     rating: f.rating || 0,
     reviews: f.totalReviews || 0,
   }));
@@ -300,6 +302,14 @@ const ClientDashboard = () => {
                 <Search size={20} />
               </button>
 
+              {/* Messages */}
+              <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+                <MessageSquare size={20} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                )}
+              </Link>
+
               {/* Notifications */}
               <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
                 <Bell size={20} />
@@ -313,7 +323,13 @@ const ClientDashboard = () => {
                   className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    RK
+                    {user?.fullName
+                      ? user.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : (user?.email?.[0] || "U").toUpperCase()}
                   </div>
                   <ChevronDown
                     size={16}
@@ -324,9 +340,11 @@ const ClientDashboard = () => {
                 {profileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">Rajesh Kumar</p>
-                      <p className="text-sm text-slate-500">
-                        rajesh@company.com
+                      <p className="font-semibold text-navy">
+                        {user?.fullName || user?.email?.split("@")[0] || "User"}
+                      </p>
+                      <p className="text-sm text-slate-500 truncate">
+                        {user?.email}
                       </p>
                     </div>
                     <Link

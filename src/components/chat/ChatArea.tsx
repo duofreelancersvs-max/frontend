@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Message } from "@/services";
+import { ChatAvatar } from "./index";
 import MessageBubble from "./MessageBubble";
 import ChatTermsOverlay from "./ChatTermsOverlay";
 
@@ -106,17 +107,11 @@ const ChatArea = ({
               <ArrowLeft size={20} />
             </button>
           )}
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-semibold text-sm">
-              {participant.name.charAt(0)}
-            </div>
-            {participant.online && (
-              <span className="absolute bottom-0 right-0 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white"></span>
-              </span>
-            )}
-          </div>
+          <ChatAvatar
+            name={participant.name}
+            size="md"
+            online={participant.online}
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <h3 className="font-semibold text-navy text-sm">

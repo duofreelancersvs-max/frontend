@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import Messages from "@/pages/client/Messages";

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ChatAvatar } from "./index";
 
 export interface InfoPanelParticipant {
   userId: string;
@@ -55,9 +56,13 @@ const ChatInfoPanel = ({
     >
       {/* Profile Header */}
       <div className="p-6 text-center border-b border-slate-100">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
-          {participant.name.charAt(0)}
-        </div>
+        <ChatAvatar
+          name={participant.name}
+          size="xl"
+          online={false}
+          showOnlineIndicator={false}
+          className="mx-auto mb-3"
+        />
         <div className="flex items-center justify-center gap-1.5 mb-1">
           <h3 className="font-bold text-navy">{participant.name}</h3>
           {participant.verified && (

@@ -1,3 +1,5 @@
+import { useUnreadStore } from "@/stores/unread.store";
+import { useAuth } from "@/hooks/useAuth";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Search, Bell, MessageSquare, Menu } from "lucide-react";
@@ -19,6 +21,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onMenuClick,
   className,
 }) => {
+  const { user } = useAuth();
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
+  const role = user?.role === 'freelancer' ? 'freelancer' : 'client';
   return (
     <header
       className={cn(
@@ -61,11 +66,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
 
         {/* Messages */}
-        <Link to="/freelancer/messages" className="relative">
+        <Link to={`/${role}/messages`} className="relative">
           <button className="p-2 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-full transition-all">
             <MessageSquare size={20} />
           </button>
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white"></span>
+          {totalUnreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white"></span>}
         </Link>
 
         <div className="h-8 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>

@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useOutletContext, useNavigate, Link } from "react-router-dom";
 import {
   Search,
-  Star,
   Menu,
   Bookmark,
   BookmarkCheck,
@@ -11,19 +10,26 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  BadgeCheck,
   Briefcase,
   SlidersHorizontal,
   DollarSign,
   AlertCircle,
+  MessageSquare,
+  Bell,
+  ChevronDown,
+  User as UserIcon,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { projectService, conversationService } from "@/services";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
+import { useUnreadStore } from "@/stores/unread.store";
 
 // Filter options
 const categories = [
@@ -60,134 +66,6 @@ const sortOptions = [
   { value: "budget-low", label: "Budget (Low-High)" },
 ];
 
-// Mock projects data
-const mockProjects = [
-  {
-    id: 1,
-    title: "E-commerce Product Video Editing",
-    description:
-      "Looking for an experienced video editor to create compelling product videos for our e-commerce platform. Must have experience with color grading and motion graphics.",
-    client: {
-      name: "TechMart Solutions",
-      rating: 4.8,
-      reviews: 45,
-      verified: true,
-    },
-    budget: { type: "Fixed", minAmount: 15000, maxAmount: 20000 },
-    skills: [
-      "Premiere Pro",
-      "After Effects",
-      "Color Grading",
-      "Motion Graphics",
-    ],
-    location: "Remote",
-    proposals: "5-10",
-    postedTime: "2 hours ago",
-    experienceLevel: "Intermediate",
-    saved: false,
-  },
-  {
-    id: 2,
-    title: "Corporate Explainer Animation",
-    description:
-      "We need a motion graphics expert to create a 2-minute explainer video for our SaaS product. Looking for clean, modern animation style.",
-    client: {
-      name: "InnovateCorp",
-      rating: 4.9,
-      reviews: 72,
-      verified: true,
-    },
-    budget: { type: "Fixed", minAmount: 25000, maxAmount: 35000 },
-    skills: ["After Effects", "Motion Graphics", "2D Animation", "Illustrator"],
-    location: "Remote",
-    proposals: "10-15",
-    postedTime: "5 hours ago",
-    experienceLevel: "Expert",
-    saved: true,
-  },
-  {
-    id: 3,
-    title: "YouTube Channel Intro & Outro",
-    description:
-      "Need creative intro and outro animations for a tech review YouTube channel. Should be modern, engaging, and under 10 seconds each.",
-    client: {
-      name: "TechReview Pro",
-      rating: 4.5,
-      reviews: 28,
-      verified: false,
-    },
-    budget: { type: "Fixed", minAmount: 5000, maxAmount: 8000 },
-    skills: ["After Effects", "Motion Graphics", "Logo Animation"],
-    location: "Remote",
-    proposals: "15-20",
-    postedTime: "1 day ago",
-    experienceLevel: "Entry Level",
-    saved: false,
-  },
-  {
-    id: 4,
-    title: "Wedding Highlight Reel Editing",
-    description:
-      "Looking for a skilled editor to create cinematic wedding highlight reels. Must have experience with color grading and audio syncing.",
-    client: {
-      name: "Moments Photography",
-      rating: 4.7,
-      reviews: 56,
-      verified: true,
-    },
-    budget: { type: "Hourly", minAmount: 800, maxAmount: 1200 },
-    skills: [
-      "Premiere Pro",
-      "DaVinci Resolve",
-      "Color Grading",
-      "Audio Editing",
-    ],
-    location: "Hybrid",
-    proposals: "3-5",
-    postedTime: "3 hours ago",
-    experienceLevel: "Intermediate",
-    saved: false,
-  },
-  {
-    id: 5,
-    title: "Social Media Ad Creatives",
-    description:
-      "Need multiple short video ads (15-30 seconds) for Instagram and Facebook. Fast turnaround required. Experience with vertical video format preferred.",
-    client: {
-      name: "Brand Boost Agency",
-      rating: 4.6,
-      reviews: 89,
-      verified: true,
-    },
-    budget: { type: "Fixed", minAmount: 10000, maxAmount: 15000 },
-    skills: ["Premiere Pro", "After Effects", "Social Media", "Video Ads"],
-    location: "Remote",
-    proposals: "20+",
-    postedTime: "6 hours ago",
-    experienceLevel: "Intermediate",
-    saved: true,
-  },
-  {
-    id: 6,
-    title: "3D Product Visualization",
-    description:
-      "Looking for a 3D artist to create photorealistic product renders and animations for our furniture catalog. Cinema 4D or Blender expertise required.",
-    client: {
-      name: "Modern Furnishings",
-      rating: 4.9,
-      reviews: 34,
-      verified: true,
-    },
-    budget: { type: "Fixed", minAmount: 40000, maxAmount: 60000 },
-    skills: ["Cinema 4D", "Blender", "3D Modeling", "Product Visualization"],
-    location: "Remote",
-    proposals: "5-10",
-    postedTime: "2 days ago",
-    experienceLevel: "Expert",
-    saved: false,
-  },
-];
-
 // User's skills for matching
 const userSkills = [
   "Premiere Pro",
@@ -199,11 +77,22 @@ const userSkills = [
 
 const BrowseProjects = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"browse" | "saved">("browse");
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("relevance");
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   // API state
   const [projects, setProjects] = useState<Project[]>([]);
@@ -361,7 +250,7 @@ const BrowseProjects = () => {
       <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -380,7 +269,7 @@ const BrowseProjects = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl hidden md:flex">
               <button
                 onClick={() => setActiveTab("browse")}
                 className={cn(
@@ -410,6 +299,79 @@ const BrowseProjects = () => {
                   </span>
                 )}
               </button>
+            </div>
+
+            <div className="flex items-center gap-2 lg:gap-4">
+              <Link
+                to="/freelancer/messages"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+              >
+                <MessageSquare size={20} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                )}
+              </Link>
+              
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+                <Bell size={20} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
+                    {user?.fullName
+                      ? user.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : (user?.email?.[0] || "U").toUpperCase()}
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className="text-slate-500 hidden sm:block"
+                  />
+                </button>
+
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="font-semibold text-navy">
+                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
+                      </p>
+                      <p className="text-sm text-slate-500 truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <Link
+                      to="/freelancer/profile"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    >
+                      <UserIcon size={16} />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/freelancer/settings"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    >
+                      <Settings size={16} />
+                      Settings
+                    </Link>
+                    <hr className="my-2 border-slate-100" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>

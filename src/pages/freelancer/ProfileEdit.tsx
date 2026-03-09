@@ -11,9 +11,9 @@ import {
   Star,
   Plus,
   Trash2,
-  Edit3,
+  Bell,
   GripVertical,
-  Upload,
+  MessageSquare,
   Briefcase,
   GraduationCap,
   CheckCircle,
@@ -22,11 +22,15 @@ import {
   ChevronRight,
   Image,
   Loader2,
+  ChevronDown,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
+import { useUnreadStore } from "@/stores/unread.store";
 import { freelancerService } from "@/services/freelancer.service";
 import type {
   FreelancerProfile,
@@ -65,18 +69,6 @@ const availabilityOptions = [
   { value: "not-available", label: "Not available" },
 ];
 
-const languages = [
-  "English",
-  "Hindi",
-  "Tamil",
-  "Telugu",
-  "Kannada",
-  "Malayalam",
-  "Marathi",
-  "Bengali",
-  "Gujarati",
-];
-
 const suggestedSkills = [
   "Adobe Premiere Pro",
   "After Effects",
@@ -89,8 +81,18 @@ const suggestedSkills = [
 ];
 
 const FreelancerProfileEdit = () => {
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -116,7 +118,6 @@ const FreelancerProfileEdit = () => {
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showExperienceModal, setShowExperienceModal] = useState(false);
   const [showEducationModal, setShowEducationModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
 
   // Modal form refs
   const portfolioTitleRef = useRef<HTMLInputElement>(null);
@@ -408,7 +409,7 @@ const FreelancerProfileEdit = () => {
       <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -426,8 +427,8 @@ const FreelancerProfileEdit = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Link to="/freelancer/profile">
+            <div className="flex items-center gap-2 lg:gap-4">
+              <Link to="/freelancer/profile" className="hidden sm:flex">
                 <Button
                   variant="outline"
                   className="border-slate-200 text-slate-600 hover:bg-slate-50"
@@ -437,7 +438,7 @@ const FreelancerProfileEdit = () => {
                 </Button>
               </Link>
               <Button
-                className="bg-teal hover:bg-teal-light text-white"
+                className="bg-teal hover:bg-teal-light text-white hidden sm:flex"
                 onClick={handleSaveChanges}
                 disabled={saving}
               >
@@ -448,6 +449,78 @@ const FreelancerProfileEdit = () => {
                 )}
                 {saving ? "Saving…" : "Save Changes"}
               </Button>
+
+              <div className="w-px h-8 bg-slate-200 mx-1 hidden lg:block" />
+
+              <Link
+                to="/freelancer/messages"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+              >
+                <MessageSquare size={20} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                )}
+              </Link>
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+                <Bell size={20} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
+                    {user?.fullName
+                      ? user.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : (user?.email?.[0] || "U").toUpperCase()}
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className="text-slate-500 hidden sm:block"
+                  />
+                </button>
+
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="font-semibold text-navy">
+                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
+                      </p>
+                      <p className="text-sm text-slate-500 truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <Link
+                      to="/freelancer/profile"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    >
+                      <User size={16} />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/freelancer/settings"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    >
+                      <Settings size={16} />
+                      Settings
+                    </Link>
+                    <hr className="my-2 border-slate-100" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -844,7 +917,6 @@ const FreelancerProfileEdit = () => {
                         </h4>
                         <Button
                           onClick={() => {
-                            setEditingItem(null);
                             setShowPortfolioModal(true);
                           }}
                           className="bg-teal hover:bg-teal-light text-white"
@@ -934,7 +1006,6 @@ const FreelancerProfileEdit = () => {
                         </h4>
                         <Button
                           onClick={() => {
-                            setEditingItem(null);
                             setShowExperienceModal(true);
                           }}
                           className="bg-teal hover:bg-teal-light text-white"
@@ -1038,7 +1109,6 @@ const FreelancerProfileEdit = () => {
                         </h4>
                         <Button
                           onClick={() => {
-                            setEditingItem(null);
                             setShowEducationModal(true);
                           }}
                           className="bg-teal hover:bg-teal-light text-white"

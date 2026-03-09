@@ -32,7 +32,6 @@ import {
   applicationService,
   projectService,
   subscriptionService,
-  notificationService,
   conversationService,
 } from "@/services";
 import type {
@@ -40,10 +39,10 @@ import type {
   Application,
   Project,
   Subscription,
-  Notification,
   Conversation,
 } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
+import { useUnreadStore } from "@/stores/unread.store";
 
 const getStatusBadgeStyle = (status: string) => {
   switch (status) {
@@ -64,6 +63,7 @@ const getStatusBadgeStyle = (status: string) => {
 };
 
 const FreelancerDashboard = () => {
+  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,6 @@ const FreelancerDashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const { logout, user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
@@ -85,7 +84,6 @@ const FreelancerDashboard = () => {
           appsData,
           projectsData,
           subData,
-          notifData,
           convData,
         ] = await Promise.allSettled([
           freelancerService.getMyProfile().catch(() => null),
@@ -98,10 +96,6 @@ const FreelancerDashboard = () => {
             .then((r) => r.projects)
             .catch(() => []),
           subscriptionService.getMySubscription().catch(() => null),
-          notificationService
-            .getAll({ limit: 5 })
-            .then((r) => r.notifications)
-            .catch(() => []),
           conversationService
             .getAll()
             .then((r) => r.conversations)
@@ -113,7 +107,6 @@ const FreelancerDashboard = () => {
         if (projectsData.status === "fulfilled")
           setRecommendedProjects(projectsData.value);
         if (subData.status === "fulfilled") setSubscription(subData.value);
-        if (notifData.status === "fulfilled") setNotifications(notifData.value);
         if (convData.status === "fulfilled") setConversations(convData.value);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -139,6 +132,7 @@ const FreelancerDashboard = () => {
           ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
           (!!profile.hourlyRate ? 15 : 0) +
           ((profile.skills?.length || 0) > 0 ? 15 : 0) +
+          // @ts-expect-error type missing
           ((profile.experience?.length || 0) > 0 ? 15 : 0) +
           ((profile.education?.length || 0) > 0 ? 10 : 0) +
           (profile.availability ? 10 : 0),
@@ -210,6 +204,7 @@ const FreelancerDashboard = () => {
     { label: "Set hourly rate", completed: !!profile?.hourlyRate },
     {
       label: "Add work experience",
+      // @ts-expect-error type missing
       completed: (profile?.experience?.length || 0) > 0,
     },
     {
@@ -309,6 +304,13 @@ const FreelancerDashboard = () => {
 
             <div className="flex items-center gap-2 lg:gap-4">
               {/* Notifications */}
+              
+              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+                <MessageSquare size={20} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
+                )}
+              </Link>
               <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
@@ -321,7 +323,13 @@ const FreelancerDashboard = () => {
                   className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    AK
+                    {user?.fullName
+                      ? user.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : (user?.email?.[0] || "U").toUpperCase()}
                   </div>
                   <ChevronDown
                     size={16}
@@ -332,8 +340,12 @@ const FreelancerDashboard = () => {
                 {profileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">Arun Kumar</p>
-                      <p className="text-sm text-slate-500">arun@email.com</p>
+                      <p className="font-semibold text-navy">
+                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
+                      </p>
+                      <p className="text-sm text-slate-500 truncate">
+                        {user?.email}
+                      </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
@@ -352,7 +364,7 @@ const FreelancerDashboard = () => {
                     <hr className="my-2 border-slate-100" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
