@@ -72,9 +72,7 @@ const FreelancerMessages = () => {
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [pendingConversation, setPendingConversation] =
-    useState<Conversation | null>(null);
+  const [modalChecked, setModalChecked] = useState(false);
   const [_loading, _setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -278,7 +276,7 @@ const FreelancerMessages = () => {
         : "",
       unreadCount: conv.unreadCount,
       isOnline: onlineUsers.has(clientParticipant?.id || ""),
-      termsAccepted: true,
+      termsAccepted: conv.termsAccepted?.freelancerAccepted ?? false,
     };
   });
 
@@ -292,11 +290,22 @@ const FreelancerMessages = () => {
   };
 
   const handleAcceptTerms = async () => {
-    if (pendingConversation && selectedConversation) {
+    if (selectedConversation) {
       try {
         await conversationService.acceptTerms(selectedConversation.id);
+        
+        // Update both conversations list and selected conversation to reflect accepted terms
+        setConversations(prev => prev.map(c => 
+          c.id === selectedConversation.id 
+            ? { ...c, termsAccepted: { ...c.termsAccepted!, freelancerAccepted: true } }
+            : c
+        ));
+        
+        setSelectedConversation(prev => 
+          prev ? { ...prev, termsAccepted: { ...prev.termsAccepted!, freelancerAccepted: true } } : null
+        );
+        
         setShowTermsModal(false);
-        setPendingConversation(null);
       } catch (error) {
         console.error("Error accepting terms:", error);
       }
@@ -517,9 +526,9 @@ const FreelancerMessages = () => {
             isConnected={isConnected}
             currentUserId={user?._id}
             role="freelancer"
-            termsAccepted={termsAccepted}
+            termsAccepted={selectedConversation?.termsAccepted?.freelancerAccepted ?? false}
             onAcceptTermsClick={() => {
-              setPendingConversation(selectedConversation);
+              setModalChecked(false); // Reset checkbox for new acceptance
               setShowTermsModal(true);
             }}
             showInfoPanel={showInfoPanel}
@@ -643,7 +652,6 @@ const FreelancerMessages = () => {
               <button
                 onClick={() => {
                   setShowTermsModal(false);
-                  setPendingConversation(null);
                 }}
                 className="ml-auto p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
@@ -663,8 +671,8 @@ const FreelancerMessages = () => {
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  checked={modalChecked}
+                  onChange={(e) => setModalChecked(e.target.checked)}
                   className="mt-1 w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal"
                 />
                 <span className="text-sm text-navy">
@@ -687,14 +695,13 @@ const FreelancerMessages = () => {
                 className="flex-1 border-slate-200"
                 onClick={() => {
                   setShowTermsModal(false);
-                  setPendingConversation(null);
                 }}
               >
                 Cancel
               </Button>
               <Button
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
-                disabled={!termsAccepted}
+                disabled={!modalChecked}
                 onClick={handleAcceptTerms}
               >
                 Start Chat

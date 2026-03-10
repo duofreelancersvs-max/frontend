@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import {
   FolderOpen,
-  Star,
   Menu,
   Plus,
   ExternalLink,
@@ -25,6 +24,9 @@ import { freelancerService } from "@/services";
 import type { PortfolioItem } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useUnreadStore } from "@/stores/unread.store";
+import { AddPortfolioModal } from "@/components/modals/AddPortfolioModal";
+import { getCategoryStyle } from "@/lib/category-styles";
+import { toast } from "react-toastify";
 
 // Extended type for display purposes with optional UI fields
 interface PortfolioDisplayItem extends PortfolioItem {
@@ -55,6 +57,8 @@ const FreelancerPortfolio = () => {
   const [portfolioItemsState, setPortfolioItems] = useState<
     PortfolioDisplayItem[]
   >([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<PortfolioDisplayItem | null>(null);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
 
@@ -80,10 +84,68 @@ const FreelancerPortfolio = () => {
     fetchPortfolio();
   }, []);
 
+  const handleProjectSubmit = async (data: {
+    title: string;
+    description: string;
+    projectUrl: string;
+    category: string;
+    thumbnail: string;
+  }) => {
+    try {
+      if (editingItem) {
+        const itemId = editingItem._id || editingItem.id || "";
+        const updatedProfile = await freelancerService.updatePortfolio(itemId, {
+          title: data.title,
+          description: data.description,
+          projectUrl: data.projectUrl,
+          skills: [data.category],
+          thumbnail: data.thumbnail,
+        });
+        setPortfolioItems(updatedProfile.portfolio || []);
+        toast.success("Project updated successfully!");
+      } else {
+        const updatedProfile = await freelancerService.addPortfolio({
+          title: data.title,
+          description: data.description,
+          projectUrl: data.projectUrl,
+          skills: [data.category],
+          thumbnail: data.thumbnail,
+        });
+        setPortfolioItems(updatedProfile.portfolio || []);
+        toast.success("Project added successfully!");
+      }
+      setEditingItem(null);
+    } catch (error) {
+      console.error("Error submitting project:", error);
+      toast.error("Failed to save project. Please try again.");
+      throw error;
+    }
+  };
+
+  const handleDeleteProject = async (itemId: string) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    try {
+      const updatedProfile = await freelancerService.removePortfolio(itemId);
+      setPortfolioItems(updatedProfile.portfolio || []);
+      setOpenMenuId(null);
+      toast.success("Project deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project.");
+    }
+  };
+
+  const handleShareProject = (item: PortfolioDisplayItem) => {
+    const url = item.projectUrl || window.location.href;
+    navigator.clipboard.writeText(url);
+    toast.info("Project link copied to clipboard!");
+    setOpenMenuId(null);
+  };
+
   const filteredItems =
     selectedCategory === "All"
       ? portfolioItemsState
-      : portfolioItemsState.filter((item) => item.title === selectedCategory);
+      : portfolioItemsState.filter((item) => (item.skills?.[0] || item.category) === selectedCategory);
 
   return (
     <div className="w-full bg-slate-50">
@@ -124,7 +186,10 @@ const FreelancerPortfolio = () => {
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
 
-              <Button className="bg-teal hover:bg-teal-light text-white hidden sm:flex">
+              <Button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-teal hover:bg-teal-light text-white hidden sm:flex"
+              >
                 <Plus size={18} className="mr-2" />
                 Add Project
               </Button>
@@ -225,12 +290,9 @@ const FreelancerPortfolio = () => {
               </p>
             </div>
             <div className="bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500 mb-1">Total Likes</p>
+              <p className="text-sm text-slate-500 mb-1">Portfolio Rating</p>
               <p className="text-2xl font-bold text-navy">
-                {portfolioItemsState.reduce(
-                  (acc, item) => acc + (item.likes || 0),
-                  0,
-                )}
+                NA
               </p>
             </div>
             <div className="bg-white rounded-xl border border-slate-100 p-4">
@@ -249,17 +311,45 @@ const FreelancerPortfolio = () => {
                 className="group bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-lg transition-all"
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-slate-100">
-                  <img
-                    src={item.thumbnail}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative aspect-video">
+                  {(item.thumbnail?.startsWith("gradient:") || !item.thumbnail) ? (
+                    (() => {
+                      const category = item.skills?.[0] || (item.thumbnail?.startsWith("gradient:") ? item.thumbnail.split(":")[1] : "Default") || "Default";
+                      const style = getCategoryStyle(category);
+                      const Icon = style.icon;
+                      return (
+                        <div className={cn(
+                          "w-full h-full flex flex-col items-center justify-center text-white bg-gradient-to-br",
+                          style.gradient
+                        )}>
+                          <Icon size={40} className="mb-2 opacity-80" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                            {category}
+                          </span>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.title}
+                      className="w-full h-full object-cover bg-slate-100"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors">
+                    <button 
+                      onClick={() => handleShareProject(item)}
+                      className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors"
+                    >
                       <Eye size={18} />
                     </button>
-                    <button className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors">
+                    <button 
+                      onClick={() => {
+                        setEditingItem(item);
+                        setIsAddModalOpen(true);
+                      }}
+                      className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors"
+                    >
                       <Edit2 size={18} />
                     </button>
                   </div>
@@ -288,13 +378,26 @@ const FreelancerPortfolio = () => {
                           className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-50"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                          <button 
+                            onClick={() => {
+                              setEditingItem(item);
+                              setIsAddModalOpen(true);
+                              setOpenMenuId(null);
+                            }}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                          >
                             <Edit2 size={14} /> Edit
                           </button>
-                          <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                          <button 
+                            onClick={() => handleShareProject(item)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                          >
                             <ExternalLink size={14} /> Share
                           </button>
-                          <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50">
+                          <button 
+                            onClick={() => handleDeleteProject(item._id || item.id || "")}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                          >
                             <Trash2 size={14} /> Delete
                           </button>
                         </div>
@@ -306,20 +409,17 @@ const FreelancerPortfolio = () => {
                 {/* Content */}
                 <div className="p-4">
                   <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-medium mb-2">
-                    {item.category}
+                    {item.skills?.[0] || item.category || "General"}
                   </span>
                   <h3 className="font-semibold text-navy mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 mb-3">
-                    Client: {item.client}
+                  <p className="text-sm text-slate-500 mb-3 line-clamp-2">
+                    {item.description}
                   </p>
 
                   <div className="flex items-center justify-between text-sm text-slate-500">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Eye size={14} /> {(item.views ?? 0).toLocaleString()}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star size={14} /> {item.likes}
                       </span>
                     </div>
                   </div>
@@ -337,7 +437,10 @@ const FreelancerPortfolio = () => {
               <p className="text-slate-500 mb-4">
                 Start adding your work to build your portfolio
               </p>
-              <Button className="bg-teal hover:bg-teal-light text-white">
+              <Button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-teal hover:bg-teal-light text-white"
+              >
                 <Plus size={18} className="mr-2" />
                 Add Your First Project
               </Button>
@@ -345,6 +448,17 @@ const FreelancerPortfolio = () => {
           )}
         </main>
       </div>
+
+      <AddPortfolioModal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingItem(null);
+        }}
+        onSubmit={handleProjectSubmit}
+        categories={categories}
+        editItem={editingItem}
+      />
     </div>
   );
 };

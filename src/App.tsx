@@ -12,6 +12,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import OAuthCallback from "@/pages/auth/OAuthCallback";
 import ClientDashboard from "@/pages/client/Dashboard";
 import ClientFreelancers from "@/pages/client/ClientFreelancers";
+import FreelancerProfileView from "@/pages/client/FreelancerProfileView";
 import PostProject from "@/pages/client/PostProject";
 import ClientProjects from "@/pages/client/Projects";
 import ProjectDetails from "@/pages/client/ProjectDetails";
@@ -82,6 +83,7 @@ function App() {
           <Route path="project/:id/applications" element={<ProjectDetails />} />
           <Route path="project/:id/edit" element={<PostProject />} />
           <Route path="freelancers" element={<ClientFreelancers />} />
+          <Route path="freelancer/:id" element={<FreelancerProfileView />} />
           <Route path="messages" element={<ClientMessages />} />
           <Route path="payments" element={<ClientPayments />} />
           <Route path="reviews" element={<ClientReviews />} />

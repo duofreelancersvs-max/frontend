@@ -28,6 +28,8 @@ import {
   CheckCircle,
   ThumbsDown,
   Award,
+  Loader2,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnreadStore } from "@/stores/unread.store";
 import { projectService, applicationService } from "@/services";
 import type { Project, Application } from "@/services";
+import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -59,6 +62,9 @@ const ProjectDetails = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,6 +99,7 @@ const ProjectDetails = () => {
   const handleApplicationAction = async (
     applicationId: string,
     status: "accepted" | "rejected" | "shortlisted" | "hired",
+    freelancerId?: string,
   ) => {
     try {
       setActionLoading(`${applicationId}-${status}`);
@@ -106,6 +113,15 @@ const ProjectDetails = () => {
         ),
       );
 
+      // If hired, update the project status locally to reflect the change immediately
+      if (status === "accepted" && project) {
+        setProject({
+          ...project,
+          status: "in-progress",
+          freelancerId: freelancerId, // Now we have the freelancerId
+        });
+      }
+
       // Redirect to messages after hiring
       if (status === "accepted") {
         navigate("/client/messages");
@@ -115,6 +131,36 @@ const ProjectDetails = () => {
       alert(`Failed to update application. Please try again.`);
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!project || !id) return;
+    if (!window.confirm("Are you sure you want to mark this project as completed?")) return;
+    try {
+      setCompleting(true);
+      await projectService.complete(id);
+      setProject({ ...project, status: "completed" });
+    } catch (err) {
+      console.error("Error completing project:", err);
+      alert("Failed to mark project as completed.");
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!project || !id) return;
+    if (!window.confirm("Are you sure you want to close this project?")) return;
+    try {
+      setCanceling(true);
+      await projectService.cancel(id);
+      setProject({ ...project, status: "cancelled" });
+    } catch (err) {
+      console.error("Error closing project:", err);
+      alert("Failed to close project.");
+    } finally {
+      setCanceling(false);
     }
   };
 
@@ -166,6 +212,8 @@ const ProjectDetails = () => {
         return "In Progress";
       case "completed":
         return "Completed";
+      case "cancelled":
+        return "Cancelled/Closed";
       default:
         return status;
     }
@@ -335,22 +383,45 @@ const ProjectDetails = () => {
                 <Share2 size={16} className="mr-2" />
                 Share
               </Button>
-              <Link to={`/client/project/${id}/edit`}>
-                <Button
-                  variant="outline"
-                  className="border-slate-200 text-slate-600"
-                >
-                  <Edit2 size={16} className="mr-2" />
-                  Edit Project
-                </Button>
-              </Link>
+              {project.status === "open" && (
+                <Link to={`/client/project/${id}/edit`}>
+                  <Button
+                    variant="outline"
+                    className="border-slate-200 text-slate-600"
+                  >
+                    <Edit2 size={16} className="mr-2" />
+                    Edit Project
+                  </Button>
+                </Link>
+              )}
               {project.status === "open" && (
                 <Button
                   variant="outline"
                   className="border-red-200 text-red-500 hover:bg-red-50"
+                  onClick={handleCancel}
+                  disabled={canceling}
                 >
-                  <XCircle size={16} className="mr-2" />
+                  {canceling ? <Loader2 size={16} className="mr-2 animate-spin" /> : <XCircle size={16} className="mr-2" />}
                   Close Project
+                </Button>
+              )}
+              {project.status === "in-progress" && (
+                <Button
+                  className="bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm"
+                  onClick={handleComplete}
+                  disabled={completing}
+                >
+                  {completing ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle size={16} className="mr-2" />}
+                  Mark as Completed
+                </Button>
+              )}
+              {project.status === "completed" && project.freelancer && (
+                <Button
+                  className="bg-gold hover:bg-gold/90 text-navy shadow-sm"
+                  onClick={() => setReviewModalOpen(true)}
+                >
+                  <Star size={16} className="mr-2 fill-navy" />
+                  Leave Review
                 </Button>
               )}
             </div>
@@ -601,6 +672,7 @@ const ProjectDetails = () => {
                                   handleApplicationAction(
                                     application._id || application.id,
                                     "rejected",
+                                    application.freelancerId
                                   )
                                 }
                                 className="flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
@@ -623,44 +695,51 @@ const ProjectDetails = () => {
                               </Button>
                             </Link>
 
-                            {/* Additional Actions (Hire/Shortlist) if pending */}
-                            {application.status === "pending" && (
-                              <Button
-                                size="sm"
-                                disabled={
-                                  actionLoading ===
-                                  `${application._id || application.id}-shortlisted`
-                                }
-                                className="h-9 bg-gold hover:bg-gold/90 text-white shadow-sm"
-                                onClick={() =>
-                                  handleApplicationAction(
-                                    application._id || application.id,
-                                    "shortlisted",
-                                  )
-                                }
-                              >
-                                <Heart size={14} className="mr-1.5" /> Shortlist
-                              </Button>
-                            )}
-                            {application.status === "pending" && (
-                              <Button
-                                size="sm"
-                                disabled={
-                                  actionLoading ===
-                                  `${application._id || application.id}-accepted`
-                                }
-                                className="h-9 bg-teal hover:bg-teal-light text-white shadow-sm"
-                                onClick={() =>
-                                  handleApplicationAction(
-                                    application._id || application.id,
-                                    "accepted",
-                                  )
-                                }
-                              >
-                                <CheckCircle size={14} className="mr-1.5" />{" "}
-                                Hire
-                              </Button>
-                            )}
+                            {/* Additional Actions (Hire/Shortlist) if pending/viewed and project is open */}
+                            {project.status === "open" &&
+                              (application.status === "pending" ||
+                                application.status === "viewed") && (
+                                <Button
+                                  size="sm"
+                                  disabled={
+                                    actionLoading ===
+                                    `${application._id || application.id}-shortlisted`
+                                  }
+                                  className="h-9 bg-gold hover:bg-gold/90 text-white shadow-sm"
+                                  onClick={() =>
+                                    handleApplicationAction(
+                                      application._id || application.id,
+                                      "shortlisted",
+                                      application.freelancerId
+                                    )
+                                  }
+                                >
+                                  <Heart size={14} className="mr-1.5" /> Shortlist
+                                </Button>
+                              )}
+                            {project.status === "open" &&
+                              (application.status === "pending" ||
+                                application.status === "viewed" ||
+                                application.status === "shortlisted") && (
+                                <Button
+                                  size="sm"
+                                  disabled={
+                                    actionLoading ===
+                                    `${application._id || application.id}-accepted`
+                                  }
+                                  className="h-9 bg-teal hover:bg-teal-light text-white shadow-sm"
+                                  onClick={() =>
+                                    handleApplicationAction(
+                                      application._id || application.id,
+                                      "accepted",
+                                      application.freelancerId
+                                    )
+                                  }
+                                >
+                                  <CheckCircle size={14} className="mr-1.5" />{" "}
+                                  Hire
+                                </Button>
+                              )}
                           </div>
                         </div>
                       </div>
@@ -685,6 +764,18 @@ const ProjectDetails = () => {
           </div>
         )}
       </main>
+
+      {/* REVIEW MODAL */}
+      {project.freelancer && project.status === "completed" && (
+        <ReviewProjectModal
+          isOpen={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          projectId={project._id || project.id || ""}
+          projectTitle={project.title}
+          freelancerId={project.freelancer.id || project.freelancerId || ""}
+          freelancerName={project.freelancer.fullName || "Freelancer"}
+        />
+      )}
     </div>
   );
 };

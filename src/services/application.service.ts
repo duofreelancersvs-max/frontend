@@ -14,7 +14,8 @@ export interface Application {
     | "rejected"
     | "withdrawn"
     | "shortlisted"
-    | "hired";
+    | "hired"
+    | "viewed";
   createdAt: string;
   updatedAt: string;
   project?: {

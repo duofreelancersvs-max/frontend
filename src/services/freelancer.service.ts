@@ -116,6 +116,12 @@ export const freelancerService = {
   addPortfolio: (data: Partial<PortfolioItem>) =>
     api.post<FreelancerProfile>("/freelancer-profiles/me/portfolio", data),
 
+  updatePortfolio: (itemId: string, data: Partial<PortfolioItem>) =>
+    api.patch<FreelancerProfile>(
+      `/freelancer-profiles/me/portfolio/${itemId}`,
+      data,
+    ),
+
   removePortfolio: (itemId: string) =>
     api.delete<FreelancerProfile>(
       `/freelancer-profiles/me/portfolio/${itemId}`,

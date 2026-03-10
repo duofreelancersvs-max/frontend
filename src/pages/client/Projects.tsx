@@ -26,6 +26,7 @@ import {
   Settings,
   MapPin,
   Loader2,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import type { Project, ProjectStats } from "@/services";
+import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
 
 // Helper to format deadline as a clean date string
 const formatDeadline = (deadline: string) => {
@@ -62,6 +64,8 @@ const ClientProjects = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [stats, setStats] = useState<ProjectStats | null>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [projectToReview, setProjectToReview] = useState<Project | null>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -152,6 +156,11 @@ const ClientProjects = () => {
     } finally {
       setCompletingId(null);
     }
+  };
+
+  const handleOpenReview = (project: Project) => {
+    setProjectToReview(project);
+    setReviewModalOpen(true);
   };
 
   const itemsPerPage = 6;
@@ -648,6 +657,14 @@ const ClientProjects = () => {
                                 ? "Completing..."
                                 : "Complete"}
                             </Button>
+                          ) : project.status === "completed" && project.freelancer ? (
+                            <Button
+                              className="flex-1 h-9 text-xs bg-gold hover:bg-gold/90 text-navy shadow-sm"
+                              onClick={() => handleOpenReview(project)}
+                            >
+                              <Star size={14} className="mr-1.5 fill-navy" />{" "}
+                              Leave Review
+                            </Button>
                           ) : (
                             <Button
                               variant="ghost"
@@ -800,6 +817,17 @@ const ClientProjects = () => {
                                     )}
                                   </Button>
                                 )}
+                                {project.status === "completed" && project.freelancer && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2 text-gold hover:text-gold/90 hover:bg-gold/10"
+                                    onClick={() => handleOpenReview(project)}
+                                    title="Leave Review"
+                                  >
+                                    <Star size={16} className="fill-gold" />
+                                  </Button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -895,6 +923,21 @@ const ClientProjects = () => {
         <div
           className="fixed inset-0 z-0"
           onClick={() => setOpenMenuId(null)}
+        />
+      )}
+
+      {/* REVIEW MODAL */}
+      {projectToReview && (
+        <ReviewProjectModal
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setProjectToReview(null);
+          }}
+          projectId={projectToReview._id}
+          projectTitle={projectToReview.title}
+          freelancerId={projectToReview.freelancer?.id || ""}
+          freelancerName={projectToReview.freelancer?.fullName || "Freelancer"}
         />
       )}
     </div>

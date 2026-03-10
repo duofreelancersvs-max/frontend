@@ -1,4 +1,5 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 import {
   ArrowLeft,
   Verified,
@@ -6,8 +7,6 @@ import {
   Phone,
   Video,
   MoreVertical,
-  Paperclip,
-  Image,
   Smile,
   Send,
   MessageSquare,
@@ -66,7 +65,28 @@ const ChatArea = ({
   onToggleInfoPanel,
   className,
 }: ChatAreaProps) => {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
   const VerifyIcon = role === "client" ? Verified : BadgeCheck;
 
   useEffect(() => {
@@ -182,17 +202,39 @@ const ChatArea = ({
       {!termsAccepted ? (
         <ChatTermsOverlay onAcceptClick={onAcceptTermsClick} />
       ) : (
-        <div className="bg-white border-t border-slate-200 p-4 flex-shrink-0">
+        <div className="bg-white border-t border-slate-200 p-4 flex-shrink-0 relative">
           <div className="flex items-center gap-2">
-            <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-              <Paperclip size={20} />
-            </button>
-            <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg hidden sm:block">
-              <Image size={20} />
-            </button>
-            <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg hidden sm:block">
-              <Smile size={20} />
-            </button>
+            <div className="relative" ref={emojiPickerRef}>
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  showEmojiPicker
+                    ? "bg-teal/10 text-teal"
+                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100",
+                )}
+              >
+                <Smile size={20} />
+              </button>
+
+              {showEmojiPicker && (
+                <div className="absolute bottom-12 left-0 z-50 shadow-2xl border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) => {
+                      setMessageInput(messageInput + emojiData.emoji);
+                      // Don't close picker automatically for better UX
+                    }}
+                    theme={Theme.LIGHT}
+                    lazyLoadEmojis={true}
+                    skinTonesDisabled={true}
+                    searchPlaceHolder="Search emojis..."
+                    width={320}
+                    height={400}
+                  />
+                </div>
+              )}
+            </div>
             <input
               type="text"
               placeholder="Type a message..."

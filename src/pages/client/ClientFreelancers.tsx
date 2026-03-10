@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import { useUnreadStore } from "@/stores/unread.store";
 import {
@@ -63,8 +63,12 @@ const skillOptions = [
 ];
 
 const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-5">
+    <div 
+      onClick={() => navigate(`/client/freelancer/${freelancer._id || freelancer.id}`)}
+      className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-5 cursor-pointer hover:border-teal/30 group"
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="w-14 h-14 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-lg">
           {(freelancer.displayName || freelancer.firstName || "F")
@@ -78,7 +82,7 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
         )}
       </div>
 
-      <h3 className="font-semibold text-navy mb-1 line-clamp-1">
+      <h3 className="font-semibold text-navy mb-1 line-clamp-1 group-hover:text-teal transition-colors">
         {freelancer.displayName ||
           `${freelancer.firstName || ""} ${freelancer.lastName || ""}`.trim() ||
           "Freelancer"}
@@ -120,6 +124,7 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
 };
 
 const ClientFreelancers = () => {
+  const navigate = useNavigate();
   const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -478,7 +483,8 @@ const ClientFreelancers = () => {
                         {freelancers.map((freelancer) => (
                           <tr
                             key={freelancer._id || freelancer.id}
-                            className="hover:bg-slate-50"
+                            className="hover:bg-slate-50 cursor-pointer group"
+                            onClick={() => navigate(`/client/freelancer/${freelancer._id || freelancer.id}`)}
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
