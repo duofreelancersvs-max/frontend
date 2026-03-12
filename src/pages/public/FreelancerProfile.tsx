@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { getCategoryStyle } from "@/lib/category-styles";
+import Logo from "@/components/shared/Logo";
 import {
   ChevronRight,
   Star,
@@ -20,6 +22,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { freelancerService, reviewService } from "@/services";
+import type { FreelancerProfile as FreelancerProfileType, Review } from "@/services";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -74,165 +78,104 @@ const AnimatedSection = ({
 };
 
 const FreelancerProfile = () => {
+  const { id } = useParams<{ id: string }>();
   const [showFullBio, setShowFullBio] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(3);
+  const [loading, setLoading] = useState(true);
+  const [freelancerData, setFreelancerData] = useState<FreelancerProfileType | null>(null);
+  const [reviewsData, setReviewsData] = useState<Review[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!id) return;
+        setLoading(true);
+        const profile = await freelancerService.getById(id);
+        setFreelancerData(profile);
+        
+        if (profile.userId) {
+          const reviews = await reviewService.getForUser(profile.userId);
+          setReviewsData(reviews.reviews || []);
+        }
+      } catch (error) {
+        console.error("Error fetching freelancer profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!freelancerData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+        <h2 className="text-2xl font-bold text-navy mb-4">Freelancer Not Found</h2>
+        <Link to="/freelancers">
+          <Button className="bg-teal text-white">Back to Directory</Button>
+        </Link>
+      </div>
+    );
+  }
 
   const freelancer = {
-    name: "Rahul Sharma",
-    title: "Senior Video Editor | Premiere Pro Expert",
-    avatar: "RS",
-    location: "Hyderabad, Telangana",
-    rating: 4.9,
-    reviews: 127,
-    projectsCompleted: 45,
-    successRate: 98,
-    memberSince: "2023",
-    verified: true,
-    bio: `I'm a passionate video editor with over 8 years of experience crafting compelling visual stories. My expertise spans across corporate videos, wedding films, music videos, and social media content.
-
-I specialize in Adobe Premiere Pro and have extensive experience with After Effects for motion graphics and color grading with DaVinci Resolve. I've worked with clients ranging from small startups to established production houses across South India.
-
-What sets me apart is my attention to detail and commitment to understanding each client's unique vision. I believe in collaborative storytelling and always strive to exceed expectations with every project.`,
+    name: freelancerData.displayName || `${freelancerData.firstName} ${freelancerData.lastName}`,
+    title: freelancerData.headline || freelancerData.category || "Professional Freelancer",
+    avatar: (freelancerData.displayName || freelancerData.firstName || "F")[0].toUpperCase(),
+    location: freelancerData.location || "Hyderabad, India",
+    rating: freelancerData.averageRating || 0,
+    reviews: freelancerData.reviewCount || 0,
+    projectsCompleted: freelancerData.totalProjects || 0,
+    successRate: freelancerData.successRate || 100,
+    memberSince: new Date(freelancerData.createdAt).getFullYear().toString(),
+    verified: freelancerData.isVerified,
+    bio: freelancerData.bio || "No bio provided.",
   };
 
-  const skills = [
-    { name: "Adobe Premiere Pro", level: "Expert", percentage: 95 },
-    { name: "After Effects", level: "Advanced", percentage: 85 },
-    { name: "DaVinci Resolve", level: "Advanced", percentage: 80 },
-    { name: "Final Cut Pro", level: "Intermediate", percentage: 65 },
-    { name: "Color Grading", level: "Expert", percentage: 90 },
-    { name: "Motion Graphics", level: "Advanced", percentage: 75 },
-  ];
+  const skills = freelancerData.skills?.map(s => ({
+    name: s.name,
+    level: s.proficiency > 80 ? "Expert" : s.proficiency > 50 ? "Advanced" : "Intermediate",
+    percentage: s.proficiency || 80
+  })) || [];
 
-  const portfolio = [
-    {
-      id: 1,
-      title: "Brand Film - TechStartup",
-      category: "Corporate",
-      thumbnail: "TS",
-    },
-    {
-      id: 2,
-      title: "Wedding Highlight - Priya & Karthik",
-      category: "Wedding",
-      thumbnail: "WH",
-    },
-    {
-      id: 3,
-      title: "Music Video - 'Nee Navve'",
-      category: "Music",
-      thumbnail: "MV",
-    },
-    {
-      id: 4,
-      title: "Product Launch - XYZ Electronics",
-      category: "Commercial",
-      thumbnail: "PL",
-    },
-    {
-      id: 5,
-      title: "Documentary - 'Voices of Telangana'",
-      category: "Documentary",
-      thumbnail: "DC",
-    },
-    {
-      id: 6,
-      title: "Social Media Reel Pack",
-      category: "Social Media",
-      thumbnail: "SM",
-    },
-  ];
+  const portfolio = freelancerData.portfolio?.map((item, idx) => ({
+    id: item._id || idx,
+    title: item.title,
+    category: item.skills?.[0] || "Project",
+    thumbnail: (item.title || "P")[0].toUpperCase(),
+    url: item.projectUrl
+  })) || [];
 
-  const experience = [
-    {
-      company: "Creative Studios Hyderabad",
-      role: "Senior Video Editor",
-      duration: "2021 - Present",
-      description:
-        "Lead editor for corporate and commercial projects. Managed a team of 3 junior editors.",
-    },
-    {
-      company: "MediaWorks Productions",
-      role: "Video Editor",
-      duration: "2018 - 2021",
-      description:
-        "Edited wedding films, music videos, and promotional content for various clients.",
-    },
-    {
-      company: "Freelance",
-      role: "Video Editor",
-      duration: "2016 - 2018",
-      description:
-        "Started freelancing journey with social media content and short films.",
-    },
-  ];
+  const experience = freelancerData.workExperience?.map((exp) => ({
+    company: exp.company,
+    role: exp.title,
+    duration: `${new Date(exp.startDate).getFullYear()} - ${exp.endDate ? new Date(exp.endDate).getFullYear() : 'Present'}`,
+    description: exp.description || "",
+  })) || [];
 
-  const education = [
-    {
-      title: "Bachelor of Fine Arts - Film & Video Production",
-      institution: "JNTU Hyderabad",
-      year: "2016",
-    },
-    {
-      title: "Adobe Certified Expert - Premiere Pro",
-      institution: "Adobe",
-      year: "2020",
-    },
-    {
-      title: "DaVinci Resolve Colorist Certification",
-      institution: "Blackmagic Design",
-      year: "2022",
-    },
-  ];
+  const education = freelancerData.education?.map((edu) => ({
+    title: edu.degree || "Education",
+    institution: edu.institution,
+    year: edu.year?.toString() || "",
+  })) || [];
 
-  const reviews = [
-    {
-      id: 1,
-      client: "Priya Menon",
-      avatar: "PM",
-      project: "Company Brand Film",
-      rating: 5,
-      text: "Rahul delivered exceptional work! His attention to detail and creative input transformed our vision into reality. Highly recommended!",
-      date: "2 weeks ago",
-    },
-    {
-      id: 2,
-      client: "Venkat Rao",
-      avatar: "VR",
-      project: "Wedding Video Editing",
-      rating: 5,
-      text: "Amazing work on our wedding video. He captured all the emotions perfectly and delivered on time. Will definitely work with him again.",
-      date: "1 month ago",
-    },
-    {
-      id: 3,
-      client: "StartupXYZ",
-      avatar: "SX",
-      project: "Product Launch Video",
-      rating: 5,
-      text: "Professional, responsive, and creative. Rahul understood our brand and delivered a video that exceeded our expectations.",
-      date: "2 months ago",
-    },
-    {
-      id: 4,
-      client: "Anitha K.",
-      avatar: "AK",
-      project: "YouTube Channel Content",
-      rating: 4,
-      text: "Great editor for consistent content. Minor delays but overall quality was excellent.",
-      date: "3 months ago",
-    },
-    {
-      id: 5,
-      client: "Film Productions",
-      avatar: "FP",
-      project: "Short Film Editing",
-      rating: 5,
-      text: "Rahul's creative vision added so much to our short film. His pacing and transitions were perfect.",
-      date: "4 months ago",
-    },
-  ];
+  const reviews = reviewsData.map((r) => ({
+    id: r.id,
+    client: r.reviewer?.fullName || "Client",
+    avatar: (r.reviewer?.fullName || "C")[0].toUpperCase(),
+    project: r.project?.title || "Work Project",
+    rating: r.rating,
+    text: r.comment,
+    date: new Date(r.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
+  }));
 
   const similarFreelancers = [
     {
@@ -275,19 +218,7 @@ What sets me apart is my attention to detail and commitment to understanding eac
       <nav className="sticky top-0 z-50 bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy to-royal-blue flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                C
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-navy tracking-tight">
-                  ConnectMe
-                </span>
-                <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal">
-                  India
-                </span>
-              </div>
-            </Link>
+            <Logo size="sm" />
 
             <div className="hidden md:flex items-center gap-6">
               <Link
@@ -332,11 +263,12 @@ What sets me apart is my attention to detail and commitment to understanding eac
       <section className="relative bg-navy">
         {/* Background Wrapper - stops horizontal overflow */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2445] to-royal-blue h-[120%]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue h-[120%]" />
+          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
 
           {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none" />
         </div>
 
         {/* Cover Image Area */}
@@ -541,29 +473,37 @@ What sets me apart is my attention to detail and commitment to understanding eac
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {portfolio.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 cursor-pointer"
-                    >
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xl">
-                          {item.thumbnail}
+                  {portfolio.map((item) => {
+                    const style = getCategoryStyle(item.category);
+                    const Icon = style.icon;
+                    return (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          "group relative aspect-video rounded-xl overflow-hidden cursor-pointer bg-gradient-to-br transition-all duration-300",
+                          style.gradient
+                        )}
+                      >
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                          <Icon size={32} className="mb-2 opacity-80" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                            {item.category}
+                          </span>
+                        </div>
+
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-navy/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
+                          <Play size={32} className="mb-2" />
+                          <h4 className="font-semibold text-sm text-center">
+                            {item.title}
+                          </h4>
+                          <span className="text-xs text-white/70 mt-1">
+                            {item.category}
+                          </span>
                         </div>
                       </div>
-
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-navy/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
-                        <Play size={32} className="mb-2" />
-                        <h4 className="font-semibold text-sm text-center">
-                          {item.title}
-                        </h4>
-                        <span className="text-xs text-white/70 mt-1">
-                          {item.category}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </AnimatedSection>
@@ -855,13 +795,8 @@ What sets me apart is my attention to detail and commitment to understanding eac
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-                  C
-                </div>
-                <div>
-                  <span className="text-lg font-bold">ConnectMeIndia</span>
-                </div>
+              <div className="mb-6">
+                <Logo isDark size="sm" />
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
                 The premier marketplace for creative professionals in Telangana

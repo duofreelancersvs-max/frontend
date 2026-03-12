@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/shared/Logo";
 
 const PublicNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,15 +39,7 @@ const PublicNavbar = () => {
       style={{ height: "64px" }}
     >
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-navy flex items-center justify-center text-white font-bold text-xl">
-            C
-          </div>
-          <span className="font-bold text-xl text-navy hidden sm:block tracking-tight">
-            ConnectMe
-          </span>
-        </Link>
+        <Logo size="sm" />
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">

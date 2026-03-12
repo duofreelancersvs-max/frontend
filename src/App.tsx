@@ -36,6 +36,7 @@ import VerificationQueue from "@/pages/admin/VerificationQueue";
 import SubscriptionManagement from "@/pages/admin/SubscriptionManagement";
 import RazorpaySettings from "@/pages/admin/RazorpaySettings";
 import SendNotifications from "@/pages/admin/SendNotifications";
+import ProjectManagement from "@/pages/admin/ProjectManagement";
 import {
   ClientRoute,
   FreelancerRoute,
@@ -163,6 +164,14 @@ function App() {
           element={
             <AdminRoute>
               <RazorpaySettings />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/projects"
+          element={
+            <AdminRoute>
+              <ProjectManagement />
             </AdminRoute>
           }
         />

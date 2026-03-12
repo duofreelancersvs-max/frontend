@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import AdminLayout from "@/components/layouts/AdminLayout";
+import { adminService } from "@/services";
 import {
   Users,
   UserPlus,
@@ -51,181 +52,28 @@ type TabType = "all" | "clients" | "freelancers" | "admins";
 
 // ============ MOCK DATA ============
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Rahul Sharma",
-    email: "rahul.sharma@gmail.com",
-    phone: "+91 98765 43210",
-    initials: "RS",
-    role: "client",
-    status: "active",
-    location: "Hyderabad",
-    state: "TG",
-    joinedDate: "Jan 15, 2024",
-    lastActive: "2 hours ago",
-    lastActiveRecent: true,
-    revenue: "₹1,45,000",
-  },
-  {
-    id: "2",
-    name: "Priya Menon",
-    email: "priya.menon@outlook.com",
-    phone: "+91 87654 32109",
-    initials: "PM",
-    role: "freelancer",
-    status: "active",
-    location: "Vijayawada",
-    state: "AP",
-    joinedDate: "Dec 8, 2023",
-    lastActive: "5 minutes ago",
-    lastActiveRecent: true,
-    revenue: "₹2,85,000",
-  },
-  {
-    id: "3",
-    name: "Amit Kumar",
-    email: "amit.kumar@yahoo.com",
-    phone: "+91 76543 21098",
-    initials: "AK",
-    role: "freelancer",
-    status: "pending",
-    location: "Warangal",
-    state: "TG",
-    joinedDate: "Feb 1, 2024",
-    lastActive: "1 day ago",
-    lastActiveRecent: false,
-    revenue: "₹0",
-  },
-  {
-    id: "4",
-    name: "Sneha Reddy",
-    email: "sneha.reddy@gmail.com",
-    phone: "+91 65432 10987",
-    initials: "SR",
-    role: "client",
-    status: "suspended",
-    location: "Visakhapatnam",
-    state: "AP",
-    joinedDate: "Nov 20, 2023",
-    lastActive: "3 days ago",
-    lastActiveRecent: false,
-    revenue: "₹45,000",
-  },
-  {
-    id: "5",
-    name: "Vikram Patel",
-    email: "vikram.p@techcorp.in",
-    phone: "+91 54321 09876",
-    initials: "VP",
-    role: "client",
-    status: "active",
-    location: "Hyderabad",
-    state: "TG",
-    joinedDate: "Oct 5, 2023",
-    lastActive: "30 minutes ago",
-    lastActiveRecent: true,
-    revenue: "₹3,20,000",
-  },
-  {
-    id: "6",
-    name: "Meera Krishnan",
-    email: "meera.k@creative.io",
-    phone: "+91 43210 98765",
-    initials: "MK",
-    role: "freelancer",
-    status: "active",
-    location: "Guntur",
-    state: "AP",
-    joinedDate: "Sep 12, 2023",
-    lastActive: "1 hour ago",
-    lastActiveRecent: true,
-    revenue: "₹4,15,000",
-  },
-  {
-    id: "7",
-    name: "Super Admin",
-    email: "admin@connectmeindia.com",
-    phone: "+91 90000 00001",
-    initials: "SA",
-    role: "admin",
-    status: "active",
-    location: "Hyderabad",
-    state: "TG",
-    joinedDate: "Jan 1, 2023",
-    lastActive: "Just now",
-    lastActiveRecent: true,
-    revenue: "—",
-  },
-  {
-    id: "8",
-    name: "Arjun Singh",
-    email: "arjun.singh@motionlab.in",
-    phone: "+91 32109 87654",
-    initials: "AS",
-    role: "freelancer",
-    status: "active",
-    location: "Secunderabad",
-    state: "TG",
-    joinedDate: "Aug 28, 2023",
-    lastActive: "4 hours ago",
-    lastActiveRecent: true,
-    revenue: "₹1,95,000",
-  },
-  {
-    id: "9",
-    name: "Kavitha Nair",
-    email: "kavitha.nair@gmail.com",
-    phone: "+91 21098 76543",
-    initials: "KN",
-    role: "client",
-    status: "pending",
-    location: "Tirupati",
-    state: "AP",
-    joinedDate: "Feb 3, 2024",
-    lastActive: "2 days ago",
-    lastActiveRecent: false,
-    revenue: "₹0",
-  },
-  {
-    id: "10",
-    name: "Ravi Teja",
-    email: "ravi.teja@filmworks.com",
-    phone: "+91 10987 65432",
-    initials: "RT",
-    role: "client",
-    status: "active",
-    location: "Hyderabad",
-    state: "TG",
-    joinedDate: "Jul 15, 2023",
-    lastActive: "6 hours ago",
-    lastActiveRecent: true,
-    revenue: "₹5,60,000",
-  },
-];
-
 const statsData = [
   {
     label: "Total Users",
-    value: "2,840",
+    value: "...",
     color: "indigo" as const,
     icon: Users,
   },
   {
     label: "Active",
-    value: "2,600",
+    value: "...",
     color: "emerald" as const,
     icon: Activity,
   },
-  { label: "Pending", value: "120", color: "amber" as const, icon: Clock },
-  { label: "Suspended", value: "45", color: "rose" as const, icon: Ban },
+  { label: "Pending", value: "...", color: "amber" as const, icon: Clock },
+  { label: "Suspended", value: "...", color: "rose" as const, icon: Ban },
 ];
 
 const tabsData: { key: TabType; label: string; count: number }[] = [
-  { key: "all", label: "All Users", count: 2840 },
-  { key: "clients", label: "Clients", count: 1680 },
-  { key: "freelancers", label: "Freelancers", count: 1150 },
-  { key: "admins", label: "Admins", count: 10 },
+  { key: "all", label: "All Users", count: 0 },
+  { key: "clients", label: "Clients", count: 0 },
+  { key: "freelancers", label: "Freelancers", count: 0 },
+  { key: "admins", label: "Admins", count: 0 },
 ];
 
 // ============ COMPONENTS ============
@@ -586,7 +434,7 @@ const UserDetailSlideOver = ({
 // ============ MAIN COMPONENT ============
 
 const UserManagement = () => {
-  const [users] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -596,44 +444,124 @@ const UserManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [slideOverUser, setSlideOverUser] = useState<User | null>(null);
+  const [totalItems, setTotalItems] = useState(0);
+  const [liveStats, setLiveStats] = useState(statsData);
+  const [liveTabs, setLiveTabs] = useState(tabsData);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Filter users based on active tab and filters
-  const filteredUsers = users.filter((user) => {
-    // Tab filter
-    if (activeTab === "clients" && user.role !== "client") return false;
-    if (activeTab === "freelancers" && user.role !== "freelancer") return false;
-    if (activeTab === "admins" && user.role !== "admin") return false;
+  // Fetch users from API
+  const fetchUsers = useCallback(async () => {
+    try {
+      const roleParam = activeTab === "clients" ? "client"
+        : activeTab === "freelancers" ? "freelancer"
+        : activeTab === "admins" ? "admin"
+        : roleFilter !== "all" ? roleFilter
+        : undefined;
+      const statusParam = statusFilter !== "all" ? statusFilter : undefined;
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      if (
-        !user.name.toLowerCase().includes(query) &&
-        !user.email.toLowerCase().includes(query) &&
-        !user.phone.includes(query)
-      ) {
-        return false;
-      }
+      const result = await adminService.getAllUsers({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery || undefined,
+        role: roleParam,
+        status: statusParam,
+      });
+
+      const mapped: User[] = (result.users || []).map((u: any) => {
+        const name = u.fullName || u.email?.split("@")[0] || "Unknown";
+        const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+        const city = u.address?.city || u.profile?.location?.city || "";
+        const state = u.address?.state || u.profile?.location?.state || "";
+        const earnings = u.profile?.totalEarnings ?? u.profile?.totalProjectsPosted ?? 0;
+        const lastLogin = u.lastLoginAt ? getTimeAgo(new Date(u.lastLoginAt)) : "—";
+        const isRecent = u.lastLoginAt
+          ? (Date.now() - new Date(u.lastLoginAt).getTime()) < 3600000
+          : false;
+        return {
+          id: u._id || u.id,
+          name,
+          email: u.email,
+          phone: u.phone || "—",
+          initials,
+          role: u.role as User["role"],
+          status: u.status as User["status"],
+          location: city || "—",
+          state: state || "—",
+          joinedDate: new Date(u.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }),
+          lastActive: lastLogin,
+          lastActiveRecent: isRecent,
+          revenue: earnings > 0 ? `₹${earnings.toLocaleString("en-IN")}` : "—",
+        };
+      });
+
+      setUsers(mapped);
+      setTotalItems(result.pagination?.totalItems ?? mapped.length);
+    } catch (error) {
+      console.error("Error fetching users:", error);
     }
+  }, [activeTab, searchQuery, roleFilter, statusFilter, currentPage, itemsPerPage]);
 
-    // Role filter
-    if (roleFilter !== "all" && user.role !== roleFilter) return false;
+  // Fetch stats
+  const fetchStats = useCallback(async () => {
+    try {
+      const statsResult = await adminService.getDashboardStats();
+      setLiveStats([
+        { label: "Total Users", value: String(statsResult.totalUsers || 0), color: "indigo" as const, icon: Users },
+        { label: "Active", value: String(statsResult.activeUsers || 0), color: "emerald" as const, icon: Activity },
+        { label: "Pending", value: String(statsResult.pendingUsers || 0), color: "amber" as const, icon: Clock },
+        { label: "Suspended", value: String(statsResult.suspendedUsers || 0), color: "rose" as const, icon: Ban },
+      ]);
+      setLiveTabs([
+        { key: "all", label: "All Users", count: statsResult.totalUsers || 0 },
+        { key: "clients", label: "Clients", count: statsResult.totalClients || 0 },
+        { key: "freelancers", label: "Freelancers", count: statsResult.totalFreelancers || 0 },
+        { key: "admins", label: "Admins", count: statsResult.totalAdmins || 0 },
+      ]);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }, []);
 
-    // Status filter
-    if (statusFilter !== "all" && user.status !== statusFilter) return false;
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
-    // Location filter
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setCurrentPage(1);
+    }, 300);
+    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
+  }, [searchQuery]);
+
+  const getTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+  };
+
+  // Filter users based on active tab and filters (client-side for location only)
+  const filteredUsers = users.filter((user) => {
+    // Location filter (client-side since API may not have it)
     if (locationFilter === "TG" && user.state !== "TG") return false;
     if (locationFilter === "AP" && user.state !== "AP") return false;
-
     return true;
   });
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const paginatedUsers = filteredUsers;
 
   const handleSelectAll = () => {
     if (selectedUsers.size === paginatedUsers.length) {
@@ -694,7 +622,7 @@ const UserManagement = () => {
 
       {/* Stats Overview */}
       <div className="um-stats-grid">
-        {statsData.map((stat) => (
+        {liveStats.map((stat) => (
           <StatCard key={stat.label} stat={stat} />
         ))}
       </div>
@@ -779,7 +707,7 @@ const UserManagement = () => {
 
       {/* Tabs */}
       <div className="um-tabs">
-        {tabsData.map((tab) => (
+        {liveTabs.map((tab) => (
           <button
             key={tab.key}
             className={activeTab === tab.key ? "active" : ""}

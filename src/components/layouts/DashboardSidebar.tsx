@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/shared/Logo";
 
 interface NavItem {
   label: string;
@@ -42,16 +43,7 @@ const DashboardSidebar = () => {
     >
       {/* Logo Area */}
       <div className="h-16 flex items-center px-6 border-b border-navy-light/30">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal flex items-center justify-center text-white font-bold text-lg shrink-0">
-            S
-          </div>
-          {!isCollapsed && (
-            <span className="font-bold text-xl tracking-wide opacity-100 transition-opacity duration-300">
-              Stitch
-            </span>
-          )}
-        </div>
+        <Logo isDark size="sm" withText={!isCollapsed} />
       </div>
 
       {/* Navigation */}

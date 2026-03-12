@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/shared/Logo";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -227,38 +228,7 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <a href="/" className="flex items-center gap-3 group">
-              <div
-                className={cn(
-                  "w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-lg transition-all duration-300 shadow-lg",
-                  isScrolled
-                    ? "bg-gradient-to-br from-navy to-royal-blue"
-                    : "bg-white/20 backdrop-blur-sm border border-white/30",
-                )}
-              >
-                <span className="group-hover:scale-110 transition-transform">
-                  C
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className={cn(
-                    "text-lg font-bold tracking-tight transition-colors",
-                    isScrolled ? "text-navy" : "text-white",
-                  )}
-                >
-                  ConnectMe
-                </span>
-                <span
-                  className={cn(
-                    "text-[10px] font-semibold tracking-widest uppercase -mt-1 transition-colors",
-                    isScrolled ? "text-teal" : "text-teal-light",
-                  )}
-                >
-                  India
-                </span>
-              </div>
-            </a>
+            <Logo isDark={!isScrolled} />
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
@@ -374,21 +344,15 @@ const Home = () => {
       </nav>
 
       {/* 2. HERO SECTION */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-navy">
+      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#050B15]">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2445] to-royal-blue" />
-          <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-royal-blue/30 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-teal/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
-          <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
-
+          <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-[#0A1628] to-[#112240] opacity-90" />
+          <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
+          
           {/* Grid Pattern */}
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
+          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">

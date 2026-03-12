@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import Logo from "@/components/shared/Logo";
 import {
   ChevronRight,
   ChevronDown,
@@ -261,19 +262,7 @@ const Pricing = () => {
       <nav className="sticky top-0 z-50 bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy to-royal-blue flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                C
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-navy tracking-tight">
-                  ConnectMe
-                </span>
-                <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal">
-                  India
-                </span>
-              </div>
-            </Link>
+            <Logo size="sm" />
 
             <div className="hidden md:flex items-center gap-6">
               <Link
@@ -315,11 +304,12 @@ const Pricing = () => {
       </nav>
 
       {/* 1. PAGE HEADER */}
-      <section className="relative py-20 bg-navy overflow-hidden">
+      <section className="relative py-20 bg-[#050B15] overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2445] to-royal-blue" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           {/* Breadcrumb */}

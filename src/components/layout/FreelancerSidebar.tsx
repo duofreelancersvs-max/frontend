@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { freelancerService, subscriptionService } from "@/services";
 import type { FreelancerProfile, Subscription } from "@/services";
 import { useUnreadStore } from "@/stores/unread.store";
+import Logo from "@/components/shared/Logo";
 
 const sidebarNavItems = [
   {
@@ -129,17 +130,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-            C
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-bold text-white tracking-tight">
-              ConnectMe
-            </span>
-            <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-              India
-            </span>
-          </div>
+          <Logo isDark withText size="sm" />
           <button
             onClick={onClose}
             className="lg:hidden ml-auto text-white/60 hover:text-white"

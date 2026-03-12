@@ -46,7 +46,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({
         <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-page-bg text-sm text-text-secondary leading-relaxed pr-2 h-[400px]">
           <h4 className="font-bold text-text-primary mb-2">1. Introduction</h4>
           <p className="mb-4">
-            Welcome to stitch. By accessing our website, you agree to be bound
+            Welcome to ConnectMeIndia. By accessing our website, you agree to be bound
             by these Terms and Conditions...
           </p>
 
@@ -63,7 +63,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({
             3. Intellectual Property
           </h4>
           <p className="mb-4">
-            All content on this platform is the property of stitch or its
+            All content on this platform is the property of ConnectMeIndia or its
             content suppliers...
           </p>
 

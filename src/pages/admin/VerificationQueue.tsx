@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   Clock,
@@ -29,6 +29,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { adminService } from "@/services";
 
 // ============ TYPES ============
 
@@ -702,7 +703,7 @@ const ReviewModal = ({
 // ============ MAIN COMPONENT ============
 
 const VerificationQueue = () => {
-  const [items, setItems] = useState<VerificationItem[]>(mockVerifications);
+  const [items, setItems] = useState<VerificationItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [documentFilter, setDocumentFilter] = useState<DocumentFilter>("all");
@@ -710,10 +711,76 @@ const VerificationQueue = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [reviewItem, setReviewItem] = useState<VerificationItem | null>(null);
   const [activeTab, setActiveTab] = useState<"queue" | "history">("queue");
+  const [apiStats, setApiStats] = useState({ pending: 0, approved: 0, rejected: 0 });
 
-  const pendingCount = items.filter((i) => i.status === "pending").length;
-  const approvedToday = items.filter((i) => i.status === "approved").length;
-  const rejectedToday = items.filter((i) => i.status === "rejected").length;
+  // Fetch verifications from API
+  const fetchVerifications = useCallback(async () => {
+    try {
+      const docTypeParam = documentFilter !== "all" ? documentFilter : undefined;
+      const result = await adminService.getVerifications({
+        page: 1,
+        limit: 50,
+        documentType: docTypeParam,
+      });
+
+      // Map API data to local VerificationItem interface
+      const mapped: VerificationItem[] = (result.verifications || []).map((v: any) => {
+        const freelancerName = v.freelancerProfile?.displayName
+          || `${v.freelancerProfile?.firstName || ""} ${v.freelancerProfile?.lastName || ""}`.trim()
+          || v.freelancerId?.fullName
+          || v.freelancerId?.email
+          || "Unknown";
+        const initials = freelancerName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+        const docTypeMap: Record<string, VerificationItem["documentType"]> = {
+          aadhaar: "aadhaar",
+          pan: "pan",
+          portfolio_proof: "portfolio",
+          certificate: "gst",
+        };
+        const submittedDate = new Date(v.submittedAt);
+        const diffMs = Date.now() - submittedDate.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        let timeAgo = "Just now";
+        if (diffMins >= 60 * 24) timeAgo = `${Math.floor(diffMins / (60 * 24))} day(s) ago`;
+        else if (diffMins >= 60) timeAgo = `${Math.floor(diffMins / 60)} hours ago`;
+        else if (diffMins > 0) timeAgo = `${diffMins} minutes ago`;
+
+        return {
+          id: v._id,
+          freelancerName,
+          freelancerInitials: initials,
+          freelancerEmail: v.freelancerId?.email || "",
+          freelancerLocation: v.freelancerProfile?.location || "—",
+          isPremiumApplicant: v.freelancerProfile?.verificationBadge === "premium" || false,
+          documentType: docTypeMap[v.documentType] || "aadhaar",
+          documentNumber: v.documentNumber ? `****${v.documentNumber.slice(-4)}` : "N/A",
+          submittedAt: timeAgo,
+          submittedDate: submittedDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }),
+          status: v.status as VerificationItem["status"],
+          isUrgent: diffMins < 180, // less than 3 hours
+          documentImage: v.documentUrl || "/placeholder-doc.png",
+          rejectionReason: v.adminNotes || undefined,
+          reviewedBy: v.reviewedBy?.fullName || v.reviewedBy?.email || undefined,
+          reviewedAt: v.reviewedAt ? new Date(v.reviewedAt).toLocaleString("en-IN") : undefined,
+        };
+      });
+
+      setItems(mapped);
+      if (result.stats) {
+        setApiStats(result.stats);
+      }
+    } catch (error) {
+      console.error("Error fetching verifications:", error);
+    }
+  }, [documentFilter]);
+
+  useEffect(() => {
+    fetchVerifications();
+  }, [fetchVerifications]);
+
+  const pendingCount = apiStats.pending;
+  const approvedToday = apiStats.approved;
+  const rejectedToday = apiStats.rejected;
 
   const statsData = [
     {
@@ -724,13 +791,13 @@ const VerificationQueue = () => {
       pulse: true,
     },
     {
-      label: "Approved Today",
+      label: "Approved",
       value: approvedToday,
       color: "emerald" as const,
       icon: CheckCircle,
     },
     {
-      label: "Rejected Today",
+      label: "Rejected",
       value: rejectedToday,
       color: "rose" as const,
       icon: XCircle,
@@ -744,7 +811,6 @@ const VerificationQueue = () => {
   });
 
   const sortedItems = [...filteredItems].sort((a, b) => {
-    // Pending first
     if (a.status === "pending" && b.status !== "pending") return -1;
     if (a.status !== "pending" && b.status === "pending") return 1;
     return 0;
@@ -760,53 +826,36 @@ const VerificationQueue = () => {
     setSelectedItems(newSelected);
   };
 
-  const handleApprove = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: "approved" as const,
-              reviewedBy: "Super Admin",
-              reviewedAt: "Just now",
-            }
-          : item,
-      ),
-    );
-    setReviewItem(null);
+  const handleApprove = async (id: string) => {
+    try {
+      await adminService.approveVerification(id);
+      await fetchVerifications();
+      setReviewItem(null);
+    } catch (error) {
+      console.error("Error approving verification:", error);
+    }
   };
 
-  const handleReject = (id: string, reason: string, _notes: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: "rejected" as const,
-              rejectionReason: reason,
-              reviewedBy: "Super Admin",
-              reviewedAt: "Just now",
-            }
-          : item,
-      ),
-    );
-    setReviewItem(null);
+  const handleReject = async (id: string, reason: string, notes: string) => {
+    try {
+      await adminService.rejectVerification(id, reason, notes);
+      await fetchVerifications();
+      setReviewItem(null);
+    } catch (error) {
+      console.error("Error rejecting verification:", error);
+    }
   };
 
-  const handleBulkApprove = () => {
-    setItems((prev) =>
-      prev.map((item) =>
-        selectedItems.has(item.id)
-          ? {
-              ...item,
-              status: "approved" as const,
-              reviewedBy: "Super Admin",
-              reviewedAt: "Just now",
-            }
-          : item,
-      ),
-    );
-    setSelectedItems(new Set());
+  const handleBulkApprove = async () => {
+    try {
+      await Promise.all(
+        Array.from(selectedItems).map((id) => adminService.approveVerification(id))
+      );
+      setSelectedItems(new Set());
+      await fetchVerifications();
+    } catch (error) {
+      console.error("Error bulk approving:", error);
+    }
   };
 
   return (

@@ -4,6 +4,7 @@ import { ArrowLeft, Mail, CheckCircle, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import Logo from "@/components/shared/Logo";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -25,25 +26,13 @@ const ForgotPassword = () => {
       {/* LEFT SIDE - Branding */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-navy overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2445] to-royal-blue" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/20 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-xl shadow-lg">
-              C
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight">
-                ConnectMe
-              </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal-light">
-                India
-              </span>
-            </div>
-          </Link>
+          <Logo isDark size="lg" />
 
           {/* Center Content */}
           <div className="flex-1 flex flex-col justify-center items-center text-center">
@@ -79,19 +68,7 @@ const ForgotPassword = () => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy to-royal-blue flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                C
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-navy tracking-tight">
-                  ConnectMe
-                </span>
-                <span className="text-[10px] font-semibold tracking-widest uppercase -mt-1 text-teal">
-                  India
-                </span>
-              </div>
-            </Link>
+            <Logo size="md" />
           </div>
 
           {/* Form Card */}

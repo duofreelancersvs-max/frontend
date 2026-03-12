@@ -63,4 +63,11 @@ export type {
   ReviewFilters,
 } from "./review.service";
 
-export type { AdminStats, AdminUser, AdminProject } from "./admin.service";
+export type {
+  AdminStats,
+  AdminUser,
+  AdminProject,
+  VerificationItem,
+  PaginationMeta,
+  NotificationHistoryItem,
+} from "./admin.service";

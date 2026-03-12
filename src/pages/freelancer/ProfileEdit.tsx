@@ -11,6 +11,7 @@ import {
   Star,
   Plus,
   Trash2,
+  Edit2,
   Bell,
   GripVertical,
   MessageSquare,
@@ -40,6 +41,8 @@ import type {
   Education,
 } from "@/services/freelancer.service";
 import { useAuth } from "@/hooks/useAuth";
+import { getCategoryStyle } from "@/lib/category-styles";
+import { AddPortfolioModal } from "@/components/modals/AddPortfolioModal";
 
 // Tab definitions
 const tabs = [
@@ -117,13 +120,10 @@ const FreelancerProfileEdit = () => {
   const [newSkill, setNewSkill] = useState("");
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showExperienceModal, setShowExperienceModal] = useState(false);
+  const [editingPortfolioItem, setEditingPortfolioItem] = useState<PortfolioItem | null>(null);
   const [showEducationModal, setShowEducationModal] = useState(false);
 
   // Modal form refs
-  const portfolioTitleRef = useRef<HTMLInputElement>(null);
-  const portfolioDescRef = useRef<HTMLTextAreaElement>(null);
-  const portfolioUrlRef = useRef<HTMLInputElement>(null);
-  const portfolioSkillsRef = useRef<HTMLInputElement>(null);
   const expTitleRef = useRef<HTMLInputElement>(null);
   const expCompanyRef = useRef<HTMLInputElement>(null);
   const expStartRef = useRef<HTMLInputElement>(null);
@@ -262,28 +262,42 @@ const FreelancerProfileEdit = () => {
   };
 
   // ---------- PORTFOLIO HANDLERS ----------
-  const handleAddPortfolio = async () => {
-    const title = portfolioTitleRef.current?.value?.trim();
-    if (!title) {
-      toast.error("Project title is required");
-      return;
-    }
+  const handlePortfolioSubmit = async (data: {
+    title: string;
+    description: string;
+    projectUrl: string;
+    category: string;
+    thumbnail: string;
+  }) => {
     try {
-      setActionLoading("portfolio-add");
-      const data = await freelancerService.addPortfolio({
-        title,
-        description: portfolioDescRef.current?.value?.trim() || undefined,
-        projectUrl: portfolioUrlRef.current?.value?.trim() || undefined,
-        skills: portfolioSkillsRef.current?.value
-          ? portfolioSkillsRef.current.value.split(",").map((s) => s.trim())
-          : [],
-      });
-      applyProfileToState(data);
+      if (editingPortfolioItem) {
+        setActionLoading(`portfolio-edit-${editingPortfolioItem._id}`);
+        const updatedProfile = await freelancerService.updatePortfolio(editingPortfolioItem._id as string, {
+          title: data.title,
+          description: data.description,
+          projectUrl: data.projectUrl,
+          skills: [data.category],
+          thumbnail: data.thumbnail,
+        });
+        applyProfileToState(updatedProfile);
+        toast.success("Project updated!");
+      } else {
+        setActionLoading("portfolio-add");
+        const updatedProfile = await freelancerService.addPortfolio({
+          title: data.title,
+          description: data.description,
+          projectUrl: data.projectUrl,
+          skills: [data.category],
+          thumbnail: data.thumbnail,
+        });
+        applyProfileToState(updatedProfile);
+        toast.success("Project added!");
+      }
       setShowPortfolioModal(false);
-      toast.success("Portfolio item added!");
+      setEditingPortfolioItem(null);
     } catch (err) {
-      console.error("Failed to add portfolio:", err);
-      toast.error("Failed to add portfolio item");
+      console.error("Failed to save portfolio:", err);
+      toast.error("Failed to save portfolio project");
     } finally {
       setActionLoading(null);
     }
@@ -627,7 +641,7 @@ const FreelancerProfileEdit = () => {
                   {/* BASIC INFO TAB */}
                   {activeTab === "basic" && (
                     <div className="space-y-6">
-                      <div className="grid sm:grid-cols-2 gap-5">
+                      <div className="grid sm:grid-cols-2 gap-6">
                         {/* First Name */}
                         <div>
                           <label className="block text-sm font-medium text-navy mb-2">
@@ -661,7 +675,7 @@ const FreelancerProfileEdit = () => {
                         </div>
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-5">
+                      <div className="grid sm:grid-cols-2 gap-6">
                         {/* Display Name */}
                         <div>
                           <label className="block text-sm font-medium text-navy mb-2">
@@ -739,7 +753,7 @@ const FreelancerProfileEdit = () => {
                         </p>
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-5">
+                      <div className="grid sm:grid-cols-2 gap-6">
                         {/* Availability */}
                         <div>
                           <label className="block text-sm font-medium text-navy mb-2">
@@ -917,6 +931,7 @@ const FreelancerProfileEdit = () => {
                         </h4>
                         <Button
                           onClick={() => {
+                            setEditingPortfolioItem(null);
                             setShowPortfolioModal(true);
                           }}
                           className="bg-teal hover:bg-teal-light text-white"
@@ -933,8 +948,33 @@ const FreelancerProfileEdit = () => {
                             className="group relative rounded-xl border border-slate-200 overflow-hidden hover:border-teal/30 hover:shadow-md transition-all"
                           >
                             {/* Thumbnail */}
-                            <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                              <Image size={40} className="text-slate-300" />
+                            <div className="h-40 overflow-hidden relative">
+                              {item.thumbnail ? (
+                                <img
+                                  src={item.thumbnail}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              ) : (
+                                (() => {
+                                  const category = item.skills?.[0] || "Default";
+                                  const style = getCategoryStyle(category);
+                                  const Icon = style.icon;
+                                  return (
+                                    <div
+                                      className={cn(
+                                        "w-full h-full flex flex-col items-center justify-center text-white bg-gradient-to-br transition-all duration-300",
+                                        style.gradient,
+                                      )}
+                                    >
+                                      <Icon size={40} className="mb-2 opacity-80" />
+                                      <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                                        {category}
+                                      </span>
+                                    </div>
+                                  );
+                                })()
+                              )}
                             </div>
 
                             {/* Content */}
@@ -959,6 +999,15 @@ const FreelancerProfileEdit = () => {
 
                             {/* Actions Overlay */}
                             <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => {
+                                  setEditingPortfolioItem(item);
+                                  setShowPortfolioModal(true);
+                                }}
+                                className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+                              >
+                                <Edit2 size={14} className="text-teal" />
+                              </button>
                               <button
                                 onClick={() =>
                                   item._id && handleDeletePortfolio(item._id)
@@ -1060,7 +1109,7 @@ const FreelancerProfileEdit = () => {
                                   {item.description}
                                 </p>
                               )}
-                              <div className="flex gap-2">
+                              <div className="flex gap-6">
                                 <button
                                   onClick={() =>
                                     item._id && handleDeleteExperience(item._id)
@@ -1187,7 +1236,7 @@ const FreelancerProfileEdit = () => {
             </div>
 
             {/* RIGHT SIDEBAR */}
-            <div className="lg:w-80 space-y-6">
+            <div className="lg:w-80 flex flex-col gap-6">
               {/* Profile Completeness */}
               <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                 <h3 className="text-lg font-bold text-navy mb-4">
@@ -1301,7 +1350,7 @@ const FreelancerProfileEdit = () => {
               </section>
 
               {/* Preview Link */}
-              <Link to="/freelancer/profile">
+              <Link to="/freelancer/profile" className="block w-full">
                 <Button
                   variant="outline"
                   className="w-full border-teal text-teal hover:bg-teal hover:text-white"
@@ -1316,99 +1365,22 @@ const FreelancerProfileEdit = () => {
       </div>
 
       {/* PORTFOLIO MODAL */}
-      {showPortfolioModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">
-                Add Portfolio Item
-              </h3>
-              <button
-                onClick={() => setShowPortfolioModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-slate-500" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-navy mb-2">
-                  Project Title *
-                </label>
-                <input
-                  ref={portfolioTitleRef}
-                  type="text"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                  placeholder="Enter project title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-navy mb-2">
-                  Description
-                </label>
-                <textarea
-                  ref={portfolioDescRef}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
-                  rows={3}
-                  placeholder="Describe your project"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-navy mb-2">
-                  Project URL
-                </label>
-                <input
-                  ref={portfolioUrlRef}
-                  type="url"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-navy mb-2">
-                  Skills Used
-                </label>
-                <input
-                  ref={portfolioSkillsRef}
-                  type="text"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                  placeholder="e.g., Premiere Pro, After Effects"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 p-5 border-t border-slate-100">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowPortfolioModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-teal hover:bg-teal-light text-white"
-                onClick={handleAddPortfolio}
-                disabled={actionLoading === "portfolio-add"}
-              >
-                {actionLoading === "portfolio-add" ? (
-                  <Loader2 size={16} className="mr-2 animate-spin" />
-                ) : null}
-                Add Project
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddPortfolioModal
+        isOpen={showPortfolioModal}
+        onClose={() => {
+          setShowPortfolioModal(false);
+          setEditingPortfolioItem(null);
+        }}
+        onSubmit={handlePortfolioSubmit}
+        categories={categoryOptions}
+        editItem={editingPortfolioItem as any}
+      />
 
       {/* EXPERIENCE MODAL */}
       {showExperienceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <h3 className="text-lg font-bold text-navy">Add Experience</h3>
               <button
                 onClick={() => setShowExperienceModal(false)}
@@ -1443,7 +1415,7 @@ const FreelancerProfileEdit = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-navy mb-2">
                     Start Date

@@ -454,7 +454,7 @@ const ClientProjects = () => {
                       className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
                     >
                       {/* Card Header */}
-                      <div className="p-5 flex-1 flex flex-col">
+                      <div className="p-6 flex-1 flex flex-col">
                         <div className="flex items-start justify-between mb-3">
                           <span
                             className={cn(
@@ -585,7 +585,7 @@ const ClientProjects = () => {
                       </div>
 
                       {/* Card Footer */}
-                      <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100">
+                      <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100">
                         <div className="grid grid-cols-3 gap-3 mb-4">
                           <div className="flex flex-col items-center text-center">
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">

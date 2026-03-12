@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Twitter, Instagram, Linkedin, Github } from "lucide-react";
+import Logo from "@/components/shared/Logo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -44,15 +45,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Column */}
           <div className="space-y-6">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-teal flex items-center justify-center text-white font-bold text-2xl">
-                S
-              </div>
-              <span className="font-bold text-2xl tracking-tight">Stitch</span>
-            </Link>
+            <Logo isDark size="md" />
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-              The premium marketplace matching top-tier freelance talent with
-              forward-thinking companies. Quality over quantity, always.
+              The premier marketplace for creative professionals in Telangana
+              and Andhra Pradesh.
             </p>
             <div className="flex gap-4">
               <a
@@ -107,7 +103,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-500 text-sm">
-            © {currentYear} Stitch Marketplace. All rights reserved.
+            © {currentYear} ConnectMeIndia. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-6 justify-center">
             <Link

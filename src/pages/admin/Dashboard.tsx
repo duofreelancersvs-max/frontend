@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { adminService } from "@/services";
-import type { AdminStats } from "@/services";
+import type { AdminStats, AdminProject, VerificationItem } from "@/services";
 
 // ============ DATA ============
 
@@ -34,98 +34,21 @@ interface MetricData {
   trendType: "positive" | "warning" | "negative";
 }
 
+const getTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+};
 
 
-interface RecentProject {
-  id: string;
-  name: string;
-  client: string;
-  budget: string;
-  status: "open" | "in-progress" | "completed";
-  date: string;
-}
 
-const recentProjects: RecentProject[] = [
-  {
-    id: "1",
-    name: "Wedding Video Edit",
-    client: "Rahul S.",
-    budget: "₹25,000",
-    status: "open",
-    date: "Feb 4",
-  },
-  {
-    id: "2",
-    name: "VFX for Short Film",
-    client: "Priya M.",
-    budget: "₹45,000",
-    status: "in-progress",
-    date: "Feb 3",
-  },
-  {
-    id: "3",
-    name: "Youtube Intro Motion",
-    client: "Amit K.",
-    budget: "₹8,000",
-    status: "completed",
-    date: "Feb 2",
-  },
-  {
-    id: "4",
-    name: "3D Product Animation",
-    client: "Tech Solutions",
-    budget: "₹75,000",
-    status: "in-progress",
-    date: "Feb 1",
-  },
-  {
-    id: "5",
-    name: "Color Grading Package",
-    client: "Filmworks",
-    budget: "₹18,000",
-    status: "open",
-    date: "Jan 31",
-  },
-];
-
-interface Verification {
-  id: string;
-  name: string;
-  initials: string;
-  docType: string;
-  time: string;
-}
-
-const verifications: Verification[] = [
-  {
-    id: "1",
-    name: "Vikram Patel",
-    initials: "VP",
-    docType: "Portfolio Review",
-    time: "2h ago",
-  },
-  {
-    id: "2",
-    name: "Sneha Reddy",
-    initials: "SR",
-    docType: "ID Verification",
-    time: "3h ago",
-  },
-  {
-    id: "3",
-    name: "Arjun Singh",
-    initials: "AS",
-    docType: "Skill Certificate",
-    time: "5h ago",
-  },
-  {
-    id: "4",
-    name: "Megha Sharma",
-    initials: "MS",
-    docType: "Business License",
-    time: "6h ago",
-  },
-];
 
 interface ActivityItem {
   id: string;
@@ -599,7 +522,7 @@ const getActivityIcon = (type: ActivityItem["type"]) => {
   }
 };
 
-const getStatusLabel = (status: RecentProject["status"]) => {
+const getStatusLabel = (status: "open" | "in-progress" | "completed") => {
   switch (status) {
     case "open":
       return "Open";
@@ -614,17 +537,29 @@ const getStatusLabel = (status: RecentProject["status"]) => {
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [recentProjects, setRecentProjects] = useState<AdminProject[]>([]);
+  const [verifications, setVerifications] = useState<VerificationItem[]>([]);
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchAll = async () => {
+      setLoading(true);
       try {
-        const data = await adminService.getDashboardStats();
-        setStats(data);
+        const [statsData, projectsData, verificationsData] = await Promise.allSettled([
+          adminService.getDashboardStats(),
+          adminService.getAllProjects({ page: 1, limit: 5 }),
+          adminService.getVerifications({ page: 1, limit: 4, status: "pending" }),
+        ]);
+        if (statsData.status === "fulfilled") setStats(statsData.value);
+        if (projectsData.status === "fulfilled") setRecentProjects(projectsData.value.projects || []);
+        if (verificationsData.status === "fulfilled") setVerifications(verificationsData.value.verifications || []);
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchStats();
+    fetchAll();
   }, []);
 
   const metricsData = stats ? [
@@ -657,8 +592,8 @@ const AdminDashboard = () => {
     },
     {
       id: "pending",
-      label: "Pending Actions",
-      value: String(stats.totalApplications - stats.totalProjects || 0),
+      label: "Pending Verifications",
+      value: String(stats.pendingVerifications || 0),
       icon: AlertCircle,
       iconColor: "amber" as const,
       trend: "Requires attention",
@@ -673,7 +608,7 @@ const AdminDashboard = () => {
         <div className="admin-welcome-content">
           <h2 className="admin-welcome-title">Welcome back, Admin!</h2>
           <p className="admin-welcome-text">
-            Platform is running smoothly. 15 verifications pending review.
+            Platform is running smoothly. {stats?.pendingVerifications ?? 0} verifications pending review.
           </p>
           <div className="admin-welcome-buttons">
             <Link
@@ -848,19 +783,40 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {recentProjects.map((project) => (
-                <tr key={project.id}>
-                  <td className="font-medium">{project.name}</td>
-                  <td className="text-[#94A3B8]">{project.client}</td>
-                  <td>{project.budget}</td>
-                  <td>
-                    <span className={`admin-status-badge ${project.status}`}>
-                      {getStatusLabel(project.status)}
-                    </span>
-                  </td>
-                  <td className="text-[#94A3B8]">{project.date}</td>
+              {recentProjects.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-[#94A3B8] py-8">No projects yet</td>
                 </tr>
-              ))}
+              )}
+              {recentProjects.map((project) => {
+                const statusMap: Record<string, "open" | "in-progress" | "completed"> = {
+                  open: "open",
+                  in_progress: "in-progress",
+                  completed: "completed",
+                };
+                const mappedStatus = statusMap[project.status] || "open";
+                const budgetStr = project.budget?.maxAmount
+                  ? `₹${project.budget.maxAmount.toLocaleString("en-IN")}`
+                  : "—";
+                return (
+                  <tr key={project._id}>
+                    <td className="font-medium">{project.title}</td>
+                    <td className="text-[#94A3B8]">{project.clientName || "—"}</td>
+                    <td>{budgetStr}</td>
+                    <td>
+                      <span className={`admin-status-badge ${mappedStatus}`}>
+                        {getStatusLabel(mappedStatus)}
+                      </span>
+                    </td>
+                    <td className="text-[#94A3B8]">
+                      {new Date(project.createdAt).toLocaleDateString("en-IN", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -869,28 +825,62 @@ const AdminDashboard = () => {
         <div className="admin-card admin-card-warning">
           <div className="admin-card-header">
             <h3 className="admin-card-title" style={{ color: "#F59E0B" }}>
-              Verification Queue (15)
+              Verification Queue ({stats?.pendingVerifications ?? 0})
             </h3>
           </div>
           <div>
-            {verifications.map((v) => (
-              <div key={v.id} className="admin-verification-item">
-                <div className="admin-verification-avatar">{v.initials}</div>
-                <div className="admin-verification-info">
-                  <div className="admin-verification-name">{v.name}</div>
-                  <div className="admin-verification-doc">{v.docType}</div>
+            {verifications.length === 0 && (
+              <div className="text-center text-[#94A3B8] py-8">No pending verifications</div>
+            )}
+            {verifications.map((v) => {
+              const name =
+                v.freelancerProfile?.displayName ||
+                `${v.freelancerProfile?.firstName || ""} ${v.freelancerProfile?.lastName || ""}`.trim() ||
+                v.freelancerId?.fullName ||
+                v.freelancerId?.email ||
+                "Unknown";
+              const initials = name
+                .split(" ")
+                .map((n: string) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              const docTypeMap: Record<string, string> = {
+                aadhaar: "Aadhaar Verification",
+                pan: "PAN Card",
+                portfolio_proof: "Portfolio Review",
+                certificate: "Skill Certificate",
+              };
+              const timeAgo = v.submittedAt
+                ? getTimeAgo(new Date(v.submittedAt))
+                : "";
+              return (
+                <div key={v._id} className="admin-verification-item">
+                  <div className="admin-verification-avatar">{initials}</div>
+                  <div className="admin-verification-info">
+                    <div className="admin-verification-name">{name}</div>
+                    <div className="admin-verification-doc">
+                      {docTypeMap[v.documentType] || v.documentType}
+                    </div>
+                  </div>
+                  <div className="admin-verification-time">{timeAgo}</div>
+                  <Link
+                    to="/admin/verifications"
+                    className="admin-btn admin-btn-primary admin-btn-sm"
+                  >
+                    Review
+                  </Link>
                 </div>
-                <div className="admin-verification-time">{v.time}</div>
-                <button className="admin-btn admin-btn-primary admin-btn-sm">
-                  Review
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-4 pt-4 border-t border-[#334155]">
-            <button className="admin-btn admin-btn-amber w-full">
+            <Link
+              to="/admin/verifications"
+              className="admin-btn admin-btn-amber w-full"
+            >
               Process All Pending
-            </button>
+            </Link>
           </div>
         </div>
       </div>

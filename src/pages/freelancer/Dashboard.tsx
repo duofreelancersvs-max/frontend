@@ -43,6 +43,7 @@ import type {
 } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useUnreadStore } from "@/stores/unread.store";
+import { getCategoryStyle } from "@/lib/category-styles";
 
 const getStatusBadgeStyle = (status: string) => {
   switch (status) {
@@ -461,12 +462,12 @@ const FreelancerDashboard = () => {
                 style={{ width: `${profileCompletion}%` }}
               />
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {profileCompletionItems.map((item, idx) => (
                 <div
                   key={idx}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                    "flex items-center gap-4 p-4 rounded-lg border transition-colors",
                     item.completed
                       ? "bg-slate-50 border-slate-100"
                       : "bg-gold/5 border-gold/20 hover:border-gold/40 cursor-pointer",
@@ -520,8 +521,12 @@ const FreelancerDashboard = () => {
               {recommendedProjectsData.map((project) => (
                 <div
                   key={project.id}
-                  className="p-4 rounded-xl border border-slate-100 hover:border-teal/30 hover:shadow-md transition-all"
+                  className="group relative p-4 pt-6 rounded-xl border border-slate-100 hover:border-teal/30 hover:shadow-md transition-all overflow-hidden"
                 >
+                  <div className={cn(
+                    "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-all",
+                    getCategoryStyle(project.skills[0] || "Default").gradient
+                  )} />
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="font-semibold text-navy text-sm line-clamp-2">
                       {project.title}

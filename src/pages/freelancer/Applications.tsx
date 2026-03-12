@@ -9,7 +9,6 @@ import {
   XCircle,
   AlertCircle,
   Calendar,
-  Briefcase,
   Search,
   Mail,
   FileText,
@@ -23,6 +22,7 @@ import {
   LogOut,
   ChevronDown,
 } from "lucide-react";
+import { getCategoryStyle } from "@/lib/category-styles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { applicationService } from "@/services";
@@ -268,9 +268,19 @@ const FreelancerApplications = () => {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                          <Briefcase size={20} className="text-slate-500" />
-                        </div>
+                        {(() => {
+                          const category = (application.project as any)?.skills?.[0] || "Default";
+                          const style = getCategoryStyle(category);
+                          const Icon = style.icon;
+                          return (
+                            <div className={cn(
+                              "w-12 h-12 rounded-xl flex items-center justify-center text-white bg-gradient-to-br transition-all duration-300",
+                              style.gradient
+                            )}>
+                              <Icon size={20} className="opacity-90" />
+                            </div>
+                          );
+                        })()}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-semibold text-navy">
@@ -396,7 +406,7 @@ const FreelancerApplications = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-start justify-between p-5 lg:p-6 border-b border-slate-100">
+            <div className="flex items-start justify-between p-6 border-b border-slate-100">
               <div>
                 <h2 className="text-xl font-bold text-navy">
                   Application Details
@@ -414,7 +424,7 @@ const FreelancerApplications = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Cover Letter */}
               <div>
                 <h3 className="text-sm font-semibold text-navy mb-3">

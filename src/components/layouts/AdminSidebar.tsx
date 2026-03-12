@@ -1,4 +1,8 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import Logo from "@/components/shared/Logo";
+import { adminService } from "@/services";
+import type { AdminStats } from "@/services/admin.service";
 import {
   LayoutDashboard,
   Users,
@@ -6,13 +10,14 @@ import {
   CreditCard,
   Wallet,
   Bell,
+  Briefcase,
 } from "lucide-react";
 
 interface NavItem {
   name: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
+  badge?: string | number;
   badgeColor?: "amber" | "rose" | "indigo";
 }
 
@@ -21,53 +26,73 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navSections: NavSection[] = [
-  {
-    title: "MAIN",
-    items: [
-      { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: "MANAGEMENT",
-    items: [
-      {
-        name: "Users",
-        path: "/admin/users",
-        icon: Users,
-        badge: "1.2k",
-        badgeColor: "indigo",
-      },
-      {
-        name: "Verifications",
-        path: "/admin/verifications",
-        icon: ShieldCheck,
-        badge: "15",
-        badgeColor: "amber",
-      },
-      { name: "Subscriptions", path: "/admin/subscriptions", icon: CreditCard },
-      { name: "Payments", path: "/admin/payments", icon: Wallet },
-    ],
-  },
-  {
-    title: "COMMUNICATION",
-    items: [
-      { name: "Notifications", path: "/admin/notifications", icon: Bell },
-    ],
-  },
-];
-
 const AdminSidebar = () => {
   const location = useLocation();
+  const [stats, setStats] = useState<AdminStats | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await adminService.getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to fetch sidebar stats:", error);
+      }
+    };
+    fetchStats();
+    // Refresh stats every 30 seconds for real-time feel
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const navSections: NavSection[] = [
+    {
+      title: "MAIN",
+      items: [
+        { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+      ],
+    },
+    {
+      title: "MANAGEMENT",
+      items: [
+        {
+          name: "Users",
+          path: "/admin/users",
+          icon: Users,
+          badge: stats ? stats.totalUsers : undefined,
+          badgeColor: "indigo",
+        },
+        {
+          name: "Projects",
+          path: "/admin/projects",
+          icon: Briefcase,
+          badge: stats ? stats.totalProjects : undefined,
+          badgeColor: "indigo",
+        },
+        {
+          name: "Verifications",
+          path: "/admin/verifications",
+          icon: ShieldCheck,
+          badge: stats && stats.pendingVerifications > 0 ? stats.pendingVerifications : undefined,
+          badgeColor: "amber",
+        },
+        { name: "Subscriptions", path: "/admin/subscriptions", icon: CreditCard },
+        { name: "Payments", path: "/admin/payments", icon: Wallet },
+      ],
+    },
+    {
+      title: "COMMUNICATION",
+      items: [
+        { name: "Notifications", path: "/admin/notifications", icon: Bell },
+      ],
+    },
+  ];
 
   return (
     <aside className="admin-sidebar">
       {/* Logo */}
-      <div className="admin-sidebar-logo">
-        <h1>
-          <span className="logo-dot"></span>
-          <span>ConnectMeIndia Admin</span>
-        </h1>
+      <div className="px-6 py-8 border-b border-white/5">
+        <Logo isDark size="sm" />
       </div>
 
       {/* Navigation */}
@@ -87,7 +112,7 @@ const AdminSidebar = () => {
                 >
                   <Icon className="nav-icon" />
                   <span>{item.name}</span>
-                  {item.badge && (
+                  {item.badge !== undefined && (
                     <span
                       className={`admin-nav-badge ${item.badgeColor || ""}`}
                     >

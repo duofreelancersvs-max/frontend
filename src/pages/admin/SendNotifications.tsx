@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   Bell,
@@ -31,6 +31,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { adminService } from "@/services";
 
 // ============ TYPES ============
 
@@ -331,17 +332,36 @@ const SendNotifications = () => {
   const [locationFilter, setLocationFilter] = useState<string[]>([]);
   const [subscriptionFilter, setSubscriptionFilter] = useState<string[]>([]);
 
+  const [sendSuccess, setSendSuccess] = useState(false);
+  const [recipientCounts, setRecipientCounts] = useState({ all: 0, clients: 0, freelancers: 0 });
+
+  // Fetch user counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const stats = await adminService.getDashboardStats();
+        setRecipientCounts({
+          all: stats.totalUsers || 0,
+          clients: stats.totalClients || 0,
+          freelancers: stats.totalFreelancers || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+      }
+    };
+    fetchCounts();
+  }, []);
+
   // Calculate recipient count
   const getRecipientCount = () => {
     const counts: Record<RecipientType, number> = {
-      all: 2840,
-      clients: 1680,
-      freelancers: 1150,
+      all: recipientCounts.all,
+      clients: recipientCounts.clients,
+      freelancers: recipientCounts.freelancers,
       specific: 0,
     };
     let count = counts[recipientType];
 
-    // Apply filters (simplified logic)
     if (locationFilter.length > 0) {
       count = Math.floor(count * 0.6);
     }
@@ -370,9 +390,33 @@ const SendNotifications = () => {
     setShowConfirmModal(true);
   };
 
-  const confirmSend = () => {
-    console.log("Sending notification to", recipientCount, "users");
-    setShowConfirmModal(false);
+  const confirmSend = async () => {
+    try {
+      const title = notificationType === "push" ? pushTitle : notificationType === "email" ? emailSubject : "SMS Notification";
+      const message = notificationType === "push" ? pushMessage : notificationType === "email" ? emailBody : smsMessage;
+
+      await adminService.sendNotification({
+        title: title || "Admin Notification",
+        message: message || "No message",
+        type: notificationType === "push" ? "system" : notificationType,
+        recipientType,
+      });
+
+      setShowConfirmModal(false);
+      setSendSuccess(true);
+      setTimeout(() => setSendSuccess(false), 3000);
+
+      // Reset form
+      setPushTitle("");
+      setPushMessage("");
+      setPushActionUrl("");
+      setEmailSubject("");
+      setEmailBody("");
+      setSmsMessage("");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      setShowConfirmModal(false);
+    }
   };
 
   return (
@@ -384,6 +428,17 @@ const SendNotifications = () => {
           <p>Reach your users via Push, Email, or SMS</p>
         </div>
       </div>
+
+      {sendSuccess && (
+        <div style={{
+          padding: '12px 20px', borderRadius: '8px', background: 'rgba(16,185,129,0.15)',
+          border: '1px solid rgba(16,185,129,0.3)', color: '#10B981', marginBottom: '16px',
+          display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500
+        }}>
+          <CheckCircle size={18} />
+          Notification sent successfully!
+        </div>
+      )}
 
       {/* Notification Type Tabs */}
       <div className="sn-type-tabs">
