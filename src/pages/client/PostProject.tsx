@@ -935,38 +935,7 @@ const PostProject = () => {
                 </h2>
 
                 <div className="space-y-6">
-                  {/* Budget Type Toggle */}
-                  <div>
-                    <label className="block text-sm font-semibold text-navy mb-3">
-                      Budget Type
-                    </label>
-                    <div className="inline-flex bg-slate-100 rounded-xl p-1">
-                      <button
-                        onClick={() => handleInputChange("budgetType", "fixed")}
-                        className={cn(
-                          "px-6 py-2 rounded-lg text-sm font-semibold transition-all",
-                          formData.budgetType === "fixed"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-slate-500 hover:text-navy",
-                        )}
-                      >
-                        Fixed Price
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleInputChange("budgetType", "hourly")
-                        }
-                        className={cn(
-                          "px-6 py-2 rounded-lg text-sm font-semibold transition-all",
-                          formData.budgetType === "hourly"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-slate-500 hover:text-navy",
-                        )}
-                      >
-                        Hourly Rate
-                      </button>
-                    </div>
-                  </div>
+                  {/* Budget Type Toggle removed */}
 
                   {/* Budget Range */}
                   <div>
@@ -1014,9 +983,7 @@ const PostProject = () => {
                       </div>
                     </div>
                     <p className="text-xs text-slate-400 mt-2">
-                      {formData.budgetType === "hourly"
-                        ? "Per hour rate range"
-                        : "Total project budget range"}
+                      Total project budget range
                     </p>
                   </div>
 
@@ -1246,7 +1213,7 @@ const PostProject = () => {
                           Budget Type
                         </p>
                         <p className="font-medium text-navy capitalize">
-                          {formData.budgetType} Price
+                          Fixed Price
                         </p>
                       </div>
                       <div>

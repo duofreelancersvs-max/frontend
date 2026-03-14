@@ -144,11 +144,7 @@ const FreelancerProfileView = () => {
                   </span>
                   <span>({freelancer.reviewCount || 0} reviews)</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-teal text-lg">
-                    ₹{freelancer.hourlyRate}/hr
-                  </span>
-                </div>
+
               </div>
             </div>
           </div>

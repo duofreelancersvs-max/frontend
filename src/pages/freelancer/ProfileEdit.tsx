@@ -109,7 +109,7 @@ const FreelancerProfileEdit = () => {
     displayName: "",
     headline: "",
     bio: "",
-    hourlyRate: 0,
+
     availability: "full-time",
     category: "Editing",
   });
@@ -159,7 +159,7 @@ const FreelancerProfileEdit = () => {
       displayName: data.displayName || "",
       headline: data.headline || "",
       bio: data.bio || "",
-      hourlyRate: data.hourlyRate || 0,
+
       availability: data.availability || "full-time",
       category: data.category || "Editing",
     });
@@ -177,7 +177,7 @@ const FreelancerProfileEdit = () => {
     { label: "Skills added", completed: skills.length > 0 },
     { label: "Portfolio items", completed: portfolio.length > 0 },
     { label: "Work experience", completed: experience.length > 0 },
-    { label: "Hourly rate set", completed: formData.hourlyRate > 0 },
+
     {
       label: "Phone verified",
       completed: user?.isPhoneVerified || false,
@@ -209,7 +209,7 @@ const FreelancerProfileEdit = () => {
         displayName: formData.displayName,
         headline: formData.headline,
         bio: formData.bio,
-        hourlyRate: Number(formData.hourlyRate),
+
         availability: formData.availability,
         category: formData.category,
         skills: skills.map((s) => ({
@@ -692,29 +692,7 @@ const FreelancerProfileEdit = () => {
                           />
                         </div>
 
-                        {/* Hourly Rate */}
-                        <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
-                            Hourly Rate (INR) *
-                          </label>
-                          <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                              ₹
-                            </span>
-                            <input
-                              type="number"
-                              value={formData.hourlyRate}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  "hourlyRate",
-                                  Number(e.target.value),
-                                )
-                              }
-                              className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
-                              placeholder="1000"
-                            />
-                          </div>
-                        </div>
+
                       </div>
 
                       {/* Professional Headline */}

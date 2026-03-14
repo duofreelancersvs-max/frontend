@@ -17,7 +17,6 @@ import {
   AlertCircle,
   Menu,
   Eye,
-  DollarSign,
   MessageSquare,
   Award,
   Zap,
@@ -131,11 +130,10 @@ const FreelancerDashboard = () => {
         (!!profile.title ? 10 : 0) +
           (!!profile.bio ? 10 : 0) +
           ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
-          (!!profile.hourlyRate ? 15 : 0) +
-          ((profile.skills?.length || 0) > 0 ? 15 : 0) +
+          ((profile.skills?.length || 0) > 0 ? 20 : 0) +
           // @ts-expect-error type missing
-          ((profile.experience?.length || 0) > 0 ? 15 : 0) +
-          ((profile.education?.length || 0) > 0 ? 10 : 0) +
+          ((profile.experience?.length || 0) > 0 ? 20 : 0) +
+          ((profile.education?.length || 0) > 0 ? 15 : 0) +
           (profile.availability ? 10 : 0),
       )
     : 0;
@@ -148,9 +146,7 @@ const FreelancerDashboard = () => {
   const pendingApplications = applications.filter(
     (a) => a.status === "pending",
   ).length;
-  const totalEarnings = profile?.completedProjects
-    ? profile.completedProjects * (profile.hourlyRate || 0) * 10
-    : 0;
+
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -177,12 +173,12 @@ const FreelancerDashboard = () => {
       trend: "neutral" as const,
     },
     {
-      label: "Total Earnings",
-      value: `₹${(totalEarnings || 25000).toLocaleString()}`,
-      icon: DollarSign,
-      color: "bg-success-green",
-      change: "+₹8,000 this month",
-      trend: "up" as const,
+      label: "Email Verification",
+      value: "Pending",
+      icon: AlertCircle,
+      color: "bg-gold",
+      change: "Verify now to apply",
+      trend: "neutral" as const,
     },
     {
       label: "New Messages",
@@ -202,7 +198,7 @@ const FreelancerDashboard = () => {
       completed: (profile?.portfolio?.length || 0) > 0,
     },
     { label: "Add skills", completed: (profile?.skills?.length || 0) > 0 },
-    { label: "Set hourly rate", completed: !!profile?.hourlyRate },
+
     {
       label: "Add work experience",
       // @ts-expect-error type missing
@@ -217,7 +213,7 @@ const FreelancerDashboard = () => {
   const applicationStatuses = applications.slice(0, 5).map((app) => ({
     id: app.id,
     project: app.project?.title || "Untitled Project",
-    client: app.freelancer?.fullName || "Unknown Client",
+    client: (app.project as any)?.client?.companyName || (app.project as any)?.client?.fullName || (app.project as any)?.client?.name || (app.project as any)?.clientName || (app.project?.clientId as any)?.companyName || (app.project?.clientId as any)?.fullName || "Client",
     appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -236,9 +232,8 @@ const FreelancerDashboard = () => {
     budget: `₹${project.budget.minAmount?.toLocaleString() || 0} - ₹${project.budget.maxAmount?.toLocaleString() || 0}`,
     skillsMatch: 85,
     postedTime: new Date(project.createdAt).toLocaleDateString("en-US", {
+      month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     }),
     skills: project.skills || [],
   }));
@@ -261,16 +256,7 @@ const FreelancerDashboard = () => {
     unread: conv.unreadCount > 0,
   }));
 
-  const earningsData = [
-    { month: "Aug", amount: 12000 },
-    { month: "Sep", amount: 18000 },
-    { month: "Oct", amount: 15000 },
-    { month: "Nov", amount: 22000 },
-    { month: "Dec", amount: 19000 },
-    { month: "Jan", amount: 25000 },
-  ];
 
-  const maxEarning = Math.max(...earningsData.map((d) => d.amount));
 
   if (loading) {
     return (
@@ -406,8 +392,7 @@ const FreelancerDashboard = () => {
                 </Link>
                 <Link to="/projects">
                   <Button
-                    variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10"
+                    className="border-white/30 bg-transparent text-white hover:bg-white hover:text-navy transition-all"
                   >
                     <Search size={18} className="mr-2" />
                     Browse Projects
@@ -525,7 +510,7 @@ const FreelancerDashboard = () => {
                 >
                   <div className={cn(
                     "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-all",
-                    getCategoryStyle(project.skills[0] || "Default").gradient
+                    getCategoryStyle((project as any).category || project.skills[0] || "Default").gradient
                   )} />
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="font-semibold text-navy text-sm line-clamp-2">
@@ -668,62 +653,9 @@ const FreelancerDashboard = () => {
             </div>
           </section>
 
-          {/* TWO COLUMN LAYOUT */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* LEFT - EARNINGS SUMMARY */}
-            <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-navy">
-                  Earnings Overview
-                </h3>
-                <Link
-                  to="/freelancer/earnings"
-                  className="text-sm text-teal font-medium hover:underline flex items-center gap-1"
-                >
-                  View Details <ArrowRight size={14} />
-                </Link>
-              </div>
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">This Month</p>
-                    <p className="text-3xl font-bold text-navy">₹25,000</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-1 bg-success-green/10 rounded-full text-success-green text-sm font-semibold">
-                    <TrendingUp size={14} />
-                    +32%
-                  </div>
-                </div>
-
-                {/* Simple Bar Chart */}
-                <div className="flex items-end justify-between h-32 gap-2">
-                  {earningsData.map((data, idx) => (
-                    <div
-                      key={idx}
-                      className="flex-1 flex flex-col items-center gap-2"
-                    >
-                      <div
-                        className={cn(
-                          "w-full rounded-t-lg transition-all",
-                          idx === earningsData.length - 1
-                            ? "bg-gradient-to-t from-teal to-teal-light"
-                            : "bg-slate-200",
-                        )}
-                        style={{
-                          height: `${(data.amount / maxEarning) * 100}%`,
-                          minHeight: "8px",
-                        }}
-                      />
-                      <span className="text-xs text-slate-500">
-                        {data.month}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* RIGHT - MESSAGES */}
+          {/* ONE COLUMN LAYOUT */}
+          <div className="grid gap-6">
+             {/* RIGHT - MESSAGES */}
             <section className="bg-white rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex items-center justify-between p-5 border-b border-slate-100">
                 <h3 className="text-lg font-bold text-navy">New Messages</h3>

@@ -4,9 +4,6 @@ import {
   Star,
   Clock,
   DollarSign,
-  Upload,
-  FileText,
-  Trash2,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -39,7 +36,6 @@ interface ProjectApplicationModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   project: ProjectData;
-  userHourlyRate?: number;
   applicationsRemaining?: number;
   subscriptionPlan?: "Free" | "Pro" | "Premium";
 }
@@ -57,14 +53,11 @@ const ProjectApplicationModal = ({
   onClose,
   onSuccess,
   project,
-  userHourlyRate = 800,
   applicationsRemaining = 5,
   subscriptionPlan = "Free",
 }: ProjectApplicationModalProps) => {
   const [coverLetter, setCoverLetter] = useState("");
-  const [proposedRate, setProposedRate] = useState(userHourlyRate.toString());
   const [estimatedDuration, setEstimatedDuration] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
   const [questionAnswers, setQuestionAnswers] = useState<{
     [key: number]: string;
   }>({});
@@ -74,22 +67,6 @@ const ProjectApplicationModal = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const maxCoverLetterLength = 1000;
-  const maxFiles = 5;
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      const totalFiles = attachments.length + newFiles.length;
-      if (totalFiles <= maxFiles) {
-        setAttachments((prev) => [...prev, ...newFiles]);
-      }
-    }
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleQuestionChange = (index: number, value: string) => {
     setQuestionAnswers((prev) => ({ ...prev, [index]: value }));
@@ -104,9 +81,6 @@ const ProjectApplicationModal = ({
       newErrors.coverLetter = "Cover letter must be at least 50 characters";
     }
 
-    if (!proposedRate || parseFloat(proposedRate) <= 0) {
-      newErrors.proposedRate = "Please enter a valid rate";
-    }
 
     if (!estimatedDuration) {
       newErrors.estimatedDuration = "Please select an estimated duration";
@@ -134,7 +108,6 @@ const ProjectApplicationModal = ({
       await applicationService.apply({
         projectId: String(project.id),
         coverLetter: coverLetter.trim(),
-        proposedRate: parseFloat(proposedRate),
         estimatedDuration: parseInt(estimatedDuration, 10),
       });
       setIsSuccess(true);
@@ -157,9 +130,7 @@ const ProjectApplicationModal = ({
   const handleClose = () => {
     // Reset form state
     setCoverLetter("");
-    setProposedRate(userHourlyRate.toString());
     setEstimatedDuration("");
-    setAttachments([]);
     setQuestionAnswers({});
     setErrors({});
     setSubmitError(null);
@@ -271,7 +242,11 @@ const ProjectApplicationModal = ({
                       <div className="flex items-center gap-1">
                         <Clock size={14} className="text-slate-400" />
                         <span className="font-medium text-navy text-sm">
-                          {project.deadline}
+                          {new Date(project.deadline).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -316,41 +291,6 @@ const ProjectApplicationModal = ({
                   </div>
                 </div>
 
-                {/* Rate and Duration Row */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {/* Proposed Rate */}
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-2">
-                      Proposed Rate (INR/hr) *
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        ₹
-                      </span>
-                      <input
-                        type="number"
-                        value={proposedRate}
-                        onChange={(e) => setProposedRate(e.target.value)}
-                        className={cn(
-                          "w-full pl-8 pr-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-navy",
-                          errors.proposedRate
-                            ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                            : "border-slate-200 focus:border-teal focus:ring-teal/20",
-                        )}
-                        placeholder="800"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-400 mt-1.5">
-                      Your usual rate: ₹{userHourlyRate.toLocaleString()}/hr
-                    </p>
-                    {errors.proposedRate && (
-                      <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                        <AlertCircle size={12} />
-                        {errors.proposedRate}
-                      </p>
-                    )}
-                  </div>
-
                   {/* Estimated Duration */}
                   <div>
                     <label className="block text-sm font-medium text-navy mb-2">
@@ -380,88 +320,8 @@ const ProjectApplicationModal = ({
                       </p>
                     )}
                   </div>
-                </div>
 
-                {/* Attachments */}
-                <div>
-                  <label className="block text-sm font-medium text-navy mb-2">
-                    Attachments
-                  </label>
-                  <div
-                    className={cn(
-                      "border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer",
-                      attachments.length >= maxFiles
-                        ? "border-slate-100 bg-slate-50 cursor-not-allowed"
-                        : "border-slate-200 hover:border-teal/50 hover:bg-teal/5",
-                    )}
-                    onClick={() => {
-                      if (attachments.length < maxFiles) {
-                        document.getElementById("file-upload")?.click();
-                      }
-                    }}
-                  >
-                    <input
-                      id="file-upload"
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileUpload}
-                      disabled={attachments.length >= maxFiles}
-                    />
-                    <Upload
-                      size={24}
-                      className={cn(
-                        "mx-auto mb-2",
-                        attachments.length >= maxFiles
-                          ? "text-slate-300"
-                          : "text-slate-400",
-                      )}
-                    />
-                    <p
-                      className={cn(
-                        "text-sm",
-                        attachments.length >= maxFiles
-                          ? "text-slate-400"
-                          : "text-slate-600",
-                      )}
-                    >
-                      {attachments.length >= maxFiles
-                        ? "Maximum files reached"
-                        : "Click to upload or drag and drop"}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Add relevant work samples (Max {maxFiles} files)
-                    </p>
-                  </div>
 
-                  {/* Uploaded Files List */}
-                  {attachments.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {attachments.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg"
-                        >
-                          <FileText size={18} className="text-slate-400" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-navy truncate">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => removeAttachment(index)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 {/* Client Questions */}
                 {project.questions && project.questions.length > 0 && (

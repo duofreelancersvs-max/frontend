@@ -134,7 +134,7 @@ const HowItWorks = () => {
       icon: UserPlus,
       features: [
         "Add portfolio items",
-        "Set your hourly rate",
+        "Showcase your expertise",
         "Get verified badge",
         "Highlight top skills",
       ],

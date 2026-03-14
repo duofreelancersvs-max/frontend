@@ -8,7 +8,7 @@ const mockFreelancer = {
   title: "Full Stack Developer",
   rating: 4.8,
   reviewCount: 42,
-  hourlyRate: 50,
+
   location: "New York, USA",
   skills: ["React", "Node.js", "TypeScript", "MongoDB", "AWS"],
   imageUrl: "https://example.com/avatar.jpg",
@@ -24,7 +24,6 @@ describe("FreelancerCard", () => {
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("Full Stack Developer")).toBeInTheDocument();
     expect(screen.getByText(/42/)).toBeInTheDocument();
-    expect(screen.getByText("₹50/hr")).toBeInTheDocument();
     expect(screen.getByText("New York, USA")).toBeInTheDocument();
   });
 

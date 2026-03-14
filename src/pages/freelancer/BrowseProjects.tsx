@@ -600,11 +600,9 @@ const BrowseProjects = () => {
                       <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center gap-2 text-sm text-slate-500">
                           <Clock size={14} />
-                          {new Date(project.createdAt).toLocaleString("en-US", {
+                          {new Date(project.createdAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
                           })}
                         </div>
                         <button
@@ -846,7 +844,6 @@ const BrowseProjects = () => {
             },
             budget: selectedProject.budget,
           }}
-          userHourlyRate={1200}
           applicationsRemaining={5}
           subscriptionPlan="Free"
         />

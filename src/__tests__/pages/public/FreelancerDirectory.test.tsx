@@ -114,13 +114,6 @@ describe("FreelancerDirectory", () => {
     expect(fiveRatings.length).toBeGreaterThan(0);
   });
 
-  it("displays freelancer hourly rates", () => {
-    renderWithRouter(<FreelancerDirectory />);
-    expect(screen.getAllByText(/₹800/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹1200/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹1000/i).length).toBeGreaterThan(0);
-  });
-
   it("displays freelancer locations", () => {
     renderWithRouter(<FreelancerDirectory />);
     expect(screen.getAllByText(/Hyderabad/i).length).toBeGreaterThan(0);

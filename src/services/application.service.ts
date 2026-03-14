@@ -6,7 +6,6 @@ export interface Application {
   projectId: string;
   freelancerId: string;
   coverLetter: string;
-  proposedRate: number;
   estimatedDuration: number;
   status:
     | "pending"
@@ -36,6 +35,11 @@ export interface Application {
       lastName: string;
       avatar?: string;
     };
+    client?: {
+      fullName: string;
+      name: string;
+      avatar?: string;
+    };
   };
   freelancer?: {
     _id?: string;
@@ -59,7 +63,6 @@ export interface ApplicationStats {
 export interface CreateApplicationRequest {
   projectId: string;
   coverLetter: string;
-  proposedRate: number;
   estimatedDuration: number;
 }
 

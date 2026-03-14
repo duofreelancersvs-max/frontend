@@ -8,7 +8,7 @@ interface FreelancerCardProps {
   title: string;
   rating: number;
   reviewCount: number;
-  hourlyRate: number;
+
   location: string;
   skills: string[];
   imageUrl: string;
@@ -23,7 +23,7 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
   title,
   rating,
   reviewCount,
-  hourlyRate,
+
   location,
   skills,
   imageUrl,
@@ -86,13 +86,10 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
         </div>
 
         {/* Details Row */}
-        <div className="w-full flex justify-between items-center text-sm text-text-secondary mb-4 px-2">
+        <div className="w-full flex justify-center items-center text-sm text-text-secondary mb-4 px-2">
           <div className="flex items-center gap-1">
             <MapPin size={14} className="text-text-secondary" />
-            <span className="truncate max-w-[80px]">{location}</span>
-          </div>
-          <div className="font-semibold text-text-primary">
-            ₹{hourlyRate}/hr
+            <span className="truncate max-w-[120px]">{location}</span>
           </div>
         </div>
 

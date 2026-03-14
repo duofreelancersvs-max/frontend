@@ -8,7 +8,7 @@ import {
   FileText,
   Mail,
   CreditCard,
-  DollarSign,
+  Wallet,
   Star,
   Settings,
   LogOut,
@@ -51,7 +51,7 @@ const sidebarNavItems = [
     badge: null,
   },
   {
-    icon: DollarSign,
+    icon: Wallet,
     label: "Earnings",
     href: "/freelancer/earnings",
     badge: null,
@@ -104,14 +104,13 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
 
   const profileCompletion = profile
     ? Math.round(
-        (!!profile.title ? 10 : 0) +
-          (!!profile.bio ? 10 : 0) +
+        (!!profile.title ? 15 : 0) +
+          (!!profile.bio ? 15 : 0) +
           ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
-          (!!profile.hourlyRate ? 15 : 0) +
           ((profile.skills?.length || 0) > 0 ? 15 : 0) +
           ((profile.workExperience?.length || 0) > 0 ? 15 : 0) +
           ((profile.education?.length || 0) > 0 ? 10 : 0) +
-          (profile.availability ? 10 : 0),
+          (profile.availability ? 15 : 0),
       )
     : 0;
 

@@ -117,7 +117,6 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
             ({freelancer.reviewCount || 0})
           </span>
         </div>
-        <span className="font-bold text-teal">₹{freelancer.hourlyRate}/hr</span>
       </div>
     </div>
   );
@@ -468,9 +467,7 @@ const ClientFreelancers = () => {
                           <th className="text-left px-6 py-4 text-sm font-semibold text-navy">
                             Skills
                           </th>
-                          <th className="text-left px-6 py-4 text-sm font-semibold text-navy">
-                            Rate
-                          </th>
+
                           <th className="text-left px-6 py-4 text-sm font-semibold text-navy">
                             Rating
                           </th>
@@ -529,9 +526,7 @@ const ClientFreelancers = () => {
                                   ))}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-navy font-medium">
-                              ₹{freelancer.hourlyRate}/hr
-                            </td>
+
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-1">
                                 <Star

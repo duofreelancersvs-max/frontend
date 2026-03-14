@@ -144,10 +144,7 @@ const ClientDashboard = () => {
   const completedProjects = (projects || []).filter(
     (p) => p.status === "completed",
   ).length;
-  const totalSpent = (projects || []).reduce(
-    (acc, p) => acc + (p.budget?.maxAmount || 0),
-    0,
-  );
+
 
   const statsData = [
     {
@@ -166,13 +163,7 @@ const ClientDashboard = () => {
       color: "bg-teal",
       change: "+3 this month",
     },
-    {
-      label: "Total Spent",
-      value: `₹${(totalSpent || 45000).toLocaleString()}`,
-      icon: CreditCard,
-      color: "bg-navy",
-      change: "₹12,000 this month",
-    },
+
     {
       label: "Pending Reviews",
       value: String(pendingApplications.length || 3),

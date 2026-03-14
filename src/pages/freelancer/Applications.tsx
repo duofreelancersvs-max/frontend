@@ -14,7 +14,6 @@ import {
   FileText,
   X,
   Eye,
-  DollarSign,
   MessageSquare,
   Bell,
   User,
@@ -269,7 +268,7 @@ const FreelancerApplications = () => {
                     <div className="flex-1">
                       <div className="flex items-start gap-3">
                         {(() => {
-                          const category = (application.project as any)?.skills?.[0] || "Default";
+                          const category = (application.project as any)?.category || (application.project as any)?.skills?.[0] || "Default";
                           const style = getCategoryStyle(category);
                           const Icon = style.icon;
                           return (
@@ -298,9 +297,21 @@ const FreelancerApplications = () => {
                             </span>
                           </div>
                           <p className="text-sm text-slate-500 mt-1">
-                            {application.project?.clientId
-                              ? `${application.project.clientId.firstName} ${application.project.clientId.lastName}`
-                              : "Unknown Client"}
+                            {(application.project as any)?.client?.companyName ||
+                              (application.project as any)?.client?.fullName ||
+                              (application.project as any)?.client?.name ||
+                              (application.project as any)?.clientName ||
+                              (application.project?.clientId as any)?.companyName ||
+                              (application.project?.clientId as any)?.fullName ||
+                              (application.project?.clientId
+                                ? [
+                                    application.project.clientId.firstName,
+                                    application.project.clientId.lastName,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ")
+                                : "") ||
+                              "Client"}
                           </p>
                           <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
                             <span className="flex items-center gap-1">
@@ -316,7 +327,14 @@ const FreelancerApplications = () => {
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock size={14} />
-                              Deadline: {application.project?.deadline || "N/A"}
+                              Deadline:{" "}
+                              {application.project?.deadline
+                                ? new Date(application.project.deadline).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                : "N/A"}
                             </span>
                           </div>
                         </div>
@@ -325,9 +343,11 @@ const FreelancerApplications = () => {
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                       <div className="text-right">
-                        <p className="text-xs text-slate-500">Your Bid</p>
+                        <p className="text-xs text-slate-500">Duration</p>
                         <p className="text-lg font-bold text-navy">
-                          ₹{(application.proposedRate || 0).toLocaleString()}
+                          {application.estimatedDuration
+                            ? `${application.estimatedDuration} days`
+                            : "N/A"}
                         </p>
                         <p className="text-xs text-slate-400">
                           Budget: ₹
@@ -437,13 +457,6 @@ const FreelancerApplications = () => {
 
               {/* Application Details */}
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <p className="text-xs text-slate-500 mb-1">Your Bid</p>
-                  <div className="flex items-center gap-1.5 font-medium text-navy text-sm">
-                    <DollarSign size={14} className="text-teal" />₹
-                    {(selectedApplication.proposedRate || 0).toLocaleString()}
-                  </div>
-                </div>
                 <div className="bg-slate-50 rounded-xl p-4">
                   <p className="text-xs text-slate-500 mb-1">
                     Estimated Duration
