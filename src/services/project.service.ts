@@ -84,8 +84,8 @@ export const projectService = {
 
   getById: (id: string) => api.get<Project>(`/projects/${id}`),
 
-  getMyClientProjects: () =>
-    api.get<{ projects: Project[] }>("/projects/me/client"),
+  getMyClientProjects: (params?: { limit?: number; page?: number }) =>
+    api.get<{ projects: Project[] }>("/projects/me/client", { params }),
 
   getMyClientStats: () => api.get<ProjectStats>("/projects/me/stats"),
 

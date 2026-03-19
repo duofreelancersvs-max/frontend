@@ -87,7 +87,7 @@ const ClientProjects = () => {
       try {
         setLoading(true);
         const [projectsData, statsData] = await Promise.all([
-          projectService.getMyClientProjects(),
+          projectService.getMyClientProjects({ limit: 100 }),
           projectService.getMyClientStats(),
         ]);
         setProjects(projectsData.projects || []);
@@ -187,7 +187,7 @@ const ClientProjects = () => {
       return (b.budget?.maxAmount || 0) - (a.budget?.maxAmount || 0);
     if (sortBy === "budget-low")
       return (a.budget?.minAmount || 0) - (b.budget?.minAmount || 0);
-    return 0;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   // Pagination
@@ -277,7 +277,7 @@ const ClientProjects = () => {
 
               <Link
                 to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
@@ -285,7 +285,7 @@ const ClientProjects = () => {
                 )}
               </Link>
 
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -840,7 +840,7 @@ const ClientProjects = () => {
 
               {/* PAGINATION */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full min-w-0">
                   <p className="text-sm text-slate-500">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
                     {Math.min(

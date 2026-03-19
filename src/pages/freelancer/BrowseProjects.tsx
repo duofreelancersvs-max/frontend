@@ -82,7 +82,7 @@ const BrowseProjects = () => {
   const [activeTab, setActiveTab] = useState<"browse" | "saved">("browse");
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("relevance");
+  const [sortBy, setSortBy] = useState("newest");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
 
@@ -250,30 +250,62 @@ const BrowseProjects = () => {
       <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
-                  Browse Projects
-                </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
-                  Find work that matches your skills
-                </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                >
+                  <Menu size={24} />
+                </button>
+                <div>
+                  <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                    Browse Projects
+                  </h1>
+                  <p className="text-sm text-slate-500 hidden sm:block">
+                    Find work that matches your skills
+                  </p>
+                </div>
+              </div>
+
+              {/* Mobile View Profile Header Actions */}
+              <div className="flex md:hidden items-center gap-2">
+                <Link
+                  to="/freelancer/messages"
+                  className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+                >
+                  <MessageSquare size={20} />
+                  {totalUnreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  )}
+                </Link>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
+                      {user?.fullName
+                        ? user.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                        : (user?.email?.[0] || "U").toUpperCase()}
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl hidden md:flex">
+            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto scrollbar-hide hide-scrollbar">
               <button
                 onClick={() => setActiveTab("browse")}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-all",
+                  "px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 md:flex-none whitespace-nowrap",
                   activeTab === "browse"
                     ? "bg-white text-navy shadow-sm"
                     : "text-slate-500 hover:text-navy",
@@ -285,7 +317,7 @@ const BrowseProjects = () => {
               <button
                 onClick={() => setActiveTab("saved")}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2",
+                  "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap",
                   activeTab === "saved"
                     ? "bg-white text-navy shadow-sm"
                     : "text-slate-500 hover:text-navy",
@@ -301,17 +333,17 @@ const BrowseProjects = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 lg:gap-4">
+            <div className="hidden md:flex items-center gap-2 lg:gap-4">
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
                   <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
                 )}
               </Link>
-              
+
               <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
@@ -341,7 +373,9 @@ const BrowseProjects = () => {
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-slate-100">
                       <p className="font-semibold text-navy">
-                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
+                        {user?.fullName ||
+                          user?.email?.split("@")[0] ||
+                          "Freelancer"}
                       </p>
                       <p className="text-sm text-slate-500 truncate">
                         {user?.email}
@@ -377,7 +411,7 @@ const BrowseProjects = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 space-y-6">
+        <main className="p-4 lg:p-8 space-y-4 lg:space-y-6">
           {/* LOADING STATE */}
           {loading && (
             <div className="flex items-center justify-center py-20">
@@ -423,7 +457,7 @@ const BrowseProjects = () => {
                   <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-3 rounded-xl border font-medium transition-all",
+                      "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-medium transition-all w-full sm:w-auto",
                       showFilters
                         ? "bg-teal/5 border-teal text-teal"
                         : "border-slate-200 text-slate-600 hover:border-slate-300",
@@ -449,7 +483,7 @@ const BrowseProjects = () => {
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {categories.map((cat) => (
                             <option key={cat} value={cat}>
@@ -470,14 +504,14 @@ const BrowseProjects = () => {
                             value={budgetMin}
                             onChange={(e) => setBudgetMin(e.target.value)}
                             placeholder="Min"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                           />
                           <input
                             type="number"
                             value={budgetMax}
                             onChange={(e) => setBudgetMax(e.target.value)}
                             placeholder="Max"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -492,7 +526,7 @@ const BrowseProjects = () => {
                           onChange={(e) =>
                             setSelectedExperience(e.target.value)
                           }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {experienceLevels.map((level) => (
                             <option key={level} value={level}>
@@ -510,7 +544,7 @@ const BrowseProjects = () => {
                         <select
                           value={selectedLocation}
                           onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {locationTypes.map((loc) => (
                             <option key={loc} value={loc}>
@@ -530,7 +564,7 @@ const BrowseProjects = () => {
                           onChange={(e) =>
                             setSelectedPostedDate(e.target.value)
                           }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {postedDateOptions.map((opt) => (
                             <option key={opt} value={opt}>
@@ -569,13 +603,13 @@ const BrowseProjects = () => {
                 {/* Sort */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500">Sort by:</span>
-                  <div className="flex bg-slate-100 rounded-lg p-0.5">
+                  <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 rounded-lg p-0.5">
                     {sortOptions.map((opt) => (
                       <button
                         key={opt.value}
                         onClick={() => setSortBy(opt.value)}
                         className={cn(
-                          "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
+                          "px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap",
                           sortBy === opt.value
                             ? "bg-white text-navy shadow-sm"
                             : "text-slate-500 hover:text-navy",
@@ -590,20 +624,23 @@ const BrowseProjects = () => {
 
               {/* PROJECT CARDS GRID */}
               {paginatedProjects.length > 0 ? (
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                   {paginatedProjects.map((project) => (
                     <div
                       key={project._id || project.id}
-                      className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-teal/20 transition-all overflow-hidden"
+                      className="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-teal/20 transition-all overflow-hidden"
                     >
                       {/* Card Header */}
-                      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-slate-50/50">
+                      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-slate-50/50 shrink-0">
                         <div className="flex items-center gap-2 text-sm text-slate-500">
                           <Clock size={14} />
-                          {new Date(project.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(project.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
                         </div>
                         <button
                           onClick={() =>
@@ -706,7 +743,15 @@ const BrowseProjects = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin size={14} />
-                            {project.location?.type ?? "Remote"}
+                            {project.location?.type === "remote"
+                              ? "Remote"
+                              : project.location?.type === "onsite"
+                                ? "Onsite"
+                                : project.location?.type === "hybrid"
+                                  ? "Hybrid"
+                                  : (project.location?.type
+                                      ?.charAt(0)
+                                      .toUpperCase() ?? "R")}
                             {project.location?.city
                               ? `, ${project.location.city}`
                               : ""}

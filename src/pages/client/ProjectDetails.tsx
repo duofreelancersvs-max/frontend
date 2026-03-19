@@ -265,7 +265,7 @@ const ProjectDetails = () => {
           <div className="flex items-center gap-2 lg:gap-4">
             <Link
               to="/client/messages"
-              className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+              className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
             >
               <MessageSquare size={20} />
               {totalUnreadCount > 0 && (
@@ -273,7 +273,7 @@ const ProjectDetails = () => {
               )}
             </Link>
 
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
@@ -472,7 +472,7 @@ const ProjectDetails = () => {
                 Project Details
               </h2>
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full min-w-0">
                   <div className="flex items-center gap-3 text-slate-500">
                     <div className="p-2 bg-green-50 text-green-600 rounded-lg">
                       <CreditCard size={18} />
@@ -485,7 +485,7 @@ const ProjectDetails = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full min-w-0">
                   <div className="flex items-center gap-3 text-slate-500">
                     <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
                       <MapPin size={18} />
@@ -497,7 +497,7 @@ const ProjectDetails = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full min-w-0">
                   <div className="flex items-center gap-3 text-slate-500">
                     <div className="p-2 bg-red-50 text-red-600 rounded-lg">
                       <Calendar size={18} />

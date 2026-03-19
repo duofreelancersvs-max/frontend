@@ -122,7 +122,7 @@ const ChatArea = ({
           {onBack && (
             <button
               onClick={onBack}
-              className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
             >
               <ArrowLeft size={20} />
             </button>

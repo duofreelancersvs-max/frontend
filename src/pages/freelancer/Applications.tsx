@@ -146,7 +146,7 @@ const FreelancerApplications = () => {
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
-              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
                   <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
@@ -261,7 +261,7 @@ const FreelancerApplications = () => {
 
               return (
                 <div
-                  key={application.id}
+                  key={application._id || application.id}
                   className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-all"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -341,8 +341,8 @@ const FreelancerApplications = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                      <div className="text-right">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0 border-t border-slate-50 pt-4 lg:border-t-0 lg:pt-0">
+                      <div className="text-left sm:text-right">
                         <p className="text-xs text-slate-500">Duration</p>
                         <p className="text-lg font-bold text-navy">
                           {application.estimatedDuration
@@ -361,11 +361,11 @@ const FreelancerApplications = () => {
                         </p>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-slate-200"
+                          className="border-slate-200 flex-1 sm:flex-none"
                           onClick={() => setSelectedApplication(application)}
                         >
                           <Eye size={14} className="mr-1" />
@@ -375,7 +375,7 @@ const FreelancerApplications = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-red-200 text-red-500 hover:bg-red-50"
+                            className="border-red-200 text-red-500 hover:bg-red-50 flex-1 sm:flex-none"
                             onClick={() =>
                               handleWithdraw(application._id || application.id)
                             }
@@ -384,10 +384,10 @@ const FreelancerApplications = () => {
                           </Button>
                         )}
                         {application.status === "accepted" && (
-                          <Link to="/freelancer/messages">
+                          <Link to="/freelancer/messages" className="flex-1 sm:flex-none">
                             <Button
                               size="sm"
-                              className="bg-teal hover:bg-teal-light text-white"
+                              className="w-full bg-teal hover:bg-teal-light text-white"
                             >
                               <Mail size={14} className="mr-1" />
                               Message
@@ -426,7 +426,7 @@ const FreelancerApplications = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-start justify-between p-6 border-b border-slate-100">
+            <div className="flex items-start justify-between p-4 sm:p-6 border-b border-slate-100">
               <div>
                 <h2 className="text-xl font-bold text-navy">
                   Application Details
@@ -444,7 +444,7 @@ const FreelancerApplications = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
               {/* Cover Letter */}
               <div>
                 <h3 className="text-sm font-semibold text-navy mb-3">
@@ -456,7 +456,7 @@ const FreelancerApplications = () => {
               </div>
 
               {/* Application Details */}
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 rounded-xl p-4">
                   <p className="text-xs text-slate-500 mb-1">
                     Estimated Duration

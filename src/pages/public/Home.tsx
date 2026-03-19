@@ -111,6 +111,18 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Lock scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
+
   const testimonials = [
     {
       quote:
@@ -220,15 +232,15 @@ const Home = () => {
       <nav
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          isScrolled
-            ? "bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 py-3"
+          (isScrolled || mobileMenuOpen)
+            ? "bg-white backdrop-blur-xl shadow-lg shadow-slate-200/50 py-3"
             : "bg-transparent py-5",
         )}
       >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Logo isDark={!isScrolled} />
+            <Logo isDark={!(isScrolled || mobileMenuOpen)} />
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
@@ -288,7 +300,7 @@ const Home = () => {
             <button
               className={cn(
                 "lg:hidden p-2 rounded-lg transition-colors",
-                isScrolled
+                (isScrolled || mobileMenuOpen)
                   ? "text-navy hover:bg-slate-100"
                   : "text-white hover:bg-white/10",
               )}
@@ -299,14 +311,29 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            "lg:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 shadow-xl transition-all duration-300 overflow-hidden",
-            mobileMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0",
-          )}
-        >
-          <div className="p-4 space-y-2">
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div
+        className={cn(
+          "lg:hidden fixed inset-0 z-[100] bg-white flex flex-col transition-all duration-500 ease-in-out transform",
+          mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        )}
+      >
+        {/* Header top row */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
+          <Logo isDark={false} />
+          <button
+            className="p-2 rounded-lg text-navy hover:bg-slate-100"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Links Content list height fill scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-between">
+          <div className="space-y-4">
             {[
               { label: "Find Talent", href: "/freelancers" },
               { label: "Find Work", href: "/find-work" },
@@ -318,30 +345,32 @@ const Home = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                className="block px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-navy font-medium transition-colors"
+                className="block px-4 py-4 rounded-xl text-lg text-slate-700 hover:bg-slate-50 hover:text-navy font-semibold transition-all border-b border-slate-50"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            <div className="pt-4 border-t border-slate-100 space-y-2">
-              <Link to="/login">
-                <Button
-                  variant="outline"
-                  className="w-full border-royal-blue text-royal-blue"
-                >
-                  Log In
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="w-full bg-teal text-white">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
+          </div>
+
+          {/* Auth actions at bottom of screen viewport overlay */}
+          <div className="pt-6 space-y-3 mt-8">
+            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full">
+              <Button
+                variant="outline"
+                className="w-full h-12 border-slate-200 text-slate-700 font-bold text-base"
+              >
+                Log In
+              </Button>
+            </Link>
+            <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block w-full">
+              <Button className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/20">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* 2. HERO SECTION */}
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#050B15]">

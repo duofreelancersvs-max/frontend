@@ -166,7 +166,7 @@ export const conversationService = {
 
   getMessages: async (conversationId: string) => {
     const data = await api.get<{ messages: any[] }>(
-      `/conversations/${conversationId}/messages`,
+      `/conversations/${conversationId}/messages?limit=100`,
     );
     return {
       ...data,

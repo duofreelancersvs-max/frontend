@@ -63,7 +63,7 @@ const Logo: React.FC<LogoProps> = ({
           )}
         >
           <span className={isDark ? "text-white" : "text-navy"}>Connect</span>
-          <span className={isDark ? "text-teal-light" : "text-royal-blue"}>
+          <span className="text-teal">
             Me
           </span>
           <span

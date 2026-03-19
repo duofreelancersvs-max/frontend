@@ -61,7 +61,7 @@ const ClientDashboard = () => {
         setLoading(true);
         const [projectsData, freeData, convData, userData, profileData] = await Promise.allSettled([
           projectService
-            .getMyClientProjects()
+            .getMyClientProjects({ limit: 100 })
             .then((r) => r.projects)
             .catch(() => []),
           freelancerService
@@ -116,6 +116,7 @@ const ClientDashboard = () => {
 
   const activeProjects = (projects || [])
     .filter((p) => p.status === "in-progress")
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3)
     .map((p) => ({
       id: p._id,
@@ -130,7 +131,13 @@ const ClientDashboard = () => {
             .join("") || "?",
       },
       progress: 50,
-      deadline: p.deadline,
+      deadline: p.deadline
+        ? new Date(p.deadline).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "No deadline",
       budget:
         p.budget?.minAmount !== undefined && p.budget?.maxAmount !== undefined
           ? `₹${p.budget.minAmount.toLocaleString()} - ₹${p.budget.maxAmount.toLocaleString()}`
@@ -173,7 +180,10 @@ const ClientDashboard = () => {
     },
   ];
 
-  const recentApplications = (applications || []).slice(0, 3).map((app) => ({
+  const recentApplications = (applications || [])
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3)
+    .map((app) => ({
     id: app.id,
     freelancer: {
       name: app.freelancer?.fullName || "Unknown",
@@ -269,7 +279,7 @@ const ClientDashboard = () => {
       <div>
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full min-w-0">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -294,7 +304,7 @@ const ClientDashboard = () => {
               </button>
 
               {/* Messages */}
-              <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
                   <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
@@ -498,10 +508,12 @@ const ClientDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between w-full min-w-0">
                     <div className="flex items-center gap-1 text-xs text-slate-500">
                       <Clock size={12} />
-                      Due in {project.deadline}
+                      {project.deadline === "No deadline"
+                        ? "No deadline"
+                        : `Due in ${project.deadline}`}
                     </div>
                     <Link to={`/client/project/${project.id}`}>
                       <Button
@@ -625,7 +637,7 @@ const ClientDashboard = () => {
           {/* TWO COLUMN LAYOUT */}
           <div className="grid lg:grid-cols-3 gap-6">
             {/* LEFT - RECOMMENDED FREELANCERS */}
-            <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm min-w-0">
               <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Sparkles size={18} className="text-gold" />

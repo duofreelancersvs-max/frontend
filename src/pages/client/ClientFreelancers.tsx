@@ -228,7 +228,7 @@ const ClientFreelancers = () => {
 
               <Link
                 to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
@@ -236,7 +236,7 @@ const ClientFreelancers = () => {
                 )}
               </Link>
 
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>

@@ -9,66 +9,19 @@ import {
   AlertCircle,
   MessageSquare,
   Bell,
-  Eye,
   FileText,
   Menu,
-  Download,
   User as UserIcon,
   Settings,
   LogOut,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { projectService } from "@/services";
+import { useEffect } from "react";
 
-const paymentsData = [
-  {
-    id: 1,
-    projectTitle: "E-commerce Product Video",
-    freelancer: "Arun Kumar",
-    amount: 22000,
-    status: "completed",
-    date: "Dec 18, 2024",
-    invoiceId: "INV-2024-001",
-  },
-  {
-    id: 2,
-    projectTitle: "Corporate Explainer",
-    freelancer: "Priya Sharma",
-    amount: 40000,
-    status: "pending",
-    date: "Dec 15, 2024",
-    invoiceId: "INV-2024-002",
-  },
-  {
-    id: 3,
-    projectTitle: "YouTube Channel Intro",
-    freelancer: "Vikram Reddy",
-    amount: 8000,
-    status: "completed",
-    date: "Dec 10, 2024",
-    invoiceId: "INV-2024-003",
-  },
-  {
-    id: 4,
-    projectTitle: "Wedding Highlight Reel",
-    freelancer: "Meera Singh",
-    amount: 30000,
-    status: "failed",
-    date: "Dec 5, 2024",
-    invoiceId: "INV-2024-004",
-  },
-  {
-    id: 5,
-    projectTitle: "Social Media Ads",
-    freelancer: "Rahul Verma",
-    amount: 12000,
-    status: "completed",
-    date: "Nov 28, 2024",
-    invoiceId: "INV-2024-005",
-  },
-];
+// Static payments simulation removed
 
 const ClientPayments = () => {
   const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
@@ -76,6 +29,41 @@ const ClientPayments = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
+  
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoading(true);
+        const projectsData = await projectService.getMyClientProjects({ limit: 100 });
+        const mappedPayments = (projectsData.projects || [])
+          .filter((p: any) => p.hiredFreelancerId || p.status === "completed" || p.status === "in-progress" || p.status === "cancelled")
+          .map((p: any, index: number) => ({
+            id: p._id || p.id,
+            projectTitle: p.title,
+            freelancer: p.freelancer?.fullName || "Assigned Freelancer",
+            amount: p.budget.maxAmount || 0,
+            status: p.status === "completed" ? "completed" : p.status === "in-progress" ? "pending" : p.status === "cancelled" ? "failed" : "pending",
+            date: new Date(p.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }),
+            invoiceId: `INV-${new Date(p.createdAt).getFullYear()}-${String(index + 1).padStart(3, "0")}`,
+          }));
+        setPayments(mappedPayments);
+      } catch (error) {
+        console.error("Failed to fetch payments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayments();
+  }, []);
+
+  const paymentsData = payments;
 
   const handleLogout = async () => {
     try {
@@ -131,6 +119,14 @@ const ClientPayments = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
@@ -155,7 +151,7 @@ const ClientPayments = () => {
             <div className="flex items-center gap-2 lg:gap-4">
               <Link
                 to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
@@ -163,7 +159,7 @@ const ClientPayments = () => {
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -316,9 +312,7 @@ const ClientPayments = () => {
                   <th className="text-center text-xs font-semibold text-slate-500 px-6 py-4">
                     Status
                   </th>
-                  <th className="text-center text-xs font-semibold text-slate-500 px-6 py-4">
-                    Actions
-                  </th>
+
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -330,9 +324,6 @@ const ClientPayments = () => {
                       <td className="px-6 py-4">
                         <p className="font-medium text-navy">
                           {payment.projectTitle}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {payment.invoiceId}
                         </p>
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
@@ -358,24 +349,7 @@ const ClientPayments = () => {
                           {payment.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2"
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2"
-                          >
-                            <Download size={16} />
-                          </Button>
-                        </div>
-                      </td>
+
                     </tr>
                   );
                 })}

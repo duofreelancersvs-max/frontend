@@ -80,10 +80,18 @@ const FreelancerMessages = () => {
 
   const handleNewMessage = useCallback(
     (socketMsg: SocketMessage, _conv: SocketConversation) => {
+      // Robustly extract senderId – backend may send ObjectId object or string
+      const rawSenderId = (socketMsg as any).senderId;
+      const senderId = (
+        typeof rawSenderId === 'object' && rawSenderId !== null
+          ? (rawSenderId._id || rawSenderId.id || rawSenderId).toString()
+          : (rawSenderId || '').toString()
+      );
+
       const mapped: Message = {
         id: (socketMsg._id || (socketMsg as any).id || "").toString(),
         conversationId: (socketMsg.conversationId || "").toString(),
-        senderId: ((socketMsg.senderId as any)?._id || socketMsg.senderId || "").toString(),
+        senderId,
         content: socketMsg.content,
         read: socketMsg.isRead ?? (socketMsg as any).read ?? false,
         createdAt: socketMsg.createdAt || (socketMsg as any).sentAt || new Date().toISOString(),
@@ -96,9 +104,11 @@ const FreelancerMessages = () => {
       const msgConvId = mapped.conversationId.toString();
       const isCurrentConv = selId && msgConvId === selId;
 
+      const currentUserId = (user?._id || '').toString();
+
       if (isCurrentConv) {
         // If it's for the current conversation and from the OTHER person, mark as read immediately
-        if (mapped.senderId !== user?._id?.toString()) {
+        if (mapped.senderId !== currentUserId) {
           console.log("[Socket] Marking message as read instantly", msgConvId);
           markAsRead(msgConvId);
         }
@@ -408,9 +418,12 @@ const FreelancerMessages = () => {
         </header>
 
         {/* Three Column Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
           {/* COLUMN 1: Conversations List */}
-          <div className="w-80 border-r border-slate-200 bg-white flex flex-col">
+          <div className={cn(
+            "w-full lg:w-80 border-r border-slate-200 bg-white flex flex-col flex-shrink-0",
+            selectedConversation ? "hidden lg:flex" : "flex"
+          )}>
             {/* Search */}
             <div className="p-4 border-b border-slate-100">
               <div className="relative">
@@ -490,7 +503,7 @@ const FreelancerMessages = () => {
                       </div>
 
                       {/* Last Message */}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between w-full min-w-0">
                         <p className="text-sm text-slate-500 truncate">
                           {conv.lastMessage}
                         </p>
@@ -509,6 +522,11 @@ const FreelancerMessages = () => {
 
           {/* COLUMN 2: Chat Area */}
           <ChatArea
+            className={cn(
+              "flex-1",
+              selectedConversation ? "flex" : "hidden lg:flex"
+            )}
+            onBack={() => setSelectedConversation(null)}
             participant={selectedConversation ? {
               name: selectedConvData?.client.name || selectedConversation.participants?.[0]?.fullName || "Unknown",
               avatar: "",
@@ -536,8 +554,13 @@ const FreelancerMessages = () => {
           />
 
           {/* COLUMN 3: Client Info Panel */}
-          {showInfoPanel && selectedConversation && (
-            <div className="w-80 border-l border-slate-200 bg-white overflow-y-auto">
+          {selectedConversation && (
+            <div className={cn(
+              "absolute lg:static inset-y-0 right-0 z-30 bg-white border-l border-slate-200 overflow-y-auto shadow-xl lg:shadow-none transition-transform duration-300",
+              showInfoPanel 
+                ? "translate-x-0 lg:translate-x-0 flex flex-col w-full sm:w-80" 
+                : "translate-x-full lg:translate-x-0 lg:hidden"
+            )}>
               {/* Client Header */}
               <div className="p-6 border-b border-slate-100 text-center">
                 <ChatAvatar

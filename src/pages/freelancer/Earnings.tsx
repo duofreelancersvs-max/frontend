@@ -246,7 +246,7 @@ const FreelancerEarnings = () => {
               <div className="flex items-center gap-2">
                 <Link
                   to="/freelancer/messages"
-                  className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                  className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
                 >
                   <MessageSquare size={20} />
                   {totalUnreadCount > 0 && (
@@ -473,7 +473,7 @@ const FreelancerEarnings = () => {
                 {categoryBreakdown.map((cat) => (
                   <div
                     key={cat.category}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between w-full min-w-0"
                   >
                     <div className="flex items-center gap-2">
                       <div
@@ -634,7 +634,7 @@ const FreelancerEarnings = () => {
                   {withdrawalHistory.slice(0, 2).map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between w-full min-w-0"
                     >
                       <div>
                         <p className="text-sm font-medium text-navy">

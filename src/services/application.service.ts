@@ -64,6 +64,7 @@ export interface CreateApplicationRequest {
   projectId: string;
   coverLetter: string;
   estimatedDuration: number;
+  proposedRate: number;
 }
 
 export const applicationService = {

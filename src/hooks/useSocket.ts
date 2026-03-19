@@ -72,7 +72,11 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     socketRef.current = s;
 
     // Handle connect/disconnect
-    const handleConnect = () => setIsConnected(true);
+    const handleConnect = () => {
+      setIsConnected(true);
+      // Request current online users on every connect/reconnect
+      s.emit("users:get_online" as any);
+    };
     const handleDisconnect = () => setIsConnected(false);
 
     // ─── Socket Event Handlers ───

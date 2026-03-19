@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   X,
   Star,
   Clock,
-  DollarSign,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -56,8 +56,10 @@ const ProjectApplicationModal = ({
   applicationsRemaining = 5,
   subscriptionPlan = "Free",
 }: ProjectApplicationModalProps) => {
+  const navigate = useNavigate();
   const [coverLetter, setCoverLetter] = useState("");
   const [estimatedDuration, setEstimatedDuration] = useState("");
+  const [proposedRate, setProposedRate] = useState("");
   const [questionAnswers, setQuestionAnswers] = useState<{
     [key: number]: string;
   }>({});
@@ -86,6 +88,12 @@ const ProjectApplicationModal = ({
       newErrors.estimatedDuration = "Please select an estimated duration";
     }
 
+    if (!proposedRate) {
+      newErrors.proposedRate = "Proposed rate is required";
+    } else if (isNaN(Number(proposedRate)) || Number(proposedRate) <= 0) {
+      newErrors.proposedRate = "Please enter a valid amount";
+    }
+
     if (project.questions) {
       project.questions.forEach((_, index) => {
         if (!questionAnswers[index]?.trim()) {
@@ -109,6 +117,7 @@ const ProjectApplicationModal = ({
         projectId: String(project.id),
         coverLetter: coverLetter.trim(),
         estimatedDuration: parseInt(estimatedDuration, 10),
+        proposedRate: Number(proposedRate),
       });
       setIsSuccess(true);
     } catch (err: unknown) {
@@ -131,6 +140,7 @@ const ProjectApplicationModal = ({
     // Reset form state
     setCoverLetter("");
     setEstimatedDuration("");
+    setProposedRate("");
     setQuestionAnswers({});
     setErrors({});
     setSubmitError(null);
@@ -168,7 +178,7 @@ const ProjectApplicationModal = ({
                   if (onSuccess) {
                     onSuccess();
                   } else {
-                    window.location.href = "/freelancer/applications";
+                    navigate("/freelancer/applications");
                   }
                 }}
                 className="w-full bg-teal hover:bg-teal-light text-white"
@@ -187,7 +197,7 @@ const ProjectApplicationModal = ({
         ) : (
           <>
             {/* HEADER */}
-            <div className="flex items-start justify-between p-5 lg:p-6 border-b border-slate-100">
+            <div className="flex items-start justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100">
               <div>
                 <h2 className="text-xl font-bold text-navy">
                   Apply for Project
@@ -205,13 +215,13 @@ const ProjectApplicationModal = ({
             </div>
 
             {/* CONTENT */}
-            <div className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-6">
               {/* PROJECT SUMMARY */}
               <div className="bg-slate-50 rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-navy mb-3">
                   Project Summary
                 </h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Client</p>
                     <div className="flex items-center gap-1.5">
@@ -229,7 +239,6 @@ const ProjectApplicationModal = ({
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Budget</p>
                     <div className="flex items-center gap-1">
-                      <DollarSign size={14} className="text-success-green" />
                       <span className="font-medium text-navy text-sm">
                         ₹{(project.budget.minAmount || 0).toLocaleString()} - ₹
                         {(project.budget.maxAmount || 0).toLocaleString()}
@@ -321,6 +330,38 @@ const ProjectApplicationModal = ({
                     )}
                   </div>
 
+                  {/* Proposed Rate */}
+                  <div>
+                    <label className="block text-sm font-medium text-navy mb-2">
+                      Proposed Rate *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold">₹</span>
+                      <input
+                        type="number"
+                        value={proposedRate}
+                        onChange={(e) => setProposedRate(e.target.value)}
+                        placeholder="Enter your rate amount"
+                        className={cn(
+                          "w-full pl-8 pr-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-navy",
+                          errors.proposedRate
+                            ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                            : "border-slate-200 focus:border-teal focus:ring-teal/20",
+                        )}
+                      />
+                    </div>
+                    {errors.proposedRate ? (
+                      <p className="text-xs text-red-500 flex items-center gap-1 mt-1.5">
+                        <AlertCircle size={12} />
+                        {errors.proposedRate}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400 mt-1">
+                        Budget: ₹{(project.budget.minAmount || 0).toLocaleString()} - ₹{(project.budget.maxAmount || 0).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+
 
 
                 {/* Client Questions */}
@@ -362,7 +403,7 @@ const ProjectApplicationModal = ({
             </div>
 
             {/* FOOTER */}
-            <div className="p-5 lg:p-6 border-t border-slate-100 bg-slate-50">
+            <div className="p-4 sm:p-5 lg:p-6 border-t border-slate-100 bg-slate-50">
               {/* Submit Error */}
               {submitError && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded-lg mb-4">
@@ -380,26 +421,26 @@ const ProjectApplicationModal = ({
                   <AlertCircle size={12} />
                   You have {applicationsRemaining} applications remaining this
                   month.{" "}
-                  <a
-                    href="/freelancer/subscription"
+                  <Link
+                    to="/freelancer/subscription"
                     className="text-teal font-medium hover:underline"
                   >
                     Upgrade
-                  </a>
+                  </Link>
                 </p>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 border-slate-200"
+                  className="w-full sm:flex-1 border-slate-200"
                   onClick={handleClose}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-teal hover:bg-teal-light text-white"
+                  className="w-full sm:flex-1 bg-teal hover:bg-teal-light text-white"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                 >

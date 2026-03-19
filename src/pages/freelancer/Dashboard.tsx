@@ -271,7 +271,7 @@ const FreelancerDashboard = () => {
       <div className="w-full">
         {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full min-w-0">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -370,7 +370,7 @@ const FreelancerDashboard = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
             <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-royal-blue/30 rounded-full blur-[60px]" />
 
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
                   {getGreeting()}, {freelancerName}! 👋
@@ -383,16 +383,17 @@ const FreelancerDashboard = () => {
                   . Complete it to get more project invites!
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Link to="/freelancer/profile">
-                  <Button className="bg-white text-navy hover:bg-slate-100 font-semibold">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto">
+                <Link to="/freelancer/profile" className="w-full sm:w-auto">
+                  <Button className="bg-white text-navy hover:bg-slate-100 font-semibold w-full">
                     <User size={18} className="mr-2" />
                     Complete Profile
                   </Button>
                 </Link>
-                <Link to="/projects">
+                <Link to="/projects" className="w-full sm:w-auto">
                   <Button
-                    className="border-white/30 bg-transparent text-white hover:bg-white hover:text-navy transition-all"
+                    variant="outline"
+                    className="w-full bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all font-semibold"
                   >
                     <Search size={18} className="mr-2" />
                     Browse Projects
@@ -403,7 +404,7 @@ const FreelancerDashboard = () => {
           </section>
 
           {/* STATS CARDS */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {statsData.map((stat, idx) => (
               <div
                 key={idx}
@@ -447,7 +448,7 @@ const FreelancerDashboard = () => {
                 style={{ width: `${profileCompletion}%` }}
               />
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {profileCompletionItems.map((item, idx) => (
                 <div
                   key={idx}
@@ -502,7 +503,7 @@ const FreelancerDashboard = () => {
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="p-5 lg:p-6 grid gap-4 lg:grid-cols-3">
+            <div className="p-4 sm:p-5 lg:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {recommendedProjectsData.map((project) => (
                 <div
                   key={project.id}
@@ -582,7 +583,8 @@ const FreelancerDashboard = () => {
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="bg-slate-50 text-left">
@@ -629,7 +631,7 @@ const FreelancerDashboard = () => {
                       <td className="px-6 py-4">
                         <span
                           className={cn(
-                            "px-2 py-1 rounded-full text-xs font-semibold",
+                            "px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap",
                             getStatusBadgeStyle(app.status),
                           )}
                         >
@@ -650,6 +652,40 @@ const FreelancerDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="lg:hidden flex flex-col divide-y divide-slate-100">
+              {applicationStatuses.map((app) => (
+                <div key={app.id} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h4 className="font-medium text-navy text-sm line-clamp-1">{app.project}</h4>
+                    <span
+                      className={cn(
+                        "px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0",
+                        getStatusBadgeStyle(app.status)
+                      )}
+                    >
+                      {app.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-3">{app.client}</p>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">Applied: {app.appliedDate}</p>
+                      <p className="text-sm font-semibold text-navy">{app.budget}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-3 text-xs text-royal-blue hover:bg-royal-blue/10"
+                    >
+                      <ExternalLink size={14} className="mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 

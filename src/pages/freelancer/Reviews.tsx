@@ -39,7 +39,11 @@ const FreelancerReviews = () => {
     const fetchReviews = async () => {
       try {
         const data = await reviewService.getMyReviews();
-        setReviews(data.reviews || []);
+        const sortedReviews = (data.reviews || []).sort(
+          (a: Review, b: Review) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        setReviews(sortedReviews);
       } catch (error) {
         console.error("Error fetching reviews:", error);
       }
@@ -97,7 +101,7 @@ const FreelancerReviews = () => {
             <div className="flex items-center gap-2 lg:gap-4">
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (

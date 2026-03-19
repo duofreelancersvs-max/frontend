@@ -48,10 +48,18 @@ const ClientMessages = () => {
     (socketMsg: SocketMessage, _conv: SocketConversation) => {
       console.log("[Socket] New message received:", (socketMsg as any).id || socketMsg._id);
       
+      // Robustly extract senderId – backend may send ObjectId object or string
+      const rawSenderId = (socketMsg as any).senderId;
+      const senderId = (
+        typeof rawSenderId === 'object' && rawSenderId !== null
+          ? (rawSenderId._id || rawSenderId.id || rawSenderId).toString()
+          : (rawSenderId || '').toString()
+      );
+
       const mapped: Message = {
         id: (socketMsg._id || (socketMsg as any).id || "").toString(),
         conversationId: (socketMsg.conversationId || "").toString(),
-        senderId: ((socketMsg.senderId as any)?._id || socketMsg.senderId || "").toString(),
+        senderId,
         content: socketMsg.content,
         read: socketMsg.isRead ?? (socketMsg as any).read ?? false,
         createdAt: socketMsg.createdAt || socketMsg.sentAt || new Date().toISOString(),
@@ -64,9 +72,11 @@ const ClientMessages = () => {
       const msgConvId = mapped.conversationId;
       const isCurrentConv = selId && msgConvId === selId;
 
+      const currentUserId = (user?._id || '').toString();
+
       if (isCurrentConv) {
         // If it's for the current conversation and from the OTHER person, mark as read immediately
-        if (mapped.senderId !== user?._id?.toString()) {
+        if (mapped.senderId !== currentUserId) {
           markAsRead(mapped.conversationId);
         }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Link,
   useNavigate,
@@ -99,6 +99,7 @@ const PostProject = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
   const [loadingProject, setLoadingProject] = useState(isEditing);
   const { user, logout } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -254,9 +255,7 @@ const PostProject = () => {
   const handleCategoryToggle = (category: string) => {
     setFormData((prev) => ({
       ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category],
+      categories: [category],
     }));
   };
 
@@ -287,6 +286,17 @@ const PostProject = () => {
         toast.error(
           `Please provide all mandatory fields: ${missingFields.join(", ")}`,
         );
+        
+        const firstMissing = missingFields[0];
+        if (["Title", "Category", "Description"].includes(firstMissing)) {
+          setCurrentStep(1);
+        } else if (["Skills", "Experience Level", "Duration", "Location (City & Country)"].includes(firstMissing)) {
+          setCurrentStep(2);
+        } else if (["Budget Range", "Deadline"].includes(firstMissing)) {
+          setCurrentStep(3);
+        }
+        
+        topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
 
@@ -341,7 +351,7 @@ const PostProject = () => {
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
+    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
       {/* Header Bar */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
@@ -365,7 +375,7 @@ const PostProject = () => {
             <div className="flex items-center gap-2 lg:gap-4">
               <Link
                 to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex"
+                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
@@ -373,7 +383,7 @@ const PostProject = () => {
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -444,7 +454,7 @@ const PostProject = () => {
           <div className="lg:col-span-3 space-y-6">
             {/* PROGRESS STEPPER */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between w-full min-w-0">
                 {steps.map((step, index) => (
                   <div key={step.id} className="flex items-center flex-1">
                     <div className="flex flex-col items-center">
@@ -514,24 +524,7 @@ const PostProject = () => {
                       Project Categories <span className="text-red-500">*</span>
                     </label>
 
-                    {/* Selected Categories */}
-                    {formData.categories.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {formData.categories.map((category) => (
-                          <span
-                            key={category}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-teal/10 text-teal rounded-full text-sm font-medium"
-                          >
-                            {category}
-                            <button
-                              onClick={() => handleCategoryToggle(category)}
-                            >
-                              <X size={14} />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+
 
                     {/* Available Categories */}
                     <div className="flex flex-wrap gap-2">
