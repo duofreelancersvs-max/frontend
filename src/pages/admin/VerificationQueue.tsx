@@ -57,136 +57,6 @@ type DocumentFilter = "all" | "aadhaar" | "pan" | "portfolio" | "gst";
 type DateFilter = "today" | "week" | "month";
 type SortOrder = "newest" | "oldest";
 
-// ============ MOCK DATA ============
-
-const mockVerifications: VerificationItem[] = [
-  {
-    id: "1",
-    freelancerName: "Vikram Patel",
-    freelancerInitials: "VP",
-    freelancerEmail: "vikram.p@gmail.com",
-    freelancerLocation: "Hyderabad, TG",
-    isPremiumApplicant: true,
-    documentType: "aadhaar",
-    documentNumber: "****4523",
-    submittedAt: "2 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: true,
-    documentImage: "/placeholder-doc.png",
-  },
-  {
-    id: "2",
-    freelancerName: "Sneha Reddy",
-    freelancerInitials: "SR",
-    freelancerEmail: "sneha.reddy@outlook.com",
-    freelancerLocation: "Vijayawada, AP",
-    isPremiumApplicant: false,
-    documentType: "pan",
-    documentNumber: "****7891",
-    submittedAt: "3 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-  },
-  {
-    id: "3",
-    freelancerName: "Arjun Singh",
-    freelancerInitials: "AS",
-    freelancerEmail: "arjun.singh@gmail.com",
-    freelancerLocation: "Secunderabad, TG",
-    isPremiumApplicant: true,
-    documentType: "portfolio",
-    documentNumber: "N/A",
-    submittedAt: "5 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-  },
-  {
-    id: "4",
-    freelancerName: "Meera Krishnan",
-    freelancerInitials: "MK",
-    freelancerEmail: "meera.k@creative.io",
-    freelancerLocation: "Guntur, AP",
-    isPremiumApplicant: false,
-    documentType: "gst",
-    documentNumber: "****9876",
-    submittedAt: "6 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: true,
-    documentImage: "/placeholder-doc.png",
-  },
-  {
-    id: "5",
-    freelancerName: "Rahul Sharma",
-    freelancerInitials: "RS",
-    freelancerEmail: "rahul.sharma@gmail.com",
-    freelancerLocation: "Hyderabad, TG",
-    isPremiumApplicant: false,
-    documentType: "aadhaar",
-    documentNumber: "****3456",
-    submittedAt: "1 day ago",
-    submittedDate: "Feb 5, 2024",
-    status: "approved",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-    reviewedBy: "Super Admin",
-    reviewedAt: "Feb 5, 2024 at 4:30 PM",
-  },
-  {
-    id: "6",
-    freelancerName: "Priya Menon",
-    freelancerInitials: "PM",
-    freelancerEmail: "priya.menon@outlook.com",
-    freelancerLocation: "Visakhapatnam, AP",
-    isPremiumApplicant: true,
-    documentType: "pan",
-    documentNumber: "****5678",
-    submittedAt: "1 day ago",
-    submittedDate: "Feb 5, 2024",
-    status: "rejected",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-    rejectionReason: "Document unclear",
-    reviewedBy: "Super Admin",
-    reviewedAt: "Feb 5, 2024 at 3:15 PM",
-  },
-  {
-    id: "7",
-    freelancerName: "Kavitha Nair",
-    freelancerInitials: "KN",
-    freelancerEmail: "kavitha.nair@gmail.com",
-    freelancerLocation: "Tirupati, AP",
-    isPremiumApplicant: false,
-    documentType: "portfolio",
-    documentNumber: "N/A",
-    submittedAt: "8 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-  },
-  {
-    id: "8",
-    freelancerName: "Ravi Teja",
-    freelancerInitials: "RT",
-    freelancerEmail: "ravi.teja@filmworks.com",
-    freelancerLocation: "Hyderabad, TG",
-    isPremiumApplicant: true,
-    documentType: "gst",
-    documentNumber: "****2468",
-    submittedAt: "10 hours ago",
-    submittedDate: "Feb 6, 2024",
-    status: "pending",
-    isUrgent: false,
-    documentImage: "/placeholder-doc.png",
-  },
-];
-
 const recentDecisions = [
   {
     id: "1",
@@ -711,12 +581,17 @@ const VerificationQueue = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [reviewItem, setReviewItem] = useState<VerificationItem | null>(null);
   const [activeTab, setActiveTab] = useState<"queue" | "history">("queue");
-  const [apiStats, setApiStats] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const [apiStats, setApiStats] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
 
   // Fetch verifications from API
   const fetchVerifications = useCallback(async () => {
     try {
-      const docTypeParam = documentFilter !== "all" ? documentFilter : undefined;
+      const docTypeParam =
+        documentFilter !== "all" ? documentFilter : undefined;
       const result = await adminService.getVerifications({
         page: 1,
         limit: 50,
@@ -724,46 +599,66 @@ const VerificationQueue = () => {
       });
 
       // Map API data to local VerificationItem interface
-      const mapped: VerificationItem[] = (result.verifications || []).map((v: any) => {
-        const freelancerName = v.freelancerProfile?.displayName
-          || `${v.freelancerProfile?.firstName || ""} ${v.freelancerProfile?.lastName || ""}`.trim()
-          || v.freelancerId?.fullName
-          || v.freelancerId?.email
-          || "Unknown";
-        const initials = freelancerName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
-        const docTypeMap: Record<string, VerificationItem["documentType"]> = {
-          aadhaar: "aadhaar",
-          pan: "pan",
-          portfolio_proof: "portfolio",
-          certificate: "gst",
-        };
-        const submittedDate = new Date(v.submittedAt);
-        const diffMs = Date.now() - submittedDate.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        let timeAgo = "Just now";
-        if (diffMins >= 60 * 24) timeAgo = `${Math.floor(diffMins / (60 * 24))} day(s) ago`;
-        else if (diffMins >= 60) timeAgo = `${Math.floor(diffMins / 60)} hours ago`;
-        else if (diffMins > 0) timeAgo = `${diffMins} minutes ago`;
+      const mapped: VerificationItem[] = (result.verifications || []).map(
+        (v: any) => {
+          const freelancerName =
+            v.freelancerProfile?.displayName ||
+            `${v.freelancerProfile?.firstName || ""} ${v.freelancerProfile?.lastName || ""}`.trim() ||
+            v.freelancerId?.fullName ||
+            v.freelancerId?.email ||
+            "Unknown";
+          const initials = freelancerName
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+          const docTypeMap: Record<string, VerificationItem["documentType"]> = {
+            aadhaar: "aadhaar",
+            pan: "pan",
+            portfolio_proof: "portfolio",
+            certificate: "gst",
+          };
+          const submittedDate = new Date(v.submittedAt);
+          const diffMs = Date.now() - submittedDate.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          let timeAgo = "Just now";
+          if (diffMins >= 60 * 24)
+            timeAgo = `${Math.floor(diffMins / (60 * 24))} day(s) ago`;
+          else if (diffMins >= 60)
+            timeAgo = `${Math.floor(diffMins / 60)} hours ago`;
+          else if (diffMins > 0) timeAgo = `${diffMins} minutes ago`;
 
-        return {
-          id: v._id,
-          freelancerName,
-          freelancerInitials: initials,
-          freelancerEmail: v.freelancerId?.email || "",
-          freelancerLocation: v.freelancerProfile?.location || "—",
-          isPremiumApplicant: v.freelancerProfile?.verificationBadge === "premium" || false,
-          documentType: docTypeMap[v.documentType] || "aadhaar",
-          documentNumber: v.documentNumber ? `****${v.documentNumber.slice(-4)}` : "N/A",
-          submittedAt: timeAgo,
-          submittedDate: submittedDate.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }),
-          status: v.status as VerificationItem["status"],
-          isUrgent: diffMins < 180, // less than 3 hours
-          documentImage: v.documentUrl || "/placeholder-doc.png",
-          rejectionReason: v.adminNotes || undefined,
-          reviewedBy: v.reviewedBy?.fullName || v.reviewedBy?.email || undefined,
-          reviewedAt: v.reviewedAt ? new Date(v.reviewedAt).toLocaleString("en-IN") : undefined,
-        };
-      });
+          return {
+            id: v._id,
+            freelancerName,
+            freelancerInitials: initials,
+            freelancerEmail: v.freelancerId?.email || "",
+            freelancerLocation: v.freelancerProfile?.location || "—",
+            isPremiumApplicant:
+              v.freelancerProfile?.verificationBadge === "premium" || false,
+            documentType: docTypeMap[v.documentType] || "aadhaar",
+            documentNumber: v.documentNumber
+              ? `****${v.documentNumber.slice(-4)}`
+              : "N/A",
+            submittedAt: timeAgo,
+            submittedDate: submittedDate.toLocaleDateString("en-IN", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }),
+            status: v.status as VerificationItem["status"],
+            isUrgent: diffMins < 180, // less than 3 hours
+            documentImage: v.documentUrl || "/placeholder-doc.png",
+            rejectionReason: v.adminNotes || undefined,
+            reviewedBy:
+              v.reviewedBy?.fullName || v.reviewedBy?.email || undefined,
+            reviewedAt: v.reviewedAt
+              ? new Date(v.reviewedAt).toLocaleString("en-IN")
+              : undefined,
+          };
+        },
+      );
 
       setItems(mapped);
       if (result.stats) {
@@ -849,7 +744,9 @@ const VerificationQueue = () => {
   const handleBulkApprove = async () => {
     try {
       await Promise.all(
-        Array.from(selectedItems).map((id) => adminService.approveVerification(id))
+        Array.from(selectedItems).map((id) =>
+          adminService.approveVerification(id),
+        ),
       );
       setSelectedItems(new Set());
       await fetchVerifications();
