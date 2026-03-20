@@ -1,9 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Menu,
-  X,
-  Search,
   CheckCircle,
   Film,
   Sparkles,
@@ -14,19 +11,20 @@ import {
   Play,
   Users,
   Layout,
-  ChevronDown,
-  MapPin,
   Shield,
   Zap,
   Heart,
-  Twitter,
-  Linkedin,
-  Instagram,
-  Youtube,
+  Search,
+  ChevronDown,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Logo from "@/components/shared/Logo";
+import PublicNavbar from "@/components/shared/PublicNavbar";
+import PublicFooter from "@/components/shared/PublicFooter";
+import freelancerService from "@/services/freelancer.service";
+import type { FreelancerProfile } from "@/services/freelancer.service";
+import { Loader2 } from "lucide-react";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -90,18 +88,73 @@ const AnimatedCounter = ({
 };
 
 const Home = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
 
+  // ── Debounced Hero Search ──
+  const [heroQuery, setHeroQuery] = useState("");
+  const [heroResults, setHeroResults] = useState<FreelancerProfile[]>([]);
+  const [heroSearching, setHeroSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Debounced API call
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+    if (!heroQuery.trim()) {
+      setHeroResults([]);
+      setShowDropdown(false);
+      return;
+    }
+    setHeroSearching(true);
+    setShowDropdown(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await freelancerService.search({ search: heroQuery.trim(), limit: 5 });
+        const data = (res as any).data || res;
+        setHeroResults(data.profiles || []);
+      } catch {
+        setHeroResults([]);
+      } finally {
+        setHeroSearching(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [heroQuery]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Close on Escape
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") setShowDropdown(false);
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (heroQuery.trim()) {
+        navigate(`/freelancers?search=${encodeURIComponent(heroQuery.trim())}`);
+        setShowDropdown(false);
+      }
+    }
+  }, [heroQuery, navigate]);
+
+  const handleSearchSubmit = () => {
+    if (heroQuery.trim()) {
+      navigate(`/freelancers?search=${encodeURIComponent(heroQuery.trim())}`);
+      setShowDropdown(false);
+    }
+  };
+
+  const handlePopularTag = (tag: string) => {
+    setHeroQuery(tag);
+  };
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -110,18 +163,6 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  // Lock scrolling when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [mobileMenuOpen]);
 
   const testimonials = [
     {
@@ -181,40 +222,23 @@ const Home = () => {
     },
   ];
 
-  const freelancers = [
-    {
-      name: "Arun Kumar",
-      title: "Senior VFX Artist",
-      rating: 4.9,
-      reviews: 89,
-      skills: ["After Effects", "Nuke", "Houdini"],
-      avatar: "AK",
-    },
-    {
-      name: "Meera Reddy",
-      title: "Video Editor",
-      rating: 4.8,
-      reviews: 156,
-      skills: ["Premiere Pro", "DaVinci"],
-      avatar: "MR",
-    },
-    {
-      name: "Karthik S.",
-      title: "3D Generalist",
-      rating: 5.0,
-      reviews: 43,
-      skills: ["Blender", "Maya", "C4D"],
-      avatar: "KS",
-    },
-    {
-      name: "Lakshmi P.",
-      title: "Motion Designer",
-      rating: 4.9,
-      reviews: 78,
-      skills: ["After Effects", "Lottie"],
-      avatar: "LP",
-    },
-  ];
+  const [topFreelancers, setTopFreelancers] = useState<FreelancerProfile[]>([]);
+  const [isLoadingFreelancers, setIsLoadingFreelancers] = useState(true);
+
+  useEffect(() => {
+    const fetchTopFreelancers = async () => {
+      try {
+        const response = await freelancerService.getTopRated();
+        const data = (response as any).data || response;
+        setTopFreelancers(data.profiles?.slice(0, 4) || []);
+      } catch (error) {
+        console.error("Failed to fetch top freelancers:", error);
+      } finally {
+        setIsLoadingFreelancers(false);
+      }
+    };
+    fetchTopFreelancers();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
@@ -228,149 +252,7 @@ const Home = () => {
         />
       </div>
 
-      {/* 1. NAVIGATION BAR */}
-      <nav
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          (isScrolled || mobileMenuOpen)
-            ? "bg-white backdrop-blur-xl shadow-lg shadow-slate-200/50 py-3"
-            : "bg-transparent py-5",
-        )}
-      >
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Logo isDark={!(isScrolled || mobileMenuOpen)} />
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
-              {[
-                { label: "Find Talent", href: "/freelancers" },
-                { label: "Find Work", href: "/find-work" },
-                { label: "How It Works", href: "/how-it-works" },
-                { label: "Pricing", href: "/pricing" },
-                { label: "About", href: "/about" },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.href}
-                  className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative group",
-                    isScrolled
-                      ? "text-slate-600 hover:text-navy hover:bg-slate-100"
-                      : "text-white/80 hover:text-white hover:bg-white/10",
-                  )}
-                >
-                  {item.label}
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-teal group-hover:w-1/2 transition-all duration-300" />
-                </Link>
-              ))}
-            </div>
-
-            {/* Auth Buttons */}
-            <div className="hidden lg:flex items-center gap-3">
-              <Link to="/login">
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "font-semibold transition-all duration-300",
-                    isScrolled
-                      ? "text-royal-blue hover:bg-royal-blue/10 hover:text-royal-blue"
-                      : "text-white hover:bg-white/10 hover:text-white",
-                  )}
-                >
-                  Log In
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button
-                  className={cn(
-                    "font-semibold px-6 transition-all duration-300 hover:scale-105 hover:shadow-lg",
-                    isScrolled
-                      ? "bg-teal hover:bg-teal-light text-white shadow-teal/25"
-                      : "bg-white text-navy hover:bg-white hover:text-navy",
-                  )}
-                >
-                  Get Started
-                </Button>
-              </Link>
-            </div>
-
-            {/* Mobile Menu Toggle */}
-            <button
-              className={cn(
-                "lg:hidden p-2 rounded-lg transition-colors",
-                (isScrolled || mobileMenuOpen)
-                  ? "text-navy hover:bg-slate-100"
-                  : "text-white hover:bg-white/10",
-              )}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-      </nav>
-
-      {/* Mobile Menu Overlay */}
-      <div
-        className={cn(
-          "lg:hidden fixed inset-0 z-[100] bg-white flex flex-col transition-all duration-500 ease-in-out transform",
-          mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
-        )}
-      >
-        {/* Header top row */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
-          <Logo isDark={false} />
-          <button
-            className="p-2 rounded-lg text-navy hover:bg-slate-100"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Links Content list height fill scrollable */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            {[
-              { label: "Find Talent", href: "/freelancers" },
-              { label: "Find Work", href: "/find-work" },
-              { label: "How It Works", href: "/how-it-works" },
-              { label: "Pricing", href: "/pricing" },
-              { label: "About", href: "/about" },
-              { label: "Contact", href: "/contact" },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className="block px-4 py-4 rounded-xl text-lg text-slate-700 hover:bg-slate-50 hover:text-navy font-semibold transition-all border-b border-slate-50"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Auth actions at bottom of screen viewport overlay */}
-          <div className="pt-6 space-y-3 mt-8">
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full">
-              <Button
-                variant="outline"
-                className="w-full h-12 border-slate-200 text-slate-700 font-bold text-base"
-              >
-                Log In
-              </Button>
-            </Link>
-            <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block w-full">
-              <Button className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/20">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
+      <PublicNavbar />
 
       {/* 2. HERO SECTION */}
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#050B15]">
@@ -379,7 +261,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-[#0A1628] to-[#112240] opacity-90" />
           <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
           <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
-          
+
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
         </div>
@@ -442,6 +324,7 @@ const Home = () => {
 
               {/* Search Bar */}
               <div
+                ref={searchContainerRef}
                 className={cn(
                   "relative max-w-lg mx-auto lg:mx-0 mb-10 transition-all duration-300",
                   searchFocused ? "scale-[1.02]" : "",
@@ -459,16 +342,90 @@ const Home = () => {
                     <Search className="text-slate-400" size={20} />
                     <input
                       type="text"
+                      value={heroQuery}
+                      onChange={(e) => setHeroQuery(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
                       placeholder="Search skills (e.g., Video Editing, VFX...)"
                       className="w-full py-4 bg-transparent text-white placeholder:text-slate-400 focus:outline-none text-base"
-                      onFocus={() => setSearchFocused(true)}
+                      onFocus={() => { setSearchFocused(true); if (heroQuery.trim()) setShowDropdown(true); }}
                       onBlur={() => setSearchFocused(false)}
                     />
                   </div>
-                  <Button className="m-2 bg-teal hover:bg-teal-light text-white px-6 py-6 rounded-xl font-semibold transition-all hover:scale-105">
+                  <Button
+                    onClick={handleSearchSubmit}
+                    className="m-2 bg-teal hover:bg-teal-light text-white px-6 py-6 rounded-xl font-semibold transition-all hover:scale-105"
+                  >
                     Search
                   </Button>
                 </div>
+
+                {/* ── Search Results Dropdown ── */}
+                {showDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden z-50 animate-fade-in-up">
+                    {heroSearching ? (
+                      <div className="flex items-center gap-3 px-5 py-6">
+                        <Loader2 className="w-5 h-5 animate-spin text-teal" />
+                        <span className="text-sm text-slate-500">Searching freelancers...</span>
+                      </div>
+                    ) : heroResults.length > 0 ? (
+                      <div>
+                        <div className="px-5 py-2.5 border-b border-slate-100">
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Freelancers</span>
+                        </div>
+                        {heroResults.map((f) => {
+                          const name = f.displayName || `${f.firstName} ${f.lastName}`;
+                          const initials = `${f.firstName?.[0] || ""}${f.lastName?.[0] || ""}`;
+                          return (
+                            <Link
+                              key={f._id}
+                              to={`/freelancer/${f._id}`}
+                              className="flex items-center gap-4 px-5 py-3.5 hover:bg-teal/5 transition-colors group"
+                              onClick={() => setShowDropdown(false)}
+                            >
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
+                                {f.profilePicture ? (
+                                  <img src={f.profilePicture} alt={name} className="w-full h-full object-cover" />
+                                ) : (
+                                  initials
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-navy text-sm group-hover:text-teal transition-colors truncate">{name}</span>
+                                  {f.isVerified && <BadgeCheck size={14} className="text-teal shrink-0" />}
+                                </div>
+                                <p className="text-xs text-slate-500 truncate">{f.headline || f.category}</p>
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex items-center gap-1">
+                                  <Star size={12} className="text-gold fill-gold" />
+                                  <span className="text-xs font-semibold text-navy">{f.averageRating?.toFixed(1)}</span>
+                                </div>
+                                {f.hourlyRate && (
+                                  <span className="text-xs font-semibold text-teal">₹{f.hourlyRate}/hr</span>
+                                )}
+                              </div>
+                            </Link>
+                          );
+                        })}
+                        <Link
+                          to={`/freelancers?search=${encodeURIComponent(heroQuery)}`}
+                          className="flex items-center justify-center gap-2 px-5 py-3 border-t border-slate-100 text-sm font-semibold text-royal-blue hover:bg-royal-blue/5 transition-colors"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          View all results
+                          <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="px-5 py-8 text-center">
+                        <Search size={24} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm text-slate-500">No freelancers found for "{heroQuery}"</p>
+                        <p className="text-xs text-slate-400 mt-1">Try different keywords or browse all talent</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Popular Searches */}
                 <div className="flex flex-wrap gap-2 mt-4 justify-center lg:justify-start">
@@ -476,6 +433,7 @@ const Home = () => {
                   {["Video Editor", "VFX Artist", "3D Designer"].map((tag) => (
                     <button
                       key={tag}
+                      onClick={() => handlePopularTag(tag)}
                       className="text-sm text-white/70 hover:text-white px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 transition-all"
                     >
                       {tag}
@@ -550,9 +508,7 @@ const Home = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div>
-                    
-                  </div>
+                  <div></div>
                   <Link to="/freelancer/1">
                     <Button className="bg-royal-blue hover:bg-royal-blue-hover text-white px-6">
                       View Profile
@@ -804,64 +760,83 @@ const Home = () => {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {freelancers.map((freelancer, idx) => (
-              <div
-                key={freelancer.name}
-                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100"
-              >
-                {/* Header Gradient */}
-                <div className="h-20 bg-gradient-to-r from-navy to-royal-blue relative">
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
-                    <Star size={12} className="text-gold fill-gold" />
-                    <span className="text-white text-xs font-semibold">
-                      {freelancer.rating}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Profile */}
-                <div className="px-6 pb-6 -mt-10 relative">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-xl border-4 border-white shadow-lg mb-4 group-hover:scale-110 transition-transform">
-                    {freelancer.avatar}
-                  </div>
-
-                  <h3 className="font-bold text-navy text-lg">
-                    {freelancer.name}
-                  </h3>
-                  <p className="text-slate-500 text-sm mb-3">
-                    {freelancer.title}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {freelancer.skills.slice(0, 2).map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-2 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-600"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                    {freelancer.skills.length > 2 && (
-                      <span className="px-2 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-400">
-                        +{freelancer.skills.length - 2}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-end pt-4 border-t border-slate-100">
-                    <Link to={`/freelancer/${idx + 1}`}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white"
-                      >
-                        View
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+            {isLoadingFreelancers ? (
+              <div className="col-span-full flex justify-center py-12">
+                <Loader2 className="w-10 h-10 animate-spin text-teal" />
               </div>
-            ))}
+            ) : (
+              topFreelancers.map((freelancer) => {
+                const name =
+                  freelancer.displayName ||
+                  `${freelancer.firstName} ${freelancer.lastName}`;
+                const initials = `${freelancer.firstName[0]}${freelancer.lastName[0]}`;
+
+                return (
+                  <div
+                    key={freelancer._id}
+                    className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100"
+                  >
+                    {/* Header Gradient */}
+                    <div className="h-20 bg-gradient-to-r from-navy to-royal-blue relative">
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
+                        <Star size={12} className="text-gold fill-gold" />
+                        <span className="text-white text-xs font-semibold">
+                          {freelancer.averageRating.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Profile */}
+                    <div className="px-6 pb-6 -mt-10 relative">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-xl border-4 border-white shadow-lg mb-4 group-hover:scale-110 transition-transform overflow-hidden">
+                        {freelancer.profilePicture ? (
+                          <img
+                            src={freelancer.profilePicture}
+                            alt={name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          initials
+                        )}
+                      </div>
+
+                      <h3 className="font-bold text-navy text-lg">{name}</h3>
+                      <p className="text-slate-500 text-sm mb-3">
+                        {freelancer.headline || freelancer.category}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {freelancer.skills.slice(0, 2).map((skill) => (
+                          <span
+                            key={skill.name}
+                            className="px-2 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-600"
+                          >
+                            {skill.name}
+                          </span>
+                        ))}
+                        {freelancer.skills.length > 2 && (
+                          <span className="px-2 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-400">
+                            +{freelancer.skills.length - 2}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end pt-4 border-t border-slate-100">
+                        <Link to={`/freelancer/${freelancer._id}`}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white"
+                          >
+                            View
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
@@ -1068,8 +1043,7 @@ const Home = () => {
               <Link to="/how-it-works">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
+                  className="bg-transparent border border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
                 >
                   Hire Talent
                 </Button>
@@ -1080,94 +1054,7 @@ const Home = () => {
       </section>
 
       {/* 11. FOOTER */}
-      <footer className="bg-navy text-white pt-20 pb-8">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-                  C
-                </div>
-                <div>
-                  <span className="text-lg font-bold">ConnectMeIndia</span>
-                </div>
-              </div>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                The premier marketplace for creative professionals in Telangana
-                and Andhra Pradesh.
-              </p>
-              <div className="flex gap-3">
-                {[Twitter, Linkedin, Instagram, Youtube].map((Icon, idx) => (
-                  <a
-                    key={idx}
-                    href="#"
-                    className="w-10 h-10 rounded-lg bg-white/5 hover:bg-teal flex items-center justify-center transition-colors"
-                  >
-                    <Icon size={18} />
-                  </a>
-                ))}
-              </div>
-            </div>
-            {/* Links */}
-            {[
-              {
-                title: "For Clients",
-                links: [
-                  { label: "Find Talent", href: "/freelancers" },
-                  { label: "How It Works", href: "/how-it-works" },
-                  { label: "Pricing", href: "/pricing" },
-                  { label: "About Us", href: "/about" },
-                ],
-              },
-              {
-                title: "For Freelancers",
-                links: [
-                  { label: "Create Profile", href: "/register" },
-                  { label: "Browse Jobs", href: "/freelancers" },
-                  { label: "Subscription", href: "/pricing" },
-                  { label: "Resources", href: "/how-it-works" },
-                ],
-              },
-              {
-                title: "Support",
-                links: [
-                  { label: "Contact Us", href: "/contact" },
-                  { label: "Help Center", href: "/contact" },
-                  { label: "Privacy Policy", href: "/" },
-                  { label: "Terms", href: "/" },
-                ],
-              },
-            ].map((section) => (
-              <div key={section.title}>
-                <h3 className="font-bold text-lg mb-6">{section.title}</h3>
-                <ul className="space-y-4">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        to={link.href}
-                        className="text-slate-400 hover:text-teal transition-colors text-sm"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}{" "}
-          </div>
-
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 text-sm">
-              © 2024 ConnectMeIndia. All rights reserved.
-            </p>
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <MapPin size={14} />
-              <span>Made with ❤️ in Hyderabad</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
       {/* Custom CSS for Animations */}
       <style>{`

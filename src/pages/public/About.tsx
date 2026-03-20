@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "@/components/shared/Logo";
+import PublicNavbar from "@/components/shared/PublicNavbar";
+import PublicFooter from "@/components/shared/PublicFooter";
 import {
   ChevronRight,
   Target,
@@ -182,48 +183,8 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm py-4">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Logo size="sm" />
-
-            <div className="hidden md:flex items-center gap-6">
-              <Link
-                to="/"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
-              >
-                Home
-              </Link>
-              <Link to="/about" className="text-sm font-medium text-royal-blue">
-                About
-              </Link>
-              <Link
-                to="/pricing"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
-              >
-                Pricing
-              </Link>
-              <Link
-                to="/contact"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
-              >
-                Contact
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" className="text-royal-blue font-semibold">
-                Log In
-              </Button>
-              <Button className="bg-teal hover:bg-teal-light text-white font-semibold px-6">
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
+      <PublicNavbar variant="white" />
 
       {/* 1. PAGE HEADER */}
       <section className="relative py-20 bg-[#050B15] overflow-hidden">
@@ -650,8 +611,7 @@ const About = () => {
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
+                  className="bg-transparent border border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
                 >
                   Become a Freelancer
                 </Button>
@@ -662,80 +622,7 @@ const About = () => {
       </section>
 
       {/* 8. FOOTER */}
-      <footer className="bg-navy text-white pt-20 pb-8">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <div className="mb-6">
-                <Logo isDark size="sm" />
-              </div>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                The premier marketplace for creative professionals in Telangana
-                and Andhra Pradesh.
-              </p>
-              <div className="flex gap-3">
-                {[Twitter, Linkedin].map((Icon, idx) => (
-                  <a
-                    key={idx}
-                    href="#"
-                    className="w-10 h-10 rounded-lg bg-white/5 hover:bg-teal flex items-center justify-center transition-colors"
-                  >
-                    <Icon size={18} />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Links */}
-            {[
-              {
-                title: "For Clients",
-                links: ["Find Talent", "Post Project", "Pricing", "Enterprise"],
-              },
-              {
-                title: "For Freelancers",
-                links: [
-                  "Create Profile",
-                  "Browse Jobs",
-                  "Subscription",
-                  "Resources",
-                ],
-              },
-              {
-                title: "Support",
-                links: ["Contact Us", "Help Center", "Privacy Policy", "Terms"],
-              },
-            ].map((section) => (
-              <div key={section.title}>
-                <h3 className="font-bold text-lg mb-6">{section.title}</h3>
-                <ul className="space-y-4">
-                  {section.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-slate-400 hover:text-teal transition-colors text-sm"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 text-sm">
-              © 2024 ConnectMeIndia. All rights reserved.
-            </p>
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <MapPin size={14} />
-              <span>Made with ❤️ in Hyderabad</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
       {/* Custom CSS for Animations */}
       <style>{`

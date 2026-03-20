@@ -104,6 +104,7 @@ function App() {
         <Route path="/freelancers" element={<Suspense fallback={<PageLoader />}><FreelancerDirectory /></Suspense>} />
         <Route path="/freelancer/:id" element={<Suspense fallback={<PageLoader />}><FreelancerProfile /></Suspense>} />
         <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
+        <Route path="/projects" element={<Suspense fallback={<PageLoader />}><BrowseProjects /></Suspense>} />
 
         {/* Auth Pages */}
         <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
@@ -144,7 +145,6 @@ function App() {
         >
           <Route path="/freelancer/dashboard" element={<SP><FreelancerDashboard /></SP>} />
           <Route path="/freelancer/profile" element={<SP><FreelancerProfileEdit /></SP>} />
-          <Route path="/projects" element={<SP><BrowseProjects /></SP>} />
           <Route path="/freelancer/messages" element={<SP><FreelancerMessages /></SP>} />
           <Route path="/freelancer/subscription" element={<SP><FreelancerSubscription /></SP>} />
           <Route path="/freelancer/earnings" element={<SP><FreelancerEarnings /></SP>} />

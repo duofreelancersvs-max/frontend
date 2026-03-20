@@ -76,6 +76,7 @@ export interface FreelancerFilters {
   availability?: string;
   search?: string;
   category?: string;
+  experienceLevel?: string;
   page?: number;
   limit?: number;
 }

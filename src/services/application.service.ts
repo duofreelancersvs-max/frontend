@@ -75,6 +75,9 @@ export const applicationService = {
   getMyApplications: () =>
     api.get<{ applications: Application[] }>("/applications/me"),
 
+  getMyClientApplications: (params?: { limit?: number; page?: number; status?: string }) =>
+    api.get<{ applications: Application[] }>("/applications/me/client", { params }),
+
   withdraw: (id: string) =>
     api.post<Application>(`/applications/${id}/withdraw`, {}),
 

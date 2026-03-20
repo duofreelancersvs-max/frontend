@@ -5,20 +5,11 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertCircle,
-  Download,
-  Wallet,
-  Building2,
   ChevronRight,
   ArrowUpRight,
-  Eye,
-  EyeOff,
-  FileDown,
-  Receipt,
   PieChart,
   BarChart3,
   DollarSign,
-  FileText,
   MessageSquare,
   Bell,
   User,
@@ -26,11 +17,11 @@ import {
   LogOut,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useUnreadStore } from "@/stores/unread.store";
+import { projectService } from "@/services/project.service";
 
 // Date range options
 const dateRanges = [
@@ -40,146 +31,28 @@ const dateRanges = [
   { value: "custom", label: "Custom" },
 ];
 
-// Mock earnings data for chart
-const monthlyEarnings = [
-  { month: "Jan", earnings: 12000 },
-  { month: "Feb", earnings: 18000 },
-  { month: "Mar", earnings: 15000 },
-  { month: "Apr", earnings: 22000 },
-  { month: "May", earnings: 19000 },
-  { month: "Jun", earnings: 25000 },
-  { month: "Jul", earnings: 28000 },
-  { month: "Aug", earnings: 24000 },
-  { month: "Sep", earnings: 30000 },
-  { month: "Oct", earnings: 27000 },
-  { month: "Nov", earnings: 32000 },
-  { month: "Dec", earnings: 8000 },
-];
-
-// Category breakdown data
-const categoryBreakdown = [
-  {
-    category: "Video Editing",
-    amount: 85000,
-    percentage: 42,
-    color: "#0D9488",
-  },
-  {
-    category: "Motion Graphics",
-    amount: 55000,
-    percentage: 27,
-    color: "#1E40AF",
-  },
-  {
-    category: "Color Grading",
-    amount: 35000,
-    percentage: 17,
-    color: "#F59E0B",
-  },
-  { category: "VFX", amount: 28000, percentage: 14, color: "#10B981" },
-];
-
-// Recent transactions
-const recentTransactions = [
-  {
-    id: 1,
-    date: "Dec 15, 2024",
-    project: "E-commerce Product Video",
-    client: "TechMart Solutions",
-    amount: 18000,
-    status: "completed",
-  },
-  {
-    id: 2,
-    date: "Dec 12, 2024",
-    project: "Corporate Explainer",
-    client: "InnovateCorp",
-    amount: 32000,
-    status: "completed",
-  },
-  {
-    id: 3,
-    date: "Dec 10, 2024",
-    project: "Social Media Ads",
-    client: "Brand Boost Agency",
-    amount: 12000,
-    status: "pending",
-  },
-  {
-    id: 4,
-    date: "Dec 5, 2024",
-    project: "Wedding Highlight Reel",
-    client: "Moments Photography",
-    amount: 15000,
-    status: "completed",
-  },
-  {
-    id: 5,
-    date: "Dec 1, 2024",
-    project: "YouTube Intro Animation",
-    client: "TechReview Pro",
-    amount: 8000,
-    status: "completed",
-  },
-];
-
-// Withdrawal history
-const withdrawalHistory = [
-  {
-    date: "Nov 30, 2024",
-    amount: 25000,
-    status: "completed",
-    method: "Bank Transfer",
-  },
-  {
-    date: "Oct 31, 2024",
-    amount: 20000,
-    status: "completed",
-    method: "Bank Transfer",
-  },
-  { date: "Sep 30, 2024", amount: 18000, status: "completed", method: "UPI" },
-];
-
-// Invoices
-const invoices = [
-  {
-    id: "INV-2024-012",
-    date: "Dec 15, 2024",
-    client: "TechMart Solutions",
-    amount: 18000,
-  },
-  {
-    id: "INV-2024-011",
-    date: "Dec 12, 2024",
-    client: "InnovateCorp",
-    amount: 32000,
-  },
-  {
-    id: "INV-2024-010",
-    date: "Dec 5, 2024",
-    client: "Moments Photography",
-    amount: 15000,
-  },
-];
-
 const FreelancerEarnings = () => {
   const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [selectedDateRange, setSelectedDateRange] = useState("this-month");
-  const [showBankDetails, setShowBankDetails] = useState(false);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch earnings data from services
-        // For now, we'll use the mock data structure
+        setLoading(true);
+        const res = await projectService.getMyFreelancerProjects();
+        setProjects(res.projects || []);
       } catch (error) {
         console.error("Error fetching earnings:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  // Stats
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
 
@@ -191,15 +64,116 @@ const FreelancerEarnings = () => {
     }
   };
 
+  const completedProjectsList = (projects || []).filter(
+    (p) => p.status === "completed",
+  );
+  const pendingProjectsList = (projects || []).filter(
+    (p) => p.status === "in-progress" || p.status === "open",
+  );
+
+  const totalEarnings = completedProjectsList.reduce(
+    (acc, p) => acc + (p.budget?.maxAmount || 0),
+    0,
+  );
+  const pendingEarnings = pendingProjectsList.reduce(
+    (acc, p) => acc + (p.budget?.maxAmount || 0),
+    0,
+  );
+
   const stats = {
-    totalEarnings: 203000,
-    thisMonth: 85000,
-    pending: 12000,
-    projectsCompleted: 24,
+    totalEarnings,
+    thisMonth: completedProjectsList
+      .filter((p) => {
+        const date = p.completedAt
+          ? new Date(p.completedAt)
+          : new Date(p.updatedAt);
+        const now = new Date();
+        return (
+          date.getMonth() === now.getMonth() &&
+          date.getFullYear() === now.getFullYear()
+        );
+      })
+      .reduce((acc, p) => acc + (p.budget?.maxAmount || 0), 0),
+    pending: pendingEarnings,
+    projectsCompleted: completedProjectsList.length,
   };
 
-  const availableBalance = 45000;
-  const maxEarning = Math.max(...monthlyEarnings.map((m) => m.earnings));
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const monthlyEarningsData = months.map((m, idx) => {
+    const total = completedProjectsList
+      .filter((p) => {
+        const date = p.completedAt
+          ? new Date(p.completedAt)
+          : new Date(p.updatedAt);
+        return (
+          date.getMonth() === idx &&
+          date.getFullYear() === new Date().getFullYear()
+        );
+      })
+      .reduce((acc, p) => acc + (p.budget?.maxAmount || 0), 0);
+    return { month: m, earnings: total };
+  });
+
+  const maxEarning = Math.max(
+    ...monthlyEarningsData.map((m) => m.earnings || 0),
+    1000,
+  );
+
+  const recentTransactionsData = (projects || [])
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    .slice(0, 5)
+    .map((p) => ({
+      id: p._id,
+      date: new Date(p.completedAt || p.updatedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      project: p.title,
+      client: p.client?.fullName || "Client",
+      amount: p.budget?.maxAmount || 0,
+      status: p.status === "completed" ? "completed" : "pending",
+    }));
+
+  const categoryMap: any = {};
+  completedProjectsList.forEach((p) => {
+    const cat = p.category || "Other";
+    categoryMap[cat] = (categoryMap[cat] || 0) + (p.budget?.maxAmount || 0);
+  });
+
+  const colors = ["#0D9488", "#1E40AF", "#F59E0B", "#10B981"];
+  const categoryBreakdownData = Object.entries(categoryMap).map(
+    ([cat, amount]: any, idx) => ({
+      category: cat,
+      amount,
+      percentage: Math.round((amount / (totalEarnings || 1)) * 100),
+      color: colors[idx % colors.length],
+    }),
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-slate-50">
@@ -282,7 +256,9 @@ const FreelancerEarnings = () => {
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
                       <div className="px-4 py-3 border-b border-slate-100">
                         <p className="font-semibold text-navy">
-                          {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
+                          {user?.fullName ||
+                            user?.email?.split("@")[0] ||
+                            "Freelancer"}
                         </p>
                         <p className="text-sm text-slate-500 truncate">
                           {user?.email}
@@ -400,7 +376,7 @@ const FreelancerEarnings = () => {
 
               {/* Bar Chart */}
               <div className="h-64 flex items-end gap-2 px-2">
-                {monthlyEarnings.map((item, idx) => (
+                {monthlyEarningsData.map((item, idx) => (
                   <div
                     key={idx}
                     className="flex-1 flex flex-col items-center gap-2"
@@ -414,7 +390,7 @@ const FreelancerEarnings = () => {
                       <div
                         className={cn(
                           "w-full rounded-t-lg transition-all cursor-pointer",
-                          idx === monthlyEarnings.length - 1
+                          idx === monthlyEarningsData.length - 1
                             ? "bg-teal"
                             : "bg-teal/30 group-hover:bg-teal/50",
                         )}
@@ -439,10 +415,10 @@ const FreelancerEarnings = () => {
               {/* Pie Chart Visual */}
               <div className="relative w-32 h-32 mx-auto mb-6">
                 <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                  {categoryBreakdown.map((cat, idx) => {
-                    const previousPercentages = categoryBreakdown
+                  {categoryBreakdownData.map((cat, idx) => {
+                    const previousPercentages = categoryBreakdownData
                       .slice(0, idx)
-                      .reduce((acc, c) => acc + c.percentage, 0);
+                      .reduce((acc: number, c: any) => acc + c.percentage, 0);
                     const circumference = 2 * Math.PI * 40;
                     const strokeDasharray = `${(cat.percentage / 100) * circumference} ${circumference}`;
                     const strokeDashoffset =
@@ -470,7 +446,7 @@ const FreelancerEarnings = () => {
 
               {/* Legend */}
               <div className="space-y-3">
-                {categoryBreakdown.map((cat) => (
+                {categoryBreakdownData.map((cat) => (
                   <div
                     key={cat.category}
                     className="flex items-center justify-between w-full min-w-0"
@@ -498,307 +474,81 @@ const FreelancerEarnings = () => {
             </div>
           </section>
 
-          {/* TRANSACTIONS & WITHDRAWAL ROW */}
-          <section className="grid lg:grid-cols-3 gap-6">
-            {/* RECENT TRANSACTIONS (2 columns) */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-navy">
-                  Recent Transactions
-                </h2>
-                <button className="text-sm text-teal font-medium hover:underline flex items-center gap-1">
-                  View All
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
-                        Date
-                      </th>
-                      <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
-                        Project
-                      </th>
-                      <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
-                        Client
-                      </th>
-                      <th className="text-right text-xs font-semibold text-slate-500 px-6 py-3">
-                        Amount
-                      </th>
-                      <th className="text-center text-xs font-semibold text-slate-500 px-6 py-3">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {recentTransactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-slate-50/50">
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {tx.date}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-navy">
-                            {tx.project}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {tx.client}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="text-sm font-semibold text-navy">
-                            ₹{tx.amount.toLocaleString()}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
-                              tx.status === "completed"
-                                ? "bg-success-green/10 text-success-green"
-                                : "bg-gold/10 text-gold",
-                            )}
-                          >
-                            {tx.status === "completed" ? (
-                              <CheckCircle size={12} />
-                            ) : (
-                              <Clock size={12} />
-                            )}
-                            {tx.status === "completed"
-                              ? "Completed"
-                              : "Pending"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* WITHDRAWAL SECTION (1 column) */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h2 className="text-lg font-bold text-navy mb-6">Withdrawal</h2>
-
-              {/* Available Balance */}
-              <div className="bg-gradient-to-r from-teal to-teal-light rounded-xl p-5 text-white mb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wallet size={18} />
-                  <span className="text-sm text-white/80">
-                    Available Balance
-                  </span>
-                </div>
-                <p className="text-3xl font-bold">
-                  ₹{availableBalance.toLocaleString()}
-                </p>
-              </div>
-
-              {/* Withdraw Button */}
-              <Button className="w-full bg-navy hover:bg-navy/90 text-white mb-4">
-                <Wallet size={16} className="mr-2" />
-                Withdraw Funds
-              </Button>
-
-              {/* Bank Account Info */}
-              <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-500">Bank Account</span>
-                  <button
-                    onClick={() => setShowBankDetails(!showBankDetails)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    {showBankDetails ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building2 size={16} className="text-slate-400" />
-                  <span className="text-sm font-medium text-navy">
-                    {showBankDetails
-                      ? "1234 5678 9012 3456"
-                      : "XXXX XXXX XXXX 3456"}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">
-                  HDFC Bank - Savings
-                </p>
-              </div>
-
-              {/* Withdrawal History */}
-              <div className="border-t border-slate-100 pt-4">
-                <h3 className="text-sm font-semibold text-navy mb-3">
-                  Recent Withdrawals
-                </h3>
-                <div className="space-y-3">
-                  {withdrawalHistory.slice(0, 2).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between w-full min-w-0"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-navy">
-                          ₹{item.amount.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-slate-400">{item.date}</p>
-                      </div>
-                      <span className="text-xs text-success-green bg-success-green/10 px-2 py-1 rounded-full">
-                        {item.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* INVOICES & TAX ROW */}
-          <section className="grid lg:grid-cols-2 gap-6">
-            {/* INVOICES */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-navy">Invoices</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-200"
-                >
-                  <Download size={14} className="mr-2" />
-                  Download All
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {invoices.map((invoice) => (
-                  <div
-                    key={invoice.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
-                        <Receipt size={18} className="text-slate-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-navy">
-                          {invoice.id}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {invoice.client} • {invoice.date}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-navy">
-                        ₹{invoice.amount.toLocaleString()}
-                      </span>
-                      <button className="p-2 hover:bg-white rounded-lg transition-colors text-slate-400 hover:text-teal">
-                        <FileDown size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button className="w-full mt-4 text-sm text-teal font-medium hover:underline">
-                View All Invoices
+          {/* RECENT TRANSACTIONS */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-navy">
+                Recent Transactions
+              </h2>
+              <button className="text-sm text-teal font-medium hover:underline flex items-center gap-1">
+                View All
+                <ChevronRight size={16} />
               </button>
             </div>
 
-            {/* TAX INFO */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-navy">Tax Information</h2>
-                <span className="text-xs text-slate-400">FY 2024-25</span>
-              </div>
-
-              {/* Annual Summary */}
-              <div className="bg-slate-50 rounded-xl p-5 mb-6">
-                <h3 className="text-sm font-semibold text-navy mb-4">
-                  Annual Summary
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">
-                      Gross Earnings
-                    </p>
-                    <p className="text-lg font-bold text-navy">₹2,03,000</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Platform Fees</p>
-                    <p className="text-lg font-bold text-navy">₹20,300</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">TDS Deducted</p>
-                    <p className="text-lg font-bold text-navy">₹2,030</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Net Earnings</p>
-                    <p className="text-lg font-bold text-success-green">
-                      ₹1,80,670
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tax Documents */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center">
-                      <FileText size={18} className="text-teal" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-navy">Form 16A</p>
-                      <p className="text-xs text-slate-500">TDS Certificate</p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-teal text-teal hover:bg-teal hover:text-white"
-                  >
-                    <Download size={14} className="mr-1" />
-                    Download
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-royal-blue/10 flex items-center justify-center">
-                      <FileText size={18} className="text-royal-blue" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-navy">
-                        Earnings Statement
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Annual Summary PDF
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white"
-                  >
-                    <Download size={14} className="mr-1" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-gold/10 rounded-xl flex items-start gap-3">
-                <AlertCircle size={18} className="text-gold shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-navy">Tax Reminder</p>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Remember to file your ITR before July 31, 2025. Consult a
-                    tax professional for accurate filings.
-                  </p>
-                </div>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
+                      Date
+                    </th>
+                    <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
+                      Project
+                    </th>
+                    <th className="text-left text-xs font-semibold text-slate-500 px-6 py-3">
+                      Client
+                    </th>
+                    <th className="text-right text-xs font-semibold text-slate-500 px-6 py-3">
+                      Amount
+                    </th>
+                    <th className="text-center text-xs font-semibold text-slate-500 px-6 py-3">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentTransactionsData.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50/50">
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {tx.date}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-navy">
+                          {tx.project}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {tx.client}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-sm font-semibold text-navy">
+                          ₹{tx.amount.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
+                            tx.status === "completed"
+                              ? "bg-success-green/10 text-success-green"
+                              : "bg-gold/10 text-gold",
+                          )}
+                        >
+                          {tx.status === "completed" ? (
+                            <CheckCircle size={12} />
+                          ) : (
+                            <Clock size={12} />
+                          )}
+                          {tx.status === "completed" ? "Completed" : "Pending"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </section>
+          </div>
         </main>
       </div>
     </div>

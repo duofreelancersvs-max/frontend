@@ -31,6 +31,7 @@ import {
   conversationService,
   userService,
   clientService,
+  applicationService,
 } from "@/services";
 import { useUnreadStore } from "@/stores/unread.store";
 import type {
@@ -59,7 +60,7 @@ const ClientDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [projectsData, freeData, convData, userData, profileData] = await Promise.allSettled([
+        const [projectsData, freeData, convData, userData, profileData, appsData] = await Promise.allSettled([
           projectService
             .getMyClientProjects({ limit: 100 })
             .then((r) => r.projects)
@@ -74,11 +75,13 @@ const ClientDashboard = () => {
             .catch(() => []),
           userService.getMe().catch(() => null),
           clientService.getMyProfile().catch(() => null),
+          applicationService.getMyClientApplications().then(r => r.applications).catch(() => []),
         ]);
 
         if (projectsData.status === "fulfilled")
           setProjects(projectsData.value || []);
-        setApplications([]); // Temporary fix
+        if (appsData.status === "fulfilled")
+          setApplications(appsData.value || []);
         if (freeData.status === "fulfilled")
           setFreelancers(freeData.value || []);
         if (convData.status === "fulfilled")
@@ -157,7 +160,7 @@ const ClientDashboard = () => {
     {
       label: "Active Projects",
       value: String(
-        projects.filter((p) => p.status === "in-progress").length || 2,
+        projects.filter((p) => p.status === "in-progress").length,
       ),
       icon: Folder,
       color: "bg-royal-blue",
@@ -165,7 +168,7 @@ const ClientDashboard = () => {
     },
     {
       label: "Completed Projects",
-      value: String(completedProjects || 15),
+      value: String(completedProjects),
       icon: CheckCircle,
       color: "bg-teal",
       change: "+3 this month",
@@ -173,7 +176,7 @@ const ClientDashboard = () => {
 
     {
       label: "Pending Reviews",
-      value: String(pendingApplications.length || 3),
+      value: String(pendingApplications.length),
       icon: Star,
       color: "bg-gold",
       change: "Leave feedback",
@@ -392,11 +395,11 @@ const ClientDashboard = () => {
                 <p className="text-white/80">
                   You have{" "}
                   <span className="text-teal-light font-semibold">
-                    2 active projects
+                    {projects.filter((p) => p.status === "in-progress").length} active project{projects.filter((p) => p.status === "in-progress").length !== 1 ? 's' : ''}
                   </span>{" "}
                   and{" "}
                   <span className="text-gold font-semibold">
-                    3 new applications
+                    {pendingApplications.length} new application{pendingApplications.length !== 1 ? 's' : ''}
                   </span>{" "}
                   to review.
                 </p>

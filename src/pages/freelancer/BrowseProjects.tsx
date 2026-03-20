@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { projectService, conversationService } from "@/services";
@@ -76,7 +77,8 @@ const userSkills = [
 ];
 
 const BrowseProjects = () => {
-  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const context = useOutletContext<FreelancerLayoutContext>();
+  const setSidebarOpen = context?.setSidebarOpen;
   const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"browse" | "saved">("browse");
@@ -139,6 +141,10 @@ const BrowseProjects = () => {
   }, [fetchProjects]);
 
   const handleApplyClick = (project: Project) => {
+    if (!user) {
+      navigate("/login", { state: { from: "/projects" } });
+      return;
+    }
     setSelectedProject(project);
     setShowTermsForApply(true);
   };
@@ -246,15 +252,17 @@ const BrowseProjects = () => {
   );
 
   return (
-    <div className="w-full bg-slate-50">
-      <div className="w-full">
+    <div className="w-full bg-slate-50 min-h-screen">
+      {!user && <PublicNavbar variant="white" />}
+      <div className={cn("w-full", !user && "pt-[72px]")}>
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        {user ? (
+          <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
             <div className="flex items-center justify-between w-full md:w-auto">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setSidebarOpen(true)}
+                  onClick={() => setSidebarOpen && setSidebarOpen(true)}
                   className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
                   <Menu size={24} />
@@ -409,6 +417,7 @@ const BrowseProjects = () => {
             </div>
           </div>
         </header>
+        ) : null}
 
         {/* Main Content Area */}
         <main className="p-4 lg:p-8 space-y-4 lg:space-y-6">
