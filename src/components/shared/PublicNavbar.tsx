@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transparent" | "white" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
@@ -100,29 +101,85 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
                       Dashboard
                     </Button>
                   </Link>
-                  <Link
-                    to={
-                      user?.role === "client"
-                        ? "/client/profile"
-                        : "/freelancer/profile"
-                    }
-                    className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
-                      isWhite
-                        ? "hover:bg-slate-100"
-                        : "hover:bg-white/10",
+                  <div className="relative">
+                    <button
+                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                      className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
+                        isWhite
+                          ? "hover:bg-slate-100"
+                          : "hover:bg-white/10",
+                        profileDropdownOpen && "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]"
+                      )}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                        {user?.fullName
+                          ? user.fullName
+                              .split(" ")
+                              .map((n: string) => n[0])
+                              .join("")
+                              .toUpperCase()
+                          : (user?.email?.[0] || "U").toUpperCase()}
+                      </div>
+                    </button>
+
+                    {/* Profile Dropdown */}
+                    {profileDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        />
+                        <div 
+                          className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 py-2 z-20 animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+                            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                              Logged in as
+                            </p>
+                            <p className="font-bold text-navy dark:text-white truncate">
+                              {user?.fullName || user?.email?.split('@')[0]}
+                            </p>
+                          </div>
+                          
+                          <div className="p-1.5">
+                            <Link
+                              to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"}
+                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
+                                <Menu size={16} />
+                              </div>
+                              Dashboard
+                            </Link>
+
+                            <Link
+                              to={user?.role === "client" ? "/client/settings" : "/freelancer/profile"}
+                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
+                                <X size={16} className="rotate-45" />
+                              </div>
+                              Profile Settings
+                            </Link>
+
+                            <hr className="my-1.5 border-slate-100 dark:border-white/5" />
+
+                            <button
+                              onClick={() => logout()}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                                <Menu size={16} className="rotate-90" />
+                              </div>
+                              Sign Out
+                            </button>
+                          </div>
+                        </div>
+                      </>
                     )}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs ring-2 ring-white/20">
-                      {user?.fullName
-                        ? user.fullName
-                            .split(" ")
-                            .map((n: string) => n[0])
-                            .join("")
-                            .toUpperCase()
-                        : (user?.email?.[0] || "U").toUpperCase()}
-                    </div>
-                  </Link>
+                  </div>
                 </div>
               ) : (
                 <>

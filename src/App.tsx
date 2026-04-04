@@ -315,6 +315,14 @@ function App() {
               </SP>
             }
           />
+          <Route
+            path="profile"
+            element={
+              <SP>
+                <ClientSettings />
+              </SP>
+            }
+          />
         </Route>
 
         {/* Freelancer Dashboard Pages — Suspense per-page keeps sidebar stable */}
