@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { screen, fireEvent } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 

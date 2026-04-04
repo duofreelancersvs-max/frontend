@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import FreelancerEarnings from "../../../pages/freelancer/Earnings";
 import { useAuthStore } from "@/stores/auth.store";
