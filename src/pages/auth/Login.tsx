@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Quote, Github, Briefcase, Building, CheckCircle, ArrowLeft } from "lucide-react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Quote, Github, Briefcase, Building, CheckCircle, ArrowLeft, Home as HomeIcon } from "lucide-react";
 import type { UserRole } from "@/types/auth.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,13 @@ import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
 
 const Login = () => {
-  const [step, setStep] = useState<"role" | "form">("role");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialRole = searchParams.get("role") as UserRole;
+  const isValidRole = initialRole === "client" || initialRole === "freelancer";
+
+  const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "role");
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
@@ -140,8 +145,16 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 relative">
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-8 left-8 flex items-center text-slate-500 hover:text-navy transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200"
+        >
+          <HomeIcon size={18} className="mr-2" />
+          Back to Home
+        </button>
+        
+        <div className="w-full max-w-md mt-10">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <Logo size="md" />

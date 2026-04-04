@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import {
   User,
   Briefcase,
@@ -72,6 +72,7 @@ const FreelancerDashboard = () => {
   const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const navigate = useNavigate();
   const { logout, user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
 
@@ -131,8 +132,7 @@ const FreelancerDashboard = () => {
           (!!profile.bio ? 10 : 0) +
           ((profile.portfolio?.length || 0) > 0 ? 15 : 0) +
           ((profile.skills?.length || 0) > 0 ? 20 : 0) +
-          // @ts-expect-error type missing
-          ((profile.experience?.length || 0) > 0 ? 20 : 0) +
+          ((profile.workExperience?.length || 0) > 0 ? 20 : 0) +
           ((profile.education?.length || 0) > 0 ? 15 : 0) +
           (profile.availability ? 10 : 0),
       )
@@ -201,8 +201,7 @@ const FreelancerDashboard = () => {
 
     {
       label: "Add work experience",
-      // @ts-expect-error type missing
-      completed: (profile?.experience?.length || 0) > 0,
+      completed: (profile?.workExperience?.length || 0) > 0,
     },
     {
       label: "Add education",
@@ -390,7 +389,7 @@ const FreelancerDashboard = () => {
                     Complete Profile
                   </Button>
                 </Link>
-                <Link to="/projects" className="w-full sm:w-auto">
+                <Link to="/freelancer/projects" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     className="w-full bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all font-semibold"
@@ -497,7 +496,7 @@ const FreelancerDashboard = () => {
                 Projects Matching Your Skills
               </h3>
               <Link
-                to="/projects"
+                to="/freelancer/projects"
                 className="text-sm text-teal font-medium hover:underline flex items-center gap-1"
               >
                 View All <ArrowRight size={14} />
@@ -563,7 +562,10 @@ const FreelancerDashboard = () => {
                         {project.postedTime}
                       </div>
                     </div>
-                    <Button className="w-full bg-royal-blue hover:bg-royal-blue-hover text-white text-sm">
+                    <Button 
+                      className="w-full bg-royal-blue hover:bg-royal-blue-hover text-white text-sm"
+                      onClick={() => navigate("/freelancer/projects", { state: { applyToProjectId: project.id } })}
+                    >
                       Apply Now
                     </Button>
                   </div>

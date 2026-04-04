@@ -15,7 +15,6 @@ import {
   Grid3X3,
   List,
   ArrowRight,
-  Users,
   Frown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,6 @@ import type {
   FreelancerProfile,
   FreelancerFilters,
 } from "@/services/freelancer.service";
-import { Loader2 } from "lucide-react";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -125,7 +123,6 @@ const FreelancerDirectory = () => {
         }
 
         const response = await freelancerService.search(filters);
-        // Checking if we need response.data or response directly based on axios setup
         const data = (response as any).data || response;
         setFreelancers(data.profiles || []);
         setTotalPages(data.pagination?.totalPages || 1);
@@ -161,191 +158,132 @@ const FreelancerDirectory = () => {
     location !== "All";
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
-      {/* Navigation */}
-      <PublicNavbar variant="white" />
+    <div className="min-h-screen bg-[#050B15] font-sans text-white overflow-x-hidden">
+      <PublicNavbar />
 
-      {/* 1. PAGE HEADER */}
-      <section className="relative py-16 bg-[#050B15] overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-32 pb-16 md:pt-48 md:pb-24 overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+        <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-6">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <ChevronRight size={16} />
-            <span className="text-white">Find Talent</span>
-          </nav>
-
-          <div className="max-w-2xl">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              Find Creative{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light to-sky-blue">
-                Talent
+          <AnimatedSection>
+            <div className="max-w-3xl">
+              <span className="inline-block px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-xs font-bold text-teal-light mb-8 uppercase tracking-widest">
+                The Network
               </span>
-            </h1>
-            <p className="text-lg text-slate-300 leading-relaxed">
-              Browse 500+ verified freelancers specializing in Video Editing,
-              VFX, and 3D Design
-            </p>
-          </div>
+              <h1 className="text-5xl md:text-7xl font-bold mb-8">
+                Elite Creative <br />
+                <span className="text-gradient">Powerhouse</span>
+              </h1>
+              <p className="text-xl text-slate-400 leading-relaxed mb-10 max-w-2xl">
+                Source high-end production talent. Each professional in our
+                directory undergoes a rigorous 5-point verification process.
+              </p>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
       {/* 2. SEARCH & FILTER BAR */}
-      <section className="sticky top-[72px] z-40 bg-white border-b border-slate-100 shadow-sm py-4">
+      <section className="sticky top-0 z-50 py-4 bg-[#050B15]/80 backdrop-blur-xl border-b border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
-          {/* Search Row */}
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 max-w-md group">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal transition-colors"
                 size={20}
               />
               <input
                 type="text"
-                placeholder="Search by name or skill..."
+                placeholder="Search talent or mastery..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all text-sm placeholder:text-slate-500"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
                 >
                   <X size={18} />
                 </button>
               )}
             </div>
 
-            {/* Filter Toggle (Mobile) */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50"
-            >
-              <Filter size={18} />
-              Filters
-              {hasActiveFilters && (
-                <span className="w-2 h-2 bg-teal rounded-full" />
-              )}
-            </button>
-
             {/* Desktop Filters */}
-            <div className="hidden lg:flex items-center gap-3 flex-wrap">
-              {/* Category */}
-              <div className="relative">
-                <select
-                  value={category}
-                  onChange={(e) => {
-                    setCategory(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="appearance-none px-4 py-3 pr-10 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal cursor-pointer"
-                >
-                  <option value="All">All Categories</option>
-                  <option value="Video Editing">Video Editing</option>
-                  <option value="VFX">VFX & Motion</option>
-                  <option value="3D Design">3D Design</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  size={16}
-                />
-              </div>
+            <div className="hidden lg:flex items-center gap-3">
+              {[
+                {
+                  value: category,
+                  setter: setCategory,
+                  options: ["All", "Video Editing", "VFX", "3D Design"],
+                  label: "Capability",
+                },
+                {
+                  value: experience,
+                  setter: setExperience,
+                  options: ["All", "Entry", "Intermediate", "Expert"],
+                  label: "Tier",
+                },
+                {
+                  value: rateRange,
+                  setter: setRateRange,
+                  options: ["All", "0-500", "500-1000", "1000+"],
+                  label: "Investment",
+                },
+              ].map((filter, idx) => (
+                <div key={idx} className="relative group">
+                  <select
+                    value={filter.value}
+                    onChange={(e) => {
+                      filter.setter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none px-5 py-3 pr-10 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-teal/50 hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    <option value="All" className="bg-[#050B15]">
+                      All {filter.label}s
+                    </option>
+                    {filter.options
+                      .filter((o) => o !== "All")
+                      .map((opt) => (
+                        <option key={opt} value={opt} className="bg-[#050B15]">
+                          {opt}
+                        </option>
+                      ))}
+                  </select>
+                  <ChevronDown
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none group-hover:text-white transition-colors"
+                    size={14}
+                  />
+                </div>
+              ))}
 
-              {/* Experience */}
-              <div className="relative">
-                <select
-                  value={experience}
-                  onChange={(e) => {
-                    setExperience(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="appearance-none px-4 py-3 pr-10 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal cursor-pointer"
-                >
-                  <option value="All">All Levels</option>
-                  <option value="Entry">Entry Level</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Expert">Expert</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  size={16}
-                />
-              </div>
-
-              {/* Rate Range */}
-              <div className="relative">
-                <select
-                  value={rateRange}
-                  onChange={(e) => {
-                    setRateRange(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="appearance-none px-4 py-3 pr-10 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal cursor-pointer"
-                >
-                  <option value="All">Any Rate</option>
-                  <option value="0-500">₹0 - ₹500/hr</option>
-                  <option value="500-1000">₹500 - ₹1000/hr</option>
-                  <option value="1000+">₹1000+/hr</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  size={16}
-                />
-              </div>
-
-              {/* Location */}
-              <div className="relative">
-                <select
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="appearance-none px-4 py-3 pr-10 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal cursor-pointer"
-                >
-                  <option value="All">All Locations</option>
-                  <option value="Telangana">Telangana</option>
-                  <option value="Andhra Pradesh">Andhra Pradesh</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  size={16}
-                />
-              </div>
-
-              {/* Clear Filters */}
               {hasActiveFilters && (
-                <button
+                <Button
                   onClick={clearFilters}
-                  className="text-sm text-royal-blue hover:text-royal-blue/80 font-medium"
+                  variant="ghost"
+                  className="text-xs font-bold text-royal-blue hover:text-royal-blue/80 hover:bg-transparent px-2"
                 >
-                  Clear All
-                </button>
+                  RESET
+                </Button>
               )}
             </div>
 
-            {/* View Mode Toggle */}
-            <div className="hidden lg:flex items-center gap-1 bg-slate-100 rounded-lg p-1 ml-auto">
+            {/* View Mode */}
+            <div className="hidden lg:flex items-center gap-1 bg-white/5 rounded-2xl p-1 ml-auto">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "p-2 rounded-md transition-colors",
+                  "p-2 rounded-xl transition-all",
                   viewMode === "grid"
-                    ? "bg-white shadow-sm text-navy"
-                    : "text-slate-400 hover:text-slate-600",
+                    ? "bg-teal shadow-lg shadow-teal/20 text-white"
+                    : "text-slate-500 hover:text-white",
                 )}
               >
                 <Grid3X3 size={18} />
@@ -353,300 +291,222 @@ const FreelancerDirectory = () => {
               <button
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "p-2 rounded-md transition-colors",
+                  "p-2 rounded-xl transition-all",
                   viewMode === "list"
-                    ? "bg-white shadow-sm text-navy"
-                    : "text-slate-400 hover:text-slate-600",
+                    ? "bg-teal shadow-lg shadow-teal/20 text-white"
+                    : "text-slate-500 hover:text-white",
                 )}
               >
                 <List size={18} />
               </button>
             </div>
-          </div>
 
-          {/* Mobile Filters Dropdown */}
-          <div
-            className={cn(
-              "lg:hidden overflow-hidden transition-all duration-300",
-              showFilters ? "max-h-60 mt-4" : "max-h-0",
-            )}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-3 border border-slate-200 rounded-xl bg-white text-sm"
-              >
-                <option value="All">All Categories</option>
-                <option value="Video Editing">Video Editing</option>
-                <option value="VFX">VFX & Motion</option>
-                <option value="3D Design">3D Design</option>
-              </select>
-              <select
-                value={experience}
-                onChange={(e) => {
-                  setExperience(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-3 border border-slate-200 rounded-xl bg-white text-sm"
-              >
-                <option value="All">All Levels</option>
-                <option value="Entry">Entry Level</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Expert">Expert</option>
-              </select>
-              <select
-                value={rateRange}
-                onChange={(e) => {
-                  setRateRange(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-3 border border-slate-200 rounded-xl bg-white text-sm"
-              >
-                <option value="All">Any Rate</option>
-                <option value="0-500">₹0 - ₹500/hr</option>
-                <option value="500-1000">₹500 - ₹1000/hr</option>
-                <option value="1000+">₹1000+/hr</option>
-              </select>
-              <select
-                value={location}
-                onChange={(e) => {
-                  setLocation(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-3 border border-slate-200 rounded-xl bg-white text-sm"
-              >
-                <option value="All">All Locations</option>
-                <option value="Telangana">Telangana</option>
-                <option value="Andhra Pradesh">Andhra Pradesh</option>
-              </select>
-            </div>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="w-full mt-3 text-sm text-royal-blue font-medium"
-              >
-                Clear All Filters
-              </button>
-            )}
-          </div>
-
-          {/* Results Count */}
-          <div className="flex items-center justify-between mt-4 text-sm">
-            <span className="text-slate-500">
-              Showing{" "}
-              <span className="font-semibold text-navy">
-                {freelancers.length}
-              </span>{" "}
-              of {totalCount} freelancers
-            </span>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-white/10"
+            >
+              <Filter size={18} />
+              Refine
+              {hasActiveFilters && (
+                <div className="w-1.5 h-1.5 bg-teal rounded-full animate-pulse" />
+              )}
+            </button>
           </div>
         </div>
       </section>
 
-      {/* 3. FREELANCER GRID */}
-      <section className="py-8 bg-slate-50 min-h-[60vh]">
+      {/* 3. MAIN CONTENT AREA */}
+      <section className="py-12 pb-32">
         <div className="container mx-auto px-4 lg:px-8">
+          {/* Status Bar */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="text-sm text-slate-400">
+              Analysis found{" "}
+              <span className="text-white font-bold">{totalCount}</span> elite
+              professionals
+            </div>
+          </div>
+
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 animate-spin text-teal" />
+            <div className="flex flex-col items-center justify-center py-32 space-y-4">
+              <div className="w-12 h-12 border-2 border-teal/20 border-t-teal rounded-full animate-spin" />
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                Querying Database
+              </div>
             </div>
           ) : freelancers.length > 0 ? (
             <div
               className={cn(
-                "grid gap-6",
+                "grid gap-8",
                 viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                   : "grid-cols-1",
               )}
             >
-              {freelancers.map((freelancer, idx) => {
-                const name =
-                  freelancer.displayName ||
-                  `${freelancer.firstName} ${freelancer.lastName}`;
-                const initials = `${freelancer.firstName[0]}${freelancer.lastName[0]}`;
-
+              {freelancers.map((f, idx) => {
+                const name = f.displayName || `${f.firstName} ${f.lastName}`;
                 return (
-                  <AnimatedSection key={freelancer._id} delay={idx * 50}>
-                    <div
-                      className={cn(
-                        "bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-500 group",
-                        viewMode === "list" && "flex",
-                      )}
-                    >
-                      {/* Cover/Header */}
+                  <AnimatedSection key={f._id} delay={idx * 50}>
+                    <Link to={`/freelancer/${f._id}`} className="block group">
                       <div
                         className={cn(
-                          "bg-gradient-to-r from-navy to-royal-blue relative",
-                          viewMode === "grid" ? "h-20" : "w-32 flex-shrink-0",
+                          "glass-card rounded-[2rem] border-white/5 hover:border-white/10 hover:bg-white/[0.07] transition-all duration-500 overflow-hidden relative",
+                          viewMode === "list" && "flex h-64",
                         )}
                       >
-                        {freelancer.isVerified && (
-                          <div
-                            className={cn(
-                              "absolute bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1",
-                              viewMode === "grid"
-                                ? "top-3 right-3"
-                                : "top-2 left-2",
-                            )}
-                          >
-                            <BadgeCheck
-                              size={12}
-                              className="text-gold fill-gold"
-                            />
-                            <span className="text-xs text-white font-medium">
-                              Verified
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div
-                        className={cn(
-                          "p-5 relative",
-                          viewMode === "grid" ? "-mt-10" : "flex-1",
-                        )}
-                      >
-                        {/* Avatar */}
+                        {/* Card Header/Preview */}
                         <div
                           className={cn(
-                            "rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold border-4 border-white shadow-lg group-hover:scale-110 transition-transform overflow-hidden",
-                            viewMode === "grid"
-                              ? "w-16 h-16 text-lg mb-3"
-                              : "w-12 h-12 text-base absolute -left-6 top-1/2 -translate-y-1/2",
+                            "relative bg-gradient-to-br from-royal-blue/20 to-[#050B15]",
+                            viewMode === "grid" ? "h-24" : "w-1/3",
                           )}
                         >
-                          {freelancer.profilePicture ? (
-                            <img
-                              src={freelancer.profilePicture}
-                              alt={name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            initials
-                          )}
-                        </div>
-
-                        <div className={viewMode === "list" ? "ml-8" : ""}>
-                          {/* Name & Title */}
-                          <h3 className="font-bold text-navy text-lg group-hover:text-royal-blue transition-colors">
-                            {name}
-                          </h3>
-                          <p className="text-slate-500 text-sm mb-3">
-                            {freelancer.headline || freelancer.category}
-                          </p>
-
-                          {/* Rating */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="flex items-center gap-1">
-                              <Star size={14} className="text-gold fill-gold" />
-                              <span className="text-sm font-semibold text-navy">
-                                {freelancer.averageRating.toFixed(1)}
+                          {f.isVerified && (
+                            <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-1.5 border border-white/10">
+                              <BadgeCheck size={12} className="text-teal" />
+                              <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                                Verified Artist
                               </span>
                             </div>
-                            <span className="text-slate-400 text-sm">
-                              ({freelancer.reviewCount} reviews)
-                            </span>
+                          )}
+                          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+                        </div>
+
+                        {/* Card Content */}
+                        <div
+                          className={cn(
+                            "p-8 pt-0 relative",
+                            viewMode === "grid"
+                              ? "-mt-10"
+                              : "flex-1 flex flex-col justify-center pt-8",
+                          )}
+                        >
+                          {/* Avatar */}
+                          <div
+                            className={cn(
+                              "relative mb-6",
+                              viewMode === "list" && "mb-4",
+                            )}
+                          >
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal to-royal-blue p-0.5 group-hover:scale-105 transition-transform duration-500 shadow-xl shadow-black/40">
+                              <div className="w-full h-full rounded-2xl overflow-hidden border-2 border-[#050B15] bg-navy">
+                                {f.profilePicture ? (
+                                  <img
+                                    src={f.profilePicture}
+                                    alt={name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white/20">
+                                    {f.firstName[0]}
+                                    {f.lastName[0]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-teal rounded-full border-4 border-[#121A2A] flex items-center justify-center shadow-lg">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                            </div>
                           </div>
 
-                          {/* Skills */}
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {freelancer.skills.slice(0, 3).map((skill) => (
+                          <h3 className="text-xl font-bold mb-1 group-hover:text-teal-light transition-colors">
+                            {name}
+                          </h3>
+                          <p className="text-sm text-slate-400 mb-4 line-clamp-1">
+                            {f.headline || f.category}
+                          </p>
+
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="flex items-center gap-1.5">
+                              <Star size={14} className="text-teal fill-teal" />
+                              <span className="text-sm font-bold">
+                                {f.averageRating.toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                              {f.reviewCount} Reports
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mb-8">
+                            {f.skills.slice(0, 2).map((skill) => (
                               <span
                                 key={skill.name}
-                                className="px-2 py-1 bg-teal/10 text-teal rounded-md text-xs font-medium"
+                                className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-300 border border-white/5"
                               >
                                 {skill.name}
                               </span>
                             ))}
                           </div>
 
-                          {/* Rate & Location */}
-                          <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center justify-between border-t border-white/5 pt-6 mt-auto">
                             <div>
-                              <span className="text-xl font-bold text-navy">
-                                ₹{freelancer.hourlyRate}
+                              <span className="text-xl font-bold">
+                                ₹{f.hourlyRate}
                               </span>
-                              <span className="text-slate-400 text-sm">
-                                /hr
+                              <span className="text-xs text-slate-500 font-bold ml-1">
+                                /HR
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 text-slate-500 text-sm">
-                              <MapPin size={14} />
-                              <span>{freelancer.category}</span>
+                            <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
+                              <MapPin size={12} className="text-teal" />
+                              {f.category.split(" ")[0]}
                             </div>
                           </div>
-
-                          {/* CTA */}
-                          <Link
-                            to={`/freelancer/${freelancer._id}`}
-                            className="w-full"
-                          >
-                            <Button
-                              variant="outline"
-                              className="w-full border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white"
-                            >
-                              View Profile
-                            </Button>
-                          </Link>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   </AnimatedSection>
                 );
               })}
             </div>
           ) : (
-            /* 5. EMPTY STATE */
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                <Frown size={48} className="text-slate-300" />
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <div className="w-24 h-24 bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-white/10 group animate-pulse">
+                <Frown
+                  size={48}
+                  className="text-slate-600 group-hover:text-teal transition-colors"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-navy mb-2">
-                No freelancers found
-              </h3>
-              <p className="text-slate-500 mb-6 max-w-md">
-                Try adjusting your filters or search query to find the perfect
-                creative professional.
+              <h3 className="text-3xl font-bold mb-4">No Mastery Matches</h3>
+              <p className="text-slate-400 max-w-md mx-auto mb-10 leading-relaxed">
+                We couldn't find professionals matching these specific
+                credentials. Try broadening your criteria.
               </p>
               <Button
                 onClick={clearFilters}
-                className="bg-teal hover:bg-teal-light text-white"
+                className="h-14 px-10 rounded-2xl bg-white/5 hover:bg-white/10 text-white border border-white/10"
               >
-                Clear All Filters
+                Clear Filters
               </Button>
             </div>
           )}
 
-          {/* 4. PAGINATION */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-12">
+            <div className="flex items-center justify-center gap-4 mt-20">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="border-slate-200"
+                className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white disabled:opacity-20"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={20} className="mr-2" />
                 Previous
               </Button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={cn(
-                        "w-10 h-10 rounded-lg text-sm font-medium transition-colors",
+                        "w-12 h-12 rounded-2xl border transition-all text-sm font-bold",
                         currentPage === page
-                          ? "bg-teal text-white"
-                          : "text-slate-600 hover:bg-slate-100",
+                          ? "bg-teal border-teal shadow-lg shadow-teal/20 text-white"
+                          : "bg-white/5 border-white/10 text-slate-500 hover:text-white hover:border-teal/50",
                       )}
                     >
                       {page}
@@ -657,57 +517,41 @@ const FreelancerDirectory = () => {
 
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="border-slate-200"
+                className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white disabled:opacity-20"
               >
                 Next
-                <ChevronRight size={16} />
+                <ChevronRight size={20} className="ml-2" />
               </Button>
             </div>
           )}
         </div>
       </section>
 
-      {/* 6. CTA SECTION */}
-      <section className="py-20 bg-gradient-to-r from-teal to-teal-light relative overflow-hidden">
-        {/* Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+      {/* FOOTER CTA */}
+      <section className="py-24 border-t border-white/5 bg-gradient-to-t from-teal/10 to-transparent">
+        <div className="container mx-auto px-4 lg:px-8 text-center">
           <AnimatedSection>
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Users size={32} className="text-white" />
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Are You a Creative Professional?
-              </h2>
-              <p className="text-white/90 text-xl mb-8 leading-relaxed">
-                Join 500+ freelancers earning on ConnectMeIndia. Showcase your
-                skills and connect with clients in your region.
-              </p>
-              <Button
-                size="lg"
-                className="bg-white text-teal hover:bg-slate-100 font-bold text-lg px-10 py-7 rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
-              >
-                Join as Freelancer
+            <h2 className="text-4xl font-bold mb-6">
+              Are You a Creative Elite?
+            </h2>
+            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+              Join our private network of high-end professionals and get matched
+              with production-level projects.
+            </p>
+            <Link to="/register">
+              <Button className="h-16 px-12 rounded-2xl bg-teal hover:bg-teal-light text-white font-bold text-lg shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1">
+                Apply for Roster
                 <ArrowRight size={20} className="ml-2" />
               </Button>
-            </div>
+            </Link>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* 7. FOOTER */}
       <PublicFooter />
     </div>
   );

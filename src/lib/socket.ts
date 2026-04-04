@@ -107,6 +107,8 @@ interface ServerToClientEvents {
 
   "conversation:created": (data: SocketConversation) => void;
 
+  "application:new": (data: { projectId: string; applicationId: string }) => void;
+
   error: (data: { message: string; event?: string }) => void;
 }
 

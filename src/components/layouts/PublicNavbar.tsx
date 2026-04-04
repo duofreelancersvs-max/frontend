@@ -4,10 +4,14 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useThemeStore } from "@/stores/theme.store";
 
 const PublicNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,13 +37,13 @@ const PublicNavbar = () => {
   return (
     <nav
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 bg-white border-b border-transparent",
-        isScrolled ? "shadow-md border-slate-200/50" : "",
+        "sticky top-0 z-50 w-full transition-all duration-300 bg-white dark:bg-[#050B15] border-b border-transparent",
+        isScrolled ? "shadow-md border-slate-200/50 dark:border-white/10" : "",
       )}
       style={{ height: "64px" }}
     >
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
-        <Logo size="sm" />
+        <Logo size="sm" isDark={isDark} />
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
@@ -47,7 +51,7 @@ const PublicNavbar = () => {
             <Link
               key={link.name}
               to={link.href}
-              className="text-sm font-medium text-slate-500 hover:text-navy transition-colors"
+              className="text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-navy dark:hover:text-white transition-colors"
             >
               {link.name}
             </Link>
@@ -56,10 +60,11 @@ const PublicNavbar = () => {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle className="mr-2" />
           <Link to="/login">
             <Button
               variant="outline"
-              className="border-royal-blue text-royal-blue hover:bg-royal-blue/5 hover:text-royal-blue"
+              className="border-royal-blue text-royal-blue dark:border-teal-light dark:text-teal-light hover:bg-royal-blue/5 dark:hover:bg-teal-light/10"
             >
               Log In
             </Button>

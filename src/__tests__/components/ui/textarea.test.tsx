@@ -70,7 +70,7 @@ describe("Textarea", () => {
     render(<Textarea />);
     const textarea = screen.getByRole("textbox");
     expect(textarea).toHaveClass("focus-visible:ring-2");
-    expect(textarea).toHaveClass("focus-visible:ring-teal");
+    expect(textarea).toHaveClass("focus-visible:ring-teal/20");
   });
 
   it("handles multi-line text", async () => {

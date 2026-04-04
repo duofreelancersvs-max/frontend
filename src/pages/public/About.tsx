@@ -3,12 +3,10 @@ import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import {
-  ChevronRight,
   Target,
   Eye,
   MapPin,
   BadgeCheck,
-  Tag,
   Shield,
   Linkedin,
   Twitter,
@@ -16,7 +14,6 @@ import {
   Briefcase,
   Award,
   Rocket,
-  Heart,
   Star,
   ArrowRight,
   Play,
@@ -78,14 +75,13 @@ const AnimatedSection = ({
 };
 
 const About = () => {
-  const [activeTimelineItem, setActiveTimelineItem] = useState(0);
 
   const team = [
     {
       name: "Vikram Reddy",
       role: "Founder & CEO",
       avatar: "VR",
-      bio: "10+ years in creative industry",
+      bio: "10+ years in the creative industry",
       linkedin: "#",
       twitter: "#",
     },
@@ -93,7 +89,7 @@ const About = () => {
       name: "Priya Sharma",
       role: "Head of Operations",
       avatar: "PS",
-      bio: "Ex-Google, scaling expert",
+      bio: "Scaling expert with focus on quality",
       linkedin: "#",
       twitter: "#",
     },
@@ -101,7 +97,7 @@ const About = () => {
       name: "Arjun Kumar",
       role: "CTO",
       avatar: "AK",
-      bio: "Full-stack architect",
+      bio: "Architecting the future of creative work",
       linkedin: "#",
       twitter: "#",
     },
@@ -109,7 +105,7 @@ const About = () => {
       name: "Lakshmi Devi",
       role: "Community Lead",
       avatar: "LD",
-      bio: "Building creator communities",
+      bio: "Bringing people together through creativity",
       linkedin: "#",
       twitter: "#",
     },
@@ -119,263 +115,116 @@ const About = () => {
     {
       year: "2024",
       month: "Jan",
-      title: "Founded",
-      desc: "ConnectMeIndia was born with a vision to empower local creative talent",
+      title: "The Vision",
+      desc: "ConnectMeIndia was born to empower South India's creative talent pool.",
     },
     {
       year: "2024",
       month: "Apr",
-      title: "100 Freelancers",
-      desc: "Reached our first milestone of 100 verified creative professionals",
+      title: "Milestone 100",
+      desc: "Reached our first 100 verified professionals across AP & Telangana.",
     },
     {
       year: "2024",
       month: "Jul",
-      title: "₹10L+ Earned",
-      desc: "Freelancers on our platform collectively earned over ₹10 lakhs",
+      title: "Earning Impact",
+      desc: "Facilitated over ₹10 Lakhs in direct earnings for our local creators.",
     },
     {
       year: "2024",
       month: "Oct",
-      title: "500+ Projects",
-      desc: "Successfully facilitated 500+ creative projects across AP & Telangana",
+      title: "Scale Reached",
+      desc: "500+ projects successfully delivered with 98% client satisfaction.",
     },
     {
       year: "2025",
       month: "Jan",
-      title: "1000 Users",
-      desc: "Growing community of 1000+ clients and freelancers",
+      title: "The Future",
+      desc: "Expanding our platform tools to support 3D and VFX workflows end-to-end.",
     },
   ];
 
   const features = [
     {
       icon: MapPin,
-      title: "Local Talent Focus",
-      desc: "Exclusively serving Telangana & Andhra Pradesh, we understand the local creative ecosystem",
+      title: "Hyper-Local Focus",
+      desc: "Deeply rooted in the creative ecosystem of Southern India.",
       color: "from-blue-500 to-royal-blue",
     },
     {
       icon: BadgeCheck,
-      title: "Verified Professionals",
-      desc: "Every freelancer goes through our rigorous verification process for quality assurance",
+      title: "Elite Verification",
+      desc: "Rigorous quality checks for every professional on our platform.",
       color: "from-teal to-emerald-500",
     },
     {
-      icon: Tag,
-      title: "Transparent Pricing",
-      desc: "No hidden fees. Clear pricing with our escrow-protected payment system",
+      icon: Shield,
+      title: "Secure Future",
+      desc: "Escrow-protected payments and secure project collaboration.",
       color: "from-purple-500 to-pink-500",
     },
     {
-      icon: Shield,
-      title: "Secure Communication",
-      desc: "End-to-end encrypted messaging keeps your project discussions private and safe",
+      icon: Sparkles,
+      title: "Premium Results",
+      desc: "Focus on high-end production value for every single project.",
       color: "from-gold to-orange-500",
     },
   ];
 
   const stats = [
-    { value: "500+", label: "Freelancers", icon: Users },
-    { value: "1000+", label: "Projects", icon: Briefcase },
-    { value: "50+", label: "Companies", icon: Award },
-    { value: "4.9", label: "Avg Rating", icon: Star },
+    { value: "500+", label: "Curated Talents", icon: Users },
+    { value: "1.2k+", label: "Success Stories", icon: Briefcase },
+    { value: "85+", label: "Enterprise Clients", icon: Award },
+    { value: "4.9/5", label: "Global Rating", icon: Star },
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
-      <PublicNavbar variant="white" />
+    <div className="min-h-screen bg-[#050B15] font-sans text-white overflow-x-hidden">
+      <PublicNavbar />
 
-      {/* 1. PAGE HEADER */}
-      <section className="relative py-20 bg-[#050B15] overflow-hidden">
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-8">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <ChevronRight size={16} />
-            <span className="text-white">About Us</span>
-          </nav>
-
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Building the Future of{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light to-sky-blue">
-                Creative Work
-              </span>
-            </h1>
-            <p className="text-xl text-slate-300 leading-relaxed">
-              We're on a mission to connect talented creative professionals with
-              businesses who value quality and local expertise.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. OUR STORY SECTION */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Image/Illustration */}
-            <AnimatedSection>
-              <div className="relative">
-                <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden relative group">
-                  {/* Abstract Creative Illustration */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative w-full h-full">
-                      {/* Floating Elements */}
-                      <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-teal to-teal-light rounded-2xl rotate-12 opacity-80 animate-float" />
-                      <div className="absolute top-20 right-16 w-16 h-16 bg-gradient-to-br from-royal-blue to-blue-500 rounded-full opacity-70 animate-float-delayed" />
-                      <div className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-br from-gold to-orange-400 rounded-3xl -rotate-12 opacity-60 animate-float" />
-                      <div className="absolute bottom-16 right-10 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl rotate-45 opacity-70 animate-float-delayed" />
-
-                      {/* Center Play Button */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl cursor-pointer group-hover:scale-110 transition-transform">
-                          <Play
-                            className="text-navy ml-1"
-                            size={32}
-                            fill="currentColor"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating Stats Card */}
-                <div className="absolute -bottom-8 -right-8 bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-teal/10 rounded-xl flex items-center justify-center">
-                      <Heart className="text-teal" size={24} />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-navy">95%</div>
-                      <div className="text-sm text-slate-500">
-                        Client Satisfaction
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </AnimatedSection>
-
-            {/* Right: Content */}
-            <AnimatedSection delay={200}>
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-royal-blue/10 text-royal-blue rounded-full text-sm font-semibold mb-6">
-                  <Sparkles size={16} />
-                  Our Story
-                </span>
-
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6 leading-tight">
-                  Connecting Creativity with Opportunity
-                </h2>
-
-                <div className="space-y-4 text-slate-600 text-lg leading-relaxed mb-8">
-                  <p>
-                    ConnectMeIndia was born from a simple observation: South
-                    India has an incredible pool of creative talent, but
-                    connecting them with the right opportunities was a
-                    challenge.
-                  </p>
-                  <p>
-                    We set out to build a platform that celebrates local
-                    expertise while providing world-class tools for
-                    collaboration. Today, we're proud to be the bridge between
-                    talented video editors, VFX artists, and 3D designers with
-                    businesses who value quality work.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="inline-flex items-center gap-3 px-5 py-3 bg-navy text-white rounded-xl font-semibold">
-                    <Rocket size={20} />
-                    Founded in 2024
-                  </div>
-                  <div className="inline-flex items-center gap-3 px-5 py-3 bg-slate-100 text-navy rounded-xl font-semibold">
-                    <MapPin size={20} />
-                    Hyderabad, India
-                  </div>
-                </div>
-              </div>
-            </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. MISSION & VISION */}
-      <section className="py-24 bg-slate-50">
-        <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                What Drives Us
-              </h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                Our mission and vision guide every decision we make
+            <div className="max-w-4xl">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-sm font-bold text-teal-light mb-8 uppercase tracking-widest">
+                <Rocket size={16} />
+                Our Mission
+              </span>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8">
+                Pioneering the <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light via-sky-blue to-teal-light">
+                  Creative Economy
+                </span>
+              </h1>
+              <p className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl">
+                We are building more than a marketplace—we are architects of a
+                borderless ecosystem where local talent meets global standards.
               </p>
             </div>
           </AnimatedSection>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Mission Card */}
-            <AnimatedSection delay={100}>
-              <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-500 group h-full">
-                <div className="w-16 h-16 bg-gradient-to-br from-teal to-emerald-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
-                  <Target size={32} />
-                </div>
-                <h3 className="text-2xl font-bold text-navy mb-4">
-                  Our Mission
-                </h3>
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  To democratize access to creative opportunities by building a
-                  trusted marketplace that empowers local talent and enables
-                  businesses to find the perfect creative partner for their
-                  projects.
-                </p>
-              </div>
-            </AnimatedSection>
-
-            {/* Vision Card */}
-            <AnimatedSection delay={200}>
-              <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-500 group h-full">
-                <div className="w-16 h-16 bg-gradient-to-br from-royal-blue to-blue-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
-                  <Eye size={32} />
-                </div>
-                <h3 className="text-2xl font-bold text-navy mb-4">
-                  Our Vision
-                </h3>
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  To become the leading creative marketplace in India, known for
-                  quality, trust, and the success stories of freelancers who
-                  built thriving careers through our platform.
-                </p>
-              </div>
-            </AnimatedSection>
-          </div>
         </div>
       </section>
 
-      {/* Quick Stats Bar */}
-      <section className="py-12 bg-gradient-to-r from-navy to-royal-blue">
+      {/* 2. STATS GRID */}
+      <section className="py-20 bg-white/5 border-y border-white/5 backdrop-blur-sm">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {stats.map((stat, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="text-center text-white">
-                  <stat.icon className="mx-auto mb-3 opacity-70" size={28} />
-                  <div className="text-3xl md:text-4xl font-bold mb-1">
+                <div className="text-center group">
+                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-teal/20 transition-all border border-white/10">
+                    <stat.icon className="text-teal" size={30} />
+                  </div>
+                  <div className="text-4xl md:text-5xl font-bold mb-2 tabular-nums">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-white/70 font-medium">
+                  <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">
                     {stat.label}
                   </div>
                 </div>
@@ -385,114 +234,161 @@ const About = () => {
         </div>
       </section>
 
-      {/* 4. WHY CHOOSE US */}
-      <section className="py-24 bg-white">
+      {/* 3. OUR STORY SECTION */}
+      <section className="py-32 relative">
         <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
-                Why Choose Us
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                What Makes Us Different
-              </h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                We're not just another marketplace. Here's why businesses and
-                freelancers trust us.
-              </p>
-            </div>
-          </AnimatedSection>
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            {/* Left: Interactive Visual */}
+            <AnimatedSection>
+              <div className="relative group">
+                <div className="aspect-square md:aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-navy to-royal-blue/30 p-1 border border-white/10 overflow-hidden">
+                  <div className="absolute inset-0 bg-plus-pattern opacity-10" />
+                  <div className="h-full w-full bg-[#050B15]/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
+                    {/* Animated Shapes */}
+                    <div className="absolute top-10 left-10 w-32 h-32 bg-teal/20 blur-3xl animate-pulse" />
+                    <div className="absolute bottom-10 right-10 w-32 h-32 bg-royal-blue/20 blur-3xl animate-pulse delay-1000" />
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, idx) => (
-              <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="group bg-white p-8 rounded-2xl border border-slate-100 hover:border-transparent hover:shadow-2xl transition-all duration-500 relative overflow-hidden h-full">
-                  {/* Background gradient on hover */}
-                  <div
-                    className={cn(
-                      "absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-gradient-to-br",
-                      feature.color,
-                    )}
-                  />
-
-                  <div
-                    className={cn(
-                      "w-14 h-14 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-6",
-                      feature.color,
-                    )}
-                  >
-                    <feature.icon size={26} />
+                    <div className="text-center relative z-10 px-8">
+                      <div className="w-20 h-20 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/20">
+                        <Play fill="currentColor" className="text-white ml-1" size={28} />
+                      </div>
+                      <h4 className="text-2xl font-bold mb-4">Watch Our Journey</h4>
+                      <p className="text-slate-400">Discover how ConnectMeIndia is transforming lives through creativity.</p>
+                    </div>
                   </div>
+                </div>
 
-                  <h3 className="text-lg font-bold text-navy mb-3 group-hover:text-royal-blue transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-500 leading-relaxed">
-                    {feature.desc}
+                {/* Floating Achievement Card */}
+                <div className="absolute -bottom-10 -right-4 md:-right-10 glass-card p-6 rounded-2xl max-w-xs animate-float">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-teal/20 rounded-xl flex items-center justify-center">
+                      <Shield className="text-teal" size={24} />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold">100% Secure</div>
+                      <div className="text-xs text-slate-400">Every project protected by escrow and verification.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AnimatedSection>
+
+            {/* Right: Narrative */}
+            <AnimatedSection delay={200}>
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <span className="text-teal font-bold uppercase tracking-widest text-sm">Our Genesis</span>
+                  <h2 className="text-4xl md:text-6xl font-bold leading-tight">
+                    From Local Roots to <br />
+                    <span className="text-gradient">Global Standards</span>
+                  </h2>
+                </div>
+
+                <div className="space-y-6 text-slate-400 text-lg leading-relaxed">
+                  <p>
+                    Founded in the heart of South India, ConnectMeIndia was born from a simple observation: the region is home to world-class talent, yet lacked a dedicated professional bridge.
+                  </p>
+                  <p>
+                    We didn't just build another platform. We built a curator of excellence. By focusing on verified professionals in Video Production, VFX, and 3D Design, we are raising the bar for the entire creative community in Telangana and Andhra Pradesh.
                   </p>
                 </div>
+
+                <div className="pt-8">
+                  <Button
+                    size="lg"
+                    className="bg-teal hover:bg-[#128a7f] text-white px-10 py-8 text-lg font-bold rounded-2xl shadow-2xl shadow-teal/30 transition-all hover:scale-105"
+                  >
+                    Partner With Us
+                    <ArrowRight className="ml-2" size={20} />
+                  </Button>
+                </div>
+              </div>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. MISSION & VISION - GLASSY TILES */}
+      <section className="py-32 bg-white/5 relative">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-10">
+            <AnimatedSection>
+              <div className="glass-card p-12 rounded-[2.5rem] h-full hover-glow">
+                <div className="w-16 h-16 bg-teal/20 rounded-2xl flex items-center justify-center text-teal mb-8 border border-teal/20">
+                  <Target size={32} />
+                </div>
+                <h3 className="text-3xl font-bold mb-6">Our Mission</h3>
+                <p className="text-slate-400 text-lg leading-relaxed">
+                  To democratize access to elite creative workflows by bridging the gap between exceptional local talent and visionary businesses who value craftsmanship over mass production.
+                </p>
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection delay={200}>
+              <div className="glass-card p-12 rounded-[2.5rem] h-full hover-glow">
+                <div className="w-16 h-16 bg-royal-blue/20 rounded-2xl flex items-center justify-center text-royal-blue mb-8 border border-royal-blue/20">
+                  <Eye size={32} />
+                </div>
+                <h3 className="text-3xl font-bold mb-6">Our Vision</h3>
+                <p className="text-slate-400 text-lg leading-relaxed">
+                  To establish ConnectMeIndia as the definitive gold standard for creative hiring, fostering a future where professional growth is determined by skill alone, irrespective of location.
+                </p>
+              </div>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* 4.5 WHY CHOOSE US - FEATURES */}
+      <section className="py-32 relative">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, idx) => (
+              <AnimatedSection key={idx} delay={idx * 100}>
+                <div className="glass-card p-10 rounded-3xl hover-glow h-full group">
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-8 shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-6",
+                    feature.color
+                  )}>
+                    <feature.icon size={26} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-4">{feature.title}</h3>
+                  <p className="text-slate-500 leading-relaxed text-sm">{feature.desc}</p>
+                </div>
               </AnimatedSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 5. TEAM SECTION */}
-      <section className="py-24 bg-slate-50">
+      {/* 5. TEAM EXHIBITION */}
+      <section className="py-32">
         <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-pink-100 text-pink-600 rounded-full text-sm font-semibold mb-4">
-                <Heart size={14} className="inline mr-1" />
-                Our Team
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                Meet the People Behind ConnectMeIndia
-              </h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                A passionate team dedicated to empowering creative professionals
-              </p>
-            </div>
-          </AnimatedSection>
+          <div className="text-center mb-20 space-y-4">
+            <span className="text-sky-blue font-bold tracking-widest uppercase text-sm">The Architects</span>
+            <h2 className="text-4xl md:text-6xl font-bold">Behind the Vision</h2>
+          </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-500">
-                  {/* Header Gradient */}
-                  <div className="h-24 bg-gradient-to-r from-navy to-royal-blue relative">
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml,...')] opacity-10" />
-                  </div>
-
-                  {/* Profile */}
-                  <div className="px-6 pb-6 -mt-12 relative">
-                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-lg mb-4 group-hover:scale-110 transition-transform">
+                <div className="group relative glass-card p-8 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/10 border-white/5">
+                  <div className="relative mb-8 inline-block">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-teal/20 to-royal-blue/20 flex items-center justify-center text-white font-bold text-3xl border border-white/10 group-hover:scale-110 transition-transform">
                       {member.avatar}
                     </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-1">{member.name}</h3>
+                  <p className="text-teal-light text-sm font-bold mb-4 uppercase tracking-wider">{member.role}</p>
+                  <p className="text-slate-500 text-sm mb-6 leading-relaxed">{member.bio}</p>
 
-                    <h3 className="font-bold text-navy text-lg">
-                      {member.name}
-                    </h3>
-                    <p className="text-teal text-sm font-medium mb-2">
-                      {member.role}
-                    </p>
-                    <p className="text-slate-500 text-sm mb-4">{member.bio}</p>
-
-                    {/* Social Links */}
-                    <div className="flex gap-2">
-                      <a
-                        href={member.linkedin}
-                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-royal-blue hover:text-white flex items-center justify-center transition-colors"
-                      >
-                        <Linkedin size={16} />
-                      </a>
-                      <a
-                        href={member.twitter}
-                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-sky-500 hover:text-white flex items-center justify-center transition-colors"
-                      >
-                        <Twitter size={16} />
-                      </a>
-                    </div>
+                  <div className="flex gap-3">
+                    <a href={member.linkedin} className="w-9 h-9 rounded-xl glass-card flex items-center justify-center hover:bg-royal-blue hover:text-white transition-all">
+                      <Linkedin size={16} />
+                    </a>
+                    <a href={member.twitter} className="w-9 h-9 rounded-xl glass-card flex items-center justify-center hover:bg-sky-blue hover:text-white transition-all">
+                      <Twitter size={16} />
+                    </a>
                   </div>
                 </div>
               </AnimatedSection>
@@ -501,77 +397,34 @@ const About = () => {
         </div>
       </section>
 
-      {/* 6. MILESTONES / TIMELINE */}
-      <section className="py-24 bg-white">
+      {/* 6. TIMELINE JOURNEY */}
+      <section className="py-32 bg-white/5">
         <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-teal/10 text-teal rounded-full text-sm font-semibold mb-4">
-                <Rocket size={14} className="inline mr-1" />
-                Our Journey
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                From Idea to Impact
-              </h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                Key milestones in our journey to transform creative work in
-                South India
-              </p>
-            </div>
-          </AnimatedSection>
-
-          {/* Timeline */}
           <div className="max-w-4xl mx-auto">
-            <div className="relative">
-              {/* Timeline Line */}
-              <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal via-royal-blue to-navy" />
+            <div className="space-y-12 relative">
+              <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-teal/0 via-teal/50 to-teal/0" />
 
               {milestones.map((item, idx) => (
-                <AnimatedSection key={idx} delay={idx * 150}>
-                  <div
-                    className={cn(
-                      "relative flex items-center mb-12 last:mb-0",
-                      idx % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse",
-                    )}
-                  >
-                    {/* Content */}
-                    <div
-                      className={cn(
-                        "ml-20 md:ml-0 md:w-1/2",
-                        idx % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16",
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "bg-white p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer",
-                          activeTimelineItem === idx
-                            ? "border-teal shadow-lg shadow-teal/10"
-                            : "border-slate-100 hover:border-slate-200",
-                        )}
-                        onMouseEnter={() => setActiveTimelineItem(idx)}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-bold text-teal">
-                            {item.month} {item.year}
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-bold text-navy mb-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-slate-500">{item.desc}</p>
-                      </div>
-                    </div>
+                <AnimatedSection key={idx} delay={idx * 100}>
+                  <div className={cn(
+                    "relative flex items-center w-full",
+                    idx % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  )}>
+                    <div className="hidden md:block w-1/2" />
 
-                    {/* Circle */}
-                    <div className="absolute left-8 md:left-1/2 -translate-x-1/2">
-                      <div
-                        className={cn(
-                          "w-4 h-4 rounded-full border-4 border-white transition-all duration-300",
-                          activeTimelineItem === idx
-                            ? "bg-teal scale-150"
-                            : "bg-royal-blue",
-                        )}
-                      />
+                    <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-teal shadow-[0_0_15px_rgba(20,184,166,0.6)] z-10" />
+
+                    <div className={cn(
+                      "w-full md:w-1/2 pl-16 md:pl-0",
+                      idx % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16"
+                    )}>
+                      <div className="glass-card p-8 rounded-2xl border-white/5 hover:border-teal/30 hover:bg-white/10 transition-all cursor-default">
+                        <span className="text-teal font-bold text-xs uppercase tracking-widest mb-2 block">
+                          {item.month} {item.year}
+                        </span>
+                        <h4 className="text-xl font-bold mb-2">{item.title}</h4>
+                        <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                      </div>
                     </div>
                   </div>
                 </AnimatedSection>
@@ -581,68 +434,51 @@ const About = () => {
         </div>
       </section>
 
-      {/* 7. CTA SECTION */}
-      <section className="py-24 bg-gradient-to-br from-royal-blue to-navy relative overflow-hidden">
-        {/* Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-
+      {/* 7. FINAL CTA */}
+      <section className="py-40 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-royal-blue/20 to-teal/10 opacity-50" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <AnimatedSection>
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                Join Our Growing Community
+          <div className="max-w-4xl mx-auto text-center space-y-10">
+            <AnimatedSection>
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tight">
+                Be Part of the <br />
+                <span className="text-gradient">Evolution</span>
               </h2>
-              <p className="text-white/80 text-xl mb-10 leading-relaxed">
-                Whether you're looking for talent or looking to showcase your
-                skills, ConnectMeIndia is the place for you.
+            </AnimatedSection>
+
+            <AnimatedSection delay={200}>
+              <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                ConnectMeIndia is rapidly expanding. Secure your place in India's premier creative marketplace today.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-teal hover:bg-teal-light text-white font-bold text-lg px-10 py-7 rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
-                >
-                  Hire Talent
-                  <ArrowRight size={20} className="ml-2" />
-                </Button>
-                <Button
-                  size="lg"
-                  className="bg-transparent border border-white/30 text-white hover:bg-white/10 font-bold text-lg px-10 py-7 rounded-xl"
-                >
-                  Become a Freelancer
-                </Button>
+            </AnimatedSection>
+
+            <AnimatedSection delay={300}>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link to="/register?role=client">
+                  <Button size="lg" className="h-16 px-12 rounded-2xl bg-white text-navy font-bold text-lg hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-2xl">
+                    Hire Talent
+                  </Button>
+                </Link>
+                <Link to="/register?role=freelancer">
+                  <Button size="lg" variant="outline" className="h-16 px-12 rounded-2xl border-white/20 text-white font-bold text-lg hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
+                    Find Work
+                  </Button>
+                </Link>
               </div>
-            </div>
-          </AnimatedSection>
+            </AnimatedSection>
+          </div>
         </div>
       </section>
 
-      {/* 8. FOOTER */}
       <PublicFooter />
 
-      {/* Custom CSS for Animations */}
       <style>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(12deg); }
-          50% { transform: translateY(-15px) rotate(12deg); }
-        }
-        
-        @keyframes float-delayed {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+          50% { transform: translateY(-20px); }
         }
-        
         .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-        
-        .animate-float-delayed {
-          animation: float-delayed 5s ease-in-out infinite;
-          animation-delay: 1s;
+          animation: float 6s ease-in-out infinite;
         }
       `}</style>
     </div>

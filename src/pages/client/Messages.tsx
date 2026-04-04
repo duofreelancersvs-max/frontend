@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useLocation } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import { Bell, ChevronDown, LogOut, User, Settings, Menu, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { conversationService } from "@/services";
-import type { Conversation, Message } from "@/services";
+import { conversationService, applicationService } from "@/services";
+import type { Conversation, Message, Application } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
@@ -35,6 +35,7 @@ const ClientMessages = () => {
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, totalUnreadCount } = useUnreadStore();
+  const [currentApplication, setCurrentApplication] = useState<Application | null>(null);
 
   // Sync active conversation with unread store
   useEffect(() => {
@@ -185,6 +186,23 @@ const ClientMessages = () => {
     fetchConversations();
   }, []);
 
+  // ── Deep-link: auto-select conversation from navigation state ──
+  const location = useLocation();
+  useEffect(() => {
+    const state = location.state as { conversationId?: string } | null;
+    if (state?.conversationId && conversations.length > 0) {
+      const target = conversations.find(
+        (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
+      );
+      if (target) {
+        setSelectedConversation(target);
+        setMobileView("chat");
+      }
+      // Clear state to prevent re-triggering
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, conversations]);
+
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedConversation?.id) return;
@@ -255,6 +273,35 @@ const ClientMessages = () => {
     conv.participants?.find((p) => p.role === "freelancer") ||
     conv.participants?.[0];
 
+  const selectedFreelancer = selectedConversation
+    ? getFreelancerParticipant(selectedConversation)
+    : null;
+
+  // ── Application Fetching ──
+  useEffect(() => {
+    const fetchApplication = async () => {
+      if (!selectedConversation?.projectId) {
+        setCurrentApplication(null);
+        return;
+      }
+      try {
+        const res = await applicationService.getByProject(selectedConversation.projectId);
+        const freelancerId = selectedFreelancer?.id || (selectedFreelancer as any)?._id;
+        const matchingApp = res.applications.find(
+          (app) => 
+            (app.freelancer as any)?._id === freelancerId || 
+            app.freelancer?.id === freelancerId || 
+            (app as any).freelancerId === freelancerId
+        );
+        setCurrentApplication(matchingApp || null);
+      } catch (err) {
+        console.error("Failed to fetch application for conversation", err);
+        setCurrentApplication(null);
+      }
+    };
+    fetchApplication();
+  }, [selectedConversation?.projectId, selectedFreelancer]);
+
   const conversationItems: ConversationItem[] = conversations.map((conv) => {
     const freelancer = getFreelancerParticipant(conv);
     // Safe date formatting: handle invalid dates
@@ -289,10 +336,6 @@ const ClientMessages = () => {
     };
   });
 
-  const selectedFreelancer = selectedConversation
-    ? getFreelancerParticipant(selectedConversation)
-    : null;
-
   const chatParticipant: ChatParticipant | null = selectedFreelancer
     ? {
         name: selectedFreelancer.fullName || "User",
@@ -326,6 +369,28 @@ const ClientMessages = () => {
     selectedConversation?.termsAccepted?.clientAccepted ?? true;
 
   // ─── Handlers ───────────────────────────────────────────────────
+
+  const handleHire = async () => {
+    if (!currentApplication) return;
+    try {
+      const appId = currentApplication.id || (currentApplication as any)._id;
+      await applicationService.updateStatus(appId, "accepted");
+      setCurrentApplication({ ...currentApplication, status: "accepted" });
+    } catch (err) {
+      console.error("Failed to hire", err);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!currentApplication) return;
+    try {
+      const appId = currentApplication.id || (currentApplication as any)._id;
+      await applicationService.updateStatus(appId, "rejected");
+      setCurrentApplication({ ...currentApplication, status: "rejected" });
+    } catch (err) {
+      console.error("Failed to reject", err);
+    }
+  };
 
   const handleSelectConversation = (id: string) => {
     const convo = conversations.find((c) => c.id === id);
@@ -529,6 +594,10 @@ const ClientMessages = () => {
           onAcceptTermsClick={() => setShowTermsModal(true)}
           showInfoPanel={showInfoPanel}
           onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
+          applicationId={currentApplication?.id || (currentApplication as any)?._id}
+          applicationStatus={currentApplication?.status}
+          onHire={handleHire}
+          onReject={handleReject}
           className={cn(mobileView === "list" && "hidden md:flex")}
         />
 

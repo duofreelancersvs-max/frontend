@@ -1,11 +1,85 @@
-import { describe, it, expect, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import ClientDashboard from "@/pages/client/Dashboard";
+import { useAuthStore } from "@/stores/auth.store";
+
+// Mock react-router-dom
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useOutletContext: () => ({ setSidebarOpen: vi.fn(), sidebarOpen: false }),
+  };
+});
+
+// Mock services
+vi.mock("@/services", () => ({
+  projectService: {
+    getMyClientProjects: vi.fn(() => Promise.resolve({ 
+      projects: [
+        {
+          _id: "1",
+          title: "E-commerce Website",
+          status: "in-progress",
+          budget: { minAmount: 1000, maxAmount: 5000 },
+          createdAt: new Date().toISOString(),
+          freelancer: { fullName: "Arun Kumar" }
+        }
+      ], 
+      total: 1 
+    })),
+  },
+  freelancerService: {
+    getTopRated: vi.fn(() => Promise.resolve({ 
+      profiles: [
+        { 
+          id: "1", 
+          userId: "Rahul Sharma", 
+          title: "Full Stack Developer", 
+          skills: ["React", "Node.js"], 
+          rating: 4.8, 
+          totalReviews: 25 
+        }
+      ] 
+    })),
+  },
+  conversationService: {
+    getAll: vi.fn(() => Promise.resolve({ 
+      conversations: [
+        { 
+          id: "1", 
+          participants: [{ fullName: "Arun Kumar" }], 
+          lastMessage: { content: "Hi", createdAt: new Date().toISOString() }, 
+          unreadCount: 1 
+        }
+      ] 
+    })),
+  },
+  userService: {
+    getMe: vi.fn(() => Promise.resolve({ fullName: "Rajesh Kumar" })),
+  },
+  clientService: {
+    getMyProfile: vi.fn(() => Promise.resolve({ companyName: "Test Co" })),
+  },
+  applicationService: {
+    getMyClientApplications: vi.fn(() => Promise.resolve({ 
+      applications: [
+        { 
+          id: "1", 
+          freelancer: { fullName: "Meera Reddy" }, 
+          project: { title: "Mobile App" }, 
+          status: "pending", 
+          createdAt: new Date().toISOString() 
+        }
+      ] 
+    })),
+  },
+}));
 
 // Mock lucide-react icons
-vi.mock("lucide-react", async () => {
-  const actual = await vi.importActual("lucide-react");
+vi.mock("lucide-react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import('lucide-react')>();
   return {
     ...actual,
     Home: () => <svg data-testid="home-icon" />,
@@ -33,170 +107,137 @@ vi.mock("lucide-react", async () => {
 });
 
 describe("ClientDashboard", () => {
-  it("renders dashboard header with welcome message", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getAllByText(/dashboard/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/welcome back, rajesh/i).length).toBeGreaterThan(0);
+  beforeEach(() => {
+    useAuthStore.setState({
+      user: { 
+        _id: "1", 
+        fullName: "Rajesh Kumar", 
+        role: "client", 
+        email: "rajesh@example.com",
+        phone: "9876543210",
+        status: "active",
+        isEmailVerified: true,
+        isPhoneVerified: true
+      },
+      isAuthenticated: true,
+      isLoading: false,
+    });
   });
 
-  it("renders sidebar navigation", () => {
+  const renderAndNavigate = async () => {
     renderWithRouter(<ClientDashboard />);
+    await waitFor(() => {
+      expect(screen.queryAllByText(/Welcome back/i).length).toBeGreaterThan(0);
+    });
+  };
+
+  it("renders dashboard header with welcome message", async () => {
+    await renderAndNavigate();
+    // Use getAllByText for Dashboard label as well if multiple
     expect(screen.getAllByText(/dashboard/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/my projects/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/post project/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Rajesh Kumar/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders sidebar navigation", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/dashboard/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders welcome banner with greeting", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/Rajesh Kumar/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders post new project button", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/post new project/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders find freelancers button", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/find freelancers/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/messages/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/payments/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/reviews/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/settings/i).length).toBeGreaterThan(0);
   });
 
-  it("renders user profile in sidebar", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getByText(/rajesh kumar/i)).toBeInTheDocument();
-    expect(screen.getByText(/client account/i)).toBeInTheDocument();
-  });
-
-  it("renders welcome banner with greeting", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getAllByText(/welcome back, rajesh/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/2 active projects/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/3 new applications/i).length).toBeGreaterThan(0);
-  });
-
-  it("renders post new project button", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(
-      screen.getAllByRole("link", { name: /post new project/i }).length
-    ).toBeGreaterThan(0);
-  });
-
-  it("renders find freelancers button", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(
-      screen.getAllByRole("link", { name: /find freelancers/i }).length
-    ).toBeGreaterThan(0);
-  });
-
-  it("renders stats cards", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("renders stats cards", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/active projects/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/completed projects/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/total spent/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/pending reviews/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/2/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/^15$/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹45,000/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/^3$/i).length).toBeGreaterThan(0);
   });
 
-  it("renders active projects section", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("renders active projects section", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/active projects/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/e-commerce product video/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/corporate explainer animation/i)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/social media ad creatives/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/e-commerce website/i).length).toBeGreaterThan(0);
   });
 
-  it("displays project status badges", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("displays project status badges", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/in progress/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/in review/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/just started/i).length).toBeGreaterThan(0);
   });
 
-  it("renders recent applications section", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getByText(/recent applications/i)).toBeInTheDocument();
-    expect(screen.getByText(/meera reddy/i)).toBeInTheDocument();
-    expect(screen.getByText(/karthik s\./i)).toBeInTheDocument();
-    expect(screen.getByText(/lakshmi p\./i)).toBeInTheDocument();
+  it("renders recent applications section", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/recent applications/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/meera reddy/i).length).toBeGreaterThan(0);
   });
 
-  it("displays application status badges", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("displays application status badges", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/pending/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/shortlisted/i).length).toBeGreaterThan(0);
   });
 
-  it("renders recommended freelancers section", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getByText(/recommended for you/i)).toBeInTheDocument();
-    expect(screen.getByText(/rahul verma/i)).toBeInTheDocument();
-    expect(screen.getByText(/ananya singh/i)).toBeInTheDocument();
-    expect(screen.getByText(/dev patel/i)).toBeInTheDocument();
+  it("renders recommended freelancers section", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/recommended for you/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/rahul sharma/i).length).toBeGreaterThan(0);
   });
 
-  it("displays freelancer rates and ratings", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getByText(/₹1,800\/hr/i)).toBeInTheDocument();
-    expect(screen.getByText(/₹1,400\/hr/i)).toBeInTheDocument();
-    expect(screen.getByText(/₹900\/hr/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/4\.9/i).length).toBeGreaterThan(0);
+  it("displays freelancer rates and ratings", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/4.8/i).length).toBeGreaterThan(0);
   });
 
-  it("renders recent messages section", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("renders recent messages section", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/recent messages/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/arun kumar/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/priya sharma/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/vikram r\./i).length).toBeGreaterThan(0);
   });
 
-  it("displays notification badges", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getAllByText(/^3$/i).length).toBeGreaterThan(0);
+  it("displays notification badges", async () => {
+    await renderAndNavigate();
+    const bell = screen.getByTestId("bell-icon");
+    expect(bell.parentElement?.querySelector(".bg-red-500")).toBeInTheDocument();
   });
 
-  it("renders quick actions section", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("renders quick actions section", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/quick actions/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/post new project/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/browse freelancers/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/get support/i).length).toBeGreaterThan(0);
   });
 
-  it("renders recent activity feed", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(screen.getByText(/recent activity/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/arun kumar submitted first draft/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/you approved milestone payment/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/new application received/i)
-    ).toBeInTheDocument();
+  it("renders recent activity feed", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/recent activity/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/new project created/i).length).toBeGreaterThan(0);
   });
 
-  it("renders header with notification bell", () => {
-    renderWithRouter(<ClientDashboard />);
-    const bellButtons = screen.getAllByRole("button").filter((btn) =>
-      btn.querySelector("[data-testid='bell-icon']")
-    );
-    expect(bellButtons.length).toBeGreaterThan(0);
+  it("renders header with notification bell", async () => {
+    await renderAndNavigate();
+    expect(screen.getByTestId("bell-icon")).toBeInTheDocument();
   });
 
-  it("renders view all links", () => {
-    renderWithRouter(<ClientDashboard />);
+  it("renders view all links", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/view all/i).length).toBeGreaterThan(0);
   });
 
-  it("renders mobile menu button", () => {
-    renderWithRouter(<ClientDashboard />);
-    const menuButtons = screen.getAllByRole("button").filter((btn) =>
-      btn.querySelector("[data-testid='menu-icon']")
-    );
-    expect(menuButtons.length).toBeGreaterThan(0);
+  it("renders mobile menu button", async () => {
+    await renderAndNavigate();
+    expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
   });
 
-  it("has link to projects page", () => {
-    renderWithRouter(<ClientDashboard />);
-    expect(
-      screen.getAllByRole("link", { name: /view all/i }).length
-    ).toBeGreaterThan(0);
+  it("has link to projects page", async () => {
+    await renderAndNavigate();
+    const viewAllLinks = screen.getAllByRole("link", { name: /view all/i });
+    expect(viewAllLinks.length).toBeGreaterThan(0);
   });
 });

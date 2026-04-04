@@ -4,7 +4,6 @@ import {
   X,
   Star,
   Clock,
-  CheckCircle,
   AlertCircle,
   Loader2,
 } from "lucide-react";
@@ -34,7 +33,7 @@ interface ProjectData {
 interface ProjectApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (conversationId?: string) => void;
   project: ProjectData;
   applicationsRemaining?: number;
   subscriptionPlan?: "Free" | "Pro" | "Premium";
@@ -64,7 +63,6 @@ const ProjectApplicationModal = ({
     [key: number]: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -113,13 +111,25 @@ const ProjectApplicationModal = ({
     setSubmitError(null);
 
     try {
-      await applicationService.apply({
+      const result = await applicationService.apply({
         projectId: String(project.id),
         coverLetter: coverLetter.trim(),
         estimatedDuration: parseInt(estimatedDuration, 10),
         proposedRate: Number(proposedRate),
       });
-      setIsSuccess(true);
+      const convId = (result as any)?.conversationId;
+
+      handleClose();
+
+      if (convId) {
+        navigate("/freelancer/messages", {
+          state: { conversationId: convId },
+        });
+      } else if (onSuccess) {
+        onSuccess(convId);
+      } else {
+        navigate("/freelancer/applications");
+      }
     } catch (err: unknown) {
       const error = err as {
         response?: {
@@ -144,7 +154,7 @@ const ProjectApplicationModal = ({
     setQuestionAnswers({});
     setErrors({});
     setSubmitError(null);
-    setIsSuccess(false);
+    setSubmitError(null);
     onClose();
   };
 
@@ -153,49 +163,6 @@ const ProjectApplicationModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        {/* SUCCESS STATE */}
-        {isSuccess ? (
-          <div className="p-8 text-center">
-            {/* Success Animation */}
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-success-green/10 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-success-green flex items-center justify-center animate-in zoom-in duration-300">
-                <CheckCircle size={40} className="text-white" />
-              </div>
-            </div>
-
-            <h2 className="text-2xl font-bold text-navy mb-2">
-              Application Submitted!
-            </h2>
-            <p className="text-slate-500 mb-6">
-              Your application for "{project.title}" has been sent to the
-              client. They will review it and get back to you soon.
-            </p>
-
-            <div className="space-y-3">
-              <Button
-                onClick={() => {
-                  handleClose();
-                  if (onSuccess) {
-                    onSuccess();
-                  } else {
-                    navigate("/freelancer/applications");
-                  }
-                }}
-                className="w-full bg-teal hover:bg-teal-light text-white"
-              >
-                {onSuccess ? "Go to Messages" : "View My Applications"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                className="w-full border-slate-200"
-              >
-                Continue Browsing
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
             {/* HEADER */}
             <div className="flex items-start justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100">
               <div>
@@ -389,7 +356,7 @@ const ProjectApplicationModal = ({
                           )}
                           placeholder="Enter your answer..."
                         />
-                        {errors[`question_${index}`] && (
+                         {errors[`question_${index}`] && (
                           <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
                             <AlertCircle size={12} />
                             {errors[`question_${index}`]}
@@ -455,8 +422,6 @@ const ProjectApplicationModal = ({
                 </Button>
               </div>
             </div>
-          </>
-        )}
       </div>
     </div>
   );

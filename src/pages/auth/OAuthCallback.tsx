@@ -78,16 +78,8 @@ export default function OAuthCallback() {
           expiresIn: tokens.expiresIn || 3600,
         });
 
-        // Redirect based on backend user role (source of truth)
-        if (user.role === "client") {
-          navigate("/client/dashboard");
-        } else if (user.role === "freelancer") {
-          navigate("/freelancer/dashboard");
-        } else if (user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/");
-        }
+        // Redirect to home page
+        navigate("/home");
       } catch (err: unknown) {
         console.error("OAuth Callback Error:", err);
         const error = err as {

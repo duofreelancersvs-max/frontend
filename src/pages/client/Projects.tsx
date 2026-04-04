@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
+import { useSocket } from "@/hooks/useSocket";
 import type { Project, ProjectStats } from "@/services";
 import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
 
@@ -100,6 +101,27 @@ const ClientProjects = () => {
     };
     fetchData();
   }, []);
+
+  // Listen for real-time application updates
+  const { socket } = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleNewApplication = (data: { projectId: string; applicationId: string }) => {
+      setProjects((prev) => 
+        prev.map((p) => 
+          p._id === data.projectId 
+            ? { ...p, applications: (p.applications || 0) + 1 } 
+            : p
+        )
+      );
+    };
+
+    socket.on("application:new", handleNewApplication);
+    return () => {
+      socket.off("application:new", handleNewApplication);
+    };
+  }, [socket]);
 
   const handleDelete = async (projectId: string) => {
     if (!window.confirm("Are you sure you want to delete this project?"))

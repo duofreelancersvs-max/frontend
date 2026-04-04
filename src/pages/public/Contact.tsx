@@ -9,7 +9,6 @@ import {
   Phone,
   Clock,
   Send,
-  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +70,6 @@ const AnimatedSection = ({
 
 const Contact = () => {
   const { toast } = useToast();
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -93,13 +91,11 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
-        title: "Message Sent!",
-        description: "We'll get back to you within 24 hours.",
+        title: "Message Sent Successfully",
+        description: "An elite representative will contact you shortly.",
         className: "bg-teal text-white border-0",
       });
       setFormData({
@@ -112,267 +108,185 @@ const Contact = () => {
     }, 1500);
   };
 
-  const faqs = [
+  const contactOptions = [
     {
-      question: "What are your support hours?",
-      answer:
-        "Our support team is available Monday through Friday from 9 AM to 6 PM IST. For urgent matters, we also check emails on weekends.",
+      icon: Mail,
+      title: "Electronic Mail",
+      value: "hello@connectmeindia.in",
+      link: "mailto:hello@connectmeindia.in",
+      color: "text-teal",
     },
     {
-      question: "Do you have a physical office?",
-      answer:
-        "Yes, our headquarters is located in Hitech City, Hyderabad. You're welcome to visit us with a prior appointment.",
+      icon: Phone,
+      title: "Direct Pipeline",
+      value: "+91 40 1234 5678",
+      link: "tel:+914012345678",
+      color: "text-royal-blue",
     },
     {
-      question: "How long does it take to get a reply?",
-      answer:
-        "We typically respond to all inquiries within 24 hours during business days.",
+      icon: MapPin,
+      title: "Central Studio",
+      value: "T-Hub, Phase 2, Hyderabad",
+      link: "https://goo.gl/maps/example",
+      color: "text-sky-blue",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
-      <PublicNavbar variant="white" />
+    <div className="min-h-screen bg-[#050B15] font-sans text-white overflow-x-hidden">
+      <PublicNavbar />
 
-      {/* 1. PAGE HEADER */}
-      <section className="relative py-20 bg-[#050B15] overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
-
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-8">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <ChevronRight size={16} />
-            <span className="text-white">Contact Us</span>
-          </nav>
-
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Get in{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light to-sky-blue">
-                Touch
-              </span>
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2" />
+        
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
+          <AnimatedSection>
+            <span className="inline-block px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-xs font-bold text-teal-light mb-8 uppercase tracking-widest">
+              Direct Access
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8">
+              Connect with <br />
+              <span className="text-gradient">The Hub</span>
             </h1>
-            <p className="text-xl text-slate-300 leading-relaxed max-w-2xl">
-              We're here to help. Whether you have a question about our
-              platform, need support, or just want to say hello.
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+              Have a high-scale production requirement or want to join our elite roster? Our team is standing by to bridge the gap.
             </p>
-          </div>
+          </AnimatedSection>
         </div>
       </section>
 
-      {/* 2. CONTACT SECTION */}
-      <section className="py-20 bg-slate-50 relative">
+      {/* 2. MAIN CONTACT AREA */}
+      <section className="pb-32">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto -mt-32">
-            {/* LEFT COLUMN - Contact Form */}
-            <AnimatedSection>
-              <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-10 border border-slate-100">
-                <h2 className="text-2xl font-bold text-navy mb-6">
-                  Send us a Message
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="name"
-                        className="text-sm font-semibold text-slate-700"
-                      >
-                        Full Name
-                      </label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
+          <div className="grid lg:grid-cols-5 gap-12 max-w-7xl mx-auto">
+            
+            {/* Left Col: Info Cards */}
+            <div className="lg:col-span-2 space-y-6">
+              {contactOptions.map((opt, idx) => (
+                <AnimatedSection key={idx} delay={idx * 100}>
+                  <div className="glass-card p-8 rounded-3xl border-white/5 hover:border-white/10 transition-all group">
+                    <div className="flex items-center gap-6">
+                      <div className={cn("w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center transition-all group-hover:scale-110", opt.color)}>
+                        <opt.icon size={28} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{opt.title}</div>
+                        <a href={opt.link} className="text-lg font-bold hover:text-teal transition-colors break-all">
+                          {opt.value}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </AnimatedSection>
+              ))}
+
+              <AnimatedSection delay={300}>
+                <div className="glass-card p-8 rounded-3xl border-white/5 bg-gradient-to-br from-white/5 to-transparent">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Clock className="text-teal" size={20} />
+                    <span className="text-sm font-bold uppercase tracking-widest">Efficiency Standard</span>
+                  </div>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Our typical response time for verified inquiries is under 6 hours. Corporate partnerships processed within 2 hours.
+                  </p>
+                </div>
+              </AnimatedSection>
+            </div>
+
+            {/* Right Col: Form */}
+            <div className="lg:col-span-3">
+              <AnimatedSection delay={200}>
+                <div className="glass-card p-8 md:p-12 rounded-[2.5rem] border-white/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-teal/5 blur-3xl rounded-full" />
+                  
+                  <h2 className="text-3xl font-bold mb-10">Send a Brief</h2>
+                  
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Identity</label>
+                        <Input
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Your full name"
+                          className="bg-white/5 border-white/10 focus:border-teal rounded-2xl h-14 text-white"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Email Endpoint</label>
+                        <Input
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="your@email.com"
+                          className="bg-white/5 border-white/10 focus:border-teal rounded-2xl h-14 text-white"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Communication</label>
+                        <Input
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="+91 00000 00000"
+                          className="bg-white/5 border-white/10 focus:border-teal rounded-2xl h-14 text-white"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Objective</label>
+                        <select
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleChange}
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-4 text-sm focus:outline-none focus:border-teal appearance-none text-white"
+                        >
+                          <option className="bg-[#050B15]">General Inquiry</option>
+                          <option className="bg-[#050B15]">Production Booking</option>
+                          <option className="bg-[#050B15]">Partnership Proposal</option>
+                          <option className="bg-[#050B15]">Vetting Support</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">The Requirements</label>
+                      <Textarea
+                        name="message"
+                        value={formData.message}
                         onChange={handleChange}
-                        placeholder="John Doe"
-                        className="bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal h-11"
+                        placeholder="Describe your project or inquiry with as much detail as possible..."
+                        className="bg-white/5 border-white/10 focus:border-teal rounded-2xl min-h-[200px] p-6 resize-none text-white"
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="email"
-                        className="text-sm font-semibold text-slate-700"
-                      >
-                        Email Address
-                      </label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="john@example.com"
-                        className="bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal h-11"
-                        required
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="phone"
-                        className="text-sm font-semibold text-slate-700"
-                      >
-                        Phone Number
-                      </label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="+91 98765 43210"
-                        className="bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal h-11"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="subject"
-                        className="text-sm font-semibold text-slate-700"
-                      >
-                        Subject
-                      </label>
-                      <select
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        className="flex h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option>General Inquiry</option>
-                        <option>Support Help</option>
-                        <option>Sales & Pricing</option>
-                        <option>Partnership</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="message"
-                      className="text-sm font-semibold text-slate-700"
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-16 rounded-2xl bg-teal hover:bg-teal-light text-white font-bold text-lg transition-all shadow-xl shadow-teal/20"
                     >
-                      Your Message
-                    </label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="How can we help you today?"
-                      className="bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal min-h-[150px] resize-none"
-                      required
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-teal hover:bg-teal-light text-white font-bold h-12 text-lg shadow-lg shadow-teal/25"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      "Sending..."
-                    ) : (
-                      <>
-                        Send Message
-                        <Send size={18} className="ml-2" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </div>
-            </AnimatedSection>
-
-            {/* RIGHT COLUMN - Contact Info */}
-            <div className="space-y-8 pt-10 lg:pt-0">
-              <AnimatedSection delay={100}>
-                <div className="grid gap-6">
-                  {/* Address */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-xl bg-royal-blue/10 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="text-royal-blue" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-navy text-lg mb-1">
-                        Our Office
-                      </h3>
-                      <p className="text-slate-500 leading-relaxed">
-                        T-Hub, Phase 2, Plot No 1/C, Sy No 83/1,
-                        <br />
-                        Raidurgam, Hyderabad,
-                        <br />
-                        Telangana 500081
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center flex-shrink-0">
-                      <Mail className="text-teal" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-navy text-lg mb-1">
-                        Email Us
-                      </h3>
-                      <p className="text-slate-500 mb-2">
-                        For general inquiries:
-                      </p>
-                      <a
-                        href="mailto:hello@connectmeindia.in"
-                        className="text-teal font-semibold hover:underline"
-                      >
-                        hello@connectmeindia.in
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-                      <Phone className="text-gold" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-navy text-lg mb-1">
-                        Call Us
-                      </h3>
-                      <p className="text-slate-500 mb-2">
-                        Mon-Fri from 9am to 6pm:
-                      </p>
-                      <a
-                        href="tel:+914012345678"
-                        className="text-navy font-semibold hover:underline"
-                      >
-                        +91 40 1234 5678
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Working Hours */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-                      <Clock className="text-slate-600" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-navy text-lg mb-1">
-                        Working Hours
-                      </h3>
-                      <p className="text-slate-500">
-                        Monday - Friday: 9:00 AM - 6:00 PM
-                        <br />
-                        Saturday: 10:00 AM - 2:00 PM
-                      </p>
-                    </div>
-                  </div>
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Processing...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          Transmit Message
+                          <Send size={20} />
+                        </div>
+                      )}
+                    </Button>
+                  </form>
                 </div>
               </AnimatedSection>
             </div>
@@ -381,7 +295,7 @@ const Contact = () => {
       </section>
 
       {/* 3. MAP SECTION */}
-      <section className="h-[400px] w-full bg-slate-200 relative">
+      <section className="relative h-[600px] w-full bg-navy border-y border-white/5 overflow-hidden">
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.452664976722!2d78.37582307593256!3d17.43632903326162!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93dc8c5d69df%3A0x19688eb5c58c0276!2sT-Hub!5e0!3m2!1sen!2sin!4v1706600000000!5m2!1sen!2sin"
           width="100%"
@@ -389,73 +303,32 @@ const Contact = () => {
           style={{ border: 0 }}
           allowFullScreen
           loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          className="grayscale hover:grayscale-0 transition-all duration-500"
+          className="grayscale invert opacity-30 contrast-125"
         />
-        {/* Location Marker Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050B15] via-transparent to-[#050B15] pointer-events-none" />
+        
+        {/* Dynamic Marker */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
           <div className="relative">
-            <div className="w-4 h-4 rounded-full bg-teal animate-ping absolute inset-0" />
-            <div className="w-4 h-4 rounded-full bg-teal border-2 border-white shadow-lg" />
+            <div className="w-16 h-16 rounded-full bg-teal/20 animate-[ping_3s_infinite] absolute -inset-6" />
+            <div className="w-4 h-4 bg-teal rounded-full border-2 border-white shadow-[0_0_20px_rgba(45,212,191,0.8)]" />
           </div>
         </div>
       </section>
 
-      {/* 4. FAQ SECTION */}
-      <section className="py-20 bg-slate-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <AnimatedSection>
-              <h2 className="text-2xl font-bold text-navy mb-8 text-center">
-                Frequently Asked Questions
-              </h2>
-            </AnimatedSection>
-
-            <div className="space-y-4">
-              {faqs.map((faq, idx) => (
-                <AnimatedSection key={idx} delay={idx * 50}>
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <button
-                      onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                      className="w-full flex items-center justify-between p-6 text-left"
-                    >
-                      <span className="font-semibold text-navy pr-4">
-                        {faq.question}
-                      </span>
-                      <ChevronDown
-                        size={20}
-                        className={cn(
-                          "text-slate-400 transition-transform duration-300 flex-shrink-0",
-                          openFaq === idx ? "rotate-180 text-teal" : "",
-                        )}
-                      />
-                    </button>
-                    <div
-                      className={cn(
-                        "transition-all duration-300",
-                        openFaq === idx
-                          ? "max-h-40 opacity-100"
-                          : "max-h-0 opacity-0",
-                      )}
-                    >
-                      <div className="p-6 pt-0 text-slate-600">
-                        {faq.answer}
-                      </div>
-                    </div>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-
-            <div className="text-center mt-8">
-              <Link
-                to="/how-it-works"
-                className="text-teal font-semibold hover:underline inline-flex items-center gap-1"
-              >
-                View all FAQs <ChevronRight size={16} />
-              </Link>
-            </div>
-          </div>
+      {/* 4. FINAL FAQ CTA */}
+      <section className="py-32">
+        <div className="container mx-auto px-4 lg:px-8 text-center">
+          <AnimatedSection>
+            <h2 className="text-3xl font-bold mb-6">Need Immediate Clarity?</h2>
+            <p className="text-slate-400 mb-10">Our detailed resource center covers everything from payout timelines to project contracts.</p>
+            <Link to="/how-it-works">
+              <Button variant="outline" className="h-14 px-8 rounded-xl border-white/10 hover:bg-white/5 text-white">
+                Visit Resource Center
+                <ChevronRight size={18} className="ml-2" />
+              </Button>
+            </Link>
+          </AnimatedSection>
         </div>
       </section>
 

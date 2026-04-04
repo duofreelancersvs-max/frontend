@@ -6,12 +6,12 @@ import Footer from "@/components/layouts/Footer";
 describe("Footer", () => {
   it("renders brand logo and name", () => {
     renderWithRouter(<Footer />);
-    expect(screen.getByText("Stitch")).toBeInTheDocument();
+    expect(screen.getByText("Connect")).toBeInTheDocument();
   });
 
   it("renders brand description", () => {
     renderWithRouter(<Footer />);
-    expect(screen.getByText(/premium marketplace/i)).toBeInTheDocument();
+    expect(screen.getByText(/premier marketplace/i)).toBeInTheDocument();
   });
 
   it("renders social media links", () => {

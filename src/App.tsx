@@ -10,9 +10,11 @@ import ClientLayout from "@/layouts/ClientLayout";
 import FreelancerLayout from "@/layouts/FreelancerLayout";
 import { UnreadListener } from "@/components/chat/UnreadListener";
 import PageLoader from "@/components/shared/PageLoader";
+import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
+const HomePage = lazy(() => import("@/pages/home/Home"));
 const About = lazy(() => import("@/pages/public/About"));
 const HowItWorks = lazy(() => import("@/pages/public/HowItWorks"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
@@ -93,24 +95,111 @@ function SP({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <>
+      <ThemeInitializer />
       <UnreadListener />
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Public Pages (full-page Suspense is fine here — no persistent layout) */}
-        <Route path="/" element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
-        <Route path="/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
-        <Route path="/how-it-works" element={<Suspense fallback={<PageLoader />}><HowItWorks /></Suspense>} />
-        <Route path="/pricing" element={<Suspense fallback={<PageLoader />}><Pricing /></Suspense>} />
-        <Route path="/freelancers" element={<Suspense fallback={<PageLoader />}><FreelancerDirectory /></Suspense>} />
-        <Route path="/freelancer/:id" element={<Suspense fallback={<PageLoader />}><FreelancerProfile /></Suspense>} />
-        <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
-        <Route path="/projects" element={<Suspense fallback={<PageLoader />}><BrowseProjects /></Suspense>} />
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Home />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <About />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/how-it-works"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <HowItWorks />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Pricing />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/freelancers"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <FreelancerDirectory />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/freelancer/:id"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <FreelancerProfile />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Contact />
+            </Suspense>
+          }
+        />
 
         {/* Auth Pages */}
-        <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
-        <Route path="/register" element={<Suspense fallback={<PageLoader />}><Register /></Suspense>} />
-        <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPassword /></Suspense>} />
-        <Route path="/auth/callback" element={<Suspense fallback={<PageLoader />}><OAuthCallback /></Suspense>} />
+        <Route
+          path="/login"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Login />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Register />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ForgotPassword />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/auth/callback"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <OAuthCallback />
+            </Suspense>
+          }
+        />
+
+        {/* Authenticated Home Page */}
+        <Route
+          path="/home"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <HomePage />
+            </Suspense>
+          }
+        />
 
         {/* Client Dashboard Pages — Suspense per-page keeps sidebar stable */}
         <Route
@@ -121,18 +210,102 @@ function App() {
             </ClientRoute>
           }
         >
-          <Route path="dashboard" element={<SP><ClientDashboard /></SP>} />
-          <Route path="post-project" element={<SP><PostProject /></SP>} />
-          <Route path="projects" element={<SP><ClientProjects /></SP>} />
-          <Route path="project/:id" element={<SP><ProjectDetails /></SP>} />
-          <Route path="project/:id/applications" element={<SP><ProjectDetails /></SP>} />
-          <Route path="project/:id/edit" element={<SP><PostProject /></SP>} />
-          <Route path="freelancers" element={<SP><ClientFreelancers /></SP>} />
-          <Route path="freelancer/:id" element={<SP><FreelancerProfileView /></SP>} />
-          <Route path="messages" element={<SP><ClientMessages /></SP>} />
-          <Route path="payments" element={<SP><ClientPayments /></SP>} />
-          <Route path="reviews" element={<SP><ClientReviews /></SP>} />
-          <Route path="settings" element={<SP><ClientSettings /></SP>} />
+          <Route
+            path="dashboard"
+            element={
+              <SP>
+                <ClientDashboard />
+              </SP>
+            }
+          />
+          <Route
+            path="post-project"
+            element={
+              <SP>
+                <PostProject />
+              </SP>
+            }
+          />
+          <Route
+            path="projects"
+            element={
+              <SP>
+                <ClientProjects />
+              </SP>
+            }
+          />
+          <Route
+            path="project/:id"
+            element={
+              <SP>
+                <ProjectDetails />
+              </SP>
+            }
+          />
+          <Route
+            path="project/:id/applications"
+            element={
+              <SP>
+                <ProjectDetails />
+              </SP>
+            }
+          />
+          <Route
+            path="project/:id/edit"
+            element={
+              <SP>
+                <PostProject />
+              </SP>
+            }
+          />
+          <Route
+            path="freelancers"
+            element={
+              <SP>
+                <ClientFreelancers />
+              </SP>
+            }
+          />
+          <Route
+            path="freelancer/:id"
+            element={
+              <SP>
+                <FreelancerProfileView />
+              </SP>
+            }
+          />
+          <Route
+            path="messages"
+            element={
+              <SP>
+                <ClientMessages />
+              </SP>
+            }
+          />
+          <Route
+            path="payments"
+            element={
+              <SP>
+                <ClientPayments />
+              </SP>
+            }
+          />
+          <Route
+            path="reviews"
+            element={
+              <SP>
+                <ClientReviews />
+              </SP>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <SP>
+                <ClientSettings />
+              </SP>
+            }
+          />
         </Route>
 
         {/* Freelancer Dashboard Pages — Suspense per-page keeps sidebar stable */}
@@ -143,52 +316,171 @@ function App() {
             </FreelancerRoute>
           }
         >
-          <Route path="/freelancer/dashboard" element={<SP><FreelancerDashboard /></SP>} />
-          <Route path="/freelancer/profile" element={<SP><FreelancerProfileEdit /></SP>} />
-          <Route path="/freelancer/messages" element={<SP><FreelancerMessages /></SP>} />
-          <Route path="/freelancer/subscription" element={<SP><FreelancerSubscription /></SP>} />
-          <Route path="/freelancer/earnings" element={<SP><FreelancerEarnings /></SP>} />
-          <Route path="/freelancer/portfolio" element={<SP><FreelancerPortfolio /></SP>} />
-          <Route path="/freelancer/applications" element={<SP><FreelancerApplications /></SP>} />
-          <Route path="/freelancer/reviews" element={<SP><FreelancerReviews /></SP>} />
-          <Route path="/freelancer/settings" element={<SP><FreelancerSettings /></SP>} />
+          <Route
+            path="/freelancer/dashboard"
+            element={
+              <SP>
+                <FreelancerDashboard />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/profile"
+            element={
+              <SP>
+                <FreelancerProfileEdit />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/messages"
+            element={
+              <SP>
+                <FreelancerMessages />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/subscription"
+            element={
+              <SP>
+                <FreelancerSubscription />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/earnings"
+            element={
+              <SP>
+                <FreelancerEarnings />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/portfolio"
+            element={
+              <SP>
+                <FreelancerPortfolio />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/applications"
+            element={
+              <SP>
+                <FreelancerApplications />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/reviews"
+            element={
+              <SP>
+                <FreelancerReviews />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/settings"
+            element={
+              <SP>
+                <FreelancerSettings />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/projects"
+            element={
+              <SP>
+                <BrowseProjects />
+              </SP>
+            }
+          />
         </Route>
 
         {/* Admin Dashboard Pages */}
         <Route
           path="/admin/dashboard"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboard />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/users"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><UserManagement /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <UserManagement />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/verifications"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><VerificationQueue /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <VerificationQueue />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/subscriptions"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><SubscriptionManagement /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <SubscriptionManagement />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/payments"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><RazorpaySettings /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <RazorpaySettings />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/projects"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><ProjectManagement /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ProjectManagement />
+              </Suspense>
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/notifications"
-          element={<AdminRoute><Suspense fallback={<PageLoader />}><SendNotifications /></Suspense></AdminRoute>}
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <SendNotifications />
+              </Suspense>
+            </AdminRoute>
+          }
         />
 
-        <Route path="*" element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Home />
+            </Suspense>
+          }
+        />
       </Routes>
     </>
   );
 }
 
 export default App;
-

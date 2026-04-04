@@ -16,6 +16,7 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 interface ApiErrorResponse {
   error?: {
     message?: string;
+    details?: Array<{ field: string; message: string }>;
   };
 }
 

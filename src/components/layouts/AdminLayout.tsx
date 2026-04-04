@@ -2,6 +2,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { Search, Bell, Menu, X } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import "@/styles/admin.css";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -76,10 +77,10 @@ const AdminLayout = ({
           </div>
 
           {/* Right Side */}
-          <div className="admin-header-right">
-            <span className="admin-header-date">{currentDate}</span>
-
-            <button className="admin-header-icon">
+          <div className="admin-header-right flex items-center gap-3">
+            <span className="admin-header-date hidden sm:block">{currentDate}</span>
+            <ThemeToggle className="w-9 h-9" />
+            <button className="admin-header-icon relative">
               <Bell size={20} />
               <span className="badge">3</span>
             </button>

@@ -7,6 +7,7 @@ import Breadcrumb, {
   type BreadcrumbItem,
 } from "@/components/common/Breadcrumb";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface DashboardHeaderProps {
   title: string;
@@ -27,7 +28,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <header
       className={cn(
-        "h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30 transition-shadow",
+        "h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 transition-shadow",
         className,
       )}
     >
@@ -37,11 +38,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Mobile Menu Trigger (Visible only on mobile/tablet) */}
           <button
             onClick={onMenuClick}
-            className="lg:hidden text-slate-500 hover:text-navy"
+            className="lg:hidden text-slate-500 dark:text-white/70 hover:text-navy dark:hover:text-white"
           >
             <Menu size={24} />
           </button>
-          <h1 className="text-xl font-bold text-navy tracking-tight">
+          <h1 className="text-xl font-bold text-navy dark:text-white tracking-tight">
             {title}
           </h1>
         </div>
@@ -52,14 +53,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {/* Right Section: Actions & Profile */}
       <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
+        <ThemeToggle className="w-9 h-9" />
+
         {/* Search */}
-        <button className="p-2 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-full transition-all">
+        <button className="p-2 text-slate-400 dark:text-white/50 hover:text-navy dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10 rounded-full transition-all">
           <Search size={20} />
         </button>
 
         {/* Notifications */}
         <div className="relative">
-          <button className="p-2 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-full transition-all">
+          <button className="p-2 text-slate-400 dark:text-white/50 hover:text-navy dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10 rounded-full transition-all">
             <Bell size={20} />
           </button>
           <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -89,9 +93,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
           <div className="hidden md:block text-left">
             <p className="text-sm font-semibold text-slate-700 leading-none">
-              Alex Johnson
+              {user?.fullName || "User"}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Freelancer</p>
+            <p className="text-xs text-slate-500 mt-1 capitalize">{user?.role || "Guest"}</p>
           </div>
         </Link>
       </div>

@@ -30,7 +30,7 @@ describe("Card Components", () => {
     it("has default card styling", () => {
       render(<Card>Content</Card>);
       const card = screen.getByText("Content");
-      expect(card).toHaveClass("rounded-lg");
+      expect(card).toHaveClass("rounded-2xl");
       expect(card).toHaveClass("border");
       expect(card).toHaveClass("shadow-sm");
     });

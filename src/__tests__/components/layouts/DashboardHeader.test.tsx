@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { useAuthStore } from "@/stores/auth.store";
 
 describe("DashboardHeader", () => {
   const defaultProps = {
@@ -12,6 +13,23 @@ describe("DashboardHeader", () => {
     ],
     onMenuClick: vi.fn(),
   };
+
+  beforeEach(() => {
+    useAuthStore.setState({
+      user: { 
+        _id: "1", 
+        fullName: "Alex Johnson", 
+        role: "client", 
+        email: "alex@example.com",
+        phone: "9876543210",
+        status: "active",
+        isEmailVerified: true,
+        isPhoneVerified: true
+      },
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  });
 
   it("renders title", () => {
     renderWithRouter(<DashboardHeader {...defaultProps} />);
@@ -39,21 +57,14 @@ describe("DashboardHeader", () => {
 
   it("displays user profile information", () => {
     renderWithRouter(<DashboardHeader {...defaultProps} />);
-    expect(screen.getByText("Alex Johnson")).toBeInTheDocument();
-    expect(screen.getByText("Client Account")).toBeInTheDocument();
+    expect(screen.getByText(/Alex Johnson/i)).toBeInTheDocument();
+    expect(screen.getByText(/client/i)).toBeInTheDocument();
   });
 
   it("displays user avatar", () => {
     renderWithRouter(<DashboardHeader {...defaultProps} />);
     const avatar = screen.getByAltText("Profile");
     expect(avatar).toBeInTheDocument();
-  });
-
-  it("renders notification indicators", () => {
-    renderWithRouter(<DashboardHeader {...defaultProps} />);
-    // Should have notification and message indicators
-    const header = document.querySelector("header");
-    expect(header).toBeInTheDocument();
   });
 
   it("applies custom className", () => {

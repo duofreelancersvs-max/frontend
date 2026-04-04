@@ -10,7 +10,7 @@ import {
   LogOut,
   X,
 } from "lucide-react";
-import { } from "react";
+import {} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";

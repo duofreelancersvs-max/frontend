@@ -6,18 +6,17 @@ import DashboardSidebar from "@/components/layouts/DashboardSidebar";
 describe("DashboardSidebar", () => {
   it("renders logo and brand name", () => {
     renderWithRouter(<DashboardSidebar />);
-    expect(screen.getByText("Stitch")).toBeInTheDocument();
+    expect(screen.getByText("Connect")).toBeInTheDocument();
   });
 
   it("renders all navigation items", () => {
     renderWithRouter(<DashboardSidebar />);
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Projects")).toBeInTheDocument();
-    expect(screen.getByText("Talent")).toBeInTheDocument();
+    expect(screen.getByText("Browse Projects")).toBeInTheDocument();
     expect(screen.getByText("Messages")).toBeInTheDocument();
-    expect(screen.getByText("Finance")).toBeInTheDocument();
-    expect(screen.getByText("Reports")).toBeInTheDocument();
-    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(screen.getByText("Earnings")).toBeInTheDocument();
+    expect(screen.getByText("Subscription")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
   });
 
   it("renders user profile information", () => {
@@ -28,9 +27,9 @@ describe("DashboardSidebar", () => {
 
   it("has correct navigation links", () => {
     renderWithRouter(<DashboardSidebar />);
-    expect(screen.getByRole("link", { name: /dashboard/i })).toHaveAttribute("href", "/dashboard");
-    expect(screen.getByRole("link", { name: /projects/i })).toHaveAttribute("href", "/dashboard/projects");
-    expect(screen.getByRole("link", { name: /messages/i })).toHaveAttribute("href", "/dashboard/messages");
+    expect(screen.getByRole("link", { name: /dashboard/i })).toHaveAttribute("href", "/freelancer/dashboard");
+    expect(screen.getByRole("link", { name: /browse projects/i })).toHaveAttribute("href", "/projects");
+    expect(screen.getByRole("link", { name: /messages/i })).toHaveAttribute("href", "/freelancer/messages");
   });
 
   it("renders logout button", () => {

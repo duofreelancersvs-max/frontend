@@ -54,24 +54,16 @@ export function useAuth(): UseAuthReturn {
         setLoading(true);
         setError(null);
 
-        // Sign in with Supabase
-        const { data: authData, error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email: credentials.email,
-            password: credentials.password,
-          });
-
-        if (signInError) {
-          throw new Error(signInError.message);
-        }
-
-        if (!authData.session || !authData.user) {
-          throw new Error("Authentication failed");
-        }
-
-        // Sync with backend
-        const { data } = await axiosClient.post<{
-          data: { user: User; tokens: { expiresIn: number } };
+        // Login via backend (which handles session sync and auto-confirmation if unconfirmed)
+        const { data: response } = await axiosClient.post<{
+          data: {
+            user: User;
+            tokens: {
+              accessToken: string;
+              refreshToken: string;
+              expiresIn: number;
+            };
+          };
         }>(
           "/auth/login",
           {
@@ -83,21 +75,27 @@ export function useAuth(): UseAuthReturn {
           } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
-        setAuth(data.data.user, {
-          accessToken: authData.session.access_token,
-          refreshToken: authData.session.refresh_token,
-          expiresIn: authData.session.expires_in || 3600,
+        const { user: apiUser, tokens: apiTokens } = response.data;
+
+        // Sync Supabase Client in the frontend with the session from the backend
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: apiTokens.accessToken,
+          refresh_token: apiTokens.refreshToken,
         });
 
-        // Redirect based on role
-        const role = data.data.user.role;
-        if (role === "client") {
-          navigate("/client/dashboard");
-        } else if (role === "freelancer") {
-          navigate("/freelancer/dashboard");
-        } else if (role === "admin") {
-          navigate("/admin/dashboard");
+        if (sessionError) {
+          console.error("Supabase session sync error:", sessionError);
         }
+
+        // Update local store
+        setAuth(apiUser, {
+          accessToken: apiTokens.accessToken,
+          refreshToken: apiTokens.refreshToken,
+          expiresIn: apiTokens.expiresIn || 1800,
+        });
+
+        // Redirect to home page
+        navigate("/home");
       } catch (err: unknown) {
         const error = err as {
           response?: { data?: { error?: { message?: string } } };
@@ -163,31 +161,40 @@ export function useAuth(): UseAuthReturn {
           setAuth(result.data.data.user, {
             accessToken: result.data.data.tokens.accessToken,
             refreshToken: result.data.data.tokens.refreshToken,
-            expiresIn: result.data.data.tokens.expiresIn || 3600,
+            expiresIn: result.data.data.tokens.expiresIn || 1800,
           });
         } else {
           setAuth(result.data.data.user, {
             accessToken: authData.session.access_token,
             refreshToken: authData.session.refresh_token,
-            expiresIn: authData.session.expires_in || 3600,
+            expiresIn: authData.session.expires_in || 1800,
           });
         }
 
-        // Redirect based on verification
-        if (result.data.data.user.role === "client") {
-          navigate("/client/dashboard");
-        } else {
-          navigate("/freelancer/dashboard");
-        }
+        // Redirect to home page
+        navigate("/home");
       } catch (err: unknown) {
         const error = err as {
           response?: {
-            data?: { error?: { message?: string }; message?: string };
+            data?: {
+              error?: {
+                message?: string;
+                details?: Array<{ field: string; message: string }>;
+              };
+              message?: string;
+            };
           };
           message?: string;
         };
         let message = "Registration failed";
-        if (error.response?.data?.error?.message) {
+        if (
+          error.response?.data?.error?.details &&
+          error.response.data.error.details.length > 0
+        ) {
+          // Show the first validation error detail for clarity
+          const detail = error.response.data.error.details[0];
+          message = `${detail.field}: ${detail.message}`;
+        } else if (error.response?.data?.error?.message) {
           message = error.response.data.error.message;
         } else if (error.message) {
           message = error.message;

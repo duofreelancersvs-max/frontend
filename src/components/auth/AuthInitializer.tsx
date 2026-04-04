@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
@@ -23,6 +23,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const { setAuth, setLoading, logout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const isOAuthCallback = location.pathname === "/auth/callback";
   const isOAuthCallbackRef = useRef(isOAuthCallback);
   isOAuthCallbackRef.current = isOAuthCallback;
@@ -117,6 +118,13 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
             console.warn("[AuthInitializer] Session sync failed, signing out");
             await supabase.auth.signOut();
             logout();
+          } else if (!isInitialized) {
+            // First time sync - only redirect to home if they are on auth/public pages
+            const user = useAuthStore.getState().user;
+            const publicRoutes = ["/", "/login", "/register", "/forgot-password"];
+            if (user && publicRoutes.includes(location.pathname)) {
+              navigate("/home");
+            }
           }
         } catch (error) {
           console.error("[AuthInitializer] Session sync error:", error);

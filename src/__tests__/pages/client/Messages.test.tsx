@@ -20,13 +20,17 @@ vi.mock("@/hooks/useAuth", () => ({
   }),
 }));
 
+const mockSendMessage = vi.fn().mockResolvedValue({ success: true });
+const mockMarkAsRead = vi.fn();
+const mockOnlineUsers = new Set<string>();
+
 // Mock useSocket hook
 vi.mock("@/hooks/useSocket", () => ({
   useSocket: () => ({
     isConnected: true,
-    onlineUsers: new Set<string>(),
-    sendMessage: vi.fn(),
-    markAsRead: vi.fn(),
+    onlineUsers: mockOnlineUsers,
+    sendMessage: mockSendMessage,
+    markAsRead: mockMarkAsRead,
   }),
 }));
 
@@ -82,6 +86,7 @@ vi.mock("@/services", async () => {
         ],
       }),
       acceptTerms: vi.fn().mockResolvedValue({}),
+      markAsRead: vi.fn().mockResolvedValue({}),
     },
   };
 });

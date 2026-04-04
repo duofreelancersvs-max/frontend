@@ -4,8 +4,8 @@ import {
   ArrowLeft,
   Verified,
   BadgeCheck,
-  Phone,
-  Video,
+  CheckCircle,
+  XCircle,
   MoreVertical,
   Smile,
   Send,
@@ -46,6 +46,10 @@ interface ChatAreaProps {
   showInfoPanel?: boolean;
   onToggleInfoPanel?: () => void;
   className?: string;
+  applicationId?: string;
+  applicationStatus?: string;
+  onHire?: () => void;
+  onReject?: () => void;
 }
 
 const ChatArea = ({
@@ -64,6 +68,10 @@ const ChatArea = ({
   showInfoPanel,
   onToggleInfoPanel,
   className,
+  applicationId,
+  applicationStatus,
+  onHire,
+  onReject,
 }: ChatAreaProps) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -147,13 +155,43 @@ const ChatArea = ({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-            <Phone size={18} />
-          </button>
-          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-            <Video size={18} />
-          </button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          {role === "client" && applicationId ? (
+            applicationStatus === "pending" || applicationStatus === "viewed" || applicationStatus === "shortlisted" || !applicationStatus ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onReject}
+                  className="hidden sm:flex items-center gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <XCircle size={16} />
+                  Reject
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={onHire}
+                  className="flex items-center gap-1.5 bg-success-green hover:bg-green-600 text-white"
+                >
+                  <CheckCircle size={16} />
+                  Hire
+                </Button>
+              </div>
+            ) : (
+              <span
+                className={cn(
+                  "hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-medium border",
+                  applicationStatus === "accepted" || applicationStatus === "hired"
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : applicationStatus === "rejected"
+                      ? "bg-red-50 text-red-700 border-red-200"
+                      : "bg-slate-100 text-slate-700 border-slate-200"
+                )}
+              >
+                {applicationStatus.charAt(0).toUpperCase() + applicationStatus.slice(1)}
+              </span>
+            )
+          ) : null}
           <button
             onClick={onToggleInfoPanel}
             className={cn(

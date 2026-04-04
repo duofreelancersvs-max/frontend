@@ -3,8 +3,12 @@ import { Twitter, Linkedin, Instagram, Youtube, MapPin } from "lucide-react";
 
 export const PublicFooter = () => {
   return (
-    <footer className="bg-navy text-white pt-20 pb-8">
-      <div className="container mx-auto px-4 lg:px-8">
+    <footer className="bg-[#050B15] text-white pt-24 pb-12 relative overflow-hidden border-t border-white/5">
+      {/* Decorative Glows */}
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
+
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
@@ -20,14 +24,14 @@ export const PublicFooter = () => {
               The premier marketplace for creative professionals in Telangana
               and Andhra Pradesh.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {[Twitter, Linkedin, Instagram, Youtube].map((Icon, idx) => (
                 <a
                   key={idx}
                   href="#"
-                  className="w-10 h-10 rounded-lg bg-white/5 hover:bg-teal flex items-center justify-center transition-colors"
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-teal/50 hover:bg-teal flex items-center justify-center transition-all duration-300 group"
                 >
-                  <Icon size={18} />
+                  <Icon size={18} className="text-slate-300 group-hover:text-white group-hover:scale-110 transition-all" />
                 </a>
               ))}
             </div>
@@ -70,8 +74,9 @@ export const PublicFooter = () => {
                   <li key={link.label}>
                     <Link
                       to={link.href}
-                      className="text-slate-400 hover:text-teal transition-colors text-sm"
+                      className="text-slate-400 hover:text-white transition-all text-sm flex items-center gap-2 group"
                     >
+                      <span className="w-0 h-px bg-teal group-hover:w-2 transition-all" />
                       {link.label}
                     </Link>
                   </li>

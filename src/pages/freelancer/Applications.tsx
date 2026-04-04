@@ -155,7 +155,7 @@ const FreelancerApplications = () => {
               <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
                 <Bell size={20} />
               </button>
-              <Link to="/projects" className="hidden sm:flex">
+              <Link to="/freelancer/projects" className="hidden sm:flex">
                 <Button className="bg-teal hover:bg-teal-light text-white">
                   <Search size={18} className="mr-2" />
                   Browse Projects
@@ -411,7 +411,7 @@ const FreelancerApplications = () => {
               <p className="text-slate-500 mb-4">
                 Start applying to projects to see them here
               </p>
-              <Link to="/projects">
+              <Link to="/freelancer/projects">
                 <Button className="bg-teal hover:bg-teal-light text-white">
                   <Search size={18} className="mr-2" />
                   Browse Projects

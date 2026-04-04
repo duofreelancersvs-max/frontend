@@ -52,6 +52,7 @@ export interface Application {
     title?: string;
     rating?: number;
   };
+  conversationId?: string;
 }
 
 export interface ApplicationStats {

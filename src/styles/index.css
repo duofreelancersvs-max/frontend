@@ -33,6 +33,12 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    /* BRAND COLORS */
+    --navy-dark: 217 60% 5%; /* #050B15 */
+    --teal-primary: 173 80% 32%; /* #0D9488 */
+    --teal-light: 171 77% 40%; /* #14B8A6 */
+    --royal-blue: 225 71% 40%; /* #1E40AF */
   }
 
   .dark {
@@ -81,6 +87,26 @@
   }
 
   .bg-navy-dark {
-    background-color: #0A1628;
+    background-color: #050B15;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-card-light {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .premium-gradient {
+    background: linear-gradient(135deg, #050B15 0%, #0A1628 50%, #1E40AF 100%);
+  }
+
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#14B8A6] via-[#38BDF8] to-[#14B8A6];
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:border-teal/30;
   }
 }

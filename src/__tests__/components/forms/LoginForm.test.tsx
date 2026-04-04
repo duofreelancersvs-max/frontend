@@ -89,7 +89,7 @@ describe("LoginForm", () => {
 
   it("renders within a card component", () => {
     renderWithRouter(<LoginForm />);
-    const card = document.querySelector("[class*='rounded-lg']");
+    const card = document.querySelector("[class*='rounded-2xl']");
     expect(card).toBeInTheDocument();
   });
 

@@ -55,8 +55,7 @@ const ConversationList = ({
     const matchesFilter =
       filter === "all" || (filter === "unread" && conv.unread > 0);
     // Filter out conversations with no valid participant name
-    const hasValidName =
-      conv.participant.name && conv.participant.name !== "Unknown";
+    const hasValidName = !!conv.participant.name;
     return matchesSearch && matchesFilter && hasValidName;
   });
 

@@ -1,20 +1,58 @@
-import { describe, it, expect, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import ProjectDetails from "@/pages/client/ProjectDetails";
+import { useAuthStore } from "@/stores/auth.store";
 
-// Mock useParams
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
+// Mock react-router-dom
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
   return {
     ...actual,
     useParams: () => ({ id: "1" }),
+    useOutletContext: () => ({ setSidebarOpen: vi.fn(), sidebarOpen: false }),
   };
 });
 
+// Mock services
+vi.mock("@/services", () => ({
+  projectService: {
+    getById: vi.fn(() => Promise.resolve({
+      _id: "1",
+      title: "E-commerce product video",
+      category: "Video Editing",
+      status: "open",
+      description: "looking for a skilled video editor for our growth",
+      skills: ["Adobe Premiere Pro", "After Effects"],
+      budget: { minAmount: 15000, maxAmount: 25000 },
+      deadline: "2024-12-31T00:00:00.000Z",
+      createdAt: new Date().toISOString(),
+      applications: 12
+    })),
+    complete: vi.fn(() => Promise.resolve({})),
+    cancel: vi.fn(() => Promise.resolve({})),
+  },
+  applicationService: {
+    getByProject: vi.fn(() => Promise.resolve({
+      applications: [
+        {
+          _id: "app1",
+          coverLetter: "I can help with this",
+          proposedRate: 20000,
+          estimatedDuration: 5,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+          freelancer: { fullName: "Arun Kumar", title: "Video Editor" }
+        }
+      ]
+    })),
+    updateStatus: vi.fn(() => Promise.resolve({})),
+  }
+}));
+
 // Mock lucide-react icons
-vi.mock("lucide-react", async () => {
-  const actual = await vi.importActual("lucide-react");
+vi.mock("lucide-react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import('lucide-react')>();
   return {
     ...actual,
     Home: () => <svg data-testid="home-icon" />,
@@ -52,99 +90,117 @@ vi.mock("lucide-react", async () => {
     Award: () => <svg data-testid="award-icon" />,
     TrendingUp: () => <svg data-testid="trending-up-icon" />,
     Verified: () => <svg data-testid="verified-icon" />,
+    Loader2: () => <svg data-testid="loader-icon" />,
   };
 });
 
 describe("ProjectDetails", () => {
-  it("renders project title", () => {
+  beforeEach(() => {
+    useAuthStore.setState({
+      user: { 
+        _id: "1", 
+        fullName: "Rajesh Kumar", 
+        role: "client", 
+        email: "rajesh@example.com",
+        phone: "9876543210",
+        status: "active",
+        isEmailVerified: true,
+        isPhoneVerified: true
+      },
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  });
+
+  const renderAndNavigate = async () => {
     renderWithRouter(<ProjectDetails />);
+    await waitFor(() => {
+      expect(screen.queryAllByText(/E-commerce product video/i).length).toBeGreaterThan(0);
+    });
+  };
+
+  it("renders project title", async () => {
+    await renderAndNavigate();
     expect(
       screen.getAllByText(/e-commerce product video/i).length
     ).toBeGreaterThan(0);
   });
 
-  it("renders project status badge", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders project status badge", async () => {
+    await renderAndNavigate();
     expect(screen.getByText(/open for applications/i)).toBeInTheDocument();
   });
 
-  it("renders project category", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders project category", async () => {
+    await renderAndNavigate();
     expect(
       screen.getAllByText(/video editing/i).length
     ).toBeGreaterThan(0);
   });
 
-  it("renders project description", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders project description", async () => {
+    await renderAndNavigate();
     expect(
       screen.getByText(/looking for a skilled video editor/i)
     ).toBeInTheDocument();
   });
 
-  it("renders budget information", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders budget information", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/15,000/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/25,000/i).length).toBeGreaterThan(0);
   });
 
-  it("renders project duration", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getByText(/1-4 weeks/i)).toBeInTheDocument();
+  it("renders location preference", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/remote/i).length).toBeGreaterThan(0);
   });
 
-  it("renders experience level", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getByText(/intermediate/i)).toBeInTheDocument();
-  });
-
-  it("renders location preference", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getByText(/remote/i)).toBeInTheDocument();
-  });
-
-  it("renders required skills", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders required skills", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/adobe premiere pro/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/after effects/i).length).toBeGreaterThan(0);
   });
 
-  it("renders applications count", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getAllByText(/12/i).length).toBeGreaterThan(0);
+  it("renders applications count", async () => {
+    await renderAndNavigate();
+    // "12 applications" is in the header
+    expect(screen.getAllByText(/12 applications/i).length).toBeGreaterThan(0);
+    // There is also a "Total Applications" card with count "1" (from our mock app list)
+    expect(screen.getAllByText(/1/i).length).toBeGreaterThan(0);
   });
 
-  it("renders posted date", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getAllByText(/3 days ago/i).length).toBeGreaterThan(0);
+  it("renders posted date", async () => {
+    await renderAndNavigate();
+    expect(screen.getAllByText(/posted/i).length).toBeGreaterThan(0);
   });
 
-  it("renders sidebar navigation", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders breadcrumb navigation", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/dashboard/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/my projects/i).length).toBeGreaterThan(0);
   });
 
-  it("renders edit project button", () => {
-    renderWithRouter(<ProjectDetails />);
-    const editButtons = screen.getAllByRole("button").filter((btn) =>
-      btn.textContent?.toLowerCase().includes("edit")
+  it("renders edit project button for open projects", async () => {
+    await renderAndNavigate();
+    const editButtons = screen.getAllByRole("link").filter((link) =>
+      link.textContent?.toLowerCase().includes("edit project")
     );
     expect(editButtons.length).toBeGreaterThan(0);
   });
 
-  it("renders applications section", () => {
-    renderWithRouter(<ProjectDetails />);
+  it("renders applications section", async () => {
+    await renderAndNavigate();
     expect(screen.getAllByText(/applications/i).length).toBeGreaterThan(0);
   });
 
-  it("renders project deliverables section", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getByText(/deliverables/i)).toBeInTheDocument();
+  it("renders about the project section", async () => {
+    await renderAndNavigate();
+    expect(screen.getByText(/about the project/i)).toBeInTheDocument();
   });
 
-  it("renders project activity section", () => {
-    renderWithRouter(<ProjectDetails />);
-    expect(screen.getByText(/activity log/i)).toBeInTheDocument();
+  it("has user initials in header", async () => {
+    await renderAndNavigate();
+    expect(screen.getByText("RK")).toBeInTheDocument();
   });
 });

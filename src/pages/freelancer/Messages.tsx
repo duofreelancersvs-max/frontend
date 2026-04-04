@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useOutletContext, Link } from "react-router-dom";
+import { useOutletContext, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
   Star,
@@ -205,6 +205,23 @@ const FreelancerMessages = () => {
     };
     fetchConversations();
   }, []);
+
+  // ── Deep-link: auto-select conversation from navigation state ──
+  const location = useLocation();
+  const nav = useNavigate();
+  useEffect(() => {
+    const state = location.state as { conversationId?: string } | null;
+    if (state?.conversationId && conversations.length > 0) {
+      const target = conversations.find(
+        (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
+      );
+      if (target) {
+        setSelectedConversation(target);
+      }
+      // Clear state to prevent re-triggering
+      nav(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, conversations, nav, location.pathname]);
 
   useEffect(() => {
     const fetchMessages = async () => {

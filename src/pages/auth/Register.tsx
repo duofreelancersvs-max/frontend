@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -14,7 +14,9 @@ import {
   Quote,
   CheckCircle,
   Github,
+  Home as HomeIcon,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -25,8 +27,13 @@ import type { UserRole } from "@/types/auth.types";
 type Step = "role" | "form";
 
 const Register = () => {
-  const [step, setStep] = useState<Step>("role");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialRole = searchParams.get("role") as UserRole;
+  const isValidRole = initialRole === "client" || initialRole === "freelancer";
+
+  const [step, setStep] = useState<Step>(isValidRole ? "form" : "role");
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -68,27 +75,46 @@ const Register = () => {
     setSelectedRole(null);
   };
 
+  const isPasswordValid = (pw: string) => {
+    return (
+      pw.length >= 8 &&
+      pw.length <= 72 &&
+      /[A-Z]/.test(pw) &&
+      /[a-z]/.test(pw) &&
+      /[0-9]/.test(pw) &&
+      /[^A-Za-z0-9]/.test(pw)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedRole) return;
 
+    if (!isPasswordValid(formData.password)) {
+      // Error is also handled by providing specific feedback under the field
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      // Show password mismatch error
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
-      await register({
+      // Sanitize: Convert empty strings to undefined to avoid backend min(1) validation errors.
+      const submissionData = {
         email: formData.email,
         password: formData.password,
         role: selectedRole,
-        phone: formData.phone,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        city: formData.city,
-        state: formData.state,
-      });
+        phone: formData.phone.replace(/\D/g, "").slice(-10),
+        firstName: formData.firstName.trim() || undefined,
+        lastName: selectedRole === "freelancer" ? (formData.lastName.trim() || undefined) : undefined,
+        city: formData.city.trim() || undefined,
+        state: (formData.state.trim() as any) || undefined,
+      };
+
+      await register(submissionData);
     } catch {
       // Error is handled in the hook
     }
@@ -168,8 +194,16 @@ const Register = () => {
       </div>
 
       {/* RIGHT SIDE - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
-        <div className="w-full max-w-lg">
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 relative">
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-8 left-8 flex items-center text-slate-500 hover:text-navy transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200"
+        >
+          <HomeIcon size={18} className="mr-2" />
+          Back to Home
+        </button>
+
+        <div className="w-full max-w-lg mt-10">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <Logo size="md" />
@@ -458,6 +492,23 @@ const Register = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {/* Password Feedback */}
+                  {formData.password && (
+                    <div className="mt-2 space-y-1">
+                      <p className={cn("text-xs flex items-center gap-1.5", formData.password.length >= 8 ? "text-green-600" : "text-slate-400")}>
+                        <CheckCircle size={10} /> Length (min 8)
+                      </p>
+                      <p className={cn("text-xs flex items-center gap-1.5", /[A-Z]/.test(formData.password) && /[a-z]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                        <CheckCircle size={10} /> Mixed Case (Aa)
+                      </p>
+                      <p className={cn("text-xs flex items-center gap-1.5", /[0-9]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                        <CheckCircle size={10} /> Number (0-9)
+                      </p>
+                      <p className={cn("text-xs flex items-center gap-1.5", /[^A-Za-z0-9]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                        <CheckCircle size={10} /> Special symbol (@$!)
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Confirm Password */}

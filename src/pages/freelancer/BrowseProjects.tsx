@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useOutletContext, useNavigate, Link } from "react-router-dom";
+import { useOutletContext, useNavigate, Link, useLocation } from "react-router-dom";
 import {
   Search,
   Menu,
@@ -82,7 +82,7 @@ const BrowseProjects = () => {
   const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"browse" | "saved">("browse");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("newest");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -126,7 +126,7 @@ const BrowseProjects = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await projectService.search({ status: "open", limit: 50 });
+      const result = await projectService.search({ limit: 50 });
       setProjects(result.projects || []);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
@@ -136,18 +136,38 @@ const BrowseProjects = () => {
     }
   }, []);
 
+  const location = useLocation();
+
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
-  const handleApplyClick = (project: Project) => {
-    if (!user) {
-      navigate("/login", { state: { from: "/projects" } });
-      return;
+  const handleApplyClick = useCallback(
+    (project: Project) => {
+      if (!user) {
+        navigate("/login", { state: { from: "/freelancer/projects" } });
+        return;
+      }
+      setSelectedProject(project);
+      setShowTermsForApply(true);
+    },
+    [user, navigate],
+  );
+
+  // Handle direct apply from dashboard
+  useEffect(() => {
+    const state = location.state as { applyToProjectId?: string } | null;
+    if (state?.applyToProjectId && projects.length > 0) {
+      const project = projects.find(
+        (p) => (p._id || p.id) === state.applyToProjectId,
+      );
+      if (project) {
+        handleApplyClick(project);
+        // Clear state to prevent re-triggering
+        navigate(location.pathname, { replace: true, state: {} });
+      }
     }
-    setSelectedProject(project);
-    setShowTermsForApply(true);
-  };
+  }, [location.state, projects, navigate, location.pathname, handleApplyClick]);
 
   const handleTermsAccepted = () => {
     setShowTermsForApply(false);

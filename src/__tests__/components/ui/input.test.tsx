@@ -74,6 +74,7 @@ describe("Input", () => {
     render(<Input />);
     const input = screen.getByRole("textbox");
     expect(input).toHaveClass("focus-visible:ring-2");
-    expect(input).toHaveClass("focus-visible:ring-teal");
+    expect(input).toHaveClass("focus-visible:ring-teal/20");
+    expect(input).toHaveClass("focus-visible:border-teal");
   });
 });

@@ -6,15 +6,15 @@ import PublicNavbar from "@/components/layouts/PublicNavbar";
 describe("PublicNavbar", () => {
   it("renders brand logo and name", () => {
     renderWithRouter(<PublicNavbar />);
-    expect(screen.getByText("Stitch")).toBeInTheDocument();
+    expect(screen.getByText("Connect")).toBeInTheDocument();
   });
 
   it("renders navigation links", () => {
     renderWithRouter(<PublicNavbar />);
     expect(screen.getByText("Find Talent")).toBeInTheDocument();
+    expect(screen.getByText("Find Work")).toBeInTheDocument();
     expect(screen.getByText("Post Project")).toBeInTheDocument();
     expect(screen.getByText("How It Works")).toBeInTheDocument();
-    expect(screen.getByText("Pricing")).toBeInTheDocument();
   });
 
   it("renders auth buttons", () => {
@@ -34,15 +34,15 @@ describe("PublicNavbar", () => {
 
   it("has correct link hrefs", () => {
     renderWithRouter(<PublicNavbar />);
-    expect(screen.getByRole("link", { name: "Find Talent" })).toHaveAttribute("href", "/find-talent");
-    expect(screen.getByRole("link", { name: "Post Project" })).toHaveAttribute("href", "/post-project");
+    expect(screen.getByRole("link", { name: "Find Talent" })).toHaveAttribute("href", "/freelancers");
+    expect(screen.getByRole("link", { name: "Find Work" })).toHaveAttribute("href", "/find-work");
+    expect(screen.getByRole("link", { name: "Post Project" })).toHaveAttribute("href", "/client/post-project");
     expect(screen.getByRole("link", { name: "How It Works" })).toHaveAttribute("href", "/how-it-works");
-    expect(screen.getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/pricing");
   });
 
   it("renders logo link to home", () => {
     renderWithRouter(<PublicNavbar />);
-    const logoLink = screen.getByRole("link", { name: /stitch/i });
+    const logoLink = screen.getAllByRole("link")[0]; // Get first link usually Logo
     expect(logoLink).toHaveAttribute("href", "/");
   });
 });

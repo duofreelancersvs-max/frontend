@@ -11,7 +11,7 @@ const FreelancerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans transition-colors duration-300">
       <FreelancerSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

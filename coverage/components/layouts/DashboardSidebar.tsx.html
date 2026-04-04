@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>14/20</span>
+                <span class='fraction'>12/18</span>
             </div>
         
             
@@ -196,17 +196,7 @@
 <a name='L131'></a><a href='#L131'>131</a>
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
-<a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a>
-<a name='L136'></a><a href='#L136'>136</a>
-<a name='L137'></a><a href='#L137'>137</a>
-<a name='L138'></a><a href='#L138'>138</a>
-<a name='L139'></a><a href='#L139'>139</a>
-<a name='L140'></a><a href='#L140'>140</a>
-<a name='L141'></a><a href='#L141'>141</a>
-<a name='L142'></a><a href='#L142'>142</a>
-<a name='L143'></a><a href='#L143'>143</a>
-<a name='L144'></a><a href='#L144'>144</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L134'></a><a href='#L134'>134</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -238,7 +228,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
@@ -259,17 +248,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">49x</span>
-<span class="cline-any cline-yes">49x</span>
+<span class="cline-any cline-yes">42x</span>
+<span class="cline-any cline-yes">42x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -354,7 +334,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
-  Users,
   MessageSquare,
   Settings,
   LogOut,
@@ -365,6 +344,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/shared/Logo";
 &nbsp;
 interface NavItem {
   label: string;
@@ -373,13 +353,12 @@ interface NavItem {
 }
 &nbsp;
 const navItems: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Projects", icon: Briefcase, href: "/dashboard/projects" },
-  { label: "Talent", icon: Users, href: "/dashboard/talent" },
-  { label: "Messages", icon: MessageSquare, href: "/dashboard/messages" },
-  { label: "Finance", icon: Wallet, href: "/dashboard/finance" },
-  { label: "Reports", icon: PieChart, href: "/dashboard/reports" },
-  { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/freelancer/dashboard" },
+  { label: "Browse Projects", icon: Briefcase, href: "/projects" },
+  { label: "Messages", icon: MessageSquare, href: "/freelancer/messages" },
+  { label: "Earnings", icon: Wallet, href: "/freelancer/earnings" },
+  { label: "Subscription", icon: PieChart, href: "/freelancer/subscription" },
+  { label: "Profile", icon: Settings, href: "/freelancer/profile" },
 ];
 &nbsp;
 const DashboardSidebar = () =&gt; {
@@ -395,16 +374,7 @@ const DashboardSidebar = () =&gt; {
     &gt;
       {/* Logo Area */}
       &lt;div className="h-16 flex items-center px-6 border-b border-navy-light/30"&gt;
-        &lt;div className="flex items-center gap-3"&gt;
-          &lt;div className="w-8 h-8 rounded-lg bg-teal flex items-center justify-center text-white font-bold text-lg shrink-0"&gt;
-            S
-          &lt;/div&gt;
-          {!isCollapsed &amp;&amp; (
-            &lt;span className="font-bold text-xl tracking-wide opacity-100 transition-opacity duration-300"&gt;
-              Stitch
-            &lt;/span&gt;
-          )}
-        &lt;/div&gt;
+        &lt;Logo isDark size="sm" withText={!isCollapsed} /&gt;
       &lt;/div&gt;
 &nbsp;
       {/* Navigation */}
@@ -499,7 +469,7 @@ export default DashboardSidebar;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-31T08:37:15.193Z
+                at 2026-03-25T17:57:21.889Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
