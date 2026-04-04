@@ -121,7 +121,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           } else if (!isInitialized) {
             // First time sync - only redirect to home if they are on auth/public pages
             const user = useAuthStore.getState().user;
-            const publicRoutes = ["/", "/login", "/register", "/forgot-password"];
+            const publicRoutes = ["/login", "/register", "/forgot-password"];
             if (user && publicRoutes.includes(location.pathname)) {
               navigate("/home");
             }
