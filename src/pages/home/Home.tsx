@@ -92,27 +92,29 @@ const HomePage = () => {
         )}
       >
         <div className="container max-w-5xl mx-auto flex items-center justify-between px-4 h-16">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 -ml-2 rounded-xl bg-slate-200/50 dark:bg-white/5 hover:bg-slate-300/50 dark:hover:bg-white/10 transition-colors group mr-2"
+              className="hidden sm:flex p-2 -ml-2 rounded-xl bg-slate-200/50 dark:bg-white/5 hover:bg-slate-300/50 dark:hover:bg-white/10 transition-colors group mr-2"
             >
               <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-white/70 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
             </button>
             <Logo size="sm" isDark={isDark} />
           </div>
 
-          <div className="relative flex items-center gap-2">
-            <ThemeToggle className="mr-2" />
+          <div className="relative flex items-center gap-2 sm:gap-4">
+            <div className="hidden sm:block">
+              <ThemeToggle className="mr-2" />
+            </div>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 dark:hover:border-white/10 transition-all shadow-sm"
+              className="flex items-center gap-2 sm:gap-3 p-1.5 pr-2 sm:pr-4 rounded-full bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 dark:hover:border-white/10 transition-all shadow-sm"
             >
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal-light flex items-center justify-center text-white font-bold shadow-md">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal-light flex items-center justify-center text-white font-bold shadow-md text-xs sm:text-base">
                 {userInitial}
               </div>
               <span className="text-slate-700 dark:text-white font-medium text-sm hidden sm:block">{userName}</span>
-              <ChevronDown className={cn("w-4 h-4 text-slate-500 dark:text-white/50 transition-transform duration-300", showMenu && "rotate-180")} />
+              <ChevronDown className={cn("w-3 h-3 sm:w-4 sm:h-4 text-slate-500 dark:text-white/50 transition-transform duration-300", showMenu && "rotate-180")} />
             </button>
 
             {showMenu && (
@@ -121,7 +123,11 @@ const HomePage = () => {
                   <p className="text-slate-900 dark:text-white font-semibold">{user?.fullName || userName}</p>
                   <p className="text-slate-500 dark:text-white/60 text-xs mt-0.5 truncate">{user?.email}</p>
                 </div>
-                <div className="p-2">
+                <div className="p-2 space-y-1">
+                  <div className="sm:hidden px-3 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors">
+                    <span className="text-sm font-medium text-slate-700 dark:text-white/70">Theme</span>
+                    <ThemeToggle />
+                  </div>
                   <button
                     onClick={handleLogout}
                     className="w-full px-3 py-2.5 text-left text-sm text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-xl flex items-center gap-3 transition-colors group"

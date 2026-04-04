@@ -158,25 +158,25 @@ const FreelancerDirectory = () => {
     location !== "All";
 
   return (
-    <div className="min-h-screen bg-[#050B15] font-sans text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-16 md:pt-48 md:pb-24 overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+      <section className="relative pt-32 pb-16 md:pt-48 md:pb-24 overflow-hidden border-b border-slate-200 dark:border-white/5 bg-white dark:bg-[#050B15]">
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-3xl">
-              <span className="inline-block px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-xs font-bold text-teal-light mb-8 uppercase tracking-widest">
+              <span className="inline-block px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xs font-bold text-teal dark:text-teal-light mb-8 uppercase tracking-widest">
                 The Network
               </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-8">
+              <h1 className="text-5xl md:text-7xl font-bold mb-8 text-navy dark:text-white">
                 Elite Creative <br />
-                <span className="text-gradient">Powerhouse</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Powerhouse</span>
               </h1>
-              <p className="text-xl text-slate-400 leading-relaxed mb-10 max-w-2xl">
+              <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed mb-10 max-w-2xl">
                 Source high-end production talent. Each professional in our
                 directory undergoes a rigorous 5-point verification process.
               </p>
@@ -186,7 +186,7 @@ const FreelancerDirectory = () => {
       </section>
 
       {/* 2. SEARCH & FILTER BAR */}
-      <section className="sticky top-0 z-50 py-4 bg-[#050B15]/80 backdrop-blur-xl border-b border-white/5">
+      <section className="sticky top-0 z-50 py-4 bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
             {/* Search Input */}
@@ -203,7 +203,7 @@ const FreelancerDirectory = () => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all text-sm placeholder:text-slate-500"
+                className="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white"
               />
               {searchQuery && (
                 <button
@@ -244,21 +244,21 @@ const FreelancerDirectory = () => {
                       filter.setter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="appearance-none px-5 py-3 pr-10 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-teal/50 hover:bg-white/10 transition-all cursor-pointer"
+                    className="appearance-none px-5 py-3 pr-10 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300 focus:outline-none focus:border-teal/50 hover:bg-slate-200 dark:hover:bg-white/10 transition-all cursor-pointer"
                   >
-                    <option value="All" className="bg-[#050B15]">
+                    <option value="All" className="bg-white dark:bg-[#050B15]">
                       All {filter.label}s
                     </option>
                     {filter.options
                       .filter((o) => o !== "All")
                       .map((opt) => (
-                        <option key={opt} value={opt} className="bg-[#050B15]">
+                        <option key={opt} value={opt} className="bg-white dark:bg-[#050B15]">
                           {opt}
                         </option>
                       ))}
                   </select>
                   <ChevronDown
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none group-hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none group-hover:text-slate-600 dark:group-hover:text-white transition-colors"
                     size={14}
                   />
                 </div>
@@ -276,14 +276,14 @@ const FreelancerDirectory = () => {
             </div>
 
             {/* View Mode */}
-            <div className="hidden lg:flex items-center gap-1 bg-white/5 rounded-2xl p-1 ml-auto">
+            <div className="hidden lg:flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-2xl p-1 ml-auto">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
                   "p-2 rounded-xl transition-all",
                   viewMode === "grid"
                     ? "bg-teal shadow-lg shadow-teal/20 text-white"
-                    : "text-slate-500 hover:text-white",
+                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white",
                 )}
               >
                 <Grid3X3 size={18} />
@@ -294,7 +294,7 @@ const FreelancerDirectory = () => {
                   "p-2 rounded-xl transition-all",
                   viewMode === "list"
                     ? "bg-teal shadow-lg shadow-teal/20 text-white"
-                    : "text-slate-500 hover:text-white",
+                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white",
                 )}
               >
                 <List size={18} />
@@ -303,7 +303,7 @@ const FreelancerDirectory = () => {
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-white/10"
+              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white"
             >
               <Filter size={18} />
               Refine
@@ -320,9 +320,9 @@ const FreelancerDirectory = () => {
         <div className="container mx-auto px-4 lg:px-8">
           {/* Status Bar */}
           <div className="flex items-center justify-between mb-8">
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
               Analysis found{" "}
-              <span className="text-white font-bold">{totalCount}</span> elite
+              <span className="text-navy dark:text-white font-bold">{totalCount}</span> elite
               professionals
             </div>
           </div>
@@ -350,7 +350,7 @@ const FreelancerDirectory = () => {
                     <Link to={`/freelancer/${f._id}`} className="block group">
                       <div
                         className={cn(
-                          "glass-card rounded-[2rem] border-white/5 hover:border-white/10 hover:bg-white/[0.07] transition-all duration-500 overflow-hidden relative",
+                          "glass-card rounded-[2rem] border-slate-200 dark:border-white/5 hover:border-teal/30 dark:hover:border-white/10 bg-white dark:bg-transparent shadow-sm dark:shadow-none hover:shadow-xl dark:hover:bg-white/[0.07] transition-all duration-500 overflow-hidden relative",
                           viewMode === "list" && "flex h-64",
                         )}
                       >
@@ -409,7 +409,7 @@ const FreelancerDirectory = () => {
                             </div>
                           </div>
 
-                          <h3 className="text-xl font-bold mb-1 group-hover:text-teal-light transition-colors">
+                          <h3 className="text-xl font-bold mb-1 group-hover:text-teal transition-colors text-navy dark:text-white">
                             {name}
                           </h3>
                           <p className="text-sm text-slate-400 mb-4 line-clamp-1">
@@ -432,15 +432,15 @@ const FreelancerDirectory = () => {
                             {f.skills.slice(0, 2).map((skill) => (
                               <span
                                 key={skill.name}
-                                className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-300 border border-white/5"
+                                className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5"
                               >
                                 {skill.name}
                               </span>
                             ))}
                           </div>
 
-                          <div className="flex items-center justify-between border-t border-white/5 pt-6 mt-auto">
-                            <div>
+                          <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-6 mt-auto">
+                            <div className="text-navy dark:text-white">
                               <span className="text-xl font-bold">
                                 ₹{f.hourlyRate}
                               </span>
@@ -463,20 +463,20 @@ const FreelancerDirectory = () => {
           ) : (
             /* Empty State */
             <div className="flex flex-col items-center justify-center py-32 text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-white/10 group animate-pulse">
+              <div className="w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-slate-200 dark:border-white/10 group animate-pulse">
                 <Frown
                   size={48}
-                  className="text-slate-600 group-hover:text-teal transition-colors"
+                  className="text-slate-400 dark:text-slate-600 group-hover:text-teal transition-colors"
                 />
               </div>
-              <h3 className="text-3xl font-bold mb-4">No Mastery Matches</h3>
-              <p className="text-slate-400 max-w-md mx-auto mb-10 leading-relaxed">
+              <h3 className="text-3xl font-bold mb-4 text-navy dark:text-white">No Mastery Matches</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-10 leading-relaxed">
                 We couldn't find professionals matching these specific
                 credentials. Try broadening your criteria.
               </p>
               <Button
                 onClick={clearFilters}
-                className="h-14 px-10 rounded-2xl bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                className="h-14 px-10 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-navy dark:text-white border border-slate-200 dark:border-white/10"
               >
                 Clear Filters
               </Button>
@@ -490,7 +490,7 @@ const FreelancerDirectory = () => {
                 variant="outline"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white disabled:opacity-20"
+                className="h-14 px-6 rounded-2xl border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-navy dark:text-white disabled:opacity-20"
               >
                 <ChevronLeft size={20} className="mr-2" />
                 Previous
@@ -506,7 +506,7 @@ const FreelancerDirectory = () => {
                         "w-12 h-12 rounded-2xl border transition-all text-sm font-bold",
                         currentPage === page
                           ? "bg-teal border-teal shadow-lg shadow-teal/20 text-white"
-                          : "bg-white/5 border-white/10 text-slate-500 hover:text-white hover:border-teal/50",
+                          : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-500 hover:text-navy dark:hover:text-white hover:border-teal/50",
                       )}
                     >
                       {page}
@@ -521,7 +521,7 @@ const FreelancerDirectory = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white disabled:opacity-20"
+                className="h-14 px-6 rounded-2xl border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-navy dark:text-white disabled:opacity-20"
               >
                 Next
                 <ChevronRight size={20} className="ml-2" />
@@ -532,13 +532,13 @@ const FreelancerDirectory = () => {
       </section>
 
       {/* FOOTER CTA */}
-      <section className="py-24 border-t border-white/5 bg-gradient-to-t from-teal/10 to-transparent">
+      <section className="py-24 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-gradient-to-t dark:from-teal/10 dark:to-transparent">
         <div className="container mx-auto px-4 lg:px-8 text-center">
           <AnimatedSection>
-            <h2 className="text-4xl font-bold mb-6">
+            <h2 className="text-4xl font-bold mb-6 text-navy dark:text-white">
               Are You a Creative Elite?
             </h2>
-            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto">
               Join our private network of high-end professionals and get matched
               with production-level projects.
             </p>

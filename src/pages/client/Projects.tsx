@@ -28,6 +28,7 @@ import {
   Loader2,
   Star,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -223,7 +224,7 @@ const ClientProjects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
@@ -264,29 +265,30 @@ const ClientProjects = () => {
   };
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
       {/* MAIN CONTENT */}
       <div>
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   My Projects
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Manage and track all your projects
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 lg:gap-4">
+             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link to="/client/post-project">
                 <Button className="bg-teal hover:bg-teal-light text-white hidden sm:flex">
                   <PlusCircle size={18} className="mr-2" />
@@ -297,25 +299,25 @@ const ClientProjects = () => {
                 </Button>
               </Link>
 
-              <Link
+               <Link
                 to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
 
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+               <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
 
               <div className="relative">
-                <button
+                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -326,40 +328,40 @@ const ClientProjects = () => {
                           .toUpperCase()
                       : (user?.email?.[0] || "U").toUpperCase()}
                   </div>
-                  <ChevronDown
+                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                 {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "User"}
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={logout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -373,8 +375,8 @@ const ClientProjects = () => {
 
         {/* Main Content Area */}
         <main className="p-4 lg:p-8 space-y-6">
-          {/* TABS */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+           {/* TABS */}
+          <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
             <div className="flex overflow-x-auto scrollbar-hide">
               {tabs.map((tab) => (
                 <button
@@ -387,7 +389,7 @@ const ClientProjects = () => {
                     "flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all",
                     activeTab === tab.id
                       ? "border-teal text-teal"
-                      : "border-transparent text-slate-500 hover:text-navy hover:border-slate-200",
+                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:border-slate-200 dark:hover:border-white/10",
                   )}
                 >
                   {tab.label}
@@ -417,28 +419,28 @@ const ClientProjects = () => {
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
-                <Input
+                 <Input
                   placeholder="Search projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-10 border-slate-200 focus:border-teal focus:ring-teal"
+                  className="pl-10 h-10 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                 />
               </div>
 
               {/* Sort */}
-              <select
+               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="h-10 px-3 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-1 focus:ring-teal"
+                className="h-10 px-3 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-white/5 focus:border-teal focus:ring-1 focus:ring-teal"
               >
-                <option value="recent">Recent</option>
-                <option value="budget-high">Budget (High-Low)</option>
-                <option value="budget-low">Budget (Low-High)</option>
+                 <option value="recent" className="dark:bg-[#121A2A]">Recent</option>
+                <option value="budget-high" className="dark:bg-[#121A2A]">Budget (High-Low)</option>
+                <option value="budget-low" className="dark:bg-[#121A2A]">Budget (Low-High)</option>
               </select>
             </div>
 
-            {/* View Toggle */}
-            <div className="flex bg-slate-100 rounded-lg p-1">
+             {/* View Toggle */}
+            <div className="flex bg-slate-100 dark:bg-white/5 rounded-lg p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
@@ -471,9 +473,9 @@ const ClientProjects = () => {
               {viewMode === "grid" && (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                   {paginatedProjects.map((project) => (
-                    <div
+                     <div
                       key={project._id}
-                      className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+                      className="group bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
                     >
                       {/* Card Header */}
                       <div className="p-6 flex-1 flex flex-col">
@@ -505,16 +507,16 @@ const ClientProjects = () => {
                                 className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <button
+                                 <button
                                   onClick={() => handleEdit(project._id)}
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                                 >
                                   <Edit2 size={14} /> Edit
                                 </button>
-                                <button
+                                 <button
                                   onClick={() => handleDelete(project._id)}
                                   disabled={deletingId === project._id}
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 disabled:opacity-50"
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
                                 >
                                   <Trash2 size={14} />{" "}
                                   {deletingId === project._id
@@ -526,17 +528,17 @@ const ClientProjects = () => {
                           </div>
                         </div>
 
-                        <h3 className="font-semibold text-navy mb-1 line-clamp-1 text-lg">
+                         <h3 className="font-semibold text-navy dark:text-white mb-1 line-clamp-1 text-lg">
                           {project.title}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <span className="inline-block px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-xs font-medium w-fit">
+                           <span className="inline-block px-2.5 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-xs font-medium w-fit">
                             {project.category}
                           </span>
                           {project.location &&
                             (project.location.city ||
                               project.location.country) && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 bg-teal/5 text-teal border border-teal/10 rounded-md text-xs font-medium w-fit">
+                               <span className="inline-flex items-center px-2.5 py-0.5 bg-teal/5 text-teal border border-teal/10 dark:border-teal/20 rounded-md text-xs font-medium w-fit">
                                 <MapPin size={12} className="mr-1" />
                                 {project.location.city}
                                 {project.location.city &&
@@ -547,29 +549,29 @@ const ClientProjects = () => {
                               </span>
                             )}
                         </div>
-                        <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">
+                         <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">
                           {project.description}
                         </p>
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-1.5 mb-4">
                           {(project.skills || []).slice(0, 3).map((skill) => (
-                            <span
+                             <span
                               key={skill}
-                              className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 rounded-md text-xs font-medium"
+                              className="px-2 py-0.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-md text-xs font-medium"
                             >
                               {skill}
                             </span>
                           ))}
                           {(project.skills || []).length > 3 && (
-                            <span className="px-2 py-0.5 bg-slate-50 text-slate-400 rounded-md text-xs border border-transparent">
+                             <span className="px-2 py-0.5 bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-500 rounded-md text-xs border border-transparent">
                               +{(project.skills || []).length - 3}
                             </span>
                           )}
                         </div>
 
-                        {/* Freelancer Section - consistently sized placeholder if empty */}
-                        <div className="mt-auto pt-3 border-t border-slate-50/50">
+                         {/* Freelancer Section - consistently sized placeholder if empty */}
+                        <div className="mt-auto pt-3 border-t border-slate-50/50 dark:border-white/5">
                           {project.freelancer ? (
                             <div className="flex items-center gap-2.5">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-white">
@@ -580,24 +582,24 @@ const ClientProjects = () => {
                                     .join("")}
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-xs text-slate-400 font-medium">
+                                 <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
                                   Assigned to
                                 </span>
-                                <span className="text-sm font-semibold text-navy leading-none">
+                                <span className="text-sm font-semibold text-navy dark:text-white leading-none">
                                   {project.freelancer.fullName}
                                 </span>
                               </div>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2.5 opacity-50 grayscale">
-                              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                               <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-slate-500">
                                 <User size={14} />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-xs text-slate-400 font-medium">
+                                 <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
                                   Status
                                 </span>
-                                <span className="text-sm font-medium text-slate-600 leading-none">
+                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-none">
                                   Not Assigned
                                 </span>
                               </div>
@@ -607,24 +609,24 @@ const ClientProjects = () => {
                       </div>
 
                       {/* Card Footer */}
-                      <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+                      <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
                         <div className="grid grid-cols-3 gap-3 mb-4">
                           <div className="flex flex-col items-center text-center">
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
                               Budget
                             </span>
-                            <span className="text-sm font-semibold text-navy">
+                            <span className="text-sm font-semibold text-navy dark:text-white">
                               ₹
                               {(
                                 project.budget?.maxAmount || 0
                               ).toLocaleString()}
                             </span>
                           </div>
-                          <div className="flex flex-col items-center text-center border-x border-slate-200/60">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                           <div className="flex flex-col items-center text-center border-x border-slate-200/60 dark:border-white/5">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Applicants
                             </span>
-                            <span className="text-sm font-semibold text-navy">
+                            <span className="text-sm font-semibold text-navy dark:text-white">
                               {project.applications}
                             </span>
                           </div>
@@ -632,7 +634,7 @@ const ClientProjects = () => {
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
                               Deadline
                             </span>
-                            <span className="text-sm font-semibold text-navy">
+                            <span className="text-sm font-semibold text-navy dark:text-white">
                               {formatDeadline(project.deadline)}
                             </span>
                           </div>
@@ -643,9 +645,9 @@ const ClientProjects = () => {
                             to={`/client/project/${project._id}`}
                             className="flex-1"
                           >
-                            <Button
+                             <Button
                               variant="outline"
-                              className="w-full h-9 text-xs border-slate-200 text-slate-600 hover:text-navy hover:bg-white bg-white hover:border-slate-300 shadow-sm"
+                              className="w-full h-9 text-xs border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:bg-white dark:hover:bg-white/5 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
                             >
                               <Eye size={14} className="mr-1.5" /> View Details
                             </Button>
@@ -704,50 +706,50 @@ const ClientProjects = () => {
 
               {/* LIST VIEW */}
               {viewMode === "list" && (
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[800px]">
                       <thead>
-                        <tr className="bg-slate-50 text-left">
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                        <tr className="bg-slate-50 dark:bg-white/5 text-left">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Project
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Status
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Budget
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Applications
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Deadline
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                         {paginatedProjects.map((project) => (
                           <tr
                             key={project._id}
-                            className="hover:bg-slate-50 transition-colors"
+                            className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                           >
                             <td className="px-6 py-4">
                               <div>
-                                <p className="font-medium text-navy">
+                                <p className="font-medium text-navy dark:text-white">
                                   {project.title}
                                 </p>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <p className="text-xs text-slate-500">
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
                                     {project.category}
                                   </p>
                                   {project.location &&
                                     (project.location.city ||
                                       project.location.country) && (
-                                      <span className="flex items-center text-xs text-teal bg-teal/5 border border-teal/10 px-1.5 py-0.5 rounded">
+                                      <span className="flex items-center text-xs text-teal bg-teal/5 dark:bg-teal/10 border border-teal/10 dark:border-teal/20 px-1.5 py-0.5 rounded">
                                         <MapPin size={10} className="mr-1" />
                                         {project.location.city}
                                         {project.location.city &&
@@ -771,7 +773,7 @@ const ClientProjects = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              <p className="text-sm font-medium text-navy">
+                              <p className="text-sm font-medium text-navy dark:text-white">
                                 {project.budget?.minAmount !== undefined &&
                                 project.budget?.maxAmount !== undefined
                                   ? `₹${project.budget.minAmount.toLocaleString()} - ₹${project.budget.maxAmount.toLocaleString()}`
@@ -779,16 +781,16 @@ const ClientProjects = () => {
                               </p>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-1 text-sm text-slate-600">
-                                <Users size={14} className="text-slate-400" />
+                              <div className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400">
+                                <Users size={14} className="text-slate-400 dark:text-slate-500" />
                                 {project.applications}
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-1 text-sm text-slate-600">
+                              <div className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400">
                                 <Calendar
                                   size={14}
-                                  className="text-slate-400"
+                                  className="text-slate-400 dark:text-slate-500"
                                 />
                                 {formatDeadline(project.deadline)}
                               </div>

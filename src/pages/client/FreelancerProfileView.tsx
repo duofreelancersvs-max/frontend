@@ -66,14 +66,14 @@ const FreelancerProfileView = () => {
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15]">
       {/* Header Info */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
         <div className="p-4 lg:p-8">
           {/* Breadcrumb / Back button */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-slate-500 hover:text-navy transition-colors mb-6"
+            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={18} />
             <span>Back to results</span>
@@ -99,7 +99,7 @@ const FreelancerProfileView = () => {
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-navy mb-1">
+                  <h1 className="text-3xl font-bold text-navy dark:text-white mb-1">
                     {freelancer.displayName ||
                       `${freelancer.firstName} ${freelancer.lastName}`}
                   </h1>
@@ -108,15 +108,15 @@ const FreelancerProfileView = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button className="bg-teal hover:bg-teal-light text-white font-semibold">
+                  <Button className="bg-teal hover:bg-teal-light text-white font-semibold shadow-sm">
                     <MessageSquare size={18} className="mr-2" />
                     Contact Me
                   </Button>
                   <Button
                     variant="ghost"
                     className={cn(
-                      "bg-white border border-slate-200 text-slate-400 hover:text-pink-500",
-                      isSaved && "text-pink-500 border-pink-100 bg-pink-50",
+                      "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 hover:text-pink-500",
+                      isSaved && "text-pink-500 border-pink-100 bg-pink-50 dark:bg-pink-500/10",
                     )}
                     onClick={() => setIsSaved(!isSaved)}
                   >
@@ -128,7 +128,7 @@ const FreelancerProfileView = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
+              <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <MapPin size={16} />
                   <span>
@@ -139,7 +139,7 @@ const FreelancerProfileView = () => {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                  <span className="font-bold text-navy">
+                  <span className="font-bold text-navy dark:text-white">
                     {freelancer.averageRating || 0}
                   </span>
                   <span>({freelancer.reviewCount || 0} reviews)</span>
@@ -157,8 +157,8 @@ const FreelancerProfileView = () => {
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Portfolio Section */}
-            <section className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h2 className="text-xl font-bold text-navy mb-6">Portfolio</h2>
+            <section className="bg-white dark:bg-white/5 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/10">
+              <h2 className="text-xl font-bold text-navy dark:text-white mb-6">Portfolio</h2>
               {freelancer.portfolio && freelancer.portfolio.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {freelancer.portfolio.map((item) => (
@@ -232,17 +232,16 @@ const FreelancerProfileView = () => {
             </section>
 
             {/* About Section */}
-            <section className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h2 className="text-xl font-bold text-navy mb-4">About</h2>
-              <div className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+            <section className="bg-white dark:bg-white/5 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/10">
+              <h2 className="text-xl font-bold text-navy dark:text-white mb-4">About</h2>
+              <div className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">
                 {freelancer.bio ||
                   `I'm a dedicated ${freelancer.category} professional with a passion for excellence. I've worked on various projects and always aim to deliver high-quality results for my clients.`}
               </div>
             </section>
 
-            {/* Reviews Section */}
-            <section className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h2 className="text-xl font-bold text-navy mb-6">
+            <section className="bg-white dark:bg-white/5 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/10">
+              <h2 className="text-xl font-bold text-navy dark:text-white mb-6">
                 Client Reviews
               </h2>
               {reviews.length > 0 ? (
@@ -307,24 +306,24 @@ const FreelancerProfileView = () => {
           {/* Sidebar Column */}
           <div className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h3 className="font-bold text-navy mb-4">Quick Stats</h3>
+            <div className="bg-white dark:bg-white/5 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/10">
+              <h3 className="font-bold text-navy dark:text-white mb-4">Quick Stats</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Success Rate</span>
+                  <span className="text-slate-500 dark:text-slate-400">Success Rate</span>
                   <span className="font-bold text-teal">
                     {freelancer.successRate}%
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Projects Completed</span>
-                  <span className="font-bold text-navy">
+                  <span className="text-slate-500 dark:text-slate-400">Projects Completed</span>
+                  <span className="font-bold text-navy dark:text-white">
                     {freelancer.totalProjects}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Member Since</span>
-                  <span className="font-bold text-slate-600">
+                  <span className="text-slate-500 dark:text-slate-400">Member Since</span>
+                  <span className="font-bold text-slate-600 dark:text-slate-300">
                     {new Date(freelancer.createdAt).getFullYear()}
                   </span>
                 </div>
@@ -332,13 +331,13 @@ const FreelancerProfileView = () => {
             </div>
 
             {/* Skills */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h3 className="font-bold text-navy mb-4">Skills</h3>
+            <div className="bg-white dark:bg-white/5 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/10">
+              <h3 className="font-bold text-navy dark:text-white mb-4">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {freelancer.skills?.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium"
+                    className="px-3 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-medium"
                   >
                     {typeof skill === "string" ? skill : skill.name}
                   </span>
@@ -347,8 +346,8 @@ const FreelancerProfileView = () => {
             </div>
 
             {/* Verification & Badges */}
-            <div className="bg-teal/5 rounded-2xl p-6 border border-teal/10">
-              <h3 className="font-bold text-navy mb-4 flex items-center gap-2">
+            <div className="bg-teal/5 dark:bg-teal/10 rounded-2xl p-6 border border-teal/10 dark:border-teal/20">
+              <h3 className="font-bold text-navy dark:text-white mb-4 flex items-center gap-2">
                 <BadgeCheck className="text-teal" size={20} />
                 Verification Status
               </h3>

@@ -64,22 +64,22 @@ const ConversationList = ({
   return (
     <div
       className={cn(
-        "bg-white border-r border-slate-200 flex flex-col",
+        "bg-white dark:bg-[#050B15] border-r border-slate-200 dark:border-white/5 flex flex-col",
         className,
       )}
     >
       {/* Search */}
-      <div className="p-4 border-b border-slate-100">
+      <div className="p-4 border-b border-slate-100 dark:border-white/5">
         <div className="relative mb-3">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
           />
           <Input
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 h-10 bg-slate-50 border-slate-200 text-sm"
+            className="pl-9 h-10 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-sm dark:text-white"
           />
         </div>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ const ConversationList = ({
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
               filter === "all"
                 ? "bg-teal text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
             )}
           >
             All
@@ -100,7 +100,7 @@ const ConversationList = ({
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
               filter === "unread"
                 ? "bg-teal text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
             )}
           >
             Unread
@@ -120,9 +120,9 @@ const ConversationList = ({
             key={conv.id}
             onClick={() => onSelect(conv.id)}
             className={cn(
-              "w-full px-4 py-3 flex gap-3 hover:bg-slate-50 transition-colors text-left border-l-[3px]",
+              "w-full px-4 py-3 flex gap-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-left border-l-[3px]",
               selectedId === conv.id
-                ? "bg-teal/5 border-l-teal"
+                ? "bg-teal/5 dark:bg-teal/10 border-l-teal"
                 : "border-l-transparent",
             )}
           >
@@ -137,7 +137,7 @@ const ConversationList = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-0.5">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-navy text-sm truncate">
+                  <span className="font-semibold text-navy dark:text-white text-sm truncate">
                     {conv.participant.name}
                   </span>
                   {conv.participant.verified && (

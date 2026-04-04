@@ -25,6 +25,7 @@ import type { PortfolioItem } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useUnreadStore } from "@/stores/unread.store";
 import { AddPortfolioModal } from "@/components/modals/AddPortfolioModal";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getCategoryStyle } from "@/lib/category-styles";
 import { toast } from "react-toastify";
 
@@ -148,10 +149,10 @@ const FreelancerPortfolio = () => {
       : portfolioItemsState.filter((item) => (item.skills?.[0] || item.category) === selectedCategory);
 
   return (
-    <div className="w-full bg-slate-50">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen transition-colors duration-300">
       <div className="w-full">
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
@@ -161,27 +162,28 @@ const FreelancerPortfolio = () => {
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   My Portfolio
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Showcase your best work to attract clients
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -197,7 +199,7 @@ const FreelancerPortfolio = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -210,38 +212,38 @@ const FreelancerPortfolio = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -265,7 +267,7 @@ const FreelancerPortfolio = () => {
                   "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                   selectedCategory === category
                     ? "bg-teal text-white"
-                    : "bg-white text-slate-600 border border-slate-200 hover:border-teal hover:text-teal",
+                    : "bg-white dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:border-teal hover:text-teal",
                 )}
               >
                 {category}
@@ -275,29 +277,29 @@ const FreelancerPortfolio = () => {
 
           {/* Portfolio Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500 mb-1">Total Projects</p>
-              <p className="text-2xl font-bold text-navy">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 shadow-sm">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Projects</p>
+              <p className="text-2xl font-bold text-navy dark:text-white">
                 {portfolioItemsState.length}
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500 mb-1">Total Views</p>
-              <p className="text-2xl font-bold text-navy">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 shadow-sm">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Views</p>
+              <p className="text-2xl font-bold text-navy dark:text-white">
                 {portfolioItemsState
                   .reduce((acc, item) => acc + (item.views || 0), 0)
                   .toLocaleString()}
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500 mb-1">Portfolio Rating</p>
-              <p className="text-2xl font-bold text-navy">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 shadow-sm">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Portfolio Rating</p>
+              <p className="text-2xl font-bold text-navy dark:text-white">
                 NA
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500 mb-1">Categories</p>
-              <p className="text-2xl font-bold text-navy">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 shadow-sm">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Categories</p>
+              <p className="text-2xl font-bold text-navy dark:text-white">
                 {categories.length - 1}
               </p>
             </div>
@@ -308,7 +310,7 @@ const FreelancerPortfolio = () => {
             {filteredItems.map((item) => (
               <div
                 key={item._id || item.id}
-                className="group bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-lg transition-all"
+                className="group bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden hover:shadow-lg transition-all"
               >
                 {/* Thumbnail */}
                 <div className="relative aspect-video">
@@ -339,7 +341,7 @@ const FreelancerPortfolio = () => {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button 
                       onClick={() => handleShareProject(item)}
-                      className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors"
+                      className="p-2 bg-white dark:bg-[#1A2333] rounded-full text-navy dark:text-white hover:bg-teal hover:text-white transition-colors"
                     >
                       <Eye size={18} />
                     </button>
@@ -348,7 +350,7 @@ const FreelancerPortfolio = () => {
                         setEditingItem(item);
                         setIsAddModalOpen(true);
                       }}
-                      className="p-2 bg-white rounded-full text-navy hover:bg-teal hover:text-white transition-colors"
+                      className="p-2 bg-white dark:bg-[#1A2333] rounded-full text-navy dark:text-white hover:bg-teal hover:text-white transition-colors"
                     >
                       <Edit2 size={18} />
                     </button>
@@ -369,13 +371,13 @@ const FreelancerPortfolio = () => {
                             openMenuId === currentId ? null : (currentId as string),
                           );
                         }}
-                        className="p-1.5 bg-white/90 rounded-lg text-slate-600 hover:bg-white transition-colors"
+                        className="p-1.5 bg-white/90 dark:bg-[#1A2333]/90 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-[#1A2333] transition-colors"
                       >
                         <MoreVertical size={16} />
                       </button>
                       {openMenuId === (item._id || item.id) && (
                         <div
-                          className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-50"
+                          className="absolute right-0 mt-1 w-36 bg-white dark:bg-[#1A2333] rounded-lg shadow-lg border border-slate-100 dark:border-white/5 py-1 z-50"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button 
@@ -384,19 +386,19 @@ const FreelancerPortfolio = () => {
                               setIsAddModalOpen(true);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                           >
                             <Edit2 size={14} /> Edit
                           </button>
                           <button 
                             onClick={() => handleShareProject(item)}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                           >
                             <ExternalLink size={14} /> Share
                           </button>
                           <button 
                             onClick={() => handleDeleteProject(item._id || item.id || "")}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                           >
                             <Trash2 size={14} /> Delete
                           </button>
@@ -408,15 +410,15 @@ const FreelancerPortfolio = () => {
 
                 {/* Content */}
                 <div className="p-4">
-                  <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-medium mb-2">
+                  <span className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded text-xs font-medium mb-2">
                     {item.skills?.[0] || item.category || "General"}
                   </span>
-                  <h3 className="font-semibold text-navy mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 mb-3 line-clamp-2">
+                  <h3 className="font-semibold text-navy dark:text-white mb-1">{item.title}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">
                     {item.description}
                   </p>
 
-                  <div className="flex items-center justify-between text-sm text-slate-500">
+                  <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Eye size={14} /> {(item.views ?? 0).toLocaleString()}
@@ -430,11 +432,11 @@ const FreelancerPortfolio = () => {
 
           {filteredItems.length === 0 && (
             <div className="text-center py-12">
-              <FolderOpen size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-lg font-semibold text-navy mb-2">
+              <FolderOpen size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
+              <h3 className="text-lg font-semibold text-navy dark:text-white mb-2">
                 No projects in this category
               </h3>
-              <p className="text-slate-500 mb-4">
+              <p className="text-slate-500 dark:text-slate-400 mb-4">
                 Start adding your work to build your portfolio
               </p>
               <Button 

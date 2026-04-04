@@ -22,7 +22,7 @@ const MessageBubble = ({
     <div>
       {showDate && dateLabel && (
         <div className="flex justify-center my-4">
-          <span className="px-3 py-1 bg-slate-200/80 text-slate-500 text-xs font-medium rounded-full">
+          <span className="px-3 py-1 bg-slate-200/80 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-xs font-medium rounded-full">
             {dateLabel}
           </span>
         </div>
@@ -33,8 +33,8 @@ const MessageBubble = ({
             className={cn(
               "px-4 py-2.5 rounded-2xl text-sm leading-relaxed",
               isOwn
-                ? "bg-teal text-white rounded-br-sm"
-                : "bg-white text-slate-700 rounded-bl-sm shadow-sm border border-slate-100",
+                ? "bg-teal text-white rounded-br-sm shadow-sm"
+                : "bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-bl-sm shadow-sm border border-slate-100 dark:border-white/10",
             )}
           >
             {content}
@@ -45,12 +45,12 @@ const MessageBubble = ({
               isOwn ? "justify-end" : "justify-start",
             )}
           >
-            <span className="text-[10px] text-slate-400">{timestamp}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">{timestamp}</span>
             {isOwn &&
               (isRead ? (
                 <CheckCheck size={12} className="text-teal" />
               ) : (
-                <Check size={12} className="text-slate-400" />
+                <Check size={12} className="text-slate-400 dark:text-slate-600" />
               ))}
           </div>
         </div>

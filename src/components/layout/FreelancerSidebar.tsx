@@ -116,7 +116,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
       {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy transition-transform duration-300 lg:translate-x-0 flex flex-col",
+          "fixed left-0 top-0 z-40 h-screen w-64 bg-[#050B15] border-r border-white/5 transition-transform duration-300 lg:translate-x-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

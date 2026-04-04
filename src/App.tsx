@@ -24,6 +24,7 @@ const FreelancerDirectory = lazy(
 const FreelancerProfile = lazy(
   () => import("@/pages/public/FreelancerProfile"),
 );
+const Categories = lazy(() => import("@/pages/public/Categories"));
 const Contact = lazy(() => import("@/pages/public/Contact"));
 
 // Auth
@@ -153,6 +154,14 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <Contact />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Categories />
             </Suspense>
           }
         />

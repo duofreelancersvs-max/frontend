@@ -30,6 +30,7 @@ import {
   Check,
   Loader2,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -344,35 +345,36 @@ const PostProject = () => {
 
   if (loadingProject) {
     return (
-      <div className="flex-1 h-full flex items-center justify-center bg-slate-50">
+      <div className="flex-1 h-full flex items-center justify-center bg-slate-50 dark:bg-[#050B15]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
   }
 
   return (
-    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
+    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
       {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   {isEditing ? "Edit Project" : "Post a New Project"}
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Find the perfect freelancer for your project
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link
                 to="/client/messages"
                 className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
@@ -383,7 +385,7 @@ const PostProject = () => {
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -391,7 +393,7 @@ const PostProject = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -404,38 +406,38 @@ const PostProject = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "User"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -453,7 +455,7 @@ const PostProject = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-3 space-y-6">
             {/* PROGRESS STEPPER */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6">
               <div className="flex items-center justify-between w-full min-w-0">
                 {steps.map((step, index) => (
                   <div key={step.id} className="flex items-center flex-1">
@@ -496,8 +498,8 @@ const PostProject = () => {
 
             {/* STEP 1: PROJECT DETAILS */}
             {currentStep === 1 && (
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                   <FileText size={20} className="text-royal-blue" />
                   Project Details
                 </h2>
@@ -505,7 +507,7 @@ const PostProject = () => {
                 <div className="space-y-6">
                   {/* Project Title */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Project Title <span className="text-red-500">*</span>
                     </label>
                     <Input
@@ -514,13 +516,13 @@ const PostProject = () => {
                       onChange={(e) =>
                         handleInputChange("title", e.target.value)
                       }
-                      className="h-12 border-slate-200 focus:border-teal focus:ring-teal"
+                      className="h-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                     />
                   </div>
 
                   {/* Project Categories */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-3">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
                       Project Categories <span className="text-red-500">*</span>
                     </label>
 
@@ -536,7 +538,7 @@ const PostProject = () => {
                             "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                             formData.categories.includes(category)
                               ? "bg-teal text-white"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                              : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/20",
                           )}
                         >
                           {category}
@@ -547,7 +549,7 @@ const PostProject = () => {
 
                   {/* Project Description */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Project Description{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -557,7 +559,7 @@ const PostProject = () => {
                       onChange={(e) =>
                         handleInputChange("description", e.target.value)
                       }
-                      className="min-h-[180px] border-slate-200 focus:border-teal focus:ring-teal resize-none"
+                      className="min-h-[180px] border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal resize-none"
                     />
                     <div className="flex justify-between mt-2">
                       <p className="text-xs text-slate-400">
@@ -579,7 +581,7 @@ const PostProject = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
                   <Link to="/client/dashboard">
                     <Button
                       variant="outline"
@@ -600,8 +602,8 @@ const PostProject = () => {
 
             {/* STEP 2: REQUIREMENTS */}
             {currentStep === 2 && (
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                   <ClipboardList size={20} className="text-royal-blue" />
                   Requirements
                 </h2>
@@ -609,14 +611,14 @@ const PostProject = () => {
                 <div className="space-y-6">
                   {/* Skills Required */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Skills Required <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="Search skills..."
                       value={skillSearch}
                       onChange={(e) => setSkillSearch(e.target.value)}
-                      className="h-12 border-slate-200 focus:border-teal focus:ring-teal mb-3"
+                      className="h-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal mb-3"
                     />
 
                     {/* Selected Skills */}
@@ -625,7 +627,7 @@ const PostProject = () => {
                         {formData.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-teal/10 text-teal rounded-full text-sm font-medium"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-full text-sm font-medium"
                           >
                             {skill}
                             <button onClick={() => handleSkillToggle(skill)}>
@@ -646,7 +648,7 @@ const PostProject = () => {
                             "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                             formData.skills.includes(skill)
                               ? "bg-teal text-white"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                              : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/20",
                           )}
                         >
                           {skill}
@@ -657,7 +659,7 @@ const PostProject = () => {
 
                   {/* Experience Level */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-3">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
                       Experience Level <span className="text-red-500">*</span>
                     </label>
                     <div className="grid sm:grid-cols-3 gap-4">
@@ -667,8 +669,8 @@ const PostProject = () => {
                           className={cn(
                             "relative p-4 rounded-xl border-2 cursor-pointer transition-all",
                             formData.experienceLevel === level.value
-                              ? "border-teal bg-teal/5"
-                              : "border-slate-200 hover:border-slate-300",
+                              ? "border-teal bg-teal/5 dark:bg-teal/10"
+                              : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20",
                           )}
                         >
                           <input
@@ -698,10 +700,10 @@ const PostProject = () => {
                               )}
                             </div>
                             <div>
-                              <p className="font-semibold text-navy">
+                              <p className="font-semibold text-navy dark:text-white">
                                 {level.label}
                               </p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
                                 {level.desc}
                               </p>
                             </div>
@@ -713,7 +715,7 @@ const PostProject = () => {
 
                   {/* Project Duration */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Project Duration <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -721,7 +723,7 @@ const PostProject = () => {
                       onChange={(e) =>
                         handleInputChange("duration", e.target.value)
                       }
-                      className="w-full h-12 px-4 rounded-lg border border-slate-200 focus:border-teal focus:ring-1 focus:ring-teal text-navy bg-white"
+                      className="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-1 focus:ring-teal text-navy dark:text-white bg-white dark:bg-white/5"
                     >
                       <option value="">Select duration</option>
                       {durations.map((dur) => (
@@ -735,7 +737,7 @@ const PostProject = () => {
                   {/* Location Preference */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <label className="block text-sm font-semibold text-navy">
+                      <label className="block text-sm font-semibold text-navy dark:text-white">
                         Location Preference
                       </label>
                       {formData.location === "onsite" && (
@@ -773,8 +775,8 @@ const PostProject = () => {
                           className={cn(
                             "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
                             formData.location === loc
-                              ? "border-teal bg-teal/5"
-                              : "border-slate-200 hover:border-slate-300",
+                              ? "border-teal bg-teal/5 dark:bg-teal/10"
+                              : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20",
                           )}
                         >
                           <input
@@ -800,8 +802,8 @@ const PostProject = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <MapPin size={16} className="text-slate-400" />
-                            <span className="font-medium text-navy capitalize">
+                            <MapPin size={16} className="text-slate-400 dark:text-slate-500" />
+                            <span className="font-medium text-navy dark:text-white capitalize">
                               {loc === "onsite" ? "On-site" : loc}
                             </span>
                           </div>
@@ -815,7 +817,7 @@ const PostProject = () => {
                         onChange={(e) =>
                           handleInputChange("city", e.target.value)
                         }
-                        className="mt-3 h-12 border-slate-200 focus:border-teal focus:ring-teal"
+                        className="mt-3 h-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                       />
                     )}
                   </div>
@@ -823,7 +825,7 @@ const PostProject = () => {
                   {/* Project Location (Mandatory) */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <label className="block text-sm font-semibold text-navy">
+                       <label className="block text-sm font-semibold text-navy dark:text-slate-400">
                         Project Location <span className="text-red-500">*</span>
                       </label>
                       <button
@@ -902,10 +904,10 @@ const PostProject = () => {
 
                 {/* Navigation */}
                 <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
-                  <Button
+                   <Button
                     variant="outline"
                     onClick={prevStep}
-                    className="border-slate-300 text-slate-600"
+                    className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
                   >
                     Previous
                   </Button>
@@ -921,8 +923,8 @@ const PostProject = () => {
 
             {/* STEP 3: BUDGET */}
             {currentStep === 3 && (
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                   <Wallet size={20} className="text-royal-blue" />
                   Budget & Timeline
                 </h2>
@@ -932,7 +934,7 @@ const PostProject = () => {
 
                   {/* Budget Range */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Budget Range (INR) <span className="text-red-500">*</span>
                     </label>
                     <div className="grid sm:grid-cols-2 gap-4">
@@ -951,7 +953,7 @@ const PostProject = () => {
                             onChange={(e) =>
                               handleInputChange("minBudget", e.target.value)
                             }
-                            className="h-12 pl-8 border-slate-200 focus:border-teal focus:ring-teal"
+                            className="h-12 pl-8 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                           />
                         </div>
                       </div>
@@ -970,7 +972,7 @@ const PostProject = () => {
                             onChange={(e) =>
                               handleInputChange("maxBudget", e.target.value)
                             }
-                            className="h-12 pl-8 border-slate-200 focus:border-teal focus:ring-teal"
+                            className="h-12 pl-8 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                           />
                         </div>
                       </div>
@@ -982,7 +984,7 @@ const PostProject = () => {
 
                   {/* Deadline */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Project Deadline <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -996,17 +998,17 @@ const PostProject = () => {
                         onChange={(e) =>
                           handleInputChange("deadline", e.target.value)
                         }
-                        className="h-12 pl-12 border-slate-200 focus:border-teal focus:ring-teal"
+                        className="h-12 pl-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                       />
                     </div>
                   </div>
 
                   {/* Visibility */}
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-3">
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
                       Project Visibility
                     </label>
-                    <div className="p-4 rounded-xl border-2 border-teal bg-teal/5">
+                     <div className="p-4 rounded-xl border-2 border-teal bg-teal/5 dark:bg-teal/10">
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 mt-0.5 rounded-full bg-teal border-2 border-teal flex items-center justify-center flex-shrink-0">
                           <Check size={12} className="text-white" />
@@ -1014,9 +1016,9 @@ const PostProject = () => {
                         <div>
                           <div className="flex items-center gap-2">
                             <Users size={16} className="text-teal" />
-                            <p className="font-semibold text-navy">Public</p>
+                            <p className="font-semibold text-navy dark:text-white">Public</p>
                           </div>
-                          <p className="text-sm text-slate-500 mt-1">
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             All freelancers can see and apply to this project
                           </p>
                         </div>
@@ -1026,11 +1028,11 @@ const PostProject = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
                   <Button
                     variant="outline"
                     onClick={prevStep}
-                    className="border-slate-300 text-slate-600"
+                    className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
                   >
                     Previous
                   </Button>
@@ -1046,8 +1048,8 @@ const PostProject = () => {
 
             {/* STEP 4: REVIEW */}
             {currentStep === 4 && (
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                   <Eye size={20} className="text-royal-blue" />
                   Review Your Project
                 </h2>
@@ -1055,7 +1057,7 @@ const PostProject = () => {
                 {/* Project Preview */}
                 <div className="space-y-6">
                   {/* Project Details Section */}
-                  <div className="p-5 bg-slate-50 rounded-xl">
+                  <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent dark:border-white/5">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-navy flex items-center gap-2">
                         <FileText size={16} className="text-teal" />
@@ -1070,10 +1072,10 @@ const PostProject = () => {
                     </div>
                     <div className="grid gap-3">
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Title
                         </p>
-                        <p className="font-medium text-navy">
+                        <p className="font-medium text-navy dark:text-white">
                           {formData.title || "Not specified"}
                         </p>
                       </div>
@@ -1086,23 +1088,23 @@ const PostProject = () => {
                             formData.categories.map((cat) => (
                               <span
                                 key={cat}
-                                className="px-2 py-1 bg-teal/10 text-teal rounded-md text-xs font-medium"
+                                 className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
                               >
                                 {cat}
                               </span>
                             ))
                           ) : (
-                            <span className="text-slate-400 text-sm">
+                            <span className="text-slate-400 dark:text-slate-500 text-sm">
                               Not specified
                             </span>
                           )}
                         </div>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Description
                         </p>
-                        <p className="text-slate-600 text-sm">
+                        <p className="text-slate-600 dark:text-slate-400 text-sm">
                           {formData.description || "Not specified"}
                         </p>
                       </div>
@@ -1133,49 +1135,49 @@ const PostProject = () => {
                             formData.skills.map((skill) => (
                               <span
                                 key={skill}
-                                className="px-2 py-1 bg-teal/10 text-teal rounded-md text-xs font-medium"
+                                 className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
                               >
                                 {skill}
                               </span>
                             ))
                           ) : (
-                            <span className="text-slate-400 text-sm">
+                            <span className="text-slate-400 dark:text-slate-500 text-sm">
                               Not specified
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="grid sm:grid-cols-3 gap-3">
-                        <div>
-                          <p className="text-xs text-slate-500 uppercase">
+                         <div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                             Experience Level
                           </p>
-                          <p className="font-medium text-navy capitalize">
+                          <p className="font-medium text-navy dark:text-white capitalize">
                             {formData.experienceLevel || "Any"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500 uppercase">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                             Duration
                           </p>
-                          <p className="font-medium text-navy">
+                          <p className="font-medium text-navy dark:text-white">
                             {formData.duration || "Not specified"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500 uppercase">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                             Location Preference
                           </p>
-                          <p className="font-medium text-navy capitalize">
+                          <p className="font-medium text-navy dark:text-white capitalize">
                             {formData.location}
                           </p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Project Location
                         </p>
-                        <p className="font-medium text-navy">
+                        <p className="font-medium text-navy dark:text-white">
                           {formData.city && formData.country
                             ? `${formData.city}, ${formData.country}`
                             : formData.city ||
@@ -1202,28 +1204,28 @@ const PostProject = () => {
                     </div>
                     <div className="grid sm:grid-cols-3 gap-3">
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Budget Type
                         </p>
-                        <p className="font-medium text-navy capitalize">
+                        <p className="font-medium text-navy dark:text-white capitalize">
                           Fixed Price
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Budget Range
                         </p>
-                        <p className="font-medium text-navy">
+                        <p className="font-medium text-navy dark:text-white">
                           {formData.minBudget && formData.maxBudget
                             ? `₹${parseInt(formData.minBudget).toLocaleString()} - ₹${parseInt(formData.maxBudget).toLocaleString()}`
                             : "Not specified"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Deadline
                         </p>
-                        <p className="font-medium text-navy">
+                        <p className="font-medium text-navy dark:text-white">
                           {formData.deadline
                             ? new Date(formData.deadline).toLocaleDateString(
                                 "en-IN",
@@ -1248,9 +1250,9 @@ const PostProject = () => {
                         onChange={(e) =>
                           handleInputChange("termsAccepted", e.target.checked)
                         }
-                        className="mt-1 w-5 h-5 rounded border-slate-300 text-teal focus:ring-teal"
+                        className="mt-1 w-5 h-5 rounded border-slate-300 dark:border-white/10 text-teal focus:ring-teal dark:bg-white/5"
                       />
-                      <span className="text-sm text-slate-600">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
                         I agree to the{" "}
                         <Link to="/terms" className="text-teal hover:underline">
                           Terms of Service
@@ -1300,7 +1302,7 @@ const PostProject = () => {
                   <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
                     <Lightbulb size={18} className="text-gold" />
                   </div>
-                  <h3 className="font-semibold text-navy">
+                   <h3 className="font-semibold text-navy dark:text-white">
                     Tips for a Great Post
                   </h3>
                 </div>
@@ -1327,7 +1329,7 @@ const PostProject = () => {
                   ))}
                 </ul>
 
-                <div className="mt-6 pt-4 border-t border-slate-100">
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10">
                   <Link
                     to="/help/posting-projects"
                     className="text-sm text-teal hover:underline flex items-center gap-1"
@@ -1366,18 +1368,18 @@ const PostProject = () => {
             <div className="w-16 h-16 rounded-full bg-teal/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={32} className="text-teal" />
             </div>
-            <h3 className="text-2xl font-bold text-navy mb-2">
+             <h3 className="text-2xl font-bold text-navy dark:text-white mb-2">
               Project Posted Successfully!
             </h3>
-            <p className="text-slate-500 mb-6">
+             <p className="text-slate-500 dark:text-slate-400 mb-6">
               Your project is now live. Freelancers will start applying soon.
               You'll receive notifications for new applications.
             </p>
             <div className="flex gap-3">
-              <Button
+               <Button
                 variant="outline"
                 onClick={() => navigate("/client/dashboard")}
-                className="flex-1 border-slate-300 text-slate-600"
+                className="flex-1 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
               >
                 Go to Dashboard
               </Button>

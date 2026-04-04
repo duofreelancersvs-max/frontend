@@ -22,6 +22,7 @@ import {
   Sparkles,
   Menu,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -270,52 +271,53 @@ const ClientDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
       {/* MAIN CONTENT */}
       <div>
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full min-w-0">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   Dashboard
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Welcome back, {clientName}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               {/* Search */}
-              <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Search size={20} />
               </button>
 
               {/* Messages */}
-              <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+              <Link to="/client/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
 
               {/* Notifications */}
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -324,7 +326,7 @@ const ClientDashboard = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -337,38 +339,38 @@ const ClientDashboard = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "User"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -429,7 +431,7 @@ const ClientDashboard = () => {
             {statsData.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl p-5 lg:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-white/5 rounded-2xl p-5 lg:p-6 border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div
@@ -442,19 +444,19 @@ const ClientDashboard = () => {
                   </div>
                   <TrendingUp size={16} className="text-green-500" />
                 </div>
-                <p className="text-2xl lg:text-3xl font-bold text-navy mb-1">
+                <p className="text-2xl lg:text-3xl font-bold text-navy dark:text-white mb-1">
                   {stat.value}
                 </p>
-                <p className="text-sm text-slate-500">{stat.label}</p>
-                <p className="text-xs text-slate-400 mt-2">{stat.change}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{stat.change}</p>
               </div>
             ))}
           </section>
 
           {/* ACTIVE PROJECTS */}
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">Active Projects</h3>
+          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+            <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/10">
+              <h3 className="text-lg font-bold text-navy dark:text-white">Active Projects</h3>
               <Link
                 to="/client/projects"
                 className="text-sm text-teal font-medium hover:underline flex items-center gap-1"
@@ -466,10 +468,10 @@ const ClientDashboard = () => {
               {activeProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="p-4 rounded-xl border border-slate-100 hover:border-teal/30 hover:shadow-md transition-all"
+                  className="p-4 rounded-xl border border-slate-100 dark:border-white/10 hover:border-teal/30 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-semibold text-navy text-sm">
+                    <h4 className="font-semibold text-navy dark:text-white text-sm">
                       {project.name}
                     </h4>
                     <span
@@ -491,19 +493,19 @@ const ClientDashboard = () => {
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-xs font-bold">
                       {project.freelancer.avatar}
                     </div>
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
                       {project.freelancer.name}
                     </span>
                   </div>
 
                   <div className="mb-3">
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-slate-500">Progress</span>
-                      <span className="font-semibold text-navy">
+                      <span className="text-slate-500 dark:text-slate-400">Progress</span>
+                      <span className="font-semibold text-navy dark:text-white">
                         {project.progress}%
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-teal to-teal-light rounded-full transition-all"
                         style={{ width: `${project.progress}%` }}
@@ -512,7 +514,7 @@ const ClientDashboard = () => {
                   </div>
 
                   <div className="flex items-center justify-between w-full min-w-0">
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                       <Clock size={12} />
                       {project.deadline === "No deadline"
                         ? "No deadline"
@@ -534,9 +536,9 @@ const ClientDashboard = () => {
           </section>
 
           {/* RECENT APPLICATIONS */}
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">
+          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/10">
+              <h3 className="text-lg font-bold text-navy dark:text-white">
                 Recent Applications
               </h3>
               <Link
@@ -549,20 +551,20 @@ const ClientDashboard = () => {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead>
-                  <tr className="bg-slate-50 text-left">
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
+                  <tr className="bg-slate-50 dark:bg-white/5 text-left">
+                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Freelancer
                     </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Project
                     </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Applied
                     </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Actions
                     </th>
                   </tr>
@@ -571,7 +573,7 @@ const ClientDashboard = () => {
                   {recentApplications.map((app) => (
                     <tr
                       key={app.id}
-                      className="hover:bg-slate-50 transition-colors"
+                      className="hover:bg-slate-50 dark:hover:bg-white/5 border-b border-slate-100 dark:border-white/5 transition-colors last:border-0"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -579,19 +581,19 @@ const ClientDashboard = () => {
                             {app.freelancer.avatar}
                           </div>
                           <div>
-                            <p className="font-medium text-navy text-sm">
+                             <p className="font-medium text-navy dark:text-white text-sm">
                               {app.freelancer.name}
                             </p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
                               {app.freelancer.title}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
+                      <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                         {app.project}
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
+                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                         {app.appliedDate}
                       </td>
                       <td className="px-6 py-4">
@@ -640,11 +642,11 @@ const ClientDashboard = () => {
           {/* TWO COLUMN LAYOUT */}
           <div className="grid lg:grid-cols-3 gap-6">
             {/* LEFT - RECOMMENDED FREELANCERS */}
-            <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm min-w-0">
-              <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100">
+            <section className="lg:col-span-2 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm min-w-0">
+              <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <Sparkles size={18} className="text-gold" />
-                  <h3 className="text-lg font-bold text-navy">
+                  <h3 className="text-lg font-bold text-navy dark:text-white">
                     Recommended for You
                   </h3>
                 </div>
@@ -657,19 +659,19 @@ const ClientDashboard = () => {
               </div>
               <div className="p-5 lg:p-6 flex gap-4 overflow-x-auto pb-4">
                 {recommendedFreelancers.map((freelancer) => (
-                  <div
+                   <div
                     key={freelancer.id}
-                    className="min-w-[260px] p-4 rounded-xl border border-slate-100 hover:border-teal/30 hover:shadow-md transition-all flex-shrink-0"
+                    className="min-w-[260px] p-4 rounded-xl border border-slate-100 dark:border-white/10 hover:border-teal/30 hover:shadow-md transition-all flex-shrink-0"
                   >
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold">
                         {freelancer.avatar}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-navy">
+                         <h4 className="font-semibold text-navy dark:text-white">
                           {freelancer.name}
                         </h4>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                           {freelancer.title}
                         </p>
                       </div>
@@ -678,7 +680,7 @@ const ClientDashboard = () => {
                       {freelancer.skills.slice(0, 2).map((skill) => (
                         <span
                           key={skill}
-                          className="px-2 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-600"
+                           className="px-2 py-1 bg-slate-100 dark:bg-white/10 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400"
                         >
                           {skill}
                         </span>
@@ -687,7 +689,7 @@ const ClientDashboard = () => {
                     <div className="flex items-center justify-end pt-3 border-t border-slate-100">
                       <div className="flex items-center gap-1">
                         <Star size={14} className="text-gold fill-gold" />
-                        <span className="text-sm font-semibold text-navy">
+                         <span className="text-sm font-semibold text-navy dark:text-white">
                           {freelancer.rating}
                         </span>
                         <span className="text-xs text-slate-400">
@@ -709,9 +711,9 @@ const ClientDashboard = () => {
             </section>
 
             {/* RIGHT - RECENT MESSAGES */}
-            <section className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between p-5 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-navy">Recent Messages</h3>
+            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10">
+                <h3 className="text-lg font-bold text-navy dark:text-white">Recent Messages</h3>
                 <Link
                   to="/client/messages"
                   className="text-sm text-teal font-medium hover:underline"
@@ -721,11 +723,11 @@ const ClientDashboard = () => {
               </div>
               <div className="divide-y divide-slate-100">
                 {recentMessages.map((msg) => (
-                  <div
+                   <div
                     key={msg.id}
                     className={cn(
-                      "p-4 hover:bg-slate-50 cursor-pointer transition-colors",
-                      msg.unread && "bg-teal/5",
+                      "p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-white/5 last:border-0",
+                      msg.unread && "bg-teal/5 dark:bg-teal/10",
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -733,16 +735,16 @@ const ClientDashboard = () => {
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-xs font-bold">
                           {msg.avatar}
                         </div>
-                        {msg.unread && (
-                          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-teal rounded-full border-2 border-white" />
+                         {msg.unread && (
+                          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-teal rounded-full border-2 border-white dark:border-[#0F172A]" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <p
                             className={cn(
-                              "text-sm font-semibold",
-                              msg.unread ? "text-navy" : "text-slate-600",
+                               "text-sm font-semibold",
+                              msg.unread ? "text-navy dark:text-white" : "text-slate-600 dark:text-slate-400",
                             )}
                           >
                             {msg.name}
@@ -751,7 +753,7 @@ const ClientDashboard = () => {
                             {msg.time}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-500 truncate">
+                         <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                           {msg.message}
                         </p>
                       </div>
@@ -761,9 +763,9 @@ const ClientDashboard = () => {
               </div>
               <div className="p-4">
                 <Link to="/client/messages">
-                  <Button
+                   <Button
                     variant="outline"
-                    className="w-full border-slate-200 text-slate-600 hover:bg-slate-50"
+                    className="w-full border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <Mail size={16} className="mr-2" />
                     Open Inbox
@@ -776,20 +778,20 @@ const ClientDashboard = () => {
           {/* BOTTOM ROW */}
           <div className="grid lg:grid-cols-3 gap-6">
             {/* QUICK ACTIONS */}
-            <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 lg:p-6">
-              <h3 className="text-lg font-bold text-navy mb-4">
+            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5 lg:p-6">
+              <h3 className="text-lg font-bold text-navy dark:text-white mb-4">
                 Quick Actions
               </h3>
               <div className="space-y-3">
-                <Link
+                 <Link
                   to="/client/post-project"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-teal hover:bg-teal/5 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:border-teal hover:bg-teal/5 transition-all group"
                 >
                   <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center text-teal group-hover:bg-teal group-hover:text-white transition-colors">
                     <PlusCircle size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-navy text-sm">
+                     <p className="font-semibold text-navy dark:text-white text-sm">
                       Post New Project
                     </p>
                     <p className="text-xs text-slate-500">

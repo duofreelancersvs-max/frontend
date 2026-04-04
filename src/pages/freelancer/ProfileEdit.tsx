@@ -27,6 +27,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
@@ -405,10 +406,10 @@ const FreelancerProfileEdit = () => {
   // ---------- LOADING STATE ----------
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#050B15]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={36} className="animate-spin text-teal" />
-          <p className="text-slate-500 text-sm">Loading your profile…</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Loading your profile…</p>
         </div>
       </div>
     );
@@ -419,33 +420,34 @@ const FreelancerProfileEdit = () => {
     "?";
 
   return (
-    <div className="w-full bg-slate-50">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen transition-colors duration-300">
       <div className="w-full">
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/10 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   Edit Profile
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Update your professional information
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link to="/freelancer/profile" className="hidden sm:flex">
                 <Button
                   variant="outline"
-                  className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                  className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
                 >
                   <Eye size={16} className="mr-2" />
                   Preview Profile
@@ -464,18 +466,18 @@ const FreelancerProfileEdit = () => {
                 {saving ? "Saving…" : "Save Changes"}
               </Button>
 
-              <div className="w-px h-8 bg-slate-200 mx-1 hidden lg:block" />
+              <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-1 hidden lg:block" />
 
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -483,7 +485,7 @@ const FreelancerProfileEdit = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -496,38 +498,38 @@ const FreelancerProfileEdit = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#111827] rounded-xl shadow-xl border border-slate-100 dark:border-white/10 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/10">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/10" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -545,10 +547,10 @@ const FreelancerProfileEdit = () => {
             {/* LEFT - Main Form */}
             <div className="flex-1 space-y-6">
               {/* PROFILE PREVIEW CARD */}
-              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                 {/* Cover Image */}
                 <div className="relative h-32 lg:h-40 bg-gradient-to-r from-navy via-royal-blue to-teal">
-                  <button className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white/90 hover:bg-white rounded-lg text-sm font-medium text-navy transition-colors">
+                  <button className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#050B15]/80 hover:bg-white dark:hover:bg-[#050B15] rounded-lg text-sm font-medium text-navy dark:text-white transition-colors backdrop-blur-sm">
                     <Camera size={14} />
                     Change Cover
                   </button>
@@ -561,30 +563,30 @@ const FreelancerProfileEdit = () => {
                       <img
                         src={profile.profilePicture}
                         alt="Profile"
-                        className="w-full h-full rounded-2xl object-cover border-4 border-white shadow-lg"
+                        className="w-full h-full rounded-2xl object-cover border-4 border-white dark:border-[#111827] shadow-lg"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-3xl lg:text-4xl border-4 border-white shadow-lg">
+                      <div className="w-full h-full rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-3xl lg:text-4xl border-4 border-white dark:border-[#111827] shadow-lg">
                         {initials}
                       </div>
                     )}
-                    <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-teal hover:bg-teal-light rounded-full flex items-center justify-center text-white shadow-lg transition-colors">
+                    <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-teal hover:bg-teal-light rounded-full flex items-center justify-center text-white shadow-lg transition-colors border-2 border-white dark:border-[#111827]">
                       <Camera size={14} />
                     </button>
                   </div>
 
                   {/* Verification Status */}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-green/10 text-success-green rounded-full text-sm font-medium">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-green/10 text-success-green rounded-full text-sm font-medium border border-success-green/20">
                       <CheckCircle size={14} />
                       Email Verified
                     </span>
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border",
                         user?.isPhoneVerified
-                          ? "bg-success-green/10 text-success-green"
-                          : "bg-gold/10 text-gold",
+                          ? "bg-success-green/10 text-success-green border-success-green/20"
+                          : "bg-gold/10 text-gold border-gold/20",
                       )}
                     >
                       {user?.isPhoneVerified ? (
@@ -598,10 +600,10 @@ const FreelancerProfileEdit = () => {
                     </span>
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border",
                         profile?.isVerified
-                          ? "bg-success-green/10 text-success-green"
-                          : "bg-slate-100 text-slate-500",
+                          ? "bg-success-green/10 text-success-green border-success-green/20"
+                          : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10",
                       )}
                     >
                       {profile?.isVerified ? (
@@ -616,9 +618,9 @@ const FreelancerProfileEdit = () => {
               </section>
 
               {/* TABS */}
-              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <section className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                 {/* Tab Navigation */}
-                <div className="flex overflow-x-auto border-b border-slate-100">
+                <div className="flex overflow-x-auto border-b border-slate-100 dark:border-white/10">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -627,7 +629,7 @@ const FreelancerProfileEdit = () => {
                         "flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors",
                         activeTab === tab.id
                           ? "border-teal text-teal"
-                          : "border-transparent text-slate-500 hover:text-navy",
+                          : "border-transparent text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                       )}
                     >
                       <tab.icon size={16} />
@@ -644,7 +646,7 @@ const FreelancerProfileEdit = () => {
                       <div className="grid sm:grid-cols-2 gap-6">
                         {/* First Name */}
                         <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                             First Name *
                           </label>
                           <input
@@ -653,14 +655,14 @@ const FreelancerProfileEdit = () => {
                             onChange={(e) =>
                               handleInputChange("firstName", e.target.value)
                             }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                             placeholder="First name"
                           />
                         </div>
 
                         {/* Last Name */}
                         <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                             Last Name *
                           </label>
                           <input
@@ -669,7 +671,7 @@ const FreelancerProfileEdit = () => {
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
                             }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                             placeholder="Last name"
                           />
                         </div>
@@ -678,7 +680,7 @@ const FreelancerProfileEdit = () => {
                       <div className="grid sm:grid-cols-2 gap-6">
                         {/* Display Name */}
                         <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                             Display Name
                           </label>
                           <input
@@ -687,7 +689,7 @@ const FreelancerProfileEdit = () => {
                             onChange={(e) =>
                               handleInputChange("displayName", e.target.value)
                             }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                             placeholder="Public display name"
                           />
                         </div>
@@ -697,7 +699,7 @@ const FreelancerProfileEdit = () => {
 
                       {/* Professional Headline */}
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                           Professional Headline *
                         </label>
                         <input
@@ -706,14 +708,14 @@ const FreelancerProfileEdit = () => {
                           onChange={(e) =>
                             handleInputChange("headline", e.target.value)
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                           placeholder="e.g., Professional Video Editor & Motion Graphics Artist"
                         />
                       </div>
 
                       {/* Bio */}
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                           Bio/About
                         </label>
                         <textarea
@@ -723,7 +725,7 @@ const FreelancerProfileEdit = () => {
                           }
                           rows={4}
                           maxLength={2000}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white resize-none"
                           placeholder="Tell clients about yourself..."
                         />
                         <p className="text-xs text-slate-400 mt-1">
@@ -734,7 +736,7 @@ const FreelancerProfileEdit = () => {
                       <div className="grid sm:grid-cols-2 gap-6">
                         {/* Availability */}
                         <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                             Availability
                           </label>
                           <select
@@ -742,7 +744,7 @@ const FreelancerProfileEdit = () => {
                             onChange={(e) =>
                               handleInputChange("availability", e.target.value)
                             }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy bg-white"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white bg-white dark:bg-white/5"
                           >
                             {availabilityOptions.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -754,7 +756,7 @@ const FreelancerProfileEdit = () => {
 
                         {/* Category */}
                         <div>
-                          <label className="block text-sm font-medium text-navy mb-2">
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                             Category
                           </label>
                           <select
@@ -762,7 +764,7 @@ const FreelancerProfileEdit = () => {
                             onChange={(e) =>
                               handleInputChange("category", e.target.value)
                             }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy bg-white"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white bg-white dark:bg-white/5"
                           >
                             {categoryOptions.map((cat) => (
                               <option key={cat} value={cat}>
@@ -780,7 +782,7 @@ const FreelancerProfileEdit = () => {
                     <div className="space-y-6">
                       {/* Search and Add */}
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                           Add Skills
                         </label>
                         <div className="flex gap-2">
@@ -791,7 +793,7 @@ const FreelancerProfileEdit = () => {
                             onKeyPress={(e) =>
                               e.key === "Enter" && addSkill(newSkill)
                             }
-                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                             placeholder="Type a skill and press Enter"
                           />
                           <Button
@@ -821,19 +823,19 @@ const FreelancerProfileEdit = () => {
 
                       {/* Selected Skills */}
                       <div className="space-y-3">
-                        <h4 className="text-sm font-medium text-navy">
+                        <h4 className="text-sm font-medium text-navy dark:text-white">
                           Your Skills
                         </h4>
                         {skills.map((skill) => (
                           <div
                             key={skill.name}
-                            className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl"
+                            className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
                           >
                             <GripVertical
                               size={16}
-                              className="text-slate-400 cursor-grab"
+                              className="text-slate-400 dark:text-slate-500 cursor-grab"
                             />
-                            <span className="flex-1 font-medium text-navy">
+                            <span className="flex-1 font-medium text-navy dark:text-white">
                               {skill.name}
                             </span>
                             <div className="flex items-center gap-2">
@@ -856,7 +858,7 @@ const FreelancerProfileEdit = () => {
                             </div>
                             <button
                               onClick={() => removeSkill(skill.name)}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -904,7 +906,7 @@ const FreelancerProfileEdit = () => {
                   {activeTab === "portfolio" && (
                     <div className="space-y-6">
                       <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-medium text-navy">
+                        <h4 className="text-sm font-medium text-navy dark:text-white">
                           Portfolio Items ({portfolio.length})
                         </h4>
                         <Button
@@ -926,7 +928,7 @@ const FreelancerProfileEdit = () => {
                             className="group relative rounded-xl border border-slate-200 overflow-hidden hover:border-teal/30 hover:shadow-md transition-all"
                           >
                             {/* Thumbnail */}
-                            <div className="h-40 overflow-hidden relative">
+                            <div className="h-40 overflow-hidden relative border-b border-slate-100 dark:border-white/5">
                               {item.thumbnail ? (
                                 <img
                                   src={item.thumbnail}
@@ -982,7 +984,7 @@ const FreelancerProfileEdit = () => {
                                   setEditingPortfolioItem(item);
                                   setShowPortfolioModal(true);
                                 }}
-                                className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+                                className="p-2 bg-white dark:bg-[#111827] rounded-lg shadow-md hover:bg-slate-50 dark:hover:bg-white/10 transition-colors border border-slate-100 dark:border-white/10"
                               >
                                 <Edit2 size={14} className="text-teal" />
                               </button>
@@ -993,7 +995,7 @@ const FreelancerProfileEdit = () => {
                                 disabled={
                                   actionLoading === `portfolio-del-${item._id}`
                                 }
-                                className="p-2 bg-white rounded-lg shadow-md hover:bg-red-50 transition-colors"
+                                className="p-2 bg-white dark:bg-[#111827] rounded-lg shadow-md hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border border-slate-100 dark:border-white/10"
                               >
                                 {actionLoading ===
                                 `portfolio-del-${item._id}` ? (
@@ -1028,7 +1030,7 @@ const FreelancerProfileEdit = () => {
                   {activeTab === "experience" && (
                     <div className="space-y-6">
                       <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-medium text-navy">
+                        <h4 className="text-sm font-medium text-navy dark:text-white">
                           Work Experience
                         </h4>
                         <Button
@@ -1046,22 +1048,22 @@ const FreelancerProfileEdit = () => {
                         {experience.map((item) => (
                           <div
                             key={item._id}
-                            className="relative pl-6 pb-6 border-l-2 border-slate-200 last:pb-0"
+                            className="relative pl-6 pb-6 border-l-2 border-slate-200 dark:border-white/10 last:pb-0"
                           >
                             {/* Timeline dot */}
-                            <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-teal border-2 border-white" />
+                            <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-teal border-2 border-white dark:border-[#111827]" />
 
-                            <div className="bg-slate-50 rounded-xl p-4 ml-4">
+                            <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 ml-4 border border-slate-100 dark:border-white/5">
                               <div className="flex items-start justify-between mb-2">
                                 <div>
-                                  <h5 className="font-semibold text-navy">
+                                  <h5 className="font-semibold text-navy dark:text-white">
                                     {item.title}
                                   </h5>
-                                  <p className="text-sm text-slate-600">
+                                  <p className="text-sm text-slate-600 dark:text-slate-400">
                                     {item.company}
                                   </p>
                                 </div>
-                                <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-white/10 px-2 py-1 rounded">
                                   {item.startDate
                                     ? new Date(
                                         item.startDate,
@@ -1149,27 +1151,27 @@ const FreelancerProfileEdit = () => {
                         {education.map((item) => (
                           <div
                             key={item._id}
-                            className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl"
+                            className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
                           >
-                            <div className="w-12 h-12 rounded-xl bg-royal-blue/10 flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 rounded-xl bg-royal-blue/10 dark:bg-royal-blue/20 flex items-center justify-center shrink-0">
                               <GraduationCap
                                 size={24}
-                                className="text-royal-blue"
+                                className="text-royal-blue dark:text-royal-blue-light"
                               />
                             </div>
                             <div className="flex-1">
-                              <h5 className="font-semibold text-navy">
+                              <h5 className="font-semibold text-navy dark:text-white">
                                 {item.degree && item.fieldOfStudy
                                   ? `${item.degree} in ${item.fieldOfStudy}`
                                   : item.degree ||
                                     item.fieldOfStudy ||
                                     "Education"}
                               </h5>
-                              <p className="text-sm text-slate-600">
+                              <p className="text-sm text-slate-600 dark:text-slate-400">
                                 {item.institution}
                               </p>
                               {item.year && (
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                   {item.year}
                                 </p>
                               )}
@@ -1216,8 +1218,8 @@ const FreelancerProfileEdit = () => {
             {/* RIGHT SIDEBAR */}
             <div className="lg:w-80 flex flex-col gap-6">
               {/* Profile Completeness */}
-              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-                <h3 className="text-lg font-bold text-navy mb-4">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5">
+                <h3 className="text-lg font-bold text-navy dark:text-white mb-4">
                   Profile Completeness
                 </h3>
 
@@ -1232,7 +1234,8 @@ const FreelancerProfileEdit = () => {
                         cy="50"
                         r="45"
                         fill="none"
-                        stroke="#e2e8f0"
+                        stroke="currentColor"
+                        className="text-slate-200 dark:text-white/10"
                         strokeWidth="8"
                       />
                       <circle
@@ -1259,7 +1262,7 @@ const FreelancerProfileEdit = () => {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-navy">
+                      <span className="text-3xl font-bold text-navy dark:text-white">
                         {profileCompletion}%
                       </span>
                     </div>
@@ -1277,8 +1280,8 @@ const FreelancerProfileEdit = () => {
                       <span
                         className={
                           item.completed
-                            ? "text-slate-500"
-                            : "text-navy font-medium"
+                            ? "text-slate-500 dark:text-slate-400"
+                            : "text-navy dark:text-white font-medium"
                         }
                       >
                         {item.label}
@@ -1289,35 +1292,35 @@ const FreelancerProfileEdit = () => {
               </section>
 
               {/* Profile Tips */}
-              <section className="bg-gradient-to-br from-royal-blue/5 to-teal/5 rounded-2xl border border-royal-blue/10 p-5">
+              <section className="bg-gradient-to-br from-royal-blue/5 to-teal/5 dark:from-royal-blue/10 dark:to-teal/10 rounded-2xl border border-royal-blue/10 dark:border-white/10 p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Lightbulb size={18} className="text-gold" />
-                  <h3 className="font-bold text-navy">Profile Tips</h3>
+                  <h3 className="font-bold text-navy dark:text-white">Profile Tips</h3>
                 </div>
 
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-2 text-sm text-slate-600">
+                  <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <ChevronRight
                       size={16}
                       className="text-teal shrink-0 mt-0.5"
                     />
                     Add a professional profile photo to increase trust
                   </li>
-                  <li className="flex items-start gap-2 text-sm text-slate-600">
+                  <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <ChevronRight
                       size={16}
                       className="text-teal shrink-0 mt-0.5"
                     />
                     Complete ID verification to get a verified badge
                   </li>
-                  <li className="flex items-start gap-2 text-sm text-slate-600">
+                  <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <ChevronRight
                       size={16}
                       className="text-teal shrink-0 mt-0.5"
                     />
                     Add more portfolio items to showcase your work
                   </li>
-                  <li className="flex items-start gap-2 text-sm text-slate-600">
+                  <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <ChevronRight
                       size={16}
                       className="text-teal shrink-0 mt-0.5"
@@ -1356,74 +1359,74 @@ const FreelancerProfileEdit = () => {
 
       {/* EXPERIENCE MODAL */}
       {showExperienceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-navy">Add Experience</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
+              <h3 className="text-lg font-bold text-navy dark:text-white">Add Experience</h3>
               <button
                 onClick={() => setShowExperienceModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
               >
-                <X size={20} className="text-slate-500" />
+                <X size={20} className="text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-navy mb-2">
+                <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                   Job Title *
                 </label>
                 <input
                   ref={expTitleRef}
                   type="text"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                   placeholder="e.g., Senior Video Editor"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy mb-2">
+                <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                   Company Name *
                 </label>
                 <input
                   ref={expCompanyRef}
                   type="text"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                   placeholder="Company name"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-navy mb-2">
+                  <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                     Start Date
                   </label>
                   <input
                     ref={expStartRef}
                     type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-navy mb-2">
+                  <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                     End Date
                   </label>
                   <input
                     ref={expEndRef}
                     type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                     placeholder="Leave empty for Present"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy mb-2">
+                <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                   Description
                 </label>
                 <textarea
                   ref={expDescRef}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white resize-none"
                   rows={3}
                   placeholder="Describe your role and achievements"
                 />

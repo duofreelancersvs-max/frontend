@@ -179,30 +179,30 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050B15] font-sans text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden">
+      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-4xl">
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-sm font-bold text-teal-light mb-8 uppercase tracking-widest">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-sm font-bold text-teal dark:text-teal-light mb-8 uppercase tracking-widest">
                 <Rocket size={16} />
                 Our Mission
               </span>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8 text-navy dark:text-white">
                 Pioneering the <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light via-sky-blue to-teal-light">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">
                   Creative Economy
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl">
+              <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl px-2">
                 We are building more than a marketplace—we are architects of a
                 borderless ecosystem where local talent meets global standards.
               </p>
@@ -212,16 +212,16 @@ const About = () => {
       </section>
 
       {/* 2. STATS GRID */}
-      <section className="py-20 bg-white/5 border-y border-white/5 backdrop-blur-sm">
+      <section className="py-20 bg-white dark:bg-white/5 border-y border-slate-200 dark:border-white/5 backdrop-blur-sm">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {stats.map((stat, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
                 <div className="text-center group">
-                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-teal/20 transition-all border border-white/10">
+                  <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-teal/20 transition-all border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none">
                     <stat.icon className="text-teal" size={30} />
                   </div>
-                  <div className="text-4xl md:text-5xl font-bold mb-2 tabular-nums">
+                  <div className="text-4xl md:text-5xl font-bold mb-2 tabular-nums text-navy dark:text-white">
                     {stat.value}
                   </div>
                   <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">
@@ -241,32 +241,32 @@ const About = () => {
             {/* Left: Interactive Visual */}
             <AnimatedSection>
               <div className="relative group">
-                <div className="aspect-square md:aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-navy to-royal-blue/30 p-1 border border-white/10 overflow-hidden">
-                  <div className="absolute inset-0 bg-plus-pattern opacity-10" />
-                  <div className="h-full w-full bg-[#050B15]/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-square md:aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-teal/20 to-royal-blue/30 dark:from-navy dark:to-royal-blue/30 p-1 border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-none">
+                  <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-10" />
+                  <div className="h-full w-full bg-white dark:bg-[#050B15]/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
                     {/* Animated Shapes */}
-                    <div className="absolute top-10 left-10 w-32 h-32 bg-teal/20 blur-3xl animate-pulse" />
-                    <div className="absolute bottom-10 right-10 w-32 h-32 bg-royal-blue/20 blur-3xl animate-pulse delay-1000" />
+                    <div className="absolute top-10 left-10 w-32 h-32 bg-teal/10 dark:bg-teal/20 blur-3xl animate-pulse" />
+                    <div className="absolute bottom-10 right-10 w-32 h-32 bg-royal-blue/10 dark:bg-royal-blue/20 blur-3xl animate-pulse delay-1000" />
 
                     <div className="text-center relative z-10 px-8">
-                      <div className="w-20 h-20 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/20">
-                        <Play fill="currentColor" className="text-white ml-1" size={28} />
+                      <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-200 dark:border-white/20 shadow-sm">
+                        <Play fill="currentColor" className="text-teal dark:text-white ml-1" size={28} />
                       </div>
-                      <h4 className="text-2xl font-bold mb-4">Watch Our Journey</h4>
-                      <p className="text-slate-400">Discover how ConnectMeIndia is transforming lives through creativity.</p>
+                      <h4 className="text-2xl font-bold mb-4 text-navy dark:text-white">Watch Our Journey</h4>
+                      <p className="text-slate-600 dark:text-slate-400">Discover how ConnectMeIndia is transforming lives through creativity.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Floating Achievement Card */}
-                <div className="absolute -bottom-10 -right-4 md:-right-10 glass-card p-6 rounded-2xl max-w-xs animate-float">
+                <div className="absolute -bottom-10 -right-4 md:-right-10 bg-white dark:glass-card shadow-xl dark:shadow-none border border-slate-100 dark:border-white/10 p-6 rounded-2xl max-w-xs animate-float">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-teal/20 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-teal/10 dark:bg-teal/20 rounded-xl flex items-center justify-center">
                       <Shield className="text-teal" size={24} />
                     </div>
                     <div>
-                      <div className="text-lg font-bold">100% Secure</div>
-                      <div className="text-xs text-slate-400">Every project protected by escrow and verification.</div>
+                      <div className="text-lg font-bold text-navy dark:text-white">100% Secure</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Every project protected by escrow and verification.</div>
                     </div>
                   </div>
                 </div>
@@ -278,13 +278,13 @@ const About = () => {
               <div className="space-y-8">
                 <div className="space-y-4">
                   <span className="text-teal font-bold uppercase tracking-widest text-sm">Our Genesis</span>
-                  <h2 className="text-4xl md:text-6xl font-bold leading-tight">
+                  <h2 className="text-4xl md:text-6xl font-bold leading-tight text-navy dark:text-white">
                     From Local Roots to <br />
-                    <span className="text-gradient">Global Standards</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Global Standards</span>
                   </h2>
                 </div>
 
-                <div className="space-y-6 text-slate-400 text-lg leading-relaxed">
+                <div className="space-y-6 text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
                   <p>
                     Founded in the heart of South India, ConnectMeIndia was born from a simple observation: the region is home to world-class talent, yet lacked a dedicated professional bridge.
                   </p>
@@ -309,28 +309,28 @@ const About = () => {
       </section>
 
       {/* 4. MISSION & VISION - GLASSY TILES */}
-      <section className="py-32 bg-white/5 relative">
+      <section className="py-32 bg-white dark:bg-white/5 border-y border-slate-200 dark:border-white/5 relative">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10">
             <AnimatedSection>
-              <div className="glass-card p-12 rounded-[2.5rem] h-full hover-glow">
-                <div className="w-16 h-16 bg-teal/20 rounded-2xl flex items-center justify-center text-teal mb-8 border border-teal/20">
+              <div className="bg-slate-50 dark:bg-transparent dark:glass-card p-12 rounded-[2.5rem] h-full hover-glow shadow-sm dark:shadow-none border border-slate-200 dark:border-white/10">
+                <div className="w-16 h-16 bg-teal/10 dark:bg-teal/20 rounded-2xl flex items-center justify-center text-teal mb-8 border border-teal/20">
                   <Target size={32} />
                 </div>
-                <h3 className="text-3xl font-bold mb-6">Our Mission</h3>
-                <p className="text-slate-400 text-lg leading-relaxed">
+                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">Our Mission</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
                   To democratize access to elite creative workflows by bridging the gap between exceptional local talent and visionary businesses who value craftsmanship over mass production.
                 </p>
               </div>
             </AnimatedSection>
 
             <AnimatedSection delay={200}>
-              <div className="glass-card p-12 rounded-[2.5rem] h-full hover-glow">
-                <div className="w-16 h-16 bg-royal-blue/20 rounded-2xl flex items-center justify-center text-royal-blue mb-8 border border-royal-blue/20">
+              <div className="bg-slate-50 dark:bg-transparent dark:glass-card p-12 rounded-[2.5rem] h-full hover-glow shadow-sm dark:shadow-none border border-slate-200 dark:border-white/10">
+                <div className="w-16 h-16 bg-royal-blue/10 dark:bg-royal-blue/20 rounded-2xl flex items-center justify-center text-royal-blue mb-8 border border-royal-blue/20">
                   <Eye size={32} />
                 </div>
-                <h3 className="text-3xl font-bold mb-6">Our Vision</h3>
-                <p className="text-slate-400 text-lg leading-relaxed">
+                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">Our Vision</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
                   To establish ConnectMeIndia as the definitive gold standard for creative hiring, fostering a future where professional growth is determined by skill alone, irrespective of location.
                 </p>
               </div>
@@ -345,15 +345,15 @@ const About = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="glass-card p-10 rounded-3xl hover-glow h-full group">
+                <div className="bg-white dark:bg-transparent dark:glass-card p-10 rounded-3xl hover-glow h-full group shadow-md dark:shadow-none border border-slate-100 dark:border-white/10">
                   <div className={cn(
                     "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-8 shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-6",
                     feature.color
                   )}>
                     <feature.icon size={26} />
                   </div>
-                  <h3 className="text-xl font-bold mb-4">{feature.title}</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm">{feature.desc}</p>
+                  <h3 className="text-xl font-bold mb-4 text-navy dark:text-white">{feature.title}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">{feature.desc}</p>
                 </div>
               </AnimatedSection>
             ))}
@@ -365,28 +365,28 @@ const About = () => {
       <section className="py-32">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-20 space-y-4">
-            <span className="text-sky-blue font-bold tracking-widest uppercase text-sm">The Architects</span>
-            <h2 className="text-4xl md:text-6xl font-bold">Behind the Vision</h2>
+            <span className="text-royal-blue dark:text-sky-blue font-bold tracking-widest uppercase text-sm">The Architects</span>
+            <h2 className="text-4xl md:text-6xl font-bold text-navy dark:text-white">Behind the Vision</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="group relative glass-card p-8 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/10 border-white/5">
+                <div className="group relative bg-white dark:bg-transparent dark:glass-card p-8 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-100 dark:border-white/5 shadow-lg dark:shadow-none">
                   <div className="relative mb-8 inline-block">
-                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-teal/20 to-royal-blue/20 flex items-center justify-center text-white font-bold text-3xl border border-white/10 group-hover:scale-110 transition-transform">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-teal/10 to-royal-blue/10 dark:from-teal/20 dark:to-royal-blue/20 flex items-center justify-center text-teal dark:text-white font-bold text-3xl border border-slate-100 dark:border-white/10 group-hover:scale-110 transition-transform">
                       {member.avatar}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                  <p className="text-teal-light text-sm font-bold mb-4 uppercase tracking-wider">{member.role}</p>
-                  <p className="text-slate-500 text-sm mb-6 leading-relaxed">{member.bio}</p>
+                  <h3 className="text-xl font-bold mb-1 text-navy dark:text-white">{member.name}</h3>
+                  <p className="text-teal dark:text-teal-light text-sm font-bold mb-4 uppercase tracking-wider">{member.role}</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">{member.bio}</p>
 
                   <div className="flex gap-3">
-                    <a href={member.linkedin} className="w-9 h-9 rounded-xl glass-card flex items-center justify-center hover:bg-royal-blue hover:text-white transition-all">
+                    <a href={member.linkedin} className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-royal-blue hover:text-white transition-all border border-slate-200 dark:border-none">
                       <Linkedin size={16} />
                     </a>
-                    <a href={member.twitter} className="w-9 h-9 rounded-xl glass-card flex items-center justify-center hover:bg-sky-blue hover:text-white transition-all">
+                    <a href={member.twitter} className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-sky-blue hover:text-white transition-all border border-slate-200 dark:border-none">
                       <Twitter size={16} />
                     </a>
                   </div>
@@ -418,12 +418,12 @@ const About = () => {
                       "w-full md:w-1/2 pl-16 md:pl-0",
                       idx % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16"
                     )}>
-                      <div className="glass-card p-8 rounded-2xl border-white/5 hover:border-teal/30 hover:bg-white/10 transition-all cursor-default">
+                      <div className="bg-white dark:bg-transparent dark:glass-card p-8 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-teal/30 hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-default shadow-sm dark:shadow-none">
                         <span className="text-teal font-bold text-xs uppercase tracking-widest mb-2 block">
                           {item.month} {item.year}
                         </span>
-                        <h4 className="text-xl font-bold mb-2">{item.title}</h4>
-                        <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                        <h4 className="text-xl font-bold mb-2 text-navy dark:text-white">{item.title}</h4>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   </div>
@@ -440,14 +440,14 @@ const About = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-10">
             <AnimatedSection>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tight">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-navy dark:text-white">
                 Be Part of the <br />
-                <span className="text-gradient">Evolution</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Evolution</span>
               </h2>
             </AnimatedSection>
 
             <AnimatedSection delay={200}>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed px-2">
                 ConnectMeIndia is rapidly expanding. Secure your place in India's premier creative marketplace today.
               </p>
             </AnimatedSection>
@@ -455,12 +455,12 @@ const About = () => {
             <AnimatedSection delay={300}>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Link to="/register?role=client">
-                  <Button size="lg" className="h-16 px-12 rounded-2xl bg-white text-navy font-bold text-lg hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-2xl">
+                  <Button size="lg" className="h-16 px-12 rounded-2xl bg-teal dark:bg-white text-white dark:text-navy font-bold text-lg hover:bg-teal-light dark:hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-teal/20 dark:shadow-2xl">
                     Hire Talent
                   </Button>
                 </Link>
                 <Link to="/register?role=freelancer">
-                  <Button size="lg" variant="outline" className="h-16 px-12 rounded-2xl border-white/20 text-white font-bold text-lg hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
+                  <Button size="lg" variant="outline" className="h-16 px-12 rounded-2xl border-slate-300 dark:border-white/20 text-slate-700 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
                     Find Work
                   </Button>
                 </Link>

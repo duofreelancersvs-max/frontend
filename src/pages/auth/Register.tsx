@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import type { UserRole } from "@/types/auth.types";
 
 type Step = "role" | "form";
@@ -194,14 +195,17 @@ const Register = () => {
       </div>
 
       {/* RIGHT SIDE - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 relative">
-        <button
-          onClick={() => navigate("/")}
-          className="absolute top-8 left-8 flex items-center text-slate-500 hover:text-navy transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200"
-        >
-          <HomeIcon size={18} className="mr-2" />
-          Back to Home
-        </button>
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 dark:bg-[#050B15] relative">
+        <div className="absolute top-8 right-8 flex items-center gap-4">
+          <ThemeToggle />
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors bg-white dark:bg-white/5 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-white/10"
+          >
+            <HomeIcon size={18} className="mr-2" />
+            Back to Home
+          </button>
+        </div>
 
         <div className="w-full max-w-lg mt-10">
           {/* Mobile Logo */}
@@ -210,12 +214,12 @@ const Register = () => {
           </div>
 
           {/* Form Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-8 border border-slate-100 dark:border-white/10">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-navy mb-2">
+              <h1 className="text-2xl font-bold text-navy dark:text-white mb-2">
                 Create Account
               </h1>
-              <p className="text-slate-500">
+              <p className="text-slate-500 dark:text-slate-400">
                 {step === "role"
                   ? "Choose your account type"
                   : selectedRole === "client"
@@ -249,16 +253,16 @@ const Register = () => {
                         "w-12 h-12 rounded-xl flex items-center justify-center",
                         selectedRole === "client"
                           ? "bg-teal text-white"
-                          : "bg-slate-100 text-slate-600",
+                          : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
                       )}
                     >
                       <Building size={24} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-navy mb-1">
+                      <h3 className="font-bold text-navy dark:text-white mb-1">
                         I&apos;m a Client
                       </h3>
-                      <p className="text-slate-500 text-sm">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">
                         Looking to hire talented professionals for my projects
                       </p>
                     </div>
@@ -284,16 +288,16 @@ const Register = () => {
                         "w-12 h-12 rounded-xl flex items-center justify-center",
                         selectedRole === "freelancer"
                           ? "bg-teal text-white"
-                          : "bg-slate-100 text-slate-600",
+                          : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
                       )}
                     >
                       <Briefcase size={24} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-navy mb-1">
+                      <h3 className="font-bold text-navy dark:text-white mb-1">
                         I&apos;m a Freelancer
                       </h3>
-                      <p className="text-slate-500 text-sm">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">
                         Looking for exciting projects and opportunities
                       </p>
                     </div>
@@ -318,7 +322,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="flex items-center text-slate-500 hover:text-navy transition-colors mb-4"
+                  className="flex items-center text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors mb-4"
                 >
                   <ArrowLeft size={18} className="mr-1" />
                   Back
@@ -329,7 +333,7 @@ const Register = () => {
                     {/* Client Fields */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                           Full Name
                         </label>
                         <div className="relative">
@@ -349,7 +353,7 @@ const Register = () => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                           Company Name
                         </label>
                         <div className="relative">
@@ -610,10 +614,10 @@ const Register = () => {
                 {/* Divider */}
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200" />
+                    <div className="w-full border-t border-slate-200 dark:border-white/10" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-slate-500">OR</span>
+                    <span className="px-4 bg-white dark:bg-[#121A2A] text-slate-500 dark:text-slate-400 rounded-full">OR</span>
                   </div>
                 </div>
 

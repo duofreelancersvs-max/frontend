@@ -87,29 +87,33 @@ const PublicNavbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-[64px] left-0 w-full bg-white border-b border-slate-100 shadow-lg animate-in slide-in-from-top-5">
+        <div className="md:hidden absolute top-[64px] left-0 w-full bg-white dark:bg-[#050B15] border-b border-slate-100 dark:border-white/10 shadow-lg animate-in slide-in-from-top-5 z-[51]">
           <div className="flex flex-col p-4 gap-4">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
-                className="text-base font-medium text-slate-500 hover:text-navy py-2"
+                className="text-base font-medium text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.name}
               </Link>
             ))}
-            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-slate-100">
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-white/10">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Theme</span>
+                <ThemeToggle />
+              </div>
               <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                 <Button
                   variant="outline"
-                  className="w-full border-royal-blue text-royal-blue hover:bg-royal-blue/5"
+                  className="w-full border-royal-blue text-royal-blue dark:border-teal-light dark:text-teal-light hover:bg-royal-blue/5 dark:hover:bg-teal-light/10"
                 >
                   Log In
                 </Button>
               </Link>
               <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full bg-teal hover:bg-teal/90 text-white">
+                <Button className="w-full bg-teal hover:bg-teal/90 text-white shadow-lg shadow-teal/20">
                   Sign Up
                 </Button>
               </Link>

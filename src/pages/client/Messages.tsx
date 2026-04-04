@@ -19,6 +19,7 @@ import { ChatAvatar } from "@/components/chat";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
+import { ThemeToggle as ThemeToggleButton } from "@/components/theme/ThemeToggle";
 
 const ClientMessages = () => {
   const { user, logout } = useAuth();
@@ -478,69 +479,70 @@ const ClientMessages = () => {
     });
   };
 
-  return (
-    <div className="h-full flex flex-col bg-background font-sans overflow-hidden">
-      {/* Header */}
-      <header className="h-16 bg-white border-b border-slate-200 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
+   return (
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#050B15] font-sans overflow-hidden">
+       {/* Header */}
+      <header className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-4">
-          <button
+           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+            className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
           >
             <Menu size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-bold text-navy">Messages</h1>
+           <div>
+            <h1 className="text-xl font-bold text-navy dark:text-white">Messages</h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link to="/client/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+         <div className="flex items-center gap-2 lg:gap-3">
+          <ThemeToggleButton className="w-9 h-9" />
+          <Link to="/client/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
             <MessageSquare size={20} />
             {totalUnreadCount > 0 && (
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
             )}
           </Link>
-          <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+           <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
             <Bell size={20} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
           </button>
           <div className="relative">
-            <button
+             <button
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-              className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
               <ChatAvatar
                 name={user?.fullName || "U"}
                 size="sm"
                 showOnlineIndicator={false}
               />
-              <ChevronDown
+               <ChevronDown
                 size={16}
-                className="text-slate-500 hidden sm:block"
+                className="text-slate-500 dark:text-slate-400 hidden sm:block"
               />
             </button>
-            {profileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="font-semibold text-navy">
+             {profileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                  <p className="font-semibold text-navy dark:text-white">
                     {user?.fullName || "User"}
                   </p>
-                  <p className="text-sm text-slate-500">{user?.email || ""}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email || ""}</p>
                 </div>
                 <Link
                   to="/client/profile"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                 >
                   <User size={16} /> My Profile
                 </Link>
                 <Link
                   to="/client/settings"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                 >
                   <Settings size={16} /> Settings
                 </Link>
-                <hr className="my-2 border-slate-100" />
+                <hr className="my-2 border-slate-100 dark:border-white/5" />
                 <button 
                   onClick={async () => {
                     try {
@@ -549,7 +551,7 @@ const ClientMessages = () => {
                       console.error("Logout failed:", error);
                     }
                   }}
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                 >
                   <LogOut size={16} /> Logout
                 </button>
@@ -559,8 +561,8 @@ const ClientMessages = () => {
         </div>
       </header>
 
-      {/* Chat Container */}
-      <div className="flex-1 flex overflow-hidden bg-slate-100">
+       {/* Chat Container */}
+      <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-[#050B15]">
         {/* Conversation List */}
         <ConversationList
           conversations={conversationItems}

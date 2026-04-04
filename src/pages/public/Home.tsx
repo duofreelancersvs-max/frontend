@@ -247,9 +247,9 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
       {/* Floating Scroll Progress */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-slate-100 z-[100]">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-slate-100 dark:bg-white/10 z-[100]">
         <div
           className="h-full bg-gradient-to-r from-teal to-royal-blue transition-all duration-150"
           style={{
@@ -261,45 +261,45 @@ const Home = () => {
       <PublicNavbar />
 
       {/* 2. HERO SECTION - REVAMPED */}
-      <section className="relative min-h-[90vh] flex items-center pt-12 md:pt-20 overflow-hidden bg-[#050B15]">
+      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-24 md:pt-32 pb-12 overflow-hidden bg-[#050B15]">
         {/* Animated Background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-[#0A1628] to-[#112240] opacity-90" />
-          <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
+          <div className="absolute top-0 right-0 w-[800px] md:w-[1000px] h-[800px] md:h-[1000px] bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-[600px] md:w-[800px] h-[600px] md:h-[800px] bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
           <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-6 animate-fade-in-up">
-              <span className="text-xs font-semibold text-teal-light tracking-wider uppercase text-center w-full">
+            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-4 md:mb-6 animate-fade-in-up">
+              <span className="text-[10px] md:text-xs font-semibold text-teal-light tracking-wider uppercase">
                 #1 Creative Marketplace in India
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-6">
-              Empower Your Business with <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light via-sky-blue to-teal-light">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight md:leading-[1.1] mb-4 md:mb-6">
+              Empower Your Business with <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light via-sky-blue to-teal-light pl-1 lg:pl-0">
                 Elite Talent
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
               Connect with India's most skilled freelancers. From creative arts
               to professional services, we bring the best to your doorstep.
             </p>
 
             {/* Role Switcher CTAs - PREMIUM & HIGH CONTRAST */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-10 mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mt-6 mb-8 md:mb-12">
               {isAuthenticated ? (
                 <>
                   <Link to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"} className="w-full sm:w-auto">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-10 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl shadow-xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
                       Go to Dashboard
                     </Button>
@@ -308,7 +308,7 @@ const Home = () => {
                     <Button
                       size="lg"
                       variant="ghost"
-                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-10 py-8 text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
                       {user?.role === "client" ? "Post a Project" : "Browse Projects"}
                     </Button>
@@ -319,7 +319,7 @@ const Home = () => {
                   <Link to="/register?role=client" className="w-full sm:w-auto">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-10 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl shadow-xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
                       I want to Hire Talent
                     </Button>
@@ -328,7 +328,7 @@ const Home = () => {
                     <Button
                       size="lg"
                       variant="ghost"
-                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-10 py-8 text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
                       I want to find Work
                     </Button>
@@ -341,7 +341,7 @@ const Home = () => {
             <div
               ref={searchContainerRef}
               className={cn(
-                "relative max-w-2xl mx-auto transition-all duration-300 px-4 sm:px-0",
+                "relative max-w-2xl mx-auto transition-all duration-300 px-2 sm:px-0",
                 searchFocused ? "scale-[1.02]" : "",
               )}
             >
@@ -427,7 +427,7 @@ const Home = () => {
       </section>
 
       {/* 2. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
-      <section className="py-24 bg-white relative z-20">
+      <section className="py-24 bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
@@ -435,18 +435,18 @@ const Home = () => {
                 <span className="text-teal font-bold tracking-widest uppercase text-sm mb-4 block">
                   Top Skills
                 </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy">
+                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
                   Browse by Top Category
                 </h2>
-                <p className="text-slate-500 text-lg mt-4">
+                <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
                   Find expert professionals across various domains to fuel your
                   growth.
                 </p>
               </div>
-              <Link to="/freelancers">
+              <Link to="/categories">
                 <Button
                   variant="outline"
-                  className="border-navy text-navy hover:bg-navy hover:text-white rounded-xl px-8 h-14 font-bold transition-all"
+                  className="border-slate-300 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl px-8 h-14 font-bold transition-all shadow-sm"
                 >
                   Browse All Categories
                 </Button>
@@ -459,7 +459,7 @@ const Home = () => {
               <AnimatedSection key={cat.name} delay={idx * 100}>
                 <Link
                   to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
-                  className="group bg-slate-50 p-6 sm:p-8 rounded-3xl border border-transparent hover:border-teal/20 hover:bg-white hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full"
+                  className="group bg-white dark:bg-white/5 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-teal/20 dark:hover:border-teal/20 hover:bg-slate-50 dark:hover:bg-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full shadow-sm dark:shadow-none"
                 >
                   <div
                     className={cn(
@@ -469,10 +469,10 @@ const Home = () => {
                   >
                     <cat.icon size={28} />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-navy mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-navy dark:text-white mb-2">
                     {cat.name}
                   </h3>
-                  <p className="text-sm text-slate-500 mb-6 line-clamp-2">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
                     {cat.desc}
                   </p>
                   <div className="flex items-center text-teal font-bold text-sm">
@@ -490,7 +490,7 @@ const Home = () => {
       </section>
 
       {/* 3. FEATURED FREELANCERS */}
-      <section className="py-24 bg-slate-50" id="find-talent">
+      <section className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5" id="find-talent">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
@@ -498,10 +498,10 @@ const Home = () => {
                 <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
                   Top Talent
                 </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-2">
+                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
                   Featured Professionals
                 </h2>
-                <p className="text-slate-500 text-lg">
+                <p className="text-slate-600 dark:text-slate-400 text-lg">
                   Work with our top-rated creative experts in the region.
                 </p>
               </div>
@@ -531,7 +531,7 @@ const Home = () => {
 
                 return (
                   <AnimatedSection key={freelancer._id} delay={idx * 100}>
-                    <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full flex flex-col hover:-translate-y-2">
+                    <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
                       {/* Header Gradient */}
                       <div className="h-24 bg-gradient-to-r from-navy to-royal-blue relative">
                         <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
@@ -544,7 +544,7 @@ const Home = () => {
 
                       {/* Profile */}
                       <div className="px-6 pb-8 -mt-12 relative flex-1 flex flex-col">
-                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-xl mb-4 group-hover:scale-110 transition-transform overflow-hidden">
+                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-4 group-hover:scale-110 transition-transform overflow-hidden">
                           {freelancer.profilePicture ? (
                             <img
                               src={freelancer.profilePicture}
@@ -555,10 +555,10 @@ const Home = () => {
                             initials
                           )}
                         </div>
-                        <h3 className="font-bold text-navy text-xl mb-1 group-hover:text-teal transition-colors">
+                        <h3 className="font-bold text-navy dark:text-white text-xl mb-1 group-hover:text-teal transition-colors">
                           {name}
                         </h3>
-                        <p className="text-xs text-slate-500 mb-4 line-clamp-1 h-4">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-1 h-4">
                           {freelancer.headline || freelancer.category}
                         </p>
 
@@ -568,17 +568,17 @@ const Home = () => {
                               key={
                                 typeof skill === "string" ? skill : skill.name
                               }
-                              className="text-[10px] bg-slate-50 text-slate-600 px-3 py-1 rounded-full font-semibold"
+                              className="text-[10px] bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
                             >
                               {typeof skill === "string" ? skill : skill.name}
                             </span>
                           ))}
                         </div>
 
-                        <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100">
-                          <div className="text-lg font-black text-navy">
+                        <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                          <div className="text-lg font-black text-navy dark:text-white">
                             ₹{freelancer.hourlyRate}
-                            <span className="text-slate-400 font-normal text-sm">
+                            <span className="text-slate-400 dark:text-slate-500 font-normal text-sm">
                               /hr
                             </span>
                           </div>
@@ -602,17 +602,17 @@ const Home = () => {
       </section>
 
       {/* 4. PLANS & PRICING PREVIEW */}
-      <section className="py-24 bg-white overflow-hidden relative">
+      <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="text-center max-w-3xl mx-auto mb-16">
               <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
                 Hiring Made Easy
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-6">
                 Affordable Plans for Everyone
               </h2>
-              <p className="text-slate-500 text-lg">
+              <p className="text-slate-600 dark:text-slate-400 text-lg">
                 Choose the perfect plan to unlock the full potential of our
                 marketplace.
               </p>
@@ -624,20 +624,20 @@ const Home = () => {
               <AnimatedSection key={plan.name} delay={idx * 100}>
                 <div
                   className={cn(
-                    "bg-white p-5 md:p-6 rounded-2xl border transition-all duration-500 h-full flex flex-col items-center text-center",
+                    "bg-white dark:bg-white/5 p-5 md:p-6 rounded-2xl border transition-all duration-500 h-full flex flex-col items-center text-center",
                     plan.highlighted
-                      ? "border-teal shadow-xl scale-105 z-10"
-                      : "border-slate-100 hover:shadow-lg hover:border-teal/20",
+                      ? "border-teal dark:border-teal shadow-xl dark:shadow-none scale-105 z-10"
+                      : "border-slate-100 dark:border-white/10 hover:shadow-lg dark:hover:shadow-none hover:border-teal/20 dark:hover:border-teal/30",
                   )}
                 >
                   <div
                     className={cn(
                       "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
                       plan.name === "Pro"
-                        ? "bg-teal/10 text-teal"
+                        ? "bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light"
                         : plan.name === "Premium"
-                          ? "bg-gold/10 text-gold"
-                          : "bg-slate-100 text-slate-400",
+                          ? "bg-gold/10 dark:bg-gold/20 text-gold"
+                          : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
                     )}
                   >
                     {plan.name === "Premium" ? (
@@ -646,25 +646,25 @@ const Home = () => {
                       <Zap size={24} />
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-navy mb-0.5">
+                  <h3 className="text-lg font-bold text-navy dark:text-white mb-0.5">
                     {plan.name}
                   </h3>
-                  <p className="text-slate-400 text-[10px] mb-3">
+                  <p className="text-slate-500 dark:text-slate-400 text-[10px] mb-3">
                     {plan.description}
                   </p>
                   <div className="mb-4">
-                    <span className="text-2xl font-bold text-navy">
+                    <span className="text-2xl font-bold text-navy dark:text-white">
                       ₹{plan.monthlyPrice}
                     </span>
-                    <span className="text-slate-400 text-xs">/mo</span>
+                    <span className="text-slate-500 dark:text-slate-400 text-xs">/mo</span>
                   </div>
                   <ul className="space-y-2 mb-6 flex-1">
                     {plan.features.map((f) => (
                       <li
                         key={f}
-                        className="flex items-center gap-2 text-slate-600 text-xs font-medium text-left"
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium text-left"
                       >
-                        <Check size={14} className="text-teal shrink-0" /> {f}
+                        <Check size={14} className="text-teal dark:text-teal-light shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -674,7 +674,7 @@ const Home = () => {
                         "w-full py-5 rounded-lg font-bold text-sm transition-all",
                         plan.highlighted
                           ? "bg-teal hover:bg-[#128a7f] text-white shadow-lg shadow-teal/10"
-                          : "bg-slate-50 text-navy hover:bg-slate-100",
+                          : "bg-slate-50 dark:bg-white/5 text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10",
                       )}
                     >
                       {plan.buttonText}
@@ -688,17 +688,17 @@ const Home = () => {
       </section>
 
       {/* 5. HOW IT WORKS */}
-      <section className="py-24 bg-slate-50 relative">
+      <section className="py-24 bg-slate-50 dark:bg-white/5 relative border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="text-center mb-16">
               <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
                 Process
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy">
+              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
                 How It Works
               </h2>
-              <p className="text-slate-500 text-lg mt-4">
+              <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
                 Three simple steps to build your dream team or find your next
                 gig.
               </p>
@@ -728,16 +728,16 @@ const Home = () => {
                 delay={idx * 150}
                 className="text-center group"
               >
-                <div className="w-20 h-20 bg-royal-blue/5 text-royal-blue rounded-full flex items-center justify-center mx-auto mb-8 text-2xl font-black italic relative transition-all duration-300 group-hover:scale-110 group-hover:bg-royal-blue group-hover:text-white">
+                <div className="w-20 h-20 bg-royal-blue/5 dark:bg-royal-blue/10 text-royal-blue rounded-full flex items-center justify-center mx-auto mb-8 text-2xl font-black italic relative transition-all duration-300 group-hover:scale-110 group-hover:bg-royal-blue group-hover:text-white border border-royal-blue/10">
                   <step.icon size={32} />
-                  <div className="absolute -top-1 -right-1 w-8 h-8 bg-white border-2 border-royal-blue rounded-full text-sm flex items-center justify-center not-italic shadow-sm text-navy">
+                  <div className="absolute -top-1 -right-1 w-8 h-8 bg-white dark:bg-[#121A2A] border-2 border-royal-blue rounded-full text-sm flex items-center justify-center not-italic shadow-sm text-navy dark:text-white">
                     {idx + 1}
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-navy mb-4 transition-colors group-hover:text-royal-blue">
+                <h3 className="text-2xl font-bold text-navy dark:text-white mb-4 transition-colors group-hover:text-royal-blue">
                   {step.title}
                 </h3>
-                <p className="text-slate-500 leading-relaxed">{step.desc}</p>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{step.desc}</p>
               </AnimatedSection>
             ))}
           </div>
@@ -745,18 +745,18 @@ const Home = () => {
       </section>
 
       {/* 6. CLIENT REVIEWS - FINAL SECTION */}
-      <section className="py-24 bg-[#050B15] relative overflow-hidden">
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03]" />
+      <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
+        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-teal-light font-bold tracking-widest uppercase text-sm mb-4 block">
+              <span className="text-royal-blue dark:text-teal-light font-bold tracking-widest uppercase text-sm mb-4 block">
                 Satisfaction
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-6">
                 Success Stories
               </h2>
-              <p className="text-slate-400 text-lg">
+              <p className="text-slate-600 dark:text-slate-400 text-lg">
                 See why thousands of businesses trust us for their
                 mission-critical creative needs.
               </p>
@@ -766,24 +766,24 @@ const Home = () => {
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {testimonials.map((t, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 h-full flex flex-col transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-white/5 group">
+                <div className="bg-slate-50 dark:bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-slate-200 dark:border-white/10 h-full flex flex-col transition-all duration-300 hover:bg-white dark:hover:bg-white/10 hover:border-teal/20 dark:hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl dark:hover:shadow-white/5 group shadow-sm dark:shadow-none">
                   <div className="flex gap-1 mb-6 text-gold group-hover:scale-110 transition-transform origin-left">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Star key={i} size={16} fill="currentColor" />
                     ))}
                   </div>
-                  <p className="text-xl text-white/90 leading-relaxed mb-10 flex-1 italic group-hover:text-white transition-colors">
+                  <p className="text-xl text-slate-700 dark:text-white/90 leading-relaxed mb-10 flex-1 italic group-hover:text-navy dark:group-hover:text-white transition-colors">
                     "{t.quote}"
                   </p>
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-lg group-hover:rotate-6 transition-transform">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-lg group-hover:rotate-6 transition-transform shadow-lg">
                       {t.avatar}
                     </div>
                     <div>
-                      <div className="text-white font-bold text-lg group-hover:text-teal-light transition-colors">
+                      <div className="text-navy dark:text-white font-bold text-lg group-hover:text-teal dark:group-hover:text-teal-light transition-colors">
                         {t.author}
                       </div>
-                      <div className="text-slate-500">{t.role}</div>
+                      <div className="text-slate-500 dark:text-slate-500">{t.role}</div>
                     </div>
                   </div>
                 </div>

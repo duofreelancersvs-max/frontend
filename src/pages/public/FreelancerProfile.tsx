@@ -213,9 +213,9 @@ const FreelancerProfile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm py-4">
+      <nav className="sticky top-0 z-50 bg-white dark:bg-[#050B15] shadow-sm py-4 border-b border-slate-100 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             <Logo size="sm" />
@@ -223,25 +223,25 @@ const FreelancerProfile = () => {
             <div className="hidden md:flex items-center gap-6">
               <Link
                 to="/"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
+                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
               >
                 Home
               </Link>
               <Link
                 to="/freelancers"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
+                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
               >
                 Find Talent
               </Link>
               <Link
                 to="/how-it-works"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
+                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
               >
                 How It Works
               </Link>
               <Link
                 to="/pricing"
-                className="text-sm font-medium text-slate-600 hover:text-navy transition-colors"
+                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
               >
                 Pricing
               </Link>
@@ -260,7 +260,7 @@ const FreelancerProfile = () => {
       </nav>
 
       {/* 1. PROFILE HEADER */}
-      <section className="relative bg-navy">
+      <section className="relative bg-navy dark:bg-[#03070C]">
         {/* Background Wrapper - stops horizontal overflow */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue h-[120%]" />
@@ -337,7 +337,7 @@ const FreelancerProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 w-full md:w-auto md:pb-2">
-              <Button className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base">
+              <Button className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base border-0">
                 <MessageSquare size={20} className="mr-2" />
                 Contact Me
               </Button>
@@ -363,32 +363,32 @@ const FreelancerProfile = () => {
       </section>
 
       {/* 2. QUICK STATS BAR */}
-      <section className="py-6 bg-white border-b border-slate-100">
+      <section className="py-6 bg-white dark:bg-white/5 border-b border-slate-100 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-navy">
+              <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.projectsCompleted}
               </div>
-              <div className="text-sm text-slate-500">Projects Completed</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Projects Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-navy">
+              <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.projectsCompleted}
               </div>
-              <div className="text-sm text-slate-500">Projects Completed</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Projects Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-teal">
+              <div className="text-2xl md:text-3xl font-bold text-teal dark:text-teal-light">
                 {freelancer.successRate}%
               </div>
-              <div className="text-sm text-slate-500">Success Rate</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Success Rate</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-navy">
+              <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.memberSince}
               </div>
-              <div className="text-sm text-slate-500">Member Since</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Member Since</div>
             </div>
           </div>
         </div>
@@ -400,11 +400,11 @@ const FreelancerProfile = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* 3. ABOUT SECTION */}
             <AnimatedSection>
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
-                <h2 className="text-xl font-bold text-navy mb-4">About</h2>
+              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-8 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-4">About</h2>
                 <div
                   className={cn(
-                    "text-slate-600 leading-relaxed whitespace-pre-line transition-all duration-300",
+                    "text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line transition-all duration-300",
                     !showFullBio && "line-clamp-4",
                   )}
                 >
@@ -421,29 +421,29 @@ const FreelancerProfile = () => {
 
             {/* 4. SKILLS SECTION */}
             <AnimatedSection delay={100}>
-              <div className="bg-slate-50 rounded-2xl p-8">
-                <h2 className="text-xl font-bold text-navy mb-6">Skills</h2>
+              <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-8 border border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">Skills</h2>
                 <div className="space-y-5">
                   {skills.map((skill, idx) => (
                     <div key={idx}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-navy">
+                        <span className="font-medium text-navy dark:text-white">
                           {skill.name}
                         </span>
                         <span
                           className={cn(
                             "text-xs font-semibold px-2 py-1 rounded-full",
                             skill.level === "Expert"
-                              ? "bg-teal/10 text-teal"
+                              ? "bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light"
                               : skill.level === "Advanced"
-                                ? "bg-royal-blue/10 text-royal-blue"
-                                : "bg-slate-200 text-slate-600",
+                                ? "bg-royal-blue/10 dark:bg-royal-blue/20 text-royal-blue dark:text-sky-blue"
+                                : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400",
                           )}
                         >
                           {skill.level}
                         </span>
                       </div>
-                      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-1000",
@@ -464,9 +464,9 @@ const FreelancerProfile = () => {
 
             {/* 5. PORTFOLIO SECTION */}
             <AnimatedSection delay={200}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-8 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-navy">Portfolio</h2>
+                  <h2 className="text-xl font-bold text-navy dark:text-white">Portfolio</h2>
                   <button className="text-royal-blue font-medium text-sm hover:underline flex items-center gap-1">
                     View All <ExternalLink size={14} />
                   </button>
@@ -510,8 +510,8 @@ const FreelancerProfile = () => {
 
             {/* 6. WORK EXPERIENCE */}
             <AnimatedSection delay={300}>
-              <div className="bg-slate-50 rounded-2xl p-8">
-                <h2 className="text-xl font-bold text-navy mb-6">
+              <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-8 border border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">
                   Work Experience
                 </h2>
                 <div className="relative">
@@ -525,19 +525,19 @@ const FreelancerProfile = () => {
                         <div className="absolute left-4 top-1 w-4 h-4 rounded-full bg-teal border-4 border-slate-50" />
 
                         <div className="flex items-start gap-3 mb-2">
-                          <Building size={18} className="text-slate-400 mt-1" />
+                          <Building size={18} className="text-slate-400 dark:text-slate-500 mt-1" />
                           <div className="flex-1">
-                            <h3 className="font-semibold text-navy">
+                            <h3 className="font-semibold text-navy dark:text-white">
                               {exp.role}
                             </h3>
-                            <p className="text-teal text-sm">{exp.company}</p>
+                            <p className="text-teal dark:text-teal-light text-sm">{exp.company}</p>
                           </div>
-                          <span className="text-sm text-slate-500 flex items-center gap-1">
+                          <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                             <Clock size={14} />
                             {exp.duration}
                           </span>
                         </div>
-                        <p className="text-slate-600 text-sm ml-7">
+                        <p className="text-slate-600 dark:text-slate-400 text-sm ml-7">
                           {exp.description}
                         </p>
                       </div>
@@ -549,15 +549,15 @@ const FreelancerProfile = () => {
 
             {/* 7. EDUCATION & CERTIFICATIONS */}
             <AnimatedSection delay={400}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
-                <h2 className="text-xl font-bold text-navy mb-6">
+              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-8 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">
                   Education & Certifications
                 </h2>
                 <div className="space-y-4">
                   {education.map((edu, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl"
+                      className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
                     >
                       <div className="w-10 h-10 rounded-lg bg-royal-blue/10 flex items-center justify-center flex-shrink-0">
                         {idx === 0 ? (
@@ -570,8 +570,8 @@ const FreelancerProfile = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-navy">{edu.title}</h4>
-                        <p className="text-slate-500 text-sm">
+                        <h4 className="font-semibold text-navy dark:text-white">{edu.title}</h4>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
                           {edu.institution}
                         </p>
                       </div>
@@ -584,15 +584,15 @@ const FreelancerProfile = () => {
 
             {/* 8. REVIEWS SECTION */}
             <AnimatedSection delay={500}>
-              <div className="bg-slate-50 rounded-2xl p-8">
-                <h2 className="text-xl font-bold text-navy mb-6">
+              <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-8 border border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">
                   Client Reviews
                 </h2>
 
                 {/* Rating Summary */}
-                <div className="flex flex-col md:flex-row gap-8 mb-8 p-6 bg-white rounded-xl">
+                <div className="flex flex-col md:flex-row gap-8 mb-8 p-6 bg-white dark:bg-white/10 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm dark:shadow-none">
                   <div className="text-center">
-                    <div className="text-5xl font-bold text-navy mb-2">
+                    <div className="text-5xl font-bold text-navy dark:text-white mb-2">
                       {freelancer.rating}
                     </div>
                     <div className="flex justify-center mb-2">
@@ -604,7 +604,7 @@ const FreelancerProfile = () => {
                         />
                       ))}
                     </div>
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
                       {freelancer.reviews} reviews
                     </div>
                   </div>
@@ -615,16 +615,16 @@ const FreelancerProfile = () => {
                         key={rating.stars}
                         className="flex items-center gap-3"
                       >
-                        <span className="text-sm text-slate-500 w-8">
+                        <span className="text-sm text-slate-500 dark:text-slate-400 w-8">
                           {rating.stars}★
                         </span>
-                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gold rounded-full"
                             style={{ width: `${rating.percentage}%` }}
                           />
                         </div>
-                        <span className="text-sm text-slate-500 w-10">
+                        <span className="text-sm text-slate-500 dark:text-slate-400 w-10">
                           {rating.percentage}%
                         </span>
                       </div>
@@ -635,14 +635,14 @@ const FreelancerProfile = () => {
                 {/* Review Cards */}
                 <div className="space-y-4">
                   {reviews.slice(0, visibleReviews).map((review) => (
-                    <div key={review.id} className="bg-white p-6 rounded-xl">
+                    <div key={review.id} className="bg-white dark:bg-white/5 p-6 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm dark:shadow-none">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                             {review.avatar}
                           </div>
                           <div>
-                            <h4 className="font-semibold text-navy">
+                            <h4 className="font-semibold text-navy dark:text-white">
                               {review.client}
                             </h4>
                             <p className="text-xs text-slate-500">
@@ -669,7 +669,7 @@ const FreelancerProfile = () => {
                         ))}
                       </div>
 
-                      <p className="text-slate-600 text-sm leading-relaxed">
+                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                         {review.text}
                       </p>
                     </div>
@@ -693,9 +693,9 @@ const FreelancerProfile = () => {
           <div className="space-y-6">
             {/* Sticky Contact Card */}
             <div className="sticky top-24">
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-6">
+              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-6 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5 mb-6">
                 <div className="text-center mb-6">
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Average response time: 2 hours
                   </p>
                 </div>
@@ -707,7 +707,7 @@ const FreelancerProfile = () => {
 
                 <Button
                   variant="outline"
-                  className="w-full border-slate-200 text-navy hover:bg-slate-50 py-6"
+                  className="w-full border-slate-200 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 py-6"
                   onClick={() => setIsSaved(!isSaved)}
                 >
                   <Heart
@@ -722,8 +722,8 @@ const FreelancerProfile = () => {
               </div>
 
               {/* 9. SIMILAR FREELANCERS */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h3 className="font-bold text-navy mb-4">
+              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-6 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
+                <h3 className="font-bold text-navy dark:text-white mb-4">
                   Similar Freelancers
                 </h3>
                 <div className="space-y-4">
@@ -738,15 +738,15 @@ const FreelancerProfile = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-navy group-hover:text-royal-blue transition-colors">
+                          <h4 className="font-semibold text-navy dark:text-white group-hover:text-royal-blue dark:group-hover:text-teal transition-colors">
                             {fl.name}
                           </h4>
                           {fl.verified && (
                             <BadgeCheck size={14} className="text-gold" />
                           )}
                         </div>
-                        <p className="text-sm text-slate-500">{fl.title}</p>
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{fl.title}</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                           <Star size={12} className="text-gold fill-gold" />
                           <span>{fl.rating}</span>
                         </div>

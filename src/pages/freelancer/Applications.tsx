@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useLocation } from "react-router-dom";
 import { useUnreadStore } from "@/stores/unread.store";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -24,6 +24,7 @@ import {
 import { getCategoryStyle } from "@/lib/category-styles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { applicationService } from "@/services";
 import type { Application } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
@@ -55,9 +56,22 @@ const FreelancerApplications = () => {
     }
   };
 
+  const location = useLocation();
+  const openAppId = (location.state as any)?.openApplicationId;
+
   useEffect(() => {
-    fetchApplications();
+    const loadAndSelect = async () => {
+      await fetchApplications();
+    };
+    loadAndSelect();
   }, []);
+
+  useEffect(() => {
+    if (openAppId && applications.length > 0) {
+      const app = applications.find((a) => (a._id || a.id) === openAppId);
+      if (app) setSelectedApplication(app);
+    }
+  }, [openAppId, applications]);
 
   const handleWithdraw = async (id: string) => {
     if (!window.confirm("Are you sure you want to withdraw this application?"))
@@ -123,10 +137,10 @@ const FreelancerApplications = () => {
   };
 
   return (
-    <div className="w-full bg-slate-50">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15]">
       <div className="w-full">
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
@@ -136,24 +150,26 @@ const FreelancerApplications = () => {
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   My Applications
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Track and manage your project applications
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
-              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+              <ThemeToggle className="w-9 h-9" />
+              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
               <Link to="/freelancer/projects" className="hidden sm:flex">
                 <Button className="bg-teal hover:bg-teal-light text-white">
@@ -165,7 +181,7 @@ const FreelancerApplications = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -178,14 +194,14 @@ const FreelancerApplications = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
                       </p>
                       <p className="text-sm text-slate-500 truncate">
@@ -194,14 +210,14 @@ const FreelancerApplications = () => {
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
@@ -209,7 +225,7 @@ const FreelancerApplications = () => {
                     <hr className="my-2 border-slate-100" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -224,7 +240,7 @@ const FreelancerApplications = () => {
         {/* Main Content Area */}
         <main className="p-4 lg:p-8 space-y-6">
           {/* Status Tabs */}
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
             <div className="flex overflow-x-auto scrollbar-hide">
               {statusTabs.map((tab) => (
                 <button
@@ -233,8 +249,8 @@ const FreelancerApplications = () => {
                   className={cn(
                     "flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all",
                     activeTab === tab.id
-                      ? "border-teal text-teal"
-                      : "border-transparent text-slate-500 hover:text-navy hover:border-slate-200",
+                      ? "border-teal text-teal dark:text-teal-light"
+                      : "border-transparent text-slate-500 hover:text-navy dark:hover:text-white hover:border-slate-200 dark:hover:border-white/20",
                   )}
                 >
                   {tab.label}
@@ -242,8 +258,8 @@ const FreelancerApplications = () => {
                     className={cn(
                       "px-2 py-0.5 text-xs font-bold rounded-full",
                       activeTab === tab.id
-                        ? "bg-teal/10 text-teal"
-                        : "bg-slate-100 text-slate-500",
+                        ? "bg-teal/10 text-teal dark:text-teal-light"
+                        : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400",
                     )}
                   >
                     {tab.count}
@@ -262,7 +278,7 @@ const FreelancerApplications = () => {
               return (
                 <div
                   key={application._id || application.id}
-                  className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-all"
+                  className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm p-5 hover:shadow-md transition-all"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex-1">
@@ -282,7 +298,7 @@ const FreelancerApplications = () => {
                         })()}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-semibold text-navy">
+                            <h3 className="font-semibold text-navy dark:text-white">
                               {application.project?.title || "Untitled Project"}
                             </h3>
                             <span
@@ -296,7 +312,7 @@ const FreelancerApplications = () => {
                               {application.status}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-500 mt-1">
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             {(application.project as any)?.client?.companyName ||
                               (application.project as any)?.client?.fullName ||
                               (application.project as any)?.client?.name ||
@@ -313,7 +329,7 @@ const FreelancerApplications = () => {
                                 : "") ||
                               "Client"}
                           </p>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                          <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
                             <span className="flex items-center gap-1">
                               <Calendar size={14} />
                               Applied:{" "}
@@ -343,13 +359,13 @@ const FreelancerApplications = () => {
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0 border-t border-slate-50 pt-4 lg:border-t-0 lg:pt-0">
                       <div className="text-left sm:text-right">
-                        <p className="text-xs text-slate-500">Duration</p>
-                        <p className="text-lg font-bold text-navy">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Duration</p>
+                        <p className="text-lg font-bold text-navy dark:text-white">
                           {application.estimatedDuration
                             ? `${application.estimatedDuration} days`
                             : "N/A"}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-slate-400 dark:text-slate-500">
                           Budget: ₹
                           {(
                             application.project?.budget?.minAmount || 0
@@ -404,8 +420,8 @@ const FreelancerApplications = () => {
 
           {filteredApplications.length === 0 && (
             <div className="text-center py-12">
-              <FileText size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-lg font-semibold text-navy mb-2">
+              <FileText size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
+              <h3 className="text-lg font-semibold text-navy dark:text-white mb-2">
                 No applications found
               </h3>
               <p className="text-slate-500 mb-4">
@@ -426,12 +442,12 @@ const FreelancerApplications = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-start justify-between p-4 sm:p-6 border-b border-slate-100">
+            <div className="flex items-start justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-white/5">
               <div>
-                <h2 className="text-xl font-bold text-navy">
+                <h2 className="text-xl font-bold text-navy dark:text-white">
                   Application Details
                 </h2>
-                <p className="text-sm text-slate-500 mt-1 line-clamp-1">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
                   {selectedApplication.project?.title || "Untitled Project"}
                 </p>
               </div>
@@ -447,31 +463,31 @@ const FreelancerApplications = () => {
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
               {/* Cover Letter */}
               <div>
-                <h3 className="text-sm font-semibold text-navy mb-3">
+                <h3 className="text-sm font-semibold text-navy dark:text-white mb-3">
                   Cover Letter
                 </h3>
-                <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 whitespace-pre-wrap">
+                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
                   {selectedApplication.coverLetter}
                 </div>
               </div>
 
               {/* Application Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <p className="text-xs text-slate-500 mb-1">
+                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
                     Estimated Duration
                   </p>
-                  <div className="flex items-center gap-1.5 font-medium text-navy text-sm">
-                    <Clock size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 font-medium text-navy dark:text-white text-sm">
+                    <Clock size={14} className="text-slate-400 dark:text-slate-500" />
                     {selectedApplication.estimatedDuration
                       ? `${selectedApplication.estimatedDuration} days`
                       : "Not specified"}
                   </div>
                 </div>
                 {/* Status card */}
-                <div className="bg-slate-50 rounded-xl p-4 sm:col-span-2">
-                  <p className="text-xs text-slate-500 mb-1">Status</p>
-                  <div className="flex items-center gap-1.5 font-medium text-navy capitalize text-sm">
+                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 sm:col-span-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Status</p>
+                  <div className="flex items-center gap-1.5 font-medium text-navy dark:text-white capitalize text-sm">
                     {selectedApplication.status}
                   </div>
                 </div>
@@ -479,9 +495,10 @@ const FreelancerApplications = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 lg:p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <div className="p-5 lg:p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-end">
               <Button
                 variant="outline"
+                className="dark:border-white/10 dark:text-slate-400"
                 onClick={() => setSelectedApplication(null)}
               >
                 Close

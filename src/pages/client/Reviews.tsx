@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { ThemeToggle as ThemeToggleButton } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { reviewService, type Review } from "@/services";
@@ -78,28 +79,29 @@ const ClientReviews = () => {
     }
   };
 
-  return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
-      <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+   return (
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+       <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
-            <button
+             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
             >
               <Menu size={24} />
             </button>
             <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-navy">
+               <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                 My Reviews
               </h1>
-              <p className="text-sm text-slate-500 hidden sm:block">
+               <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                 Reviews you've given to freelancers
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 lg:gap-4">
+           <div className="flex items-center gap-2 lg:gap-4">
+            <ThemeToggleButton className="w-9 h-9" />
             <Link
               to="/client/messages"
               className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
@@ -110,15 +112,15 @@ const ClientReviews = () => {
               )}
             </Link>
             
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+             <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
             <div className="relative">
-              <button
+               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
               >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                   {user?.fullName
@@ -129,40 +131,40 @@ const ClientReviews = () => {
                         .toUpperCase()
                     : (user?.email?.[0] || "U").toUpperCase()}
                 </div>
-                <ChevronDown
+                 <ChevronDown
                   size={16}
-                  className="text-slate-500 hidden sm:block"
+                  className="text-slate-500 dark:text-slate-400 hidden sm:block"
                 />
               </button>
 
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="font-semibold text-navy">
+               {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                    <p className="font-semibold text-navy dark:text-white">
                       {user?.fullName || user?.email?.split("@")[0] || "Client"}
                     </p>
-                    <p className="text-sm text-slate-500 truncate">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {user?.email}
                     </p>
                   </div>
                   <Link
                     to="/client/profile"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <User size={16} />
                     My Profile
                   </Link>
                   <Link
                     to="/client/settings"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <Settings size={16} />
                     Settings
                   </Link>
-                  <hr className="my-2 border-slate-100" />
+                  <hr className="my-2 border-slate-100 dark:border-white/5" />
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                   >
                     <LogOut size={16} />
                     Logout
@@ -174,38 +176,38 @@ const ClientReviews = () => {
         </div>
       </header>
       <main className="p-4 lg:p-8 space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
+         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5">
             <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-3">
               <Star size={20} className="text-gold fill-gold" />
             </div>
-            <p className="text-sm text-slate-500 mb-1">Average Rating Given</p>
-            <p className="text-2xl font-bold text-navy">
+             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Average Rating Given</p>
+            <p className="text-2xl font-bold text-navy dark:text-white">
               {averageRating.toFixed(1)}
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
+           <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5">
             <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center mb-3">
               <MessageCircle size={20} className="text-teal" />
             </div>
-            <p className="text-sm text-slate-500 mb-1">Total Reviews</p>
-            <p className="text-2xl font-bold text-navy">{totalReviews}</p>
+             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Reviews</p>
+            <p className="text-2xl font-bold text-navy dark:text-white">{totalReviews}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
+           <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
               <TrendingUp size={20} className="text-green-600" />
             </div>
-            <p className="text-sm text-slate-500 mb-1">5-Star Reviews</p>
-            <p className="text-2xl font-bold text-navy">
+             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">5-Star Reviews</p>
+            <p className="text-2xl font-bold text-navy dark:text-white">
               {fiveStarReviews}
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
+           <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5">
             <div className="w-10 h-10 rounded-xl bg-royal-blue/10 flex items-center justify-center mb-3">
               <ThumbsUp size={20} className="text-royal-blue" />
             </div>
-            <p className="text-sm text-slate-500 mb-1">Helpful Votes</p>
-            <p className="text-2xl font-bold text-navy">
+             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Helpful Votes</p>
+            <p className="text-2xl font-bold text-navy dark:text-white">
               {helpfulVotes}
             </p>
           </div>
@@ -213,16 +215,16 @@ const ClientReviews = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal mb-4"></div>
-            <p className="text-slate-500">Loading your reviews...</p>
+             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal mb-4"></div>
+            <p className="text-slate-500 dark:text-slate-400">Loading your reviews...</p>
           </div>
-        ) : reviews.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-100 p-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
-              <Star size={32} className="text-slate-300" />
+         ) : reviews.length === 0 ? (
+          <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <Star size={32} className="text-slate-300 dark:text-slate-600" />
             </div>
-            <h3 className="text-lg font-bold text-navy mb-2">No reviews yet</h3>
-            <p className="text-slate-500 mb-6">You haven't given any reviews to freelancers yet.</p>
+            <h3 className="text-lg font-bold text-navy dark:text-white mb-2">No reviews yet</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">You haven't given any reviews to freelancers yet.</p>
             <Link to="/client/projects">
               <Button className="bg-teal hover:bg-teal-light text-white">
                 View Projects
@@ -230,12 +232,12 @@ const ClientReviews = () => {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-navy">Your Reviews</h2>
+           <div className="space-y-4">
+            <h2 className="text-lg font-bold text-navy dark:text-white">Your Reviews</h2>
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-white rounded-xl border border-slate-100 p-6"
+                className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -244,10 +246,10 @@ const ClientReviews = () => {
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                       <div>
-                        <p className="font-semibold text-navy">
+                         <p className="font-semibold text-navy dark:text-white">
                           {review.reviewer?.fullName || "Freelancer"}
                         </p>
-                        <p className="text-sm text-slate-500">
+                         <p className="text-sm text-slate-500 dark:text-slate-400">
                           Project: {review.project?.title || "Untitled Project"}
                         </p>
                       </div>
@@ -259,19 +261,19 @@ const ClientReviews = () => {
                               size={14}
                               className={
                                 i < review.rating
-                                  ? "text-gold fill-gold"
-                                  : "text-slate-200"
-                              }
+                                   ? "text-gold fill-gold"
+                                   : "text-slate-200 dark:text-slate-800"
+                               }
                             />
                           ))}
                         </div>
-                        <span className="text-sm text-slate-500 flex items-center gap-1">
+                         <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <Calendar size={12} />
                           {formatDate(review.createdAt)}
                         </span>
                       </div>
                     </div>
-                    <p className="text-slate-600 mb-3">{review.comment}</p>
+                     <p className="text-slate-600 dark:text-slate-400 mb-3">{review.comment}</p>
                     <div className="flex items-center gap-4">
                       <Button
                         variant="ghost"

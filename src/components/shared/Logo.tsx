@@ -33,10 +33,10 @@ const Logo: React.FC<LogoProps> = ({
         className={cn(
           iconSizes[size],
           "flex items-center justify-center transition-all duration-300 rounded-full overflow-hidden",
-          "bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)]",
+          "bg-white dark:bg-[#050B15]/80 dark:backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-none",
           isDark
-            ? "ring-4 ring-white/10 shadow-none"
-            : "border border-slate-100",
+            ? "ring-4 ring-white/10"
+            : "border border-slate-100 dark:border-white/10",
         )}
       >
         <img
@@ -62,7 +62,7 @@ const Logo: React.FC<LogoProps> = ({
             "font-extrabold tracking-tighter transition-all duration-300",
           )}
         >
-          <span className={isDark ? "text-white" : "text-navy"}>Connect</span>
+          <span className={isDark ? "text-white" : "text-navy dark:text-white"}>Connect</span>
           <span className="text-teal">
             Me
           </span>
@@ -71,7 +71,7 @@ const Logo: React.FC<LogoProps> = ({
               "transition-colors duration-300",
               isDark
                 ? "text-white/90 group-hover:text-white"
-                : "text-navy/90 group-hover:text-navy",
+                : "text-navy/90 dark:text-white/90 group-hover:text-navy dark:group-hover:text-white",
             )}
           >
             India

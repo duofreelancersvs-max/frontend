@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -272,26 +273,26 @@ const BrowseProjects = () => {
   );
 
   return (
-    <div className="w-full bg-slate-50 min-h-screen">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen">
       {!user && <PublicNavbar variant="white" />}
       <div className={cn("w-full", !user && "pt-[72px]")}>
         {/* Header Bar */}
         {user ? (
-          <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+          <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
             <div className="flex items-center justify-between w-full md:w-auto">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSidebarOpen && setSidebarOpen(true)}
-                  className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
                 >
                   <Menu size={24} />
                 </button>
                 <div>
-                  <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                  <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                     Browse Projects
                   </h1>
-                  <p className="text-sm text-slate-500 hidden sm:block">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                     Find work that matches your skills
                   </p>
                 </div>
@@ -301,18 +302,18 @@ const BrowseProjects = () => {
               <div className="flex md:hidden items-center gap-2">
                 <Link
                   to="/freelancer/messages"
-                  className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+                  className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
                 >
                   <MessageSquare size={20} />
                   {totalUnreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                   )}
                 </Link>
 
                 <div className="relative">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                    className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                       {user?.fullName
@@ -329,14 +330,14 @@ const BrowseProjects = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto scrollbar-hide hide-scrollbar">
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-xl w-full md:w-auto overflow-x-auto scrollbar-hide hide-scrollbar">
               <button
                 onClick={() => setActiveTab("browse")}
                 className={cn(
                   "px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 md:flex-none whitespace-nowrap",
                   activeTab === "browse"
-                    ? "bg-white text-navy shadow-sm"
-                    : "text-slate-500 hover:text-navy",
+                    ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 <Search size={16} className="inline mr-2" />
@@ -347,8 +348,8 @@ const BrowseProjects = () => {
                 className={cn(
                   "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap",
                   activeTab === "saved"
-                    ? "bg-white text-navy shadow-sm"
-                    : "text-slate-500 hover:text-navy",
+                    ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 <Bookmark size={16} />
@@ -364,23 +365,24 @@ const BrowseProjects = () => {
             <div className="hidden md:flex items-center gap-2 lg:gap-4">
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
 
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
 
+              <ThemeToggle className="w-9 h-9" />
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -398,35 +400,35 @@ const BrowseProjects = () => {
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName ||
                           user?.email?.split("@")[0] ||
                           "Freelancer"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <UserIcon size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -445,15 +447,15 @@ const BrowseProjects = () => {
           {loading && (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal"></div>
-              <span className="ml-3 text-slate-500">Loading projects...</span>
+              <span className="ml-3 text-slate-500 dark:text-slate-400">Loading projects...</span>
             </div>
           )}
 
           {/* ERROR STATE */}
           {!loading && error && (
-            <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-8 text-center">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-red-100 dark:border-red-900/20 shadow-sm p-8 text-center">
               <AlertCircle size={40} className="mx-auto text-red-400 mb-3" />
-              <p className="text-red-600 font-medium mb-4">{error}</p>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-4">{error}</p>
               <button
                 onClick={fetchProjects}
                 className="px-6 py-2 bg-teal text-white rounded-lg hover:bg-teal-light transition-colors text-sm font-medium"
@@ -467,7 +469,7 @@ const BrowseProjects = () => {
           {!loading && !error && (
             <>
               {/* SEARCH & FILTER BAR */}
-              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 lg:p-6">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-4 lg:p-6">
                 {/* Search Row */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-4">
                   <div className="flex-1 relative">
@@ -480,7 +482,7 @@ const BrowseProjects = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search projects by title, skills, or keywords..."
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy"
+                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white bg-white dark:bg-white/5"
                     />
                   </div>
                   <button
@@ -488,8 +490,8 @@ const BrowseProjects = () => {
                     className={cn(
                       "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-medium transition-all w-full sm:w-auto",
                       showFilters
-                        ? "bg-teal/5 border-teal text-teal"
-                        : "border-slate-200 text-slate-600 hover:border-slate-300",
+                        ? "bg-teal/5 dark:bg-teal/10 border-teal text-teal"
+                        : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/20",
                     )}
                   >
                     <SlidersHorizontal size={18} />
@@ -502,7 +504,7 @@ const BrowseProjects = () => {
 
                 {/* Filters */}
                 {showFilters && (
-                  <div className="pt-4 border-t border-slate-100">
+                  <div className="pt-4 border-t border-slate-100 dark:border-white/10">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
                       {/* Category */}
                       <div>
@@ -512,7 +514,7 @@ const BrowseProjects = () => {
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {categories.map((cat) => (
                             <option key={cat} value={cat}>
@@ -533,14 +535,14 @@ const BrowseProjects = () => {
                             value={budgetMin}
                             onChange={(e) => setBudgetMin(e.target.value)}
                             placeholder="Min"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                           />
                           <input
                             type="number"
                             value={budgetMax}
                             onChange={(e) => setBudgetMax(e.target.value)}
                             placeholder="Max"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -555,7 +557,7 @@ const BrowseProjects = () => {
                           onChange={(e) =>
                             setSelectedExperience(e.target.value)
                           }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {experienceLevels.map((level) => (
                             <option key={level} value={level}>
@@ -573,7 +575,7 @@ const BrowseProjects = () => {
                         <select
                           value={selectedLocation}
                           onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {locationTypes.map((loc) => (
                             <option key={loc} value={loc}>
@@ -593,7 +595,7 @@ const BrowseProjects = () => {
                           onChange={(e) =>
                             setSelectedPostedDate(e.target.value)
                           }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-navy bg-white focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
                         >
                           {postedDateOptions.map((opt) => (
                             <option key={opt} value={opt}>
@@ -621,8 +623,8 @@ const BrowseProjects = () => {
 
               {/* RESULTS BAR */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <p className="text-sm text-slate-600">
-                  <span className="font-semibold text-navy">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="font-semibold text-navy dark:text-white">
                     {filteredProjects.length}
                   </span>{" "}
                   projects found
@@ -631,8 +633,8 @@ const BrowseProjects = () => {
 
                 {/* Sort */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Sort by:</span>
-                  <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 rounded-lg p-0.5">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">Sort by:</span>
+                  <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 dark:bg-white/5 rounded-lg p-0.5">
                     {sortOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -640,8 +642,8 @@ const BrowseProjects = () => {
                         className={cn(
                           "px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap",
                           sortBy === opt.value
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-slate-500 hover:text-navy",
+                            ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
+                            : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                         )}
                       >
                         {opt.label}
@@ -657,10 +659,10 @@ const BrowseProjects = () => {
                   {paginatedProjects.map((project) => (
                     <div
                       key={project._id || project.id}
-                      className="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-teal/20 transition-all overflow-hidden"
+                      className="flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md hover:border-teal/20 dark:hover:border-teal/30 transition-all overflow-hidden"
                     >
                       {/* Card Header */}
-                      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-slate-50/50 shrink-0">
+                      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 shrink-0">
                         <div className="flex items-center gap-2 text-sm text-slate-500">
                           <Clock size={14} />
                           {new Date(project.createdAt).toLocaleDateString(
@@ -697,7 +699,7 @@ const BrowseProjects = () => {
                       {/* Card Content */}
                       <div className="p-5">
                         {/* Title */}
-                        <h3 className="text-lg font-semibold text-navy mb-3 line-clamp-2 hover:text-royal-blue cursor-pointer transition-colors">
+                        <h3 className="text-lg font-semibold text-navy dark:text-white mb-3 line-clamp-2 hover:text-royal-blue dark:hover:text-teal transition-colors">
                           {project.title}
                         </h3>
 
@@ -708,7 +710,7 @@ const BrowseProjects = () => {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-sm font-medium text-navy">
+                              <span className="text-sm font-medium text-navy dark:text-white">
                                 {project.client?.fullName ?? "Client"}
                               </span>
                             </div>
@@ -723,7 +725,7 @@ const BrowseProjects = () => {
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm text-slate-600 line-clamp-3 mb-4">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
                           {project.description}
                         </p>
 
@@ -736,7 +738,7 @@ const BrowseProjects = () => {
                                 "px-2 py-1 rounded-md text-xs font-medium",
                                 userSkills.includes(skill)
                                   ? "bg-teal/10 text-teal border border-teal/20"
-                                  : "bg-slate-100 text-slate-600",
+                                  : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
                               )}
                             >
                               {skill}
@@ -750,10 +752,10 @@ const BrowseProjects = () => {
                         </div>
 
                         {/* Footer Info */}
-                        <div className="flex items-center gap-4 text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-4 pb-4 border-b border-slate-100 dark:border-white/5">
                           <div className="flex items-center gap-1">
                             <DollarSign size={14} />
-                            <span className="font-semibold text-navy">
+                            <span className="font-semibold text-navy dark:text-white">
                               ₹{project.budget.minAmount?.toLocaleString() || 0}{" "}
                               - ₹
                               {project.budget.maxAmount?.toLocaleString() || 0}
@@ -800,16 +802,16 @@ const BrowseProjects = () => {
                 </div>
               ) : (
                 /* EMPTY STATE */
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-100 flex items-center justify-center">
-                    <Briefcase size={40} className="text-slate-300" />
+                <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-12 text-center text-navy dark:text-white">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
+                    <Briefcase size={40} className="text-slate-300 dark:text-slate-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-navy mb-2">
+                  <h3 className="text-xl font-semibold text-navy dark:text-white mb-2">
                     {activeTab === "saved"
                       ? "No saved projects yet"
                       : "No projects match your filters"}
                   </h3>
-                  <p className="text-slate-500 mb-6">
+                  <p className="text-slate-500 dark:text-slate-400 mb-6">
                     {activeTab === "saved"
                       ? "Click the bookmark icon on any project to save it for later."
                       : "Try adjusting your search criteria or clearing some filters."}
@@ -818,7 +820,7 @@ const BrowseProjects = () => {
                     <Button
                       variant="outline"
                       onClick={clearAllFilters}
-                      className="border-teal text-teal hover:bg-teal hover:text-white"
+                      className="border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent"
                     >
                       Clear All Filters
                     </Button>
@@ -826,7 +828,7 @@ const BrowseProjects = () => {
                   {activeTab === "saved" && (
                     <Button
                       onClick={() => setActiveTab("browse")}
-                      className="bg-teal hover:bg-teal-light text-white"
+                      className="bg-teal hover:bg-teal-light text-white font-bold"
                     >
                       Browse Projects
                     </Button>
@@ -841,10 +843,10 @@ const BrowseProjects = () => {
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className={cn(
-                      "p-2 rounded-lg border transition-colors",
+                      "p-2 rounded-lg border transition-colors bg-white dark:bg-white/5",
                       currentPage === 1
-                        ? "border-slate-100 text-slate-300 cursor-not-allowed"
-                        : "border-slate-200 text-slate-600 hover:bg-slate-50",
+                        ? "border-slate-100 dark:border-white/5 text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                        : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/10",
                     )}
                   >
                     <ChevronLeft size={18} />
@@ -858,8 +860,8 @@ const BrowseProjects = () => {
                         className={cn(
                           "w-10 h-10 rounded-lg font-medium transition-colors",
                           currentPage === page
-                            ? "bg-teal text-white"
-                            : "text-slate-600 hover:bg-slate-100",
+                            ? "bg-teal text-white shadow-lg shadow-teal/20"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
                         )}
                       >
                         {page}
@@ -873,10 +875,10 @@ const BrowseProjects = () => {
                     }
                     disabled={currentPage === totalPages}
                     className={cn(
-                      "p-2 rounded-lg border transition-colors",
+                      "p-2 rounded-lg border transition-colors bg-white dark:bg-white/5",
                       currentPage === totalPages
-                        ? "border-slate-100 text-slate-300 cursor-not-allowed"
-                        : "border-slate-200 text-slate-600 hover:bg-slate-50",
+                        ? "border-slate-100 dark:border-white/5 text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                        : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/10",
                     )}
                   >
                     <ChevronRight size={18} />

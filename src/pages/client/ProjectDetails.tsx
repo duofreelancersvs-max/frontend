@@ -31,6 +31,7 @@ import {
   Loader2,
   Star,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -166,7 +167,7 @@ const ProjectDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
@@ -174,10 +175,10 @@ const ProjectDetails = () => {
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-        <p className="text-slate-600 mb-4">{error || "Project not found"}</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex flex-col items-center justify-center">
+        <p className="text-slate-600 dark:text-slate-400 mb-4">{error || "Project not found"}</p>
         <Link to="/client/projects">
-          <Button variant="outline">Back to Projects</Button>
+          <Button variant="outline" className="dark:border-white/10 dark:text-white dark:hover:bg-white/5">Back to Projects</Button>
         </Link>
       </div>
     );
@@ -231,38 +232,39 @@ const ProjectDetails = () => {
     }
   };
 
-  return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 font-sans">
-      <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+   return (
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+       <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
-            <button
+             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
             >
               <Menu size={24} />
             </button>
             {/* Breadcrumb */}
             <nav className="hidden sm:flex items-center gap-2 text-sm">
-              <Link
+               <Link
                 to="/client/dashboard"
-                className="text-slate-500 hover:text-teal"
+                className="text-slate-500 dark:text-slate-400 hover:text-teal"
               >
                 Dashboard
               </Link>
               <ChevronRight size={14} className="text-slate-400" />
-              <Link
+               <Link
                 to="/client/projects"
-                className="text-slate-500 hover:text-teal"
+                className="text-slate-500 dark:text-slate-400 hover:text-teal"
               >
                 My Projects
               </Link>
-              <ChevronRight size={14} className="text-slate-400" />
-              <span className="text-navy font-medium">{project.title}</span>
+               <ChevronRight size={14} className="text-slate-400" />
+              <span className="text-navy dark:text-white font-medium">{project.title}</span>
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 lg:gap-4">
+           <div className="flex items-center gap-2 lg:gap-4">
+            <ThemeToggle className="w-9 h-9" />
             <Link
               to="/client/messages"
               className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
@@ -273,15 +275,15 @@ const ProjectDetails = () => {
               )}
             </Link>
 
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex">
+             <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
             <div className="relative">
-              <button
+               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
               >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                   {user?.fullName
@@ -292,40 +294,40 @@ const ProjectDetails = () => {
                         .toUpperCase()
                     : (user?.email?.[0] || "U").toUpperCase()}
                 </div>
-                <ChevronDown
+                 <ChevronDown
                   size={16}
-                  className="text-slate-500 hidden sm:block"
+                  className="text-slate-500 dark:text-slate-400 hidden sm:block"
                 />
               </button>
 
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="font-semibold text-navy">
+               {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                    <p className="font-semibold text-navy dark:text-white">
                       {user?.fullName || user?.email?.split("@")[0] || "Client"}
                     </p>
-                    <p className="text-sm text-slate-500 truncate">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {user?.email}
                     </p>
                   </div>
                   <Link
                     to="/client/profile"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <User size={16} />
                     My Profile
                   </Link>
                   <Link
                     to="/client/settings"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <Settings size={16} />
                     Settings
                   </Link>
-                  <hr className="my-2 border-slate-100" />
+                  <hr className="my-2 border-slate-100 dark:border-white/5" />
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                   >
                     <LogOut size={16} />
                     Logout
@@ -339,8 +341,8 @@ const ProjectDetails = () => {
 
       {/* Main Content Area */}
       <main className="p-4 lg:p-8 space-y-6">
-        {/* PROJECT HEADER CARD */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
+         {/* PROJECT HEADER CARD */}
+        <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3 flex-wrap">
@@ -350,18 +352,18 @@ const ProjectDetails = () => {
                     getStatusStyles(project.status),
                   )}
                 >
-                  {getStatusLabel(project.status)}
+                   {getStatusLabel(project.status)}
                 </span>
-                <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium">
+                <span className="px-3 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 rounded-lg text-sm font-medium">
                   {project.category}
                 </span>
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-navy">
+               <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white">
                 {project.title}
               </h1>
               <div className="flex items-center gap-4 text-sm text-slate-500">
                 <div className="flex items-center gap-1">
-                  <Clock size={14} />
+                   <Clock size={14} />
                   Posted{" "}
                   {new Date(project.createdAt).toLocaleDateString("en-US", {
                     month: "short",
@@ -369,25 +371,25 @@ const ProjectDetails = () => {
                     year: "numeric",
                   })}
                 </div>
-                <div className="flex items-center gap-1">
+                 <div className="flex items-center gap-1">
                   <Users size={14} />
                   {project.applications || 0} applications
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <Button
+               <Button
                 variant="outline"
-                className="border-slate-200 text-slate-600"
+                className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
               >
                 <Share2 size={16} className="mr-2" />
                 Share
               </Button>
               {project.status === "open" && (
-                <Link to={`/client/project/${id}/edit`}>
+                 <Link to={`/client/project/${id}/edit`}>
                   <Button
                     variant="outline"
-                    className="border-slate-200 text-slate-600"
+                    className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
                   >
                     <Edit2 size={16} className="mr-2" />
                     Edit Project
@@ -432,23 +434,23 @@ const ProjectDetails = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* LEFT COLUMN - Project Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Description */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+             {/* Description */}
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+              <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                 <FileText size={24} className="text-teal" />
                 About the Project
               </h2>
 
-              <div className="space-y-6 text-slate-600 leading-relaxed">
+              <div className="space-y-6 text-slate-600 dark:text-slate-400 leading-relaxed">
                 <p className="text-lg whitespace-pre-line">
                   {project.description}
                 </p>
               </div>
             </div>
 
-            {/* Skills */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-navy mb-6 flex items-center gap-2">
+             {/* Skills */}
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
+              <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                 <Award size={24} className="text-teal" />
                 Skills Required
               </h2>
@@ -456,7 +458,7 @@ const ProjectDetails = () => {
                 {(project.skills || []).map((skill) => (
                   <span
                     key={skill}
-                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium border border-slate-200"
+                    className="px-4 py-2 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-400 rounded-xl text-sm font-medium border border-slate-200 dark:border-white/10"
                   >
                     {skill}
                   </span>
@@ -466,60 +468,60 @@ const ProjectDetails = () => {
           </div>
 
           {/* RIGHT COLUMN - Info Card (Sticky) */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sticky top-24">
-              <h2 className="text-lg font-bold text-navy mb-6 border-b border-slate-100 pb-4">
+           <div className="space-y-6">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 sticky top-24">
+              <h2 className="text-lg font-bold text-navy dark:text-white mb-6 border-b border-slate-100 dark:border-white/10 pb-4">
                 Project Details
               </h2>
               <div className="space-y-6">
                 <div className="flex items-center justify-between w-full min-w-0">
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                    <div className="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg">
                       <CreditCard size={18} />
                     </div>
                     <span className="text-sm font-medium">Budget</span>
                   </div>
-                  <span className="font-bold text-navy text-right">
+                  <span className="font-bold text-navy dark:text-white text-right">
                     ₹{(project.budget?.minAmount || 0).toLocaleString()} - ₹
                     {(project.budget?.maxAmount || 0).toLocaleString()}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between w-full min-w-0">
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                    <div className="p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 rounded-lg">
                       <MapPin size={18} />
                     </div>
                     <span className="text-sm font-medium">Location</span>
                   </div>
-                  <span className="font-semibold text-navy">
+                  <span className="font-semibold text-navy dark:text-white">
                     {project.location?.type || "Remote"}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between w-full min-w-0">
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                    <div className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-lg">
                       <Calendar size={18} />
                     </div>
                     <span className="text-sm font-medium">Deadline</span>
                   </div>
-                  <span className="font-semibold text-navy">
+                  <span className="font-semibold text-navy dark:text-white">
                     {formatDeadline(project.deadline)}
                   </span>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  <div className="p-4 bg-teal/5 rounded-xl border border-teal/10 flex items-center justify-between">
+                <div className="pt-4 border-t border-slate-100 dark:border-white/10">
+                  <div className="p-4 bg-teal/5 dark:bg-teal/10 rounded-xl border border-teal/10 dark:border-teal/20 flex items-center justify-between">
                     <div>
                       <p className="text-xs text-teal font-semibold uppercase tracking-wider mb-1">
                         Total Applications
                       </p>
-                      <p className="text-2xl font-bold text-navy">
+                      <p className="text-2xl font-bold text-navy dark:text-white">
                         {applications.length}
                       </p>
                     </div>
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-teal shadow-sm">
+                    <div className="w-10 h-10 bg-white dark:bg-[#121A2A] rounded-full flex items-center justify-center text-teal shadow-sm">
                       <Users size={20} />
                     </div>
                   </div>
@@ -529,22 +531,22 @@ const ProjectDetails = () => {
           </div>
         </div>
 
-        {/* APPLICATIONS SECTION */}
+         {/* APPLICATIONS SECTION */}
         {project.status === "open" && (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-slate-100">
+            <div className="p-6 border-b border-slate-100 dark:border-white/10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 className="text-xl font-bold text-navy flex items-center gap-2">
+                 <h2 className="text-xl font-bold text-navy dark:text-white flex items-center gap-2">
                   <Users size={24} className="text-teal" />
                   Applications
-                  <span className="px-2.5 py-0.5 bg-teal/10 text-teal rounded-full text-sm">
+                  <span className="px-2.5 py-0.5 bg-teal/10 dark:bg-teal/20 text-teal rounded-full text-sm">
                     {applications.length}
                   </span>
                 </h2>
                 <div className="flex items-center gap-3">
-                  {/* Filter */}
-                  <div className="flex bg-slate-100 rounded-lg p-1">
+                   {/* Filter */}
+                  <div className="flex bg-slate-100 dark:bg-white/10 rounded-lg p-1">
                     {["all", "shortlisted", "new"].map((filter) => (
                       <button
                         key={filter}
@@ -552,34 +554,34 @@ const ProjectDetails = () => {
                         className={cn(
                           "px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize",
                           applicationFilter === filter
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-slate-500 hover:text-navy",
+                            ? "bg-white dark:bg-[#121A2A] text-navy dark:text-white shadow-sm"
+                            : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                         )}
                       >
                         {filter}
                       </button>
                     ))}
                   </div>
-                  {/* Sort */}
+                   {/* Sort */}
                   <select
                     value={applicationSort}
                     onChange={(e) => setApplicationSort(e.target.value)}
-                    className="h-9 px-3 rounded-lg border border-slate-200 text-sm text-navy bg-white"
+                    className="h-9 px-3 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-white/5"
                   >
-                    <option value="recent">Recent</option>
-                    <option value="rating">Rating</option>
+                    <option value="recent" className="dark:bg-[#121A2A]">Recent</option>
+                    <option value="rating" className="dark:bg-[#121A2A]">Rating</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Applications List */}
-            <div className="divide-y divide-slate-100">
+             {/* Applications List */}
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
               {filteredApplications.length > 0 ? (
                 filteredApplications.map((application, index) => (
-                  <div
+                   <div
                     key={application.id || String(index)}
-                    className="p-6 hover:bg-slate-50/50 transition-colors"
+                    className="p-6 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors"
                   >
                     <div className="flex flex-col lg:flex-row gap-6">
                       {/* Avatar */}
@@ -600,7 +602,7 @@ const ProjectDetails = () => {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
                           <div>
                             <div className="flex items-center gap-3 mb-1">
-                              <h3 className="text-base font-bold text-navy">
+                             <h3 className="text-base font-bold text-navy dark:text-white">
                                 {application.freelancer?.fullName ||
                                   "Unknown Freelancer"}
                               </h3>
@@ -608,23 +610,23 @@ const ProjectDetails = () => {
                                 application.status === "hired" ||
                                 application.status === "shortlisted") && (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-500 border border-orange-100">
-                                  {application.status === "shortlisted"
+                                   {application.status === "shortlisted"
                                     ? "Shortlisted"
                                     : "Hired"}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-slate-500 font-medium">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                               {application.freelancer?.title || "Freelancer"}
                             </p>
                           </div>
 
                           {/* Right Side Info & Actions Header */}
-                          <div className="flex flex-col sm:items-end text-sm text-slate-500">
-                            <span className="text-[11px] uppercase tracking-wider text-slate-400 mb-0.5">
+                           <div className="flex flex-col sm:items-end text-sm text-slate-500 dark:text-slate-400">
+                            <span className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">
                               Applied
                             </span>
-                            <span className="font-medium">
+                            <span className="font-medium text-navy dark:text-white">
                               {new Date(
                                 application.createdAt,
                               ).toLocaleDateString("en-US", {
@@ -636,16 +638,16 @@ const ProjectDetails = () => {
                         </div>
 
                         {/* Cover Letter */}
-                        <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                         <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
                           {application.coverLetter}
                         </p>
 
                         {/* Footer Info & Actions */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
+                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 text-sm font-medium text-slate-500 dark:text-slate-400">
                             <span>
                               Proposed:{" "}
-                              <strong className="text-slate-700 font-semibold">
+                              <strong className="text-slate-700 dark:text-slate-200 font-semibold">
                                 ₹
                                 {application.proposedRate?.toLocaleString() ||
                                   "N/A"}
@@ -653,7 +655,7 @@ const ProjectDetails = () => {
                             </span>
                             <span>
                               Duration:{" "}
-                              <strong className="text-slate-700 font-semibold">
+                              <strong className="text-slate-700 dark:text-slate-200 font-semibold">
                                 {application.estimatedDuration
                                   ? `${application.estimatedDuration} days`
                                   : "N/A"}
@@ -681,15 +683,15 @@ const ProjectDetails = () => {
                               </button>
                             )}
 
-                            <Link to="/client/messages">
+                             <Link to="/client/messages">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-9 px-4 border-slate-200 text-navy hover:bg-slate-50 shadow-sm font-medium"
+                                className="h-9 px-4 border-slate-200 dark:border-white/10 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm font-medium bg-white dark:bg-white/5"
                               >
                                 <MessageSquare
                                   size={16}
-                                  className="mr-2 text-slate-400"
+                                  className="mr-2 text-slate-400 dark:text-slate-500"
                                 />
                                 Message
                               </Button>
@@ -747,14 +749,14 @@ const ProjectDetails = () => {
                   </div>
                 ))
               ) : (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                    <Users size={28} className="text-slate-300" />
+                 <div className="p-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <Users size={28} className="text-slate-300 dark:text-slate-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-navy mb-1">
+                  <h3 className="text-lg font-semibold text-navy dark:text-white mb-1">
                     No applications yet
                   </h3>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Applications will appear here when freelancers apply to your
                     project.
                   </p>

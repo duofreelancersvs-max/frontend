@@ -20,6 +20,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -258,40 +259,41 @@ const FreelancerSubscription = () => {
   };
 
   return (
-    <div className="w-full bg-slate-50">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15]">
       <div className="w-full">
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   Choose Your Plan
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Unlock premium features and get hired faster
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -299,7 +301,7 @@ const FreelancerSubscription = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -317,33 +319,33 @@ const FreelancerSubscription = () => {
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <UserIcon size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -359,7 +361,7 @@ const FreelancerSubscription = () => {
         <main className="p-4 lg:p-8 space-y-8">
           {/* CURRENT PLAN CARD (if subscribed) */}
           {currentPlan !== "free" && (
-            <section className="bg-gradient-to-r from-teal/10 to-teal-light/10 rounded-2xl border border-teal/20 p-6">
+            <section className="bg-gradient-to-r from-teal/10 to-teal-light/10 dark:from-teal/20 dark:to-teal-light/20 rounded-2xl border border-teal/20 dark:border-teal/30 p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-teal flex items-center justify-center">
@@ -370,11 +372,11 @@ const FreelancerSubscription = () => {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-navy">
+                    <h2 className="text-lg font-bold text-navy dark:text-white">
                       Your Current Plan:{" "}
                       <span className="text-teal">{currentPlan}</span>
                     </h2>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       <Clock size={14} className="inline mr-1" />
                       Renews on {renewalDate}
                     </p>
@@ -382,7 +384,7 @@ const FreelancerSubscription = () => {
                 </div>
                 <Button
                   variant="outline"
-                  className="border-teal text-teal hover:bg-teal hover:text-white"
+                  className="border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent"
                 >
                   Manage Subscription
                 </Button>
@@ -392,14 +394,14 @@ const FreelancerSubscription = () => {
 
           {/* BILLING TOGGLE */}
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-200 shadow-sm">
+            <div className="inline-flex items-center gap-3 bg-white dark:bg-white/5 rounded-xl p-1.5 border border-slate-200 dark:border-white/10 shadow-sm">
               <button
                 onClick={() => setBillingPeriod("monthly")}
                 className={cn(
                   "px-6 py-2.5 rounded-lg text-sm font-medium transition-all",
                   billingPeriod === "monthly"
-                    ? "bg-navy text-white"
-                    : "text-slate-600 hover:text-navy",
+                    ? "bg-navy dark:bg-teal text-white"
+                    : "text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 Monthly
@@ -424,33 +426,33 @@ const FreelancerSubscription = () => {
           {/* PRICING CARDS */}
           <section className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {/* FREE PLAN */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
               <div className="p-6 lg:p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
                     <User size={20} className="text-slate-500" />
                   </div>
-                  <h3 className="text-xl font-bold text-navy">Free</h3>
+                  <h3 className="text-xl font-bold text-navy dark:text-white">Free</h3>
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-navy">₹0</span>
-                  <span className="text-slate-500">/month</span>
+                  <span className="text-4xl font-bold text-navy dark:text-white">₹0</span>
+                  <span className="text-slate-500 dark:text-slate-400">/month</span>
                 </div>
 
-                <p className="text-sm text-slate-500 mb-6">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                   Get started and explore the platform
                 </p>
 
                 {currentPlan === "free" ? (
                   <Button
                     disabled
-                    className="w-full bg-slate-100 text-slate-500 cursor-not-allowed"
+                    className="w-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   >
                     Current Plan
                   </Button>
                 ) : (
-                  <Button variant="outline" className="w-full border-slate-200">
+                  <Button variant="outline" className="w-full border-slate-200 dark:border-white/10 dark:text-white">
                     Downgrade
                   </Button>
                 )}
@@ -478,7 +480,7 @@ const FreelancerSubscription = () => {
             </div>
 
             {/* PRO PLAN */}
-            <div className="bg-white rounded-2xl border-2 border-teal shadow-lg overflow-hidden relative">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border-2 border-teal shadow-lg overflow-hidden relative">
               {/* Popular Badge */}
               <div className="absolute top-0 right-0 bg-teal text-white text-xs font-bold px-4 py-1 rounded-bl-xl">
                 Most Popular
@@ -489,17 +491,17 @@ const FreelancerSubscription = () => {
                   <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
                     <Zap size={20} className="text-teal" />
                   </div>
-                  <h3 className="text-xl font-bold text-navy">Pro</h3>
+                  <h3 className="text-xl font-bold text-navy dark:text-white">Pro</h3>
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-navy">
+                  <span className="text-4xl font-bold text-navy dark:text-white">
                     ₹
                     {billingPeriod === "monthly"
                       ? prices.pro.monthly
                       : prices.pro.yearly}
                   </span>
-                  <span className="text-slate-500">
+                  <span className="text-slate-500 dark:text-slate-400">
                     /{billingPeriod === "monthly" ? "month" : "year"}
                   </span>
                   {billingPeriod === "yearly" && (
@@ -509,7 +511,7 @@ const FreelancerSubscription = () => {
                   )}
                 </div>
 
-                <p className="text-sm text-slate-500 mb-6">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                   For serious freelancers ready to grow
                 </p>
 
@@ -521,7 +523,7 @@ const FreelancerSubscription = () => {
                     Current Plan
                   </Button>
                 ) : (
-                  <Button className="w-full bg-teal hover:bg-teal-light text-white">
+                  <Button className="w-full bg-teal hover:bg-teal-light text-white font-bold">
                     {currentPlan === "premium"
                       ? "Downgrade to Pro"
                       : "Upgrade to Pro"}
@@ -551,7 +553,7 @@ const FreelancerSubscription = () => {
             </div>
 
             {/* PREMIUM PLAN */}
-            <div className="bg-white rounded-2xl border-2 border-gold shadow-lg overflow-hidden relative">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border-2 border-gold shadow-lg overflow-hidden relative">
               {/* Best Value Badge */}
               <div className="absolute top-0 right-0 bg-gold text-white text-xs font-bold px-4 py-1 rounded-bl-xl flex items-center gap-1">
                 <Sparkles size={12} />
@@ -563,17 +565,17 @@ const FreelancerSubscription = () => {
                   <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
                     <Crown size={20} className="text-gold" />
                   </div>
-                  <h3 className="text-xl font-bold text-navy">Premium</h3>
+                  <h3 className="text-xl font-bold text-navy dark:text-white">Premium</h3>
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-navy">
+                  <span className="text-4xl font-bold text-navy dark:text-white">
                     ₹
                     {billingPeriod === "monthly"
                       ? prices.premium.monthly
                       : prices.premium.yearly}
                   </span>
-                  <span className="text-slate-500">
+                  <span className="text-slate-500 dark:text-slate-400">
                     /{billingPeriod === "monthly" ? "month" : "year"}
                   </span>
                   {billingPeriod === "yearly" && (
@@ -604,7 +606,7 @@ const FreelancerSubscription = () => {
                   {planFeatures.premium.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3">
                       <Check size={16} className="text-success-green" />
-                      <span className="text-sm text-navy">{item.feature}</span>
+                      <span className="text-sm text-navy dark:text-white">{item.feature}</span>
                     </div>
                   ))}
                 </div>
@@ -613,20 +615,20 @@ const FreelancerSubscription = () => {
           </section>
 
           {/* FEATURE COMPARISON TABLE */}
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-navy">
+          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 dark:border-white/10">
+              <h2 className="text-xl font-bold text-navy dark:text-white">
                 Compare All Features
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 sticky top-0">
+                <thead className="bg-slate-50 dark:bg-white/10 sticky top-0">
                   <tr>
-                    <th className="text-left text-sm font-semibold text-navy px-6 py-4">
+                    <th className="text-left text-sm font-semibold text-navy dark:text-white px-6 py-4">
                       Feature
                     </th>
-                    <th className="text-center text-sm font-semibold text-navy px-6 py-4">
+                    <th className="text-center text-sm font-semibold text-navy dark:text-white px-6 py-4">
                       Free
                     </th>
                     <th className="text-center text-sm font-semibold text-teal px-6 py-4">
@@ -641,9 +643,9 @@ const FreelancerSubscription = () => {
                   {comparisonFeatures.map((feature, idx) => (
                     <tr
                       key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}
+                      className={idx % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-slate-50/50 dark:bg-white/5"}
                     >
-                      <td className="text-sm text-navy px-6 py-4 font-medium">
+                      <td className="text-sm text-navy dark:text-white px-6 py-4 font-medium">
                         {feature.name}
                       </td>
                       <td className="text-center px-6 py-4">
@@ -657,7 +659,7 @@ const FreelancerSubscription = () => {
                             <X size={16} className="mx-auto text-slate-300" />
                           )
                         ) : (
-                          <span className="text-sm text-slate-600">
+                          <span className="text-sm text-slate-600 dark:text-slate-400">
                             {feature.free}
                           </span>
                         )}
@@ -702,7 +704,7 @@ const FreelancerSubscription = () => {
           </section>
 
           {/* PAYMENT SECTION */}
-          <section className="bg-gradient-to-r from-navy to-royal-blue rounded-2xl p-6 lg:p-8 text-center text-white">
+          <section className="bg-gradient-to-r from-navy to-royal-blue dark:from-[#0f172a] dark:to-royal-blue/30 rounded-2xl p-6 lg:p-8 text-center text-white border border-white/5">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Shield size={24} />
               <h3 className="text-lg font-bold">Secure Payment</h3>
@@ -712,19 +714,19 @@ const FreelancerSubscription = () => {
               financial data is encrypted and protected.
             </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 text-sm">
+              <div className="bg-white/10 dark:bg-white/5 backdrop-blur rounded-lg px-4 py-2 text-sm border border-white/10">
                 💳 Visa
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 text-sm">
+              <div className="bg-white/10 dark:bg-white/5 backdrop-blur rounded-lg px-4 py-2 text-sm border border-white/10">
                 💳 Mastercard
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 text-sm">
+              <div className="bg-white/10 dark:bg-white/5 backdrop-blur rounded-lg px-4 py-2 text-sm border border-white/10">
                 🏦 Net Banking
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 text-sm">
+              <div className="bg-white/10 dark:bg-white/5 backdrop-blur rounded-lg px-4 py-2 text-sm border border-white/10">
                 📱 UPI
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 text-sm">
+              <div className="bg-white/10 dark:bg-white/5 backdrop-blur rounded-lg px-4 py-2 text-sm border border-white/10">
                 💰 Paytm
               </div>
             </div>
@@ -732,14 +734,14 @@ const FreelancerSubscription = () => {
 
           {/* TESTIMONIALS */}
           <section>
-            <h2 className="text-xl font-bold text-navy mb-6 text-center">
+            <h2 className="text-xl font-bold text-navy dark:text-white mb-6 text-center">
               What Our Pro & Premium Members Say
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.map((testimonial, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
+                  className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6"
                 >
                   <div className="flex items-center gap-1 mb-4">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -749,12 +751,12 @@ const FreelancerSubscription = () => {
                         className={
                           i < testimonial.rating
                             ? "text-gold fill-gold"
-                            : "text-slate-200"
+                            : "text-slate-200 dark:text-slate-700"
                         }
                       />
                     ))}
                   </div>
-                  <p className="text-slate-600 italic mb-4">
+                  <p className="text-slate-600 dark:text-slate-400 italic mb-4">
                     "{testimonial.quote}"
                   </p>
                   <div className="flex items-center gap-3">
@@ -762,10 +764,10 @@ const FreelancerSubscription = () => {
                       {testimonial.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-semibold text-navy text-sm">
+                      <p className="font-semibold text-navy dark:text-white text-sm">
                         {testimonial.name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {testimonial.role} •{" "}
                         <span
                           className={
@@ -785,13 +787,13 @@ const FreelancerSubscription = () => {
           </section>
 
           {/* FAQ */}
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-navy">
+          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 dark:border-white/10">
+              <h2 className="text-xl font-bold text-navy dark:text-white">
                 Frequently Asked Questions
               </h2>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-white/10">
               {faqItems.map((item, idx) => (
                 <div key={idx} className="p-6">
                   <button

@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -239,38 +240,39 @@ const FreelancerSettings = () => {
 
   if (loading) {
     return (
-      <div className="w-full bg-slate-50 flex items-center justify-center h-64">
-        <div className="text-slate-500">Loading settings...</div>
+      <div className="w-full bg-slate-50 dark:bg-[#050B15] flex items-center justify-center h-64">
+        <div className="text-slate-500 dark:text-slate-400">Loading settings...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-slate-50">
+    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen">
       <div className="w-full">
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
               >
                 <Menu size={24} />
               </button>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy">
+                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
                   Settings
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
+                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                   Manage your account preferences
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
+              <ThemeToggle className="w-9 h-9" />
               <Link
                 to="/freelancer/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
+                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
               >
                 <MessageSquare size={20} />
                 {totalUnreadCount > 0 && (
@@ -278,7 +280,7 @@ const FreelancerSettings = () => {
                 )}
               </Link>
               
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden sm:flex">
+              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
@@ -286,7 +288,7 @@ const FreelancerSettings = () => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
                     {user?.fullName
@@ -299,38 +301,38 @@ const FreelancerSettings = () => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className="text-slate-500 hidden sm:block"
+                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
                   />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-semibold text-navy">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                      <p className="font-semibold text-navy dark:text-white">
                         {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
                       </p>
-                      <p className="text-sm text-slate-500 truncate">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                         {user?.email}
                       </p>
                     </div>
                     <Link
                       to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <UserIcon size={16} />
                       My Profile
                     </Link>
                     <Link
                       to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       <Settings size={16} />
                       Settings
                     </Link>
-                    <hr className="my-2 border-slate-100" />
+                    <hr className="my-2 border-slate-100 dark:border-white/5" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -344,7 +346,7 @@ const FreelancerSettings = () => {
         <main className="p-4 lg:p-8">
           <div className="grid lg:grid-cols-4 gap-6">
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl border border-slate-100 p-4 space-y-1">
+              <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 p-4 space-y-1">
                 {settingsSections.map((section) => (
                   <button
                     key={section.id}
@@ -353,7 +355,7 @@ const FreelancerSettings = () => {
                       "flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
                       activeSection === section.id
                         ? "bg-teal/10 text-teal"
-                        : "text-slate-600 hover:bg-slate-50",
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5",
                     )}
                   >
                     <section.icon size={18} />
@@ -364,13 +366,13 @@ const FreelancerSettings = () => {
             </div>
             <div className="lg:col-span-3">
               {activeSection === "account" && (
-                <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-6">
-                  <h2 className="text-lg font-bold text-navy">
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
                     Account Settings
                   </h2>
                   <div className="grid gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Full Name
                       </label>
                       <Input
@@ -382,25 +384,25 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter your full name"
-                        className="max-w-md"
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Email Address
                       </label>
                       <Input
                         value={accountForm.email}
                         placeholder="No email available"
                         disabled
-                        className="max-w-md bg-slate-50 text-slate-700"
+                        className="max-w-md bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-400 dark:border-white/10"
                       />
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                         Email cannot be changed
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Phone Number
                       </label>
                       <Input
@@ -412,7 +414,7 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter your phone number"
-                        className="max-w-md"
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                       />
                     </div>
                   </div>
@@ -426,8 +428,8 @@ const FreelancerSettings = () => {
                 </div>
               )}
               {activeSection === "notifications" && (
-                <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-6">
-                  <h2 className="text-lg font-bold text-navy">
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
                     Notification Preferences
                   </h2>
                   <div className="space-y-4">
@@ -442,7 +444,7 @@ const FreelancerSettings = () => {
                         key={item.key}
                         className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
                       >
-                        <span className="text-sm text-slate-600">
+                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           {item.label}
                         </span>
                         <button
@@ -458,7 +460,7 @@ const FreelancerSettings = () => {
                               item.key as keyof NotificationSettings
                             ]
                               ? "bg-teal"
-                              : "bg-slate-300",
+                              : "bg-slate-300 dark:bg-white/10",
                           )}
                         >
                           <span
@@ -485,13 +487,13 @@ const FreelancerSettings = () => {
                 </div>
               )}
               {activeSection === "security" && (
-                <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-6">
-                  <h2 className="text-lg font-bold text-navy">
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
                     Security Settings
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Current Password
                       </label>
                       <Input
@@ -504,11 +506,11 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter current password"
-                        className="max-w-md"
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         New Password
                       </label>
                       <Input
@@ -521,11 +523,11 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter new password"
-                        className="max-w-md"
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Confirm Password
                       </label>
                       <Input
@@ -538,7 +540,7 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Confirm new password"
-                        className="max-w-md"
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                       />
                     </div>
                   </div>
@@ -552,8 +554,8 @@ const FreelancerSettings = () => {
                 </div>
               )}
               {activeSection === "privacy" && (
-                <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-6">
-                  <h2 className="text-lg font-bold text-navy">
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
                     Privacy Settings
                   </h2>
                   <div className="space-y-4">
@@ -576,7 +578,7 @@ const FreelancerSettings = () => {
                         key={item.key}
                         className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
                       >
-                        <span className="text-sm text-slate-600">
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
                           {item.label}
                         </span>
                         <button
@@ -613,11 +615,11 @@ const FreelancerSettings = () => {
                 </div>
               )}
               {activeSection === "preferences" && (
-                <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-6">
-                  <h2 className="text-lg font-bold text-navy">Preferences</h2>
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">Preferences</h2>
                   <div className="grid gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Language
                       </label>
                       <select
@@ -628,14 +630,14 @@ const FreelancerSettings = () => {
                             language: e.target.value,
                           }))
                         }
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="en">English</option>
                         <option value="hi">Hindi</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Timezone
                       </label>
                       <select
@@ -646,14 +648,14 @@ const FreelancerSettings = () => {
                             timezone: e.target.value,
                           }))
                         }
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="Asia/Kolkata">IST (UTC+5:30)</option>
                         <option value="UTC">UTC</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Currency
                       </label>
                       <select
@@ -664,7 +666,7 @@ const FreelancerSettings = () => {
                             currency: e.target.value,
                           }))
                         }
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="INR">INR (₹)</option>
                         <option value="USD">USD ($)</option>

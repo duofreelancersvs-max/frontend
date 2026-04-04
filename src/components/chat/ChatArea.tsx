@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useThemeStore } from "@/stores/theme.store";
 import type { Message } from "@/services";
 import { ChatAvatar } from "./index";
 import MessageBubble from "./MessageBubble";
@@ -73,6 +74,7 @@ const ChatArea = ({
   onHire,
   onReject,
 }: ChatAreaProps) => {
+  const { theme } = useThemeStore();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -105,17 +107,17 @@ const ChatArea = ({
     return (
       <div
         className={cn(
-          "flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50",
+          "flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50 dark:bg-[#050B15]",
           className,
         )}
       >
-        <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center mb-4">
-          <MessageSquare size={28} className="text-slate-400" />
+        <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-white/5 flex items-center justify-center mb-4">
+          <MessageSquare size={28} className="text-slate-400 dark:text-slate-500" />
         </div>
-        <h3 className="text-lg font-semibold text-navy mb-1">
+        <h3 className="text-lg font-semibold text-navy dark:text-white mb-1">
           Select a conversation
         </h3>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Choose a conversation to start messaging
         </p>
       </div>
@@ -123,9 +125,9 @@ const ChatArea = ({
   }
 
   return (
-    <div className={cn("flex-1 flex flex-col bg-slate-50 min-w-0", className)}>
+    <div className={cn("flex-1 flex flex-col bg-slate-50 dark:bg-[#050B15] min-w-0 border-r border-slate-200 dark:border-white/5", className)}>
       {/* Chat Header */}
-      <div className="h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between flex-shrink-0">
+      <div className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           {onBack && (
             <button
@@ -142,14 +144,14 @@ const ChatArea = ({
           />
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-navy text-sm">
+              <h3 className="font-semibold text-navy dark:text-white text-sm">
                 {participant.name}
               </h3>
               {participant.verified && (
                 <VerifyIcon size={14} className="text-teal" />
               )}
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {participant.online ? "Online" : "Offline"}
               {project && ` • ${project.title}`}
             </p>
@@ -192,13 +194,13 @@ const ChatArea = ({
               </span>
             )
           ) : null}
-          <button
+            <button
             onClick={onToggleInfoPanel}
             className={cn(
               "p-2 rounded-lg transition-colors",
               showInfoPanel
                 ? "bg-teal/10 text-teal"
-                : "text-slate-400 hover:text-slate-600 hover:bg-slate-100",
+                : "text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
             )}
           >
             <MoreVertical size={18} />
@@ -240,7 +242,7 @@ const ChatArea = ({
       {!termsAccepted ? (
         <ChatTermsOverlay onAcceptClick={onAcceptTermsClick} />
       ) : (
-        <div className="bg-white border-t border-slate-200 p-4 flex-shrink-0 relative">
+        <div className="bg-white dark:bg-[#050B15] border-t border-slate-200 dark:border-white/10 p-4 flex-shrink-0 relative">
           <div className="flex items-center gap-2">
             <div className="relative" ref={emojiPickerRef}>
               <button
@@ -250,20 +252,19 @@ const ChatArea = ({
                   "p-2 rounded-lg transition-colors",
                   showEmojiPicker
                     ? "bg-teal/10 text-teal"
-                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100",
+                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
                 )}
               >
                 <Smile size={20} />
               </button>
 
               {showEmojiPicker && (
-                <div className="absolute bottom-12 left-0 z-50 shadow-2xl border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="absolute bottom-12 left-0 z-50 shadow-2xl border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
                   <EmojiPicker
                     onEmojiClick={(emojiData) => {
                       setMessageInput(messageInput + emojiData.emoji);
-                      // Don't close picker automatically for better UX
                     }}
-                    theme={Theme.LIGHT}
+                    theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
                     lazyLoadEmojis={true}
                     skinTonesDisabled={true}
                     searchPlaceHolder="Search emojis..."
@@ -279,7 +280,7 @@ const ChatArea = ({
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSend()}
-              className="flex-1 h-10 px-4 rounded-full bg-slate-100 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30"
+              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white"
             />
             <Button
               onClick={onSend}

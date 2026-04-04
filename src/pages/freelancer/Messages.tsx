@@ -359,37 +359,37 @@ const FreelancerMessages = () => {
   );
 
   return (
-    <div className="w-full h-screen flex flex-col bg-slate-50 overflow-hidden relative">
+    <div className="w-full h-screen flex flex-col bg-slate-50 dark:bg-[#050B15] overflow-hidden relative">
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
         {/* Header Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
+        <header className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
             >
               <Menu size={24} />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-navy">Messages</h1>
+              <h1 className="text-xl font-bold text-navy dark:text-white">Messages</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/freelancer/messages" className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <Link to="/freelancer/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
               <MessageSquare size={20} />
               {totalUnreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
               )}
             </Link>
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
               <Bell size={20} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </button>
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
               >
                 <ChatAvatar
                   name={user?.fullName || "U"}
@@ -402,29 +402,29 @@ const FreelancerMessages = () => {
                 />
               </button>
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="font-semibold text-navy">
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                    <p className="font-semibold text-navy dark:text-white">
                       {user?.fullName || "User"}
                     </p>
-                    <p className="text-sm text-slate-500">{user?.email || ""}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email || ""}</p>
                   </div>
                   <Link
                     to="/freelancer/profile"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <User size={16} /> My Profile
                   </Link>
                   <Link
                     to="/freelancer/settings"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <Settings size={16} /> Settings
                   </Link>
-                  <div className="h-px bg-slate-100 my-1"></div>
+                  <div className="h-px bg-slate-100 dark:bg-white/5 my-1"></div>
                   <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     <LogOut size={16} /> Sign out
                   </button>
@@ -438,11 +438,11 @@ const FreelancerMessages = () => {
         <div className="flex-1 flex overflow-hidden relative">
           {/* COLUMN 1: Conversations List */}
           <div className={cn(
-            "w-full lg:w-80 border-r border-slate-200 bg-white flex flex-col flex-shrink-0",
+            "w-full lg:w-80 border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0A121E] flex flex-col flex-shrink-0",
             selectedConversation ? "hidden lg:flex" : "flex"
           )}>
             {/* Search */}
-            <div className="p-4 border-b border-slate-100">
+            <div className="p-4 border-b border-slate-100 dark:border-white/5">
               <div className="relative">
                 <Search
                   size={18}
@@ -453,7 +453,7 @@ const FreelancerMessages = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search conversations..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none text-navy dark:text-white"
                 />
               </div>
             </div>
@@ -465,10 +465,10 @@ const FreelancerMessages = () => {
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv)}
                   className={cn(
-                    "p-4 border-b border-slate-50 cursor-pointer transition-colors",
+                    "p-4 border-b border-slate-50 dark:border-white/5 cursor-pointer transition-colors",
                     selectedConversation?.id === conv.id
-                      ? "bg-teal/5 border-l-2 border-l-teal"
-                      : "hover:bg-slate-50",
+                      ? "bg-teal/5 dark:bg-teal/10 border-l-2 border-l-teal"
+                      : "hover:bg-slate-50 dark:hover:bg-white/5",
                   )}
                 >
                   <div className="flex gap-3">
@@ -483,7 +483,7 @@ const FreelancerMessages = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-navy text-sm truncate">
+                          <span className="font-semibold text-navy dark:text-white text-sm truncate">
                             {conv.client.name}
                           </span>
                           {conv.client.verified && (
@@ -506,7 +506,7 @@ const FreelancerMessages = () => {
                       {/* Client Rating */}
                       <div className="flex items-center gap-1 mb-1">
                         <Star size={10} className="text-gold fill-gold" />
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
                           {conv.client.rating}
                         </span>
                         <span
@@ -521,7 +521,7 @@ const FreelancerMessages = () => {
 
                       {/* Last Message */}
                       <div className="flex items-center justify-between w-full min-w-0">
-                        <p className="text-sm text-slate-500 truncate">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                           {conv.lastMessage}
                         </p>
                         {conv.unreadCount > 0 && (
@@ -573,20 +573,20 @@ const FreelancerMessages = () => {
           {/* COLUMN 3: Client Info Panel */}
           {selectedConversation && (
             <div className={cn(
-              "absolute lg:static inset-y-0 right-0 z-30 bg-white border-l border-slate-200 overflow-y-auto shadow-xl lg:shadow-none transition-transform duration-300",
+              "absolute lg:static inset-y-0 right-0 z-30 bg-white dark:bg-[#0A121E] border-l border-slate-200 dark:border-white/5 overflow-y-auto shadow-xl lg:shadow-none transition-transform duration-300",
               showInfoPanel 
                 ? "translate-x-0 lg:translate-x-0 flex flex-col w-full sm:w-80" 
                 : "translate-x-full lg:translate-x-0 lg:hidden"
             )}>
               {/* Client Header */}
-              <div className="p-6 border-b border-slate-100 text-center">
+              <div className="p-6 border-b border-slate-100 dark:border-white/5 text-center">
                 <ChatAvatar
                   name={selectedConvData?.client.name || "Unknown"}
                   size="3xl"
                   showOnlineIndicator={false}
                   className="mx-auto mb-3"
                 />
-                <h3 className="font-bold text-navy text-lg flex items-center justify-center gap-1">
+                <h3 className="font-bold text-navy dark:text-white text-lg flex items-center justify-center gap-1">
                   {selectedConvData?.client.name ||
                     selectedConversation.participants?.[0]?.fullName ||
                     "Unknown"}
@@ -594,7 +594,7 @@ const FreelancerMessages = () => {
                 </h3>
                 <div className="flex items-center justify-center gap-1 mt-1">
                   <Star size={14} className="text-gold fill-gold" />
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
                     {selectedConvData?.client.rating || 0} (
                     {selectedConvData?.client.reviews || 0} reviews)
                   </span>
@@ -602,16 +602,16 @@ const FreelancerMessages = () => {
               </div>
 
               {/* Company Details */}
-              <div className="p-6 border-b border-slate-100">
-                <h4 className="text-sm font-semibold text-navy mb-4">
+              <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
                   Client Details
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Building2 size={16} className="text-slate-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-slate-500">Company</p>
-                      <p className="text-sm font-medium text-navy">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Company</p>
+                      <p className="text-sm font-medium text-navy dark:text-white">
                         {selectedConvData?.client.company || "N/A"}
                       </p>
                     </div>
@@ -619,8 +619,8 @@ const FreelancerMessages = () => {
                   <div className="flex items-start gap-3">
                     <Building2 size={16} className="text-slate-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-slate-500">Location</p>
-                      <p className="text-sm font-medium text-navy">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Location</p>
+                      <p className="text-sm font-medium text-navy dark:text-white">
                         {selectedConvData?.client.location || "N/A"}
                       </p>
                     </div>
@@ -629,17 +629,17 @@ const FreelancerMessages = () => {
               </div>
 
               {/* Project Reference */}
-              <div className="p-6 border-b border-slate-100">
-                <h4 className="text-sm font-semibold text-navy mb-4">
+              <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
                   Project Reference
                 </h4>
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <h5 className="font-medium text-navy mb-2">
+                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4">
+                  <h5 className="font-medium text-navy dark:text-white mb-2">
                     {selectedConversation.project?.title || "Project"}
                   </h5>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Status</span>
+                      <span className="text-slate-500 dark:text-slate-400">Status</span>
                       <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal/10 text-teal">
                         Active
                       </span>
@@ -650,13 +650,13 @@ const FreelancerMessages = () => {
 
               {/* Quick Actions */}
               <div className="p-6">
-                <h4 className="text-sm font-semibold text-navy mb-4">
+                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
                   Quick Actions
                 </h4>
                 <div className="space-y-2">
                   <Button
                     variant="outline"
-                    className="w-full justify-start border-slate-200"
+                    className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
                   >
                     <ExternalLink size={16} className="mr-2" />
                     View Project
@@ -674,18 +674,18 @@ const FreelancerMessages = () => {
 
       {/* TERMS & CONDITIONS MODAL */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-white/10">
             {/* Modal Header */}
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 dark:border-white/10">
               <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
                 <FileSignature size={20} className="text-teal" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-navy">
+                <h2 className="text-lg font-bold text-navy dark:text-white">
                   Terms & Conditions
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Please read and accept before chatting
                 </p>
               </div>
@@ -695,13 +695,13 @@ const FreelancerMessages = () => {
                 }}
                 className="ml-auto p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
-                <X size={20} className="text-slate-500" />
+                <X size={20} className="text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 
             {/* Terms Content */}
             <div className="p-5">
-              <div className="bg-slate-50 rounded-xl p-4 h-64 overflow-y-auto text-sm text-slate-600 leading-relaxed whitespace-pre-line border border-slate-100">
+              <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 h-64 overflow-y-auto text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line border border-slate-100 dark:border-white/10">
                 {termsText}
               </div>
             </div>
@@ -713,9 +713,9 @@ const FreelancerMessages = () => {
                   type="checkbox"
                   checked={modalChecked}
                   onChange={(e) => setModalChecked(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal"
+                  className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-white/20 text-teal focus:ring-teal bg-white dark:bg-white/5"
                 />
-                <span className="text-sm text-navy">
+                <span className="text-sm text-navy dark:text-white">
                   I have read and agree to the Terms and Conditions
                 </span>
               </label>
@@ -729,7 +729,7 @@ const FreelancerMessages = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex gap-3 p-5 border-t border-slate-100 bg-slate-50">
+            <div className="flex gap-3 p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
               <Button
                 variant="outline"
                 className="flex-1 border-slate-200"

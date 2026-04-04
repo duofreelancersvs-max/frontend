@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Twitter, Linkedin, Instagram, Youtube, MapPin } from "lucide-react";
+import Logo from "@/components/shared/Logo";
 
 export const PublicFooter = () => {
   return (
@@ -12,13 +13,8 @@ export const PublicFooter = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center text-white font-bold text-lg">
-                C
-              </div>
-              <div>
-                <span className="text-lg font-bold">ConnectMeIndia</span>
-              </div>
+            <div className="mb-6 h-12 flex items-center">
+              <Logo isDark={true} size="md" />
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               The premier marketplace for creative professionals in Telangana
