@@ -258,42 +258,44 @@ const Home = () => {
         />
       </div>
 
-      <PublicNavbar />
+      <PublicNavbar dark />
 
-      {/* 2. HERO SECTION - REVAMPED */}
-      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-24 md:pt-32 pb-12 overflow-hidden bg-[#050B15]">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-[#0A1628] to-[#112240] opacity-90" />
-          <div className="absolute top-0 right-0 w-[800px] md:w-[1000px] h-[800px] md:h-[1000px] bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[600px] md:w-[800px] h-[600px] md:h-[800px] bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
-          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+      {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
+      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 overflow-hidden bg-white dark:bg-[#050B15]">
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Main Gradient Surface */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-[#050B15] dark:via-[#0A1628] dark:to-[#112240]" />
+          
+          {/* Floating Decorative Blobs - Light Mode Accent */}
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-4 md:mb-6 animate-fade-in-up">
-              <span className="text-[10px] md:text-xs font-semibold text-teal-light tracking-wider uppercase">
+            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 mb-4 md:mb-6 animate-fade-in-up">
+              <span className="text-[10px] md:text-xs font-bold text-teal tracking-wider uppercase">
                 #1 Creative Marketplace in India
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight md:leading-[1.1] mb-4 md:mb-6">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
               Empower Your Business with <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light via-sky-blue to-teal-light pl-1 lg:pl-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue">
                 Elite Talent
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
               Connect with India's most skilled freelancers. From creative arts
               to professional services, we bring the best to your doorstep.
             </p>
 
-            {/* Role Switcher CTAs - PREMIUM & HIGH CONTRAST */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mt-6 mb-8 md:mb-12">
+            {/* Role Switcher CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-6 mb-12">
               {isAuthenticated ? (
                 <>
                   <Link to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"} className="w-full sm:w-auto">
@@ -304,19 +306,19 @@ const Home = () => {
                       Go to Dashboard
                     </Button>
                   </Link>
-                  <Link to={user?.role === "client" ? "/client/post-project" : "/freelancer/projects"} className="w-full sm:w-auto">
+                  <Link to="/projects" className="w-full sm:w-auto">
                     <Button
                       size="lg"
                       variant="ghost"
-                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto border-2 border-navy/20 dark:border-white/30 text-navy dark:text-white hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
-                      {user?.role === "client" ? "Post a Project" : "Browse Projects"}
+                      Browse Projects
                     </Button>
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link to="/register?role=client" className="w-full sm:w-auto">
+                  <Link to="/freelancers" className="w-full sm:w-auto">
                     <Button
                       size="lg"
                       className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl shadow-xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
@@ -324,11 +326,11 @@ const Home = () => {
                       I want to Hire Talent
                     </Button>
                   </Link>
-                  <Link to="/register?role=freelancer" className="w-full sm:w-auto">
+                  <Link to="/projects" className="w-full sm:w-auto">
                     <Button
                       size="lg"
                       variant="ghost"
-                      className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full sm:w-auto border-2 border-navy/20 dark:border-white/30 text-navy dark:text-white hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
                     >
                       I want to find Work
                     </Button>
@@ -347,10 +349,10 @@ const Home = () => {
             >
               <div
                 className={cn(
-                  "flex items-center bg-white/10 backdrop-blur-xl rounded-2xl border transition-all duration-300 overflow-hidden",
+                  "flex items-center bg-white dark:bg-white/10 backdrop-blur-xl rounded-2xl border transition-all duration-300 overflow-hidden",
                   searchFocused
-                    ? "border-teal shadow-lg shadow-teal/20"
-                    : "border-white/20",
+                    ? "border-teal shadow-2xl shadow-teal/20"
+                    : "border-slate-200 dark:border-white/20 shadow-lg",
                 )}
               >
                 <div className="flex items-center gap-3 px-5 flex-1">
@@ -361,7 +363,7 @@ const Home = () => {
                     onChange={(e) => setHeroQuery(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
                     placeholder="Search skills (e.g. Video Editing, CA, Web Dev...)"
-                    className="w-full py-4 bg-transparent text-white placeholder:text-slate-400 focus:outline-none text-base"
+                    className="w-full py-5 bg-transparent text-navy dark:text-white placeholder:text-slate-400 focus:outline-none text-base md:text-lg"
                     onFocus={() => {
                       setSearchFocused(true);
                       if (heroQuery.trim()) setShowDropdown(true);
@@ -371,7 +373,7 @@ const Home = () => {
                 </div>
                 <Button
                   onClick={handleSearchSubmit}
-                  className="hidden sm:flex m-2 bg-white text-navy hover:bg-slate-100 px-6 py-6 rounded-xl font-bold"
+                  className="hidden sm:flex m-2 bg-navy dark:bg-white text-white dark:text-navy hover:opacity-90 px-8 py-6 rounded-xl font-bold transition-all"
                 >
                   Search
                 </Button>

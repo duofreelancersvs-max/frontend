@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithRouter } from "@/__tests__/test-utils";
-import BrowseProjects from "../../../pages/freelancer/BrowseProjects";
+import FindWork from "../../../pages/freelancer/FindWork";
 import { useAuth } from "@/hooks/useAuth";
 import { projectService, conversationService } from "@/services";
 import type { User } from "@/types/auth.types";
@@ -32,7 +32,7 @@ vi.mock("@/components/modals/TermsModal", () => ({
     isOpen ? <div data-testid="terms-modal"><button onClick={onAccept}>Accept Terms</button></div> : null
 }));
 
-describe("BrowseProjects", () => {
+describe("FindWork", () => {
   const mockUser: User = {
     _id: "user-1",
     email: "freelancer@example.com",
@@ -85,12 +85,12 @@ describe("BrowseProjects", () => {
   });
 
   it("renders projects list", async () => {
-    renderWithRouter(<BrowseProjects />);
+    renderWithRouter(<FindWork />);
     expect(await screen.findByText("React Developer Needed")).toBeInTheDocument();
   });
 
   it("handles search filtering", async () => {
-    renderWithRouter(<BrowseProjects />);
+    renderWithRouter(<FindWork />);
     await screen.findByText("React Developer Needed");
     
     const searchInput = screen.getByPlaceholderText(/search projects/i);
@@ -101,7 +101,7 @@ describe("BrowseProjects", () => {
   });
 
   it("can clear all filters", async () => {
-    renderWithRouter(<BrowseProjects />);
+    renderWithRouter(<FindWork />);
     await screen.findByText("React Developer Needed");
     
     const searchInput = screen.getByPlaceholderText(/search projects/i);
@@ -115,7 +115,7 @@ describe("BrowseProjects", () => {
 
   it("handles project application flow", async () => {
     (conversationService.create as any).mockResolvedValue({});
-    renderWithRouter(<BrowseProjects />);
+    renderWithRouter(<FindWork />);
     await screen.findByText("React Developer Needed");
     
     const applyButtons = screen.getAllByRole("button", { name: /apply now/i });
@@ -139,7 +139,7 @@ describe("BrowseProjects", () => {
 
   it("displays loading state initially", async () => {
     (projectService.search as any).mockReturnValue(new Promise(() => {}));
-    renderWithRouter(<BrowseProjects />);
+    renderWithRouter(<FindWork />);
     expect(screen.getByText(/loading projects/i)).toBeInTheDocument();
   });
 });

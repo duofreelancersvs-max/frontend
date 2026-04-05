@@ -1,30 +1,28 @@
 import { useState, useCallback } from "react";
 import { useOutletContext, useLocation } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
-import { Bell, ChevronDown, LogOut, User, Settings, Menu, MessageSquare } from "lucide-react";
-import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { conversationService, applicationService } from "@/services";
 import type { Conversation, Message, Application } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
-import { ConversationList, ChatArea, ChatInfoPanel } from "@/components/chat";
-import type {
-  ConversationItem,
-  ChatParticipant,
-  InfoPanelParticipant,
+import {
+  ConversationList,
+  ChatArea,
+  ChatInfoPanel,
+  type ConversationItem,
+  type ChatParticipant,
+  type InfoPanelParticipant,
 } from "@/components/chat";
-import { ChatAvatar } from "@/components/chat";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
-import { ThemeToggle as ThemeToggleButton } from "@/components/theme/ThemeToggle";
 
 const ClientMessages = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -35,8 +33,9 @@ const ClientMessages = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, totalUnreadCount } = useUnreadStore();
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
   const [currentApplication, setCurrentApplication] = useState<Application | null>(null);
+  const [allClientApplications, setAllClientApplications] = useState<Application[]>([]);
 
   // Sync active conversation with unread store
   useEffect(() => {
@@ -180,6 +179,10 @@ const ClientMessages = () => {
         if (convs.length > 0) {
           setSelectedConversation(convs[0]);
         }
+
+        // Also fetch all client applications for context enrichment
+        const appsRes = await applicationService.getMyClientApplications();
+        setAllClientApplications(appsRes.applications || []);
       } catch (error) {
         console.error("Error fetching conversations:", error);
       }
@@ -280,31 +283,60 @@ const ClientMessages = () => {
 
   // ── Application Fetching ──
   useEffect(() => {
-    const fetchApplication = async () => {
-      if (!selectedConversation?.projectId) {
-        setCurrentApplication(null);
-        return;
-      }
-      try {
-        const res = await applicationService.getByProject(selectedConversation.projectId);
-        const freelancerId = selectedFreelancer?.id || (selectedFreelancer as any)?._id;
-        const matchingApp = res.applications.find(
-          (app) => 
-            (app.freelancer as any)?._id === freelancerId || 
-            app.freelancer?.id === freelancerId || 
-            (app as any).freelancerId === freelancerId
-        );
-        setCurrentApplication(matchingApp || null);
-      } catch (err) {
-        console.error("Failed to fetch application for conversation", err);
-        setCurrentApplication(null);
-      }
-    };
-    fetchApplication();
-  }, [selectedConversation?.projectId, selectedFreelancer]);
+    const freelancerId = selectedFreelancer?.id || (selectedFreelancer as any)?._id;
+    if (!freelancerId) {
+      setCurrentApplication(null);
+      return;
+    }
+
+    // Find all applications from THIS freelancer
+    const freelancerApps = allClientApplications.filter(
+      (app) => 
+        (app.freelancer as any)?._id === freelancerId || 
+        app.freelancer?.id === freelancerId || 
+        (app as any).freelancerId === freelancerId
+    );
+
+    if (freelancerApps.length === 0) {
+      setCurrentApplication(null);
+      return;
+    }
+
+    // 1. First priority: Try to match the projectId in the conversation if specifically selected
+    const projectSpecificApp = freelancerApps.find(
+      (app) => (app.projectId === selectedConversation?.projectId || (app.project as any)?._id === selectedConversation?.projectId)
+    );
+
+    // 2. Second priority: Pick the MOST RECENT application (by createdAt)
+    const sortedApps = [...freelancerApps].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const mostRecentApp = sortedApps[0];
+
+    // LOGIC: If both are pending (or specifically the most recent is pending), 
+    // prioritize the most recent one as it's the likely current topic.
+    if (mostRecentApp && mostRecentApp.status === 'pending') {
+       setCurrentApplication(mostRecentApp);
+    } else {
+       setCurrentApplication(projectSpecificApp || mostRecentApp);
+    }
+  }, [selectedConversation?.id, allClientApplications, selectedFreelancer]);
 
   const conversationItems: ConversationItem[] = conversations.map((conv) => {
     const freelancer = getFreelancerParticipant(conv);
+    const freelancerId = freelancer?.id || (freelancer as any)?._id;
+    
+    // Find matching application for sidebar title enrichment
+    const matchingApp = allClientApplications
+      .filter(app => {
+        const appFreelancerId = (app.freelancer as any)?._id || app.freelancer?.id || (app as any).freelancerId;
+        return appFreelancerId === freelancerId;
+      })
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+
+    const projectTitle = matchingApp?.project?.title || conv.project?.title || "Project";
+    const projectId = matchingApp?.projectId || matchingApp?.project?._id || conv.projectId || "";
+
     // Safe date formatting: handle invalid dates
     let lastMessageTime = "";
     if (conv.lastMessage?.createdAt) {
@@ -327,8 +359,8 @@ const ClientMessages = () => {
         reviews: 10,
       },
       project: {
-        id: conv.projectId || "",
-        title: conv.project?.title || "Project",
+        id: projectId,
+        title: projectTitle,
       },
       lastMessage: conv.lastMessage?.content || "No messages",
       lastMessageTime,
@@ -359,12 +391,17 @@ const ClientMessages = () => {
       }
     : null;
 
-  const chatProject = selectedConversation?.project
+  const chatProject = currentApplication?.project
     ? {
-        id: selectedConversation.projectId || "",
-        title: selectedConversation.project.title,
+        id: currentApplication.projectId || (currentApplication.project as any)._id || (currentApplication.project as any).id || "",
+        title: currentApplication.project.title,
       }
-    : null;
+    : selectedConversation?.project
+      ? {
+          id: selectedConversation.projectId || "",
+          title: selectedConversation.project.title,
+        }
+      : null;
 
   const clientTermsAccepted =
     selectedConversation?.termsAccepted?.clientAccepted ?? true;
@@ -482,84 +519,10 @@ const ClientMessages = () => {
    return (
     <div className="h-full flex flex-col bg-slate-50 dark:bg-[#050B15] font-sans overflow-hidden">
        {/* Header */}
-      <header className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-4">
-           <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-          >
-            <Menu size={24} />
-          </button>
-           <div>
-            <h1 className="text-xl font-bold text-navy dark:text-white">Messages</h1>
-          </div>
-        </div>
-
-         <div className="flex items-center gap-2 lg:gap-3">
-          <ThemeToggleButton className="w-9 h-9" />
-          <Link to="/client/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-            <MessageSquare size={20} />
-            {totalUnreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
-            )}
-          </Link>
-           <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-            <Bell size={20} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
-          <div className="relative">
-             <button
-              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-              className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-            >
-              <ChatAvatar
-                name={user?.fullName || "U"}
-                size="sm"
-                showOnlineIndicator={false}
-              />
-               <ChevronDown
-                size={16}
-                className="text-slate-500 dark:text-slate-400 hidden sm:block"
-              />
-            </button>
-             {profileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                  <p className="font-semibold text-navy dark:text-white">
-                    {user?.fullName || "User"}
-                  </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email || ""}</p>
-                </div>
-                <Link
-                  to="/client/profile"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                >
-                  <User size={16} /> My Profile
-                </Link>
-                <Link
-                  to="/client/settings"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                >
-                  <Settings size={16} /> Settings
-                </Link>
-                <hr className="my-2 border-slate-100 dark:border-white/5" />
-                <button 
-                  onClick={async () => {
-                    try {
-                      await logout();
-                    } catch (error) {
-                      console.error("Logout failed:", error);
-                    }
-                  }}
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                >
-                  <LogOut size={16} /> Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        title="Messages"
+        onMenuClick={() => setSidebarOpen(true)}
+      />
 
        {/* Chat Container */}
       <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-[#050B15]">

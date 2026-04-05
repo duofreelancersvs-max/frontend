@@ -6,34 +6,27 @@ import {
   Eye,
   Save,
   X,
-  Menu,
   FolderOpen,
   Star,
   Plus,
   Trash2,
   Edit2,
-  Bell,
   GripVertical,
-  MessageSquare,
   Briefcase,
   GraduationCap,
   CheckCircle,
   AlertCircle,
   Lightbulb,
   ChevronRight,
-  Image,
+  Image as ImageIcon,
   Loader2,
-  ChevronDown,
-  Settings,
-  LogOut,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
-import { useUnreadStore } from "@/stores/unread.store";
 import { freelancerService } from "@/services/freelancer.service";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 import type {
   FreelancerProfile,
   SkillRef,
@@ -85,18 +78,9 @@ const suggestedSkills = [
 ];
 
 const FreelancerProfileEdit = () => {
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const { user, logout } = useAuth();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const { user } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -121,7 +105,8 @@ const FreelancerProfileEdit = () => {
   const [newSkill, setNewSkill] = useState("");
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showExperienceModal, setShowExperienceModal] = useState(false);
-  const [editingPortfolioItem, setEditingPortfolioItem] = useState<PortfolioItem | null>(null);
+  const [editingPortfolioItem, setEditingPortfolioItem] =
+    useState<PortfolioItem | null>(null);
   const [showEducationModal, setShowEducationModal] = useState(false);
 
   // Modal form refs
@@ -273,13 +258,16 @@ const FreelancerProfileEdit = () => {
     try {
       if (editingPortfolioItem) {
         setActionLoading(`portfolio-edit-${editingPortfolioItem._id}`);
-        const updatedProfile = await freelancerService.updatePortfolio(editingPortfolioItem._id as string, {
-          title: data.title,
-          description: data.description,
-          projectUrl: data.projectUrl,
-          skills: [data.category],
-          thumbnail: data.thumbnail,
-        });
+        const updatedProfile = await freelancerService.updatePortfolio(
+          editingPortfolioItem._id as string,
+          {
+            title: data.title,
+            description: data.description,
+            projectUrl: data.projectUrl,
+            skills: [data.category],
+            thumbnail: data.thumbnail,
+          },
+        );
         applyProfileToState(updatedProfile);
         toast.success("Project updated!");
       } else {
@@ -409,7 +397,9 @@ const FreelancerProfileEdit = () => {
       <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#050B15]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={36} className="animate-spin text-teal" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Loading your profile…</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Loading your profile…
+          </p>
         </div>
       </div>
     );
@@ -423,123 +413,34 @@ const FreelancerProfileEdit = () => {
     <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen transition-colors duration-300">
       <div className="w-full">
         {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/10 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                  Edit Profile
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Update your professional information
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle className="w-9 h-9" />
-              <Link to="/freelancer/profile" className="hidden sm:flex">
-                <Button
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
-                >
-                  <Eye size={16} className="mr-2" />
-                  Preview Profile
-                </Button>
-              </Link>
+        <DashboardHeader
+          title="Edit Profile"
+          onMenuClick={() => setSidebarOpen(true)}
+        >
+          <div className="flex items-center gap-2 lg:gap-4 ml-auto">
+            <Link to="/freelancer/profile" className="hidden sm:flex">
               <Button
-                className="bg-teal hover:bg-teal-light text-white hidden sm:flex"
-                onClick={handleSaveChanges}
-                disabled={saving}
+                variant="outline"
+                className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
               >
-                {saving ? (
-                  <Loader2 size={16} className="mr-2 animate-spin" />
-                ) : (
-                  <Save size={16} className="mr-2" />
-                )}
-                {saving ? "Saving…" : "Save Changes"}
+                <Eye size={16} className="mr-2" />
+                Preview Profile
               </Button>
-
-              <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-1 hidden lg:block" />
-
-              <Link
-                to="/freelancer/messages"
-                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
-              >
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
-                )}
-              </Link>
-              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              <div className="relative">
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
-                  />
-                </button>
-
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#111827] rounded-xl shadow-xl border border-slate-100 dark:border-white/10 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/10">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <User size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/10" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            </Link>
+            <Button
+              className="bg-teal hover:bg-teal-light text-white hidden sm:flex"
+              onClick={handleSaveChanges}
+              disabled={saving}
+            >
+              {saving ? (
+                <Loader2 size={16} className="mr-2 animate-spin" />
+              ) : (
+                <Save size={16} className="mr-2" />
+              )}
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
           </div>
-        </header>
+        </DashboardHeader>
 
         {/* Main Content Area */}
         <main className="p-4 lg:p-8">
@@ -693,8 +594,6 @@ const FreelancerProfileEdit = () => {
                             placeholder="Public display name"
                           />
                         </div>
-
-
                       </div>
 
                       {/* Professional Headline */}
@@ -937,7 +836,8 @@ const FreelancerProfileEdit = () => {
                                 />
                               ) : (
                                 (() => {
-                                  const category = item.skills?.[0] || "Default";
+                                  const category =
+                                    item.skills?.[0] || "Default";
                                   const style = getCategoryStyle(category);
                                   const Icon = style.icon;
                                   return (
@@ -947,7 +847,10 @@ const FreelancerProfileEdit = () => {
                                         style.gradient,
                                       )}
                                     >
-                                      <Icon size={40} className="mb-2 opacity-80" />
+                                      <Icon
+                                        size={40}
+                                        className="mb-2 opacity-80"
+                                      />
                                       <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
                                         {category}
                                       </span>
@@ -1014,7 +917,7 @@ const FreelancerProfileEdit = () => {
 
                       {portfolio.length === 0 && (
                         <div className="text-center py-12">
-                          <Image
+                          <ImageIcon
                             size={40}
                             className="mx-auto text-slate-300 mb-3"
                           />
@@ -1295,7 +1198,9 @@ const FreelancerProfileEdit = () => {
               <section className="bg-gradient-to-br from-royal-blue/5 to-teal/5 dark:from-royal-blue/10 dark:to-teal/10 rounded-2xl border border-royal-blue/10 dark:border-white/10 p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Lightbulb size={18} className="text-gold" />
-                  <h3 className="font-bold text-navy dark:text-white">Profile Tips</h3>
+                  <h3 className="font-bold text-navy dark:text-white">
+                    Profile Tips
+                  </h3>
                 </div>
 
                 <ul className="space-y-3">
@@ -1362,7 +1267,9 @@ const FreelancerProfileEdit = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
-              <h3 className="text-lg font-bold text-navy dark:text-white">Add Experience</h3>
+              <h3 className="text-lg font-bold text-navy dark:text-white">
+                Add Experience
+              </h3>
               <button
                 onClick={() => setShowExperienceModal(false)}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"

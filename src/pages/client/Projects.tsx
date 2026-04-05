@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
-import { useUnreadStore } from "@/stores/unread.store";
 import {
-  MessageSquare,
+  User,
   PlusCircle,
   Search,
-  ChevronDown,
-  LogOut,
-  User,
-  Menu,
   MoreVertical,
   Grid3X3,
   List,
@@ -22,21 +17,18 @@ import {
   Eye,
   CheckCircle,
   Briefcase,
-  Bell,
-  Settings,
   MapPin,
   Loader2,
   Star,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
-import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import type { Project, ProjectStats } from "@/services";
 import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 // Helper to format deadline as a clean date string
 const formatDeadline = (deadline: string) => {
@@ -52,9 +44,7 @@ const formatDeadline = (deadline: string) => {
 };
 
 const ClientProjects = () => {
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -68,7 +58,6 @@ const ClientProjects = () => {
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [projectToReview, setProjectToReview] = useState<Project | null>(null);
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // Build tabs dynamically from stats
@@ -268,113 +257,13 @@ const ClientProjects = () => {
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
       {/* MAIN CONTENT */}
       <div>
-        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                  My Projects
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Manage and track all your projects
-                </p>
-              </div>
-            </div>
-
-             <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle className="w-9 h-9" />
-              <Link to="/client/post-project">
-                <Button className="bg-teal hover:bg-teal-light text-white hidden sm:flex">
-                  <PlusCircle size={18} className="mr-2" />
-                  Post New Project
-                </Button>
-                <Button className="bg-teal hover:bg-teal-light text-white sm:hidden p-2">
-                  <PlusCircle size={20} />
-                </Button>
-              </Link>
-
-               <Link
-                to="/client/messages"
-                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
-              >
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
-                )}
-              </Link>
-
-               <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              <div className="relative">
-                 <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                   <ChevronDown
-                    size={16}
-                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
-                  />
-                </button>
-
-                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName || user?.email?.split("@")[0] || "User"}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <User size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/5" />
-                    <button
-                      onClick={logout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+      <DashboardHeader
+        title="My Projects"
+        onMenuClick={() => setSidebarOpen(true)}
+      />
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 space-y-6">
+        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
            {/* TABS */}
           <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
             <div className="flex overflow-x-auto scrollbar-hide">
@@ -555,7 +444,7 @@ const ClientProjects = () => {
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-1.5 mb-4">
-                          {(project.skills || []).slice(0, 3).map((skill) => (
+                          {(project.requiredSkills || []).slice(0, 3).map((skill) => (
                              <span
                               key={skill}
                               className="px-2 py-0.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-md text-xs font-medium"
@@ -563,9 +452,9 @@ const ClientProjects = () => {
                               {skill}
                             </span>
                           ))}
-                          {(project.skills || []).length > 3 && (
+                          {(project.requiredSkills || []).length > 3 && (
                              <span className="px-2 py-0.5 bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-500 rounded-md text-xs border border-transparent">
-                              +{(project.skills || []).length - 3}
+                              +{(project.requiredSkills || []).length - 3}
                             </span>
                           )}
                         </div>

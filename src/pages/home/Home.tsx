@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useThemeStore } from "@/stores/theme.store";
+import { projectService, applicationService } from "@/services";
 
 interface ActionItem {
   icon: React.ElementType;
@@ -50,6 +51,11 @@ const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
+  const [statsCount, setStatsCount] = useState<number>(0);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const isClient = user?.role === "client";
+  const isFreelancer = user?.role === "freelancer";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,11 +65,27 @@ const HomePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isClient = user?.role === "client";
-  const isFreelancer = user?.role === "freelancer";
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        if (isClient) {
+          const stats = await projectService.getMyClientStats();
+          setStatsCount(stats.inProgress);
+        } else if (isFreelancer) {
+          const res = await applicationService.getMyApplications();
+          setStatsCount(res.applications.length);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    if (user) fetchStats();
+  }, [isClient, isFreelancer, user]);
 
   const userName = user?.fullName?.split(" ")[0] || user?.email?.split("@")[0] || "User";
-  const userInitial = userName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
@@ -80,7 +102,7 @@ const HomePage = () => {
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-primary/10 dark:bg-teal-primary/20 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute top-[40%] right-[-10%] w-[30%] h-[50%] bg-royal-blue/10 dark:bg-royal-blue/15 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 dark:opacity-20 pointer-events-none mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20200%20200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22noiseFilter%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.65%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23noiseFilter)%22%2F%3E%3C%2Fsvg%3E')] opacity-[0.03] dark:opacity-[0.05] pointer-events-none mix-blend-overlay"></div>
 
       {/* Header */}
       <header
@@ -108,13 +130,19 @@ const HomePage = () => {
             </div>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 sm:gap-3 p-1.5 pr-2 sm:pr-4 rounded-full bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 dark:hover:border-white/10 transition-all shadow-sm"
+              className="flex items-center gap-2 sm:gap-3 p-1 rounded-full bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 dark:hover:border-white/10 transition-all shadow-sm group"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal-light flex items-center justify-center text-white font-bold shadow-md text-xs sm:text-base">
-                {userInitial}
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-teal-primary p-0.5 shadow-md active-scale">
+                <div className="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden border border-white/20">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || userName)}&background=0F172A&color=fff&font-size=0.33&bold=true`}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <span className="text-slate-700 dark:text-white font-medium text-sm hidden sm:block">{userName}</span>
-              <ChevronDown className={cn("w-3 h-3 sm:w-4 sm:h-4 text-slate-500 dark:text-white/50 transition-transform duration-300", showMenu && "rotate-180")} />
+              <span className="text-slate-700 dark:text-white font-semibold text-sm hidden sm:block ml-1">{userName}</span>
+              <ChevronDown className={cn("w-3 h-3 sm:w-4 sm:h-4 text-slate-500 dark:text-white/50 transition-transform duration-300 mr-2", showMenu && "rotate-180")} />
             </button>
 
             {showMenu && (
@@ -172,9 +200,13 @@ const HomePage = () => {
             <div>
                <p className="text-slate-500 dark:text-white/50 text-sm font-medium mb-1 uppercase tracking-wider">{isClient ? 'Active Projects' : 'Proposals sent'}</p>
                <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
-                 {isClient ? '3' : '12'}
+                 {loadingStats ? "..." : statsCount}
                </h3>
-               <p className="text-teal-primary dark:text-teal-light text-xs font-medium mt-1">+2 this week</p>
+               {!loadingStats && (
+                 <p className="text-teal-primary dark:text-teal-light text-xs font-medium mt-1">
+                   {isClient ? "Manage ongoing work" : "Track your applications"}
+                 </p>
+               )}
             </div>
           </div>
         </div>
@@ -191,8 +223,8 @@ const HomePage = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-teal-primary/0 to-teal-primary/0 group-hover:from-teal-primary/5 group-hover:to-transparent transition-all duration-500 rounded-3xl" />
               
               <div className="relative mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center justify-center group-hover:bg-teal-primary/10 dark:group-hover:bg-teal-primary/20 group-hover:border-teal-primary/30 transition-all duration-300 shadow-sm dark:shadow-lg">
-                  <action.icon className="w-6 h-6 text-slate-600 dark:text-white group-hover:text-teal-primary dark:group-hover:text-teal-light transition-colors duration-300" />
+                <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300 shadow-sm dark:shadow-lg">
+                  <action.icon className="w-6 h-6 text-slate-600 dark:text-white group-hover:text-primary dark:group-hover:text-teal-light transition-colors duration-300" />
                 </div>
                 {action.hasBadge && unreadCount > 0 && (
                   <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.5)] border-2 border-white dark:border-[#050B15]">
@@ -200,14 +232,14 @@ const HomePage = () => {
                   </span>
                 )}
               </div>
-              <h3 className="text-slate-900 dark:text-white font-semibold text-lg mb-2 group-hover:text-teal-primary dark:group-hover:text-teal-light transition-colors">
+              <h3 className="text-slate-900 dark:text-white font-semibold text-lg mb-2 group-hover:text-primary dark:group-hover:text-teal-light transition-colors">
                 {action.label}
               </h3>
               <p className="text-slate-500 dark:text-white/50 text-sm leading-relaxed mb-4">
                 {action.description}
               </p>
               
-              <div className="mt-auto flex items-center text-sm font-medium text-slate-400 dark:text-white/40 group-hover:text-teal-primary dark:group-hover:text-teal-light transition-colors">
+              <div className="mt-auto flex items-center text-sm font-medium text-slate-400 dark:text-white/40 group-hover:text-primary dark:group-hover:text-teal-light transition-colors">
                 <span>View</span>
                 <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
               </div>

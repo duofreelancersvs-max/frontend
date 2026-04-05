@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
 import Logo from "@/components/shared/Logo";
+import PublicNavbar from "@/components/shared/PublicNavbar";
 import {
   ChevronRight,
   Star,
@@ -79,6 +81,8 @@ const AnimatedSection = ({
 
 const FreelancerProfile = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [showFullBio, setShowFullBio] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(3);
@@ -214,57 +218,14 @@ const FreelancerProfile = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white dark:bg-[#050B15] shadow-sm py-4 border-b border-slate-100 dark:border-white/5">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Logo size="sm" />
-
-            <div className="hidden md:flex items-center gap-6">
-              <Link
-                to="/"
-                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
-              >
-                Home
-              </Link>
-              <Link
-                to="/freelancers"
-                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
-              >
-                Find Talent
-              </Link>
-              <Link
-                to="/how-it-works"
-                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
-              >
-                How It Works
-              </Link>
-              <Link
-                to="/pricing"
-                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors"
-              >
-                Pricing
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" className="text-royal-blue font-semibold">
-                Log In
-              </Button>
-              <Button className="bg-teal hover:bg-teal-light text-white font-semibold px-6">
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PublicNavbar dark />
 
       {/* 1. PROFILE HEADER */}
-      <section className="relative bg-navy dark:bg-[#03070C]">
+      <section className="relative bg-navy dark:bg-[#03070C] pt-20">
         {/* Background Wrapper - stops horizontal overflow */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue h-[120%]" />
-          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]" />
 
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
@@ -337,7 +298,17 @@ const FreelancerProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 w-full md:w-auto md:pb-2">
-              <Button className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base border-0">
+              <Button 
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                  } else {
+                    // Logic for authenticated contact
+                    navigate(`/client/messages`, { state: { freelancerId: id } });
+                  }
+                }}
+                className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base border-0"
+              >
                 <MessageSquare size={20} className="mr-2" />
                 Contact Me
               </Button>
@@ -347,7 +318,13 @@ const FreelancerProfile = () => {
                   "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 px-4 py-6 rounded-xl transition-all hover:scale-105 active:scale-95",
                   isSaved && "bg-white/20 border-pink-400/50 text-pink-400",
                 )}
-                onClick={() => setIsSaved(!isSaved)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                    return;
+                  }
+                  setIsSaved(!isSaved);
+                }}
               >
                 <Heart
                   size={24}
@@ -700,7 +677,16 @@ const FreelancerProfile = () => {
                   </p>
                 </div>
 
-                <Button className="w-full bg-teal hover:bg-teal-light text-white font-semibold py-6 mb-3">
+                <Button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                    } else {
+                      navigate(`/client/messages`, { state: { freelancerId: id } });
+                    }
+                  }}
+                  className="w-full bg-teal hover:bg-teal-light text-white font-semibold py-6 mb-3"
+                >
                   <MessageSquare size={18} className="mr-2" />
                   Contact {freelancer.name.split(" ")[0]}
                 </Button>
@@ -708,7 +694,13 @@ const FreelancerProfile = () => {
                 <Button
                   variant="outline"
                   className="w-full border-slate-200 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 py-6"
-                  onClick={() => setIsSaved(!isSaved)}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                      return;
+                    }
+                    setIsSaved(!isSaved);
+                  }}
                 >
                   <Heart
                     size={18}
@@ -778,7 +770,15 @@ const FreelancerProfile = () => {
               <p className="text-white/90 text-xl mb-8 leading-relaxed">
                 Start a conversation and bring your creative vision to life.
               </p>
-              <Button
+               <Button
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                  } else {
+                    // Logic for hiring when authenticated as client
+                    navigate(`/client/dashboard`);
+                  }
+                }}
                 size="lg"
                 className="bg-white text-teal hover:bg-slate-100 font-bold text-lg px-10 py-7 rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
               >

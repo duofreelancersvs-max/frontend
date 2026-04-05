@@ -154,14 +154,13 @@ const HowItWorks = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
-      <PublicNavbar />
+      <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+      <section className="relative pt-28 pb-20 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-left">
           <AnimatedSection>
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xs font-bold text-teal dark:text-teal-light mb-8 uppercase tracking-widest">
               <Play size={14} className="fill-current" />
@@ -235,7 +234,6 @@ const HowItWorks = () => {
                         step.color
                       )}>
                         <div className="h-full w-full bg-white dark:bg-[#050B15]/90 rounded-[2.4rem] flex items-center justify-center relative overflow-hidden">
-                          <div className="absolute inset-0 bg-plus-pattern opacity-[0.02] dark:opacity-[0.05]" />
                           <div className={cn(
                             "w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 bg-gradient-to-br",
                             step.color
@@ -290,7 +288,6 @@ const HowItWorks = () => {
 
               <div className="aspect-video rounded-[3rem] bg-gradient-to-br from-teal/20 to-royal-blue/30 dark:from-navy dark:to-royal-blue/30 p-1 group cursor-pointer relative shadow-xl dark:shadow-2xl dark:shadow-navy/50">
                 <div className="h-full w-full bg-white dark:bg-[#050B15] rounded-[2.9rem] flex items-center justify-center overflow-hidden relative">
-                  <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-10" />
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-xl border border-slate-100 dark:border-none">
                     <Play fill="currentColor" className="text-teal dark:text-navy ml-1" size={32} />
                   </div>

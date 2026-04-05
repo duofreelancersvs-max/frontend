@@ -11,14 +11,13 @@ const FreelancerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans transition-colors duration-300">
+    <div className="flex h-screen bg-background font-sans transition-colors duration-300 overflow-hidden">
       <FreelancerSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Overlay for mobile when sidebar is open */}
-      <div className="lg:ml-64 min-h-screen flex flex-col">
+      <div className="flex-1 flex flex-col h-screen lg:ml-64 transition-all duration-300 relative w-full overflow-hidden">
         <Outlet context={{ setSidebarOpen, sidebarOpen }} />
       </div>
     </div>

@@ -11,6 +11,8 @@ export interface User {
   status: UserStatus;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  avatar?: string;
+  profilePicture?: string;
   firebaseUid?: string;
   createdAt?: string;
   updatedAt?: string;

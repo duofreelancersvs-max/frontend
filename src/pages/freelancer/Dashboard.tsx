@@ -6,26 +6,23 @@ import {
   Search,
   FileText,
   Star,
-  Settings,
-  Bell,
-  ChevronDown,
-  LogOut,
   ArrowRight,
   Clock,
   TrendingUp,
   CheckCircle,
   AlertCircle,
-  Menu,
   Eye,
   MessageSquare,
   Award,
   Zap,
   Plus,
   ExternalLink,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/shared/Skeleton";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import {
   freelancerService,
@@ -42,7 +39,6 @@ import type {
   Conversation,
 } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
-import { useUnreadStore } from "@/stores/unread.store";
 import { getCategoryStyle } from "@/lib/category-styles";
 
 const getStatusBadgeStyle = (status: string) => {
@@ -52,29 +48,29 @@ const getStatusBadgeStyle = (status: string) => {
       return "bg-gold/10 text-gold";
     case "accepted":
     case "Shortlisted":
-      return "bg-teal/10 text-teal";
+      return "bg-primary/10 text-primary";
     case "rejected":
     case "Rejected":
-      return "bg-red-100 text-red-600";
+      return "bg-destructive/10 text-destructive";
     case "withdrawn":
-      return "bg-slate-100 text-slate-600";
+      return "bg-muted text-muted-foreground";
     default:
-      return "bg-royal-blue/10 text-royal-blue";
+      return "bg-secondary text-secondary-foreground";
   }
 };
 
 const FreelancerDashboard = () => {
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
 
   useEffect(() => {
@@ -119,13 +115,6 @@ const FreelancerDashboard = () => {
     fetchData();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   const profileCompletion = profile
     ? Math.round(
@@ -210,8 +199,8 @@ const FreelancerDashboard = () => {
     },
   ];
 
-  const applicationStatuses = applications.slice(0, 5).map((app) => ({
-    id: app.id,
+  const applicationStatuses = applications.slice(0, 5).map((app, index) => ({
+    id: app._id || app.id || `app-${index}`,
     project: app.project?.title || "Untitled Project",
     client: (app.project as any)?.client?.companyName || (app.project as any)?.client?.fullName || (app.project as any)?.client?.name || (app.project as any)?.clientName || (app.project?.clientId as any)?.companyName || (app.project?.clientId as any)?.fullName || "Client",
     appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
@@ -223,10 +212,11 @@ const FreelancerDashboard = () => {
     budget: app.project
       ? `₹${app.project.budget.minAmount?.toLocaleString() || 0} - ₹${app.project.budget.maxAmount?.toLocaleString() || 0}`
       : "N/A",
+    fullData: app,
   }));
 
-  const recommendedProjectsData = recommendedProjects.map((project) => ({
-    id: project.id,
+  const recommendedProjectsData = recommendedProjects.map((project, index) => ({
+    id: project._id || project.id || `project-${index}`,
     title: project.title,
     client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
     budget: `₹${project.budget.minAmount?.toLocaleString() || 0} - ₹${project.budget.maxAmount?.toLocaleString() || 0}`,
@@ -235,11 +225,11 @@ const FreelancerDashboard = () => {
       month: "short",
       day: "numeric",
     }),
-    skills: project.skills || [],
+    skills: project.requiredSkills || [],
   }));
 
-  const recentMessages = conversations.slice(0, 3).map((conv) => ({
-    id: conv.id,
+  const recentMessages = conversations.slice(0, 3).map((conv, index) => ({
+    id: conv.id || (conv as any)._id || `msg-${index}`,
     name: conv.participants?.[0]?.fullName || "Unknown",
     avatar:
       conv.participants?.[0]?.fullName
@@ -260,112 +250,37 @@ const FreelancerDashboard = () => {
 
   if (loading) {
     return (
-      <div className="w-full bg-slate-50 dark:bg-[#050B15] flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      <div className="flex-1 space-y-8 p-8 pt-6 min-h-screen bg-background">
+        <div className="flex items-center justify-between space-y-2">
+          <Skeleton className="h-9 w-[200px]" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-9 w-[150px]" />
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-[200px] rounded-2xl" />
+          <Skeleton className="h-[400px] rounded-2xl" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15]">
-      <div className="w-full">
-        {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full min-w-0">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                  Dashboard
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Welcome back, {freelancerName}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle className="w-9 h-9" />
-              {/* Notifications */}
-              
-              <Link to="/freelancer/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
-                )}
-              </Link>
-              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-slate-500 hidden sm:block"
-                  />
-                </button>
-
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName || user?.email?.split("@")[0] || "Freelancer"}
-                      </p>
-                      <p className="text-sm text-slate-500 truncate dark:text-slate-400">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <User size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/5" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+    <div className="flex-1 h-full overflow-y-auto bg-background transition-colors duration-300">
+      <div className="min-h-full">
+        <DashboardHeader
+          title="Dashboard"
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6 lg:space-y-8">
           {/* WELCOME BANNER */}
           <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-6 lg:p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
@@ -512,7 +427,7 @@ const FreelancerDashboard = () => {
                 >
                   <div className={cn(
                     "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-all",
-                    getCategoryStyle((project as any).category || project.skills[0] || "Default").gradient
+                    getCategoryStyle((project as any).category || project.skills?.[0] || "Default").gradient
                   )} />
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="font-semibold text-navy dark:text-white text-sm line-clamp-2">
@@ -539,7 +454,7 @@ const FreelancerDashboard = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {project.skills.slice(0, 2).map((skill) => (
+                    {project.skills.slice(0, 2).map((skill: string) => (
                       <span
                         key={skill}
                         className="px-2 py-1 bg-slate-100 dark:bg-white/5 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400"
@@ -643,16 +558,15 @@ const FreelancerDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <Link to="/freelancer/applications" state={{ openApplicationId: app.id }}>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 px-3 text-xs text-royal-blue dark:text-teal-light hover:bg-royal-blue/10 dark:hover:bg-white/5"
-                          >
-                            <ExternalLink size={14} className="mr-1" />
-                            View
-                          </Button>
-                        </Link>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-3 text-xs text-royal-blue dark:text-teal-light hover:bg-royal-blue/10 dark:hover:bg-white/5"
+                          onClick={() => setSelectedApplication(app.fullData)}
+                        >
+                          <ExternalLink size={14} className="mr-1" />
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -681,16 +595,15 @@ const FreelancerDashboard = () => {
                       <p className="text-xs text-slate-500 dark:text-slate-500 mb-0.5">Applied: {app.appliedDate}</p>
                       <p className="text-sm font-semibold text-navy dark:text-white">{app.budget}</p>
                     </div>
-                    <Link to="/freelancer/applications" state={{ openApplicationId: app.id }}>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-3 text-xs text-royal-blue dark:text-teal-light hover:bg-royal-blue/10 dark:hover:bg-white/5"
-                      >
-                        <ExternalLink size={14} className="mr-1" />
-                        View
-                      </Button>
-                    </Link>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-3 text-xs text-royal-blue dark:text-teal-light hover:bg-royal-blue/10 dark:hover:bg-white/5"
+                      onClick={() => setSelectedApplication(app.fullData)}
+                    >
+                      <ExternalLink size={14} className="mr-1" />
+                      View
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -860,6 +773,98 @@ const FreelancerDashboard = () => {
           </section>
         </main>
       </div>
+
+      {/* Application Details Modal */}
+      {selectedApplication && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 border border-white/10">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between p-6 sm:p-8 border-b border-slate-100 dark:border-white/5">
+              <div>
+                <h2 className="text-2xl font-black text-navy dark:text-white tracking-tight">
+                  Application Details
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium line-clamp-1">
+                  {selectedApplication.project?.title || "Untitled Project"}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedApplication(null)}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors -mr-2 -mt-2"
+              >
+                <X size={24} className="text-slate-500" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
+              {/* Cover Letter */}
+              <div>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                  Cover Letter
+                </h3>
+                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-wrap border border-slate-100 dark:border-white/5">
+                  {selectedApplication.coverLetter || "No cover letter provided."}
+                </div>
+              </div>
+
+              {/* Application Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    Estimated Duration
+                  </p>
+                  <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
+                    <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
+                      <Clock size={16} />
+                    </div>
+                    {selectedApplication.estimatedDuration
+                      ? `${selectedApplication.estimatedDuration} days`
+                      : "Not specified"}
+                  </div>
+                </div>
+                
+                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    Status
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border",
+                      getStatusBadgeStyle(selectedApplication.status)
+                    )}>
+                      {selectedApplication.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5 sm:col-span-2">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    Project Budget Range
+                  </p>
+                  <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
+                    <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
+                      <Zap size={16} />
+                    </div>
+                    ₹{selectedApplication.project?.budget?.minAmount?.toLocaleString() || 0} - ₹{selectedApplication.project?.budget?.maxAmount?.toLocaleString() || 0}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 sm:p-8 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] flex justify-end">
+              <Button
+                variant="outline"
+                className="rounded-xl border-slate-200 dark:border-white/10 dark:text-white font-bold h-12 px-8"
+                onClick={() => setSelectedApplication(null)}
+              >
+                Close Details
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

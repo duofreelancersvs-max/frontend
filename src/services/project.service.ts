@@ -6,20 +6,21 @@ export interface Project {
   title: string;
   description: string;
   category: string;
-  skills: string[];
+  requiredSkills: string[];
   budget: {
     type: string;
     minAmount: number;
     maxAmount: number;
     currency: string;
   };
+  experienceLevel: "Entry" | "Intermediate" | "Expert";
   deadline: string;
   status: "draft" | "open" | "in-progress" | "completed" | "cancelled";
   applications: number;
   createdAt: string;
   updatedAt: string;
   clientId: string;
-  location?: {
+  location: {
     type: string;
     city?: string;
     country?: string;
@@ -81,6 +82,9 @@ export interface ProjectFilters {
 export const projectService = {
   search: (params?: ProjectFilters) =>
     api.get<{ projects: Project[]; total: number }>("/projects", { params }),
+
+  searchPublic: (params?: ProjectFilters) =>
+    api.get<{ projects: Project[]; total: number }>("/public/projects", { params }),
 
   getById: (id: string) => api.get<Project>(`/projects/${id}`),
 

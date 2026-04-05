@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
   Folder,
   PlusCircle,
   Search,
-  Mail,
-  CreditCard,
   Star,
-  Settings,
-  Bell,
-  ChevronDown,
-  LogOut,
-  User,
   ArrowRight,
   Clock,
   MessageSquare,
@@ -20,10 +14,13 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
-  Menu,
+  CreditCard,
+  User,
+  Mail,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/shared/Skeleton";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -34,7 +31,6 @@ import {
   clientService,
   applicationService,
 } from "@/services";
-import { useUnreadStore } from "@/stores/unread.store";
 import type {
   Project,
   Application,
@@ -46,16 +42,15 @@ import type {
 
 const ClientDashboard = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const [clientProfile, setClientProfile] = useState<any>(null);
   const [userFullName, setUserFullName] = useState<string>("");
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,14 +97,6 @@ const ClientDashboard = () => {
     fetchData();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   const getClientName = () => {
     if (userFullName) return userFullName;
     if (clientProfile?.companyName) return clientProfile.companyName;
@@ -153,8 +140,42 @@ const ClientDashboard = () => {
   );
 
   const completedProjects = (projects || []).filter(
-    (p) => p.status === "completed",
+    (p) => p.status === "completed"
   ).length;
+
+  const handleHireFreelancer = async (applicationId: string) => {
+    try {
+      await applicationService.updateStatus(applicationId, "hired");
+      toast.success("Freelancer hired successfully!");
+      // Update local state
+      setApplications((prev) =>
+        prev.map((app) =>
+          (app._id === applicationId || app.id === applicationId)
+            ? { ...app, status: "hired" as any }
+            : app
+        )
+      );
+    } catch (error) {
+      console.error("Error hiring freelancer:", error);
+      toast.error("Failed to hire freelancer. Please try again.");
+    }
+  };
+
+  const handleMessageFreelancer = async (
+    freelancerId: string,
+    projectId?: string
+  ) => {
+    try {
+      const conv = await conversationService.create({
+        participantId: freelancerId,
+        projectId,
+      });
+      navigate(`/client/messages`, { state: { conversationId: conv.id } });
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      toast.error("Failed to start conversation. Please try again.");
+    }
+  };
 
 
   const statsData = [
@@ -164,14 +185,14 @@ const ClientDashboard = () => {
         projects.filter((p) => p.status === "in-progress").length,
       ),
       icon: Folder,
-      color: "bg-royal-blue",
+      color: "bg-primary",
       change: "+1 this month",
     },
     {
       label: "Completed Projects",
       value: String(completedProjects),
       icon: CheckCircle,
-      color: "bg-teal",
+      color: "bg-teal-primary",
       change: "+3 this month",
     },
 
@@ -188,26 +209,29 @@ const ClientDashboard = () => {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3)
     .map((app) => ({
-    id: app.id,
-    freelancer: {
-      name: app.freelancer?.fullName || "Unknown",
-      avatar:
-        app.freelancer?.fullName
-          ?.split(" ")
-          .map((n) => n[0])
-          .join("") || "?",
-      title: "Freelancer",
-    },
-    project: app.project?.title || "Project",
-    appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
-      day: "numeric",
-      hour: "2-digit",
-    }),
-    status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
-  }));
+      id: app._id || app.id,
+      freelancerId: app.freelancerId || (app.freelancer as any)?._id || (app.freelancer as any)?.id,
+      projectId: app.projectId || (app.project as any)?._id || (app.project as any)?.id,
+      freelancer: {
+        name: app.freelancer?.fullName || "Unknown",
+        avatar:
+          app.freelancer?.fullName
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("") || "?",
+        title: "Freelancer",
+      },
+      project: app.project?.title || "Project",
+      appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
+        day: "numeric",
+        hour: "2-digit",
+      }),
+      status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
+      rawStatus: app.status,
+    }));
 
   const recommendedFreelancers = (freelancers || []).slice(0, 3).map((f) => ({
-    id: f.id,
+    id: f._id || f.id,
     name: f.userId,
     avatar:
       f.title
@@ -221,7 +245,7 @@ const ClientDashboard = () => {
   }));
 
   const recentMessages = (conversations || []).slice(0, 3).map((conv) => ({
-    id: conv.id,
+    id: conv.id || (conv as any)._id,
     name: conv.participants?.[0]?.fullName || "Unknown",
     avatar:
       conv.participants?.[0]?.fullName
@@ -271,119 +295,39 @@ const ClientDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
+      <div className="flex-1 space-y-8 p-8 pt-6 min-h-screen bg-background">
+        <div className="flex items-center justify-between space-y-2">
+          <Skeleton className="h-9 w-[200px]" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-9 w-[150px]" />
+            <Skeleton className="h-9 w-[150px]" />
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+          <Skeleton className="h-[140px] rounded-2xl" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+          <Skeleton className="col-span-4 h-[400px] rounded-2xl" />
+          <Skeleton className="col-span-3 h-[400px] rounded-2xl" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-background transition-colors duration-300">
       {/* MAIN CONTENT */}
-      <div>
-        {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full min-w-0">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                  Dashboard
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Welcome back, {clientName}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle className="w-9 h-9" />
-              {/* Search */}
-              <button className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
-                <Search size={20} />
-              </button>
-
-              {/* Messages */}
-              <Link to="/client/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
-                )}
-              </Link>
-
-              {/* Notifications */}
-              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
-                  />
-                </button>
-
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName || user?.email?.split("@")[0] || "User"}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <User size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/5" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+      <div className="min-h-full">
+        <DashboardHeader
+          title="Dashboard"
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6 lg:space-y-8">
           {/* WELCOME BANNER */}
           <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-6 lg:p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
@@ -600,9 +544,10 @@ const ClientDashboard = () => {
                         <span
                           className={cn(
                             "px-2 py-1 rounded-full text-xs font-semibold",
-                            app.status === "Pending" && "bg-gold/10 text-gold",
-                            app.status === "Shortlisted" &&
-                              "bg-teal/10 text-teal",
+                            app.rawStatus === "pending" && "bg-slate-100 text-slate-600",
+                            app.rawStatus === "shortlisted" && "bg-gold/10 text-gold",
+                            (app.rawStatus === "accepted" || app.rawStatus === "hired") && "bg-teal/10 text-teal",
+                            app.rawStatus === "rejected" && "bg-red-50 text-red-600",
                           )}
                         >
                           {app.status}
@@ -614,6 +559,7 @@ const ClientDashboard = () => {
                             size="sm"
                             variant="ghost"
                             className="h-8 px-2 text-xs"
+                            onClick={() => navigate(`/client/project/${app.projectId}`)}
                           >
                             View
                           </Button>
@@ -621,14 +567,22 @@ const ClientDashboard = () => {
                             size="sm"
                             variant="ghost"
                             className="h-8 px-2 text-xs text-teal"
+                            onClick={() => handleMessageFreelancer(app.freelancerId, app.projectId)}
                           >
                             <MessageSquare size={14} />
                           </Button>
                           <Button
                             size="sm"
-                            className="h-8 px-3 text-xs bg-teal hover:bg-teal-light text-white"
+                            disabled={app.rawStatus === "hired" || app.rawStatus === "accepted"}
+                            className={cn(
+                              "h-8 px-3 text-xs",
+                              (app.rawStatus === "hired" || app.rawStatus === "accepted") 
+                                ? "bg-slate-100 text-slate-500 cursor-not-allowed border-none shadow-none" 
+                                : "bg-teal hover:bg-teal-light text-white"
+                            )}
+                            onClick={() => (app.rawStatus !== "hired" && app.rawStatus !== "accepted") && handleHireFreelancer(app.id)}
                           >
-                            Hire
+                            {(app.rawStatus === "hired" || app.rawStatus === "accepted") ? "Hired" : "Hire"}
                           </Button>
                         </div>
                       </td>

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { freelancerService, reviewService } from "@/services";
 import type { FreelancerProfile, Review } from "@/services";
 import { getCategoryStyle } from "@/lib/category-styles";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 const FreelancerProfileView = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,17 +68,22 @@ const FreelancerProfileView = () => {
 
   return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15]">
+      <DashboardHeader
+        title="Freelancer Profile"
+        onMenuClick={() => navigate(-1)}
+      >
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors mr-4"
+        >
+          <ArrowLeft size={18} />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+      </DashboardHeader>
+
       {/* Header Info */}
       <div className="bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
-        <div className="p-4 lg:p-8">
-          {/* Breadcrumb / Back button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors mb-6"
-          >
-            <ArrowLeft size={18} />
-            <span>Back to results</span>
-          </button>
+        <div className="px-6 lg:px-8 py-6 lg:py-8">
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Avatar */}
@@ -152,7 +158,7 @@ const FreelancerProfileView = () => {
       </div>
 
       {/* Grid Content */}
-      <div className="p-4 lg:p-8">
+      <div className="px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">

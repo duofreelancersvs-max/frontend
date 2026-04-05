@@ -17,6 +17,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        heading: ["Outfit", "sans-serif"],
+        sans: ["Inter", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -51,25 +55,30 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // STRICT COLOR PALETTE
+        // PROFESSIONAL COLOR PALETTE
         navy: {
-          DEFAULT: "#0A1628",
-          light: "#112240",
-        },
-        "royal-blue": {
-          DEFAULT: "#1E40AF",
-          hover: "#1e3a8a",
+          DEFAULT: "hsl(var(--navy-dark))",
+          dark: "hsl(var(--navy-dark))",
+          light: "#1E293B",
         },
         teal: {
-          DEFAULT: "#0D9488",
-          light: "#14B8A6",
+          DEFAULT: "hsl(var(--teal-primary))",
+          light: "hsl(var(--teal-light))",
+          dark: "#0F766E",
         },
-        "sky-blue": "#38BDF8",
-        gold: "#F59E0B",
+        "teal-primary": "hsl(var(--teal-primary))",
+        "teal-light": "hsl(var(--teal-light))",
+        "royal-blue": {
+          DEFAULT: "hsl(var(--primary))",
+          light: "hsl(199, 89%, 48%)",
+        },
+        gold: {
+          DEFAULT: "#F59E0B",
+          light: "#FEF3C7",
+        },
+        "sky-blue": "#0EA5E9",
         "success-green": "#10B981",
-        "page-bg": "#F8FAFC",
-        "text-primary": "#1E293B",
-        "text-secondary": "#64748B",
+        "page-bg": "hsl(var(--background))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,10 +94,15 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "text-gradient": {
+          "0%": { backgroundPosition: "0% center" },
+          "100%": { backgroundPosition: "200% center" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "text-gradient": "text-gradient 3s linear infinite",
       },
     },
   },

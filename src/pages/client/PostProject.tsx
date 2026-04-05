@@ -19,28 +19,21 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
-  Bell,
-  ChevronDown,
-  User,
-  Settings,
-  LogOut,
-  MessageSquare,
   X,
-  Menu,
   Check,
   Loader2,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
 import { projectService } from "@/services";
 import { toast } from "react-toastify";
-import { useUnreadStore } from "@/stores/unread.store";
 
 // Form Options
+import DashboardHeader from "@/components/layouts/DashboardHeader";
+
+
 const categories = [
   "Editing",
   "VFX",
@@ -97,23 +90,12 @@ const PostProject = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const isEditing = Boolean(projectId);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
   const [loadingProject, setLoadingProject] = useState(isEditing);
-  const { user, logout } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   // Form State
   const [formData, setFormData] = useState({
@@ -149,7 +131,7 @@ const PostProject = () => {
             title: project.title || "",
             categories: project.category ? [project.category] : [],
             description: project.description || "",
-            skills: project.skills || [],
+            skills: (project as any).skills || [],
             experienceLevel: "",
             duration: "",
             location: project.location?.type || "remote",
@@ -354,103 +336,13 @@ const PostProject = () => {
   return (
     <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
       {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                  {isEditing ? "Edit Project" : "Post a New Project"}
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Find the perfect freelancer for your project
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle className="w-9 h-9" />
-              <Link
-                to="/client/messages"
-                className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex"
-              >
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white" />
-                )}
-              </Link>
-              
-              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              <div className="relative">
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-slate-500 dark:text-slate-400 hidden sm:block"
-                  />
-                </button>
-
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName || user?.email?.split("@")[0] || "User"}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/client/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <User size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/client/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/5" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+      <DashboardHeader
+        title={isEditing ? "Edit Project" : "Post a New Project"}
+        onMenuClick={() => setSidebarOpen(true)}
+      />
 
       {/* Main Content Area */}
-      <main className="p-4 lg:p-8">
+      <main className="px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid lg:grid-cols-4 gap-6">
           {/* LEFT CONTENT */}
           <div className="lg:col-span-3 space-y-6">

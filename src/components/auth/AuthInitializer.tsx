@@ -71,6 +71,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   // Supabase auth state listener
   useEffect(() => {
     setLoading(true);
+    let syncInProgress = false;
 
     // Set up auth state listener
     const {
@@ -81,45 +82,48 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         event,
         session?.user?.email,
       );
-      const { isLoading: storeIsLoading, isAuthenticated: storeAuthenticated } =
+      
+      const { isAuthenticated: storeAuthenticated } =
         useAuthStore.getState();
 
-      // Skip on OAuth callback route or if we're already mid-login in useAuth
-      if (isOAuthCallbackRef.current || (storeIsLoading && !isInitialized)) {
-        console.log(
-          "[AuthInitializer] Skipping sync (OAuth callback or mid-login)",
-        );
-        setIsInitialized(true);
-        setLoading(false);
-        return;
+      // IMPORTANT: Prevent race conditions during login/sync
+      if (syncInProgress) {
+          console.log("[AuthInitializer] Sync already in progress, skipping");
+          return;
+      }
+
+      // If we're on the OAuth callback page, let the specific page component
+      // handle the sync so we can properly manage roles and avoid double-syncing.
+      if (isOAuthCallbackRef.current) {
+          console.log("[AuthInitializer] OAuth callback pending, skipping global sync to let the specialized page handle it.");
+          setIsInitialized(true);
+          setLoading(false);
+          return;
       }
 
       if (session?.user) {
-        // If we're already authenticated in the store, we don't need to sync again on every state change
-        // unless it's the very first initialization.
-        if (storeAuthenticated && isInitialized) {
-          console.log(
-            "[AuthInitializer] Already authenticated and initialized",
-          );
+        // If we're already authenticated and nothing critical changed, don't re-sync
+        if (storeAuthenticated && isInitialized && event !== 'TOKEN_REFRESHED') {
+          console.log("[AuthInitializer] Already authenticated, skipping re-sync");
           setLoading(false);
           return;
         }
 
         try {
+          syncInProgress = true;
           console.log("[AuthInitializer] Syncing session with backend...");
           const synced = await syncSessionWithBackend(
             session.access_token,
             session.refresh_token,
           );
-          console.log("[AuthInitializer] Session synced:", synced);
 
           if (!synced) {
-            // Session invalid on backend, clear it
-            console.warn("[AuthInitializer] Session sync failed, signing out");
-            await supabase.auth.signOut();
-            logout();
+            console.warn("[AuthInitializer] Session sync failed, checking if state should be cleared");
+            // Only clear state if it's definitive
+            if (!storeAuthenticated) {
+               logout();
+            }
           } else if (!isInitialized) {
-            // First time sync - only redirect to home if they are on auth/public pages
             const user = useAuthStore.getState().user;
             const publicRoutes = ["/login", "/register", "/forgot-password"];
             if (user && publicRoutes.includes(location.pathname)) {
@@ -127,20 +131,21 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
             }
           }
         } catch (error) {
-          console.error("[AuthInitializer] Session sync error:", error);
-          logout();
+          console.error("[AuthInitializer] Sync error caught:", error);
+        } finally {
+          syncInProgress = false;
         }
       } else {
-        console.log("[AuthInitializer] No session");
-        // No Supabase user — clear auth state if we thought we were logged in
-        if (storeAuthenticated) {
+        console.log("[AuthInitializer] No session from Supabase");
+        // Only logout if we had a session and Supabase explicitly says it's gone
+        if (storeAuthenticated && isInitialized && event === 'SIGNED_OUT') {
+          console.log("[AuthInitializer] Supabase signed out, clearing store");
           logout();
         }
       }
 
       setLoading(false);
       setIsInitialized(true);
-      console.log("[AuthInitializer] Initialization complete");
     });
 
     // Check for existing session on mount

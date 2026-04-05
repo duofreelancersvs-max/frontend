@@ -4,12 +4,9 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import {
   ChevronRight,
-  ChevronDown,
   ChevronLeft,
   Search,
-  X,
   Star,
-  MapPin,
   BadgeCheck,
   Filter,
   Grid3X3,
@@ -122,7 +119,7 @@ const FreelancerDirectory = () => {
           filters.location = location as any;
         }
 
-        const response = await freelancerService.search(filters);
+        const response = await freelancerService.searchPublic(filters);
         const data = (response as any).data || response;
         setFreelancers(data.profiles || []);
         setTotalPages(data.pagination?.totalPages || 1);
@@ -150,167 +147,105 @@ const FreelancerDirectory = () => {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters =
-    searchQuery ||
-    category !== "All" ||
-    experience !== "All" ||
-    rateRange !== "All" ||
-    location !== "All";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
-      <PublicNavbar />
+      <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-16 md:pt-48 md:pb-24 overflow-hidden border-b border-slate-200 dark:border-white/5 bg-white dark:bg-[#050B15]">
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" />
-
+      <section className="relative pt-28 pb-12 md:pt-32 md:pb-20 overflow-hidden bg-white dark:bg-[#050B15]">
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-3xl">
-              <span className="inline-block px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xs font-bold text-teal dark:text-teal-light mb-8 uppercase tracking-widest">
-                The Network
+              <span className="inline-block px-3 py-1 bg-teal/5 border border-teal/10 rounded-full text-[10px] font-black text-teal uppercase tracking-[0.2em] mb-6">
+                Verified Talent Network
               </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-8 text-navy dark:text-white">
-                Elite Creative <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Powerhouse</span>
+              <h1 className="text-4xl md:text-7xl font-black mb-6 text-navy dark:text-white leading-[1.1] tracking-tighter">
+                Find the best <br />
+                <span className="text-teal">Expert Freelancers</span>
               </h1>
-              <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed mb-10 max-w-2xl">
-                Source high-end production talent. Each professional in our
-                directory undergoes a rigorous 5-point verification process.
+              <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-xl font-medium">
+                Direct access to top-tier production talent. Curated, verified, and ready to scale your next project.
               </p>
             </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* 2. SEARCH & FILTER BAR */}
-      <section className="sticky top-0 z-50 py-4 bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
+      {/* 2. SEARCH & COMPACT FILTER BAR */}
+      <section className="sticky top-0 z-40 bg-white/95 dark:bg-[#050B15]/95 backdrop-blur-xl border-b border-slate-100 dark:border-white/5 py-3 shadow-sm">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md group">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal transition-colors"
-                size={20}
-              />
-              <input
-                type="text"
-                placeholder="Search talent or mastery..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white"
-              />
-              {searchQuery && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal transition-colors" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search skills, names..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal/10 focus:border-teal transition-all text-sm font-medium"
+                />
+              </div>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-3 rounded-2xl border transition-all shrink-0 font-black text-[10px] uppercase tracking-widest",
+                  showFilters 
+                    ? "bg-navy text-white border-navy" 
+                    : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-teal hover:text-teal"
+                )}
+              >
+                <Filter size={16} />
+                <span className="hidden sm:inline">Refine</span>
+              </button>
+            </div>
+
+            {/* Category Chips Scroll */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              {["All", "Video Editing", "VFX", "3D Animation", "Graphic Design", "Illustration", "UI/UX"].map(cat => (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  key={cat}
+                  onClick={() => { setCategory(cat); setCurrentPage(1); }}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
+                    category === cat
+                      ? "bg-teal/10 text-teal border-teal/20"
+                      : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:border-teal/30"
+                  )}
                 >
-                  <X size={18} />
+                  {cat}
                 </button>
-              )}
-            </div>
-
-            {/* Desktop Filters */}
-            <div className="hidden lg:flex items-center gap-3">
-              {[
-                {
-                  value: category,
-                  setter: setCategory,
-                  options: ["All", "Video Editing", "VFX", "3D Design"],
-                  label: "Capability",
-                },
-                {
-                  value: experience,
-                  setter: setExperience,
-                  options: ["All", "Entry", "Intermediate", "Expert"],
-                  label: "Tier",
-                },
-                {
-                  value: rateRange,
-                  setter: setRateRange,
-                  options: ["All", "0-500", "500-1000", "1000+"],
-                  label: "Investment",
-                },
-              ].map((filter, idx) => (
-                <div key={idx} className="relative group">
-                  <select
-                    value={filter.value}
-                    onChange={(e) => {
-                      filter.setter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="appearance-none px-5 py-3 pr-10 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300 focus:outline-none focus:border-teal/50 hover:bg-slate-200 dark:hover:bg-white/10 transition-all cursor-pointer"
-                  >
-                    <option value="All" className="bg-white dark:bg-[#050B15]">
-                      All {filter.label}s
-                    </option>
-                    {filter.options
-                      .filter((o) => o !== "All")
-                      .map((opt) => (
-                        <option key={opt} value={opt} className="bg-white dark:bg-[#050B15]">
-                          {opt}
-                        </option>
-                      ))}
-                  </select>
-                  <ChevronDown
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none group-hover:text-slate-600 dark:group-hover:text-white transition-colors"
-                    size={14}
-                  />
-                </div>
               ))}
-
-              {hasActiveFilters && (
-                <Button
-                  onClick={clearFilters}
-                  variant="ghost"
-                  className="text-xs font-bold text-royal-blue hover:text-royal-blue/80 hover:bg-transparent px-2"
-                >
-                  RESET
-                </Button>
-              )}
             </div>
 
-            {/* View Mode */}
-            <div className="hidden lg:flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-2xl p-1 ml-auto">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "p-2 rounded-xl transition-all",
-                  viewMode === "grid"
-                    ? "bg-teal shadow-lg shadow-teal/20 text-white"
-                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white",
-                )}
-              >
-                <Grid3X3 size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn(
-                  "p-2 rounded-xl transition-all",
-                  viewMode === "list"
-                    ? "bg-teal shadow-lg shadow-teal/20 text-white"
-                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white",
-                )}
-              >
-                <List size={18} />
-              </button>
-            </div>
-
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white"
-            >
-              <Filter size={18} />
-              Refine
-              {hasActiveFilters && (
-                <div className="w-1.5 h-1.5 bg-teal rounded-full animate-pulse" />
-              )}
-            </button>
+            {/* Expanded Filters Drawer */}
+            {showFilters && (
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-top-4 duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { value: experience, setter: setExperience, options: ["All", "Entry", "Intermediate", "Expert"], label: "Tier" },
+                    { value: rateRange, setter: setRateRange, options: ["All", "0-500", "500-1000", "1000+"], label: "Investment" },
+                    { value: location, setter: setLocation, options: ["All", "Remote", "India", "UK", "USA"], label: "Location" },
+                  ].map((f, i) => (
+                    <div key={i} className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{f.label}</label>
+                      <select 
+                        value={f.value} 
+                        onChange={e => { f.setter(e.target.value); setCurrentPage(1); }}
+                        className="w-full p-3 bg-slate-100 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl outline-none focus:border-teal text-sm font-semibold"
+                      >
+                        {f.options.map(opt => <option key={opt} value={opt}>{opt === "All" ? `All ${f.label}s` : opt}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-white/5">
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="font-bold text-xs uppercase tracking-widest">Reset</Button>
+                  <Button onClick={() => setShowFilters(false)} size="sm" className="bg-teal text-white font-bold text-xs uppercase tracking-widest rounded-xl">Apply Results</Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -320,139 +255,102 @@ const FreelancerDirectory = () => {
         <div className="container mx-auto px-4 lg:px-8">
           {/* Status Bar */}
           <div className="flex items-center justify-between mb-8">
-            <div className="text-sm text-slate-600 dark:text-slate-400">
+            <div className="text-sm font-bold text-slate-500">
               Analysis found{" "}
-              <span className="text-navy dark:text-white font-bold">{totalCount}</span> elite
+              <span className="text-navy dark:text-white font-black">{totalCount}</span> elite
               professionals
+            </div>
+            
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn("p-2 rounded-lg transition-all", viewMode === "grid" ? "bg-white dark:bg-teal text-teal dark:text-white shadow-sm" : "text-slate-400")}
+              >
+                <Grid3X3 size={16} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn("p-2 rounded-lg transition-all", viewMode === "list" ? "bg-white dark:bg-teal text-teal dark:text-white shadow-sm" : "text-slate-400")}
+              >
+                <List size={16} />
+              </button>
             </div>
           </div>
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-32 space-y-4">
               <div className="w-12 h-12 border-2 border-teal/20 border-t-teal rounded-full animate-spin" />
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                 Querying Database
               </div>
             </div>
           ) : freelancers.length > 0 ? (
-            <div
-              className={cn(
-                "grid gap-8",
-                viewMode === "grid"
-                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                  : "grid-cols-1",
-              )}
-            >
+            <div className={cn("grid gap-6 sm:gap-8", viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1")}>
               {freelancers.map((f, idx) => {
                 const name = f.displayName || `${f.firstName} ${f.lastName}`;
                 return (
                   <AnimatedSection key={f._id} delay={idx * 50}>
-                    <Link to={`/freelancer/${f._id}`} className="block group">
-                      <div
-                        className={cn(
-                          "glass-card rounded-[2rem] border-slate-200 dark:border-white/5 hover:border-teal/30 dark:hover:border-white/10 bg-white dark:bg-transparent shadow-sm dark:shadow-none hover:shadow-xl dark:hover:bg-white/[0.07] transition-all duration-500 overflow-hidden relative",
-                          viewMode === "list" && "flex h-64",
-                        )}
-                      >
-                        {/* Card Header/Preview */}
-                        <div
-                          className={cn(
-                            "relative bg-gradient-to-br from-royal-blue/20 to-[#050B15]",
-                            viewMode === "grid" ? "h-24" : "w-1/3",
-                          )}
-                        >
-                          {f.isVerified && (
-                            <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-1.5 border border-white/10">
-                              <BadgeCheck size={12} className="text-teal" />
-                              <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-                                Verified Artist
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+                    <Link to={`/freelancer/${f._id}`} className="block group h-full">
+                      <div className={cn("bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-6 sm:p-8 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-teal/30 transition-all duration-500 relative flex flex-col h-full", viewMode === "list" && "sm:flex-row gap-8 sm:items-center")}>
+                        
+                        <div className={cn("flex items-start gap-5 mb-6", viewMode === "list" && "sm:mb-0 sm:w-1/3")}>
+                          <div className="relative shrink-0">
+                             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] overflow-hidden border-4 border-white dark:border-white/5 shadow-2xl">
+                               {f.profilePicture ? (
+                                 <img src={f.profilePicture} alt={name} className="w-full h-full object-cover" />
+                               ) : (
+                                 <div className="w-full h-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-2xl font-black">
+                                   {f.firstName[0]}{f.lastName[0]}
+                                 </div>
+                               )}
+                             </div>
+                             {f.isVerified && (
+                               <div className="absolute -top-2 -right-2 bg-white dark:bg-teal p-1.5 rounded-full shadow-lg border-2 border-teal dark:border-white/10">
+                                 <BadgeCheck size={14} className="text-teal dark:text-white" />
+                               </div>
+                             )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 pt-2">
+                             <h3 className="text-xl sm:text-2xl font-black text-navy dark:text-white truncate group-hover:text-teal transition-colors">
+                               {name}
+                             </h3>
+                             <p className="text-[11px] font-black text-teal uppercase tracking-widest mb-1 truncate">
+                               {f.category}
+                             </p>
+                             <div className="flex items-center gap-1.5 mt-2">
+                               <div className="flex items-center gap-0.5">
+                                 <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                                 <span className="text-sm font-black text-navy dark:text-white">{f.averageRating.toFixed(1)}</span>
+                               </div>
+                               <span className="text-[10px] font-bold text-slate-400 uppercase">({f.reviewCount})</span>
+                             </div>
+                          </div>
                         </div>
 
-                        {/* Card Content */}
-                        <div
-                          className={cn(
-                            "p-8 pt-0 relative",
-                            viewMode === "grid"
-                              ? "-mt-10"
-                              : "flex-1 flex flex-col justify-center pt-8",
-                          )}
-                        >
-                          {/* Avatar */}
-                          <div
-                            className={cn(
-                              "relative mb-6",
-                              viewMode === "list" && "mb-4",
-                            )}
-                          >
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal to-royal-blue p-0.5 group-hover:scale-105 transition-transform duration-500 shadow-xl shadow-black/40">
-                              <div className="w-full h-full rounded-2xl overflow-hidden border-2 border-[#050B15] bg-navy">
-                                {f.profilePicture ? (
-                                  <img
-                                    src={f.profilePicture}
-                                    alt={name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white/20">
-                                    {f.firstName[0]}
-                                    {f.lastName[0]}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-teal rounded-full border-4 border-[#121A2A] flex items-center justify-center shadow-lg">
-                              <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                            </div>
-                          </div>
+                        <div className={cn("flex-1 flex flex-col", viewMode === "list" && "sm:justify-center")}>
+                           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 mb-6 font-medium">
+                             {f.headline || "Seasoned creative professional specializing in high-end production and visual storytelling."}
+                           </p>
 
-                          <h3 className="text-xl font-bold mb-1 group-hover:text-teal transition-colors text-navy dark:text-white">
-                            {name}
-                          </h3>
-                          <p className="text-sm text-slate-400 mb-4 line-clamp-1">
-                            {f.headline || f.category}
-                          </p>
+                           <div className="flex flex-wrap gap-2 mb-8">
+                             {f.skills.slice(0, 3).map((skill) => (
+                               <span key={skill.name} className="px-3 py-1.5 bg-slate-50 dark:bg-white/10 border border-slate-100 dark:border-white/5 rounded-xl text-[10px] font-black uppercase text-slate-500 dark:text-slate-300">
+                                 {skill.name}
+                               </span>
+                             ))}
+                             {f.skills.length > 3 && <span className="text-[10px] font-bold text-slate-400 self-center">+ {f.skills.length - 3}</span>}
+                           </div>
 
-                          <div className="flex items-center gap-4 mb-6">
-                            <div className="flex items-center gap-1.5">
-                              <Star size={14} className="text-teal fill-teal" />
-                              <span className="text-sm font-bold">
-                                {f.averageRating.toFixed(1)}
-                              </span>
-                            </div>
-                            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                              {f.reviewCount} Reports
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2 mb-8">
-                            {f.skills.slice(0, 2).map((skill) => (
-                              <span
-                                key={skill.name}
-                                className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5"
-                              >
-                                {skill.name}
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-6 mt-auto">
-                            <div className="text-navy dark:text-white">
-                              <span className="text-xl font-bold">
-                                ₹{f.hourlyRate}
-                              </span>
-                              <span className="text-xs text-slate-500 font-bold ml-1">
-                                /HR
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                              <MapPin size={12} className="text-teal" />
-                              {f.category.split(" ")[0]}
-                            </div>
-                          </div>
+                           <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
+                             <div className="flex flex-col">
+                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Investment</span>
+                               <p className="text-lg font-black text-navy dark:text-white">₹{f.hourlyRate}<span className="text-xs text-slate-400 font-bold ml-1">/HR</span></p>
+                             </div>
+                             <div className="h-12 px-6 bg-navy dark:bg-teal text-white rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-navy/10 dark:shadow-teal/20">
+                               View Profile
+                             </div>
+                           </div>
                         </div>
                       </div>
                     </Link>
@@ -464,20 +362,13 @@ const FreelancerDirectory = () => {
             /* Empty State */
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <div className="w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-slate-200 dark:border-white/10 group animate-pulse">
-                <Frown
-                  size={48}
-                  className="text-slate-400 dark:text-slate-600 group-hover:text-teal transition-colors"
-                />
+                <Frown size={48} className="text-slate-400" />
               </div>
-              <h3 className="text-3xl font-bold mb-4 text-navy dark:text-white">No Mastery Matches</h3>
-              <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-10 leading-relaxed">
-                We couldn't find professionals matching these specific
-                credentials. Try broadening your criteria.
+              <h3 className="text-3xl font-black mb-4 text-navy dark:text-white leading-tight">No Mastery Matches</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-10 font-medium">
+                We couldn't find professionals matching these specific credentials. Try broadening your criteria.
               </p>
-              <Button
-                onClick={clearFilters}
-                className="h-14 px-10 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-navy dark:text-white border border-slate-200 dark:border-white/10"
-              >
+              <Button onClick={clearFilters} className="h-14 px-10 rounded-2xl bg-teal text-white font-black uppercase tracking-widest">
                 Clear Filters
               </Button>
             </div>
@@ -485,46 +376,43 @@ const FreelancerDirectory = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-20">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-20">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-14 px-6 rounded-2xl border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-navy dark:text-white disabled:opacity-20"
+                className="h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 disabled:opacity-20"
               >
-                <ChevronLeft size={20} className="mr-2" />
+                <ChevronLeft size={16} className="mr-2" />
                 Previous
               </Button>
 
               <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={cn(
-                        "w-12 h-12 rounded-2xl border transition-all text-sm font-bold",
+                        "w-10 h-10 rounded-xl transition-all text-xs font-black",
                         currentPage === page
-                          ? "bg-teal border-teal shadow-lg shadow-teal/20 text-white"
-                          : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-500 hover:text-navy dark:hover:text-white hover:border-teal/50",
+                          ? "bg-teal text-white shadow-xl shadow-teal/20"
+                          : "text-slate-400 hover:text-navy dark:hover:text-white"
                       )}
                     >
                       {page}
                     </button>
-                  ),
+                  )
                 )}
               </div>
 
               <Button
-                variant="outline"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
+                variant="ghost"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="h-14 px-6 rounded-2xl border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-navy dark:text-white disabled:opacity-20"
+                className="h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 disabled:opacity-20"
               >
                 Next
-                <ChevronRight size={20} className="ml-2" />
+                <ChevronRight size={16} className="ml-2" />
               </Button>
             </div>
           )}
@@ -535,15 +423,15 @@ const FreelancerDirectory = () => {
       <section className="py-24 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-gradient-to-t dark:from-teal/10 dark:to-transparent">
         <div className="container mx-auto px-4 lg:px-8 text-center">
           <AnimatedSection>
-            <h2 className="text-4xl font-bold mb-6 text-navy dark:text-white">
+            <h2 className="text-4xl font-black mb-6 text-navy dark:text-white leading-tight">
               Are You a Creative Elite?
             </h2>
-            <p className="text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto font-medium">
               Join our private network of high-end professionals and get matched
               with production-level projects.
             </p>
-            <Link to="/register">
-              <Button className="h-16 px-12 rounded-2xl bg-teal hover:bg-teal-light text-white font-bold text-lg shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1">
+            <Link to="/register?role=freelancer">
+              <Button className="h-16 px-12 rounded-2xl bg-teal hover:bg-teal-light text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1">
                 Apply for Roster
                 <ArrowRight size={20} className="ml-2" />
               </Button>

@@ -92,6 +92,17 @@ export const freelancerService = {
         limit: number;
       };
     }>("/freelancer-profiles", { params }),
+  
+  searchPublic: (params?: FreelancerFilters) =>
+    api.get<{
+      profiles: FreelancerProfile[];
+      pagination: {
+        totalItems: number;
+        totalPages: number;
+        page: number;
+        limit: number;
+      };
+    }>("/public/freelancers", { params }),
 
   getTopRated: () =>
     api.get<{ profiles: FreelancerProfile[] }>(

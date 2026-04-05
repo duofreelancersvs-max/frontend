@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,7 +7,13 @@ import Logo from "@/components/shared/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
-export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transparent" | "white" }) => {
+export const PublicNavbar = ({ 
+  variant = "transparent",
+  dark = false // If true, navbar text will be dark (navy) instead of white when transparent
+}: { 
+  variant?: "transparent" | "white",
+  dark?: boolean
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -40,40 +46,39 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-3"
+          ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-4"
           : variant === "white"
-            ? "bg-white dark:bg-[#050B15] py-3 shadow-sm dark:shadow-none"
-            : "bg-transparent py-5",
+            ? "bg-white dark:bg-[#050B15] py-4 dark:shadow-none"
+            : "bg-transparent py-4",
       )}
     >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Logo isDark={!isWhite} />
+            <Logo isDark={!isWhite && !dark} />
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-4">
               {[
                 { label: "Find Talent", href: "/freelancers" },
-                { label: "Find Work", href: "/freelancer/projects" },
+                { label: "Find Work", href: "/projects" },
                 { label: "Categories", href: "/categories" },
                 { label: "How It Works", href: "/how-it-works" },
                 { label: "Pricing", href: "/pricing" },
                 { label: "About", href: "/about" },
               ].map((item) => (
-                <Link
+                <NavLink
                   key={item.label}
                   to={item.href}
-                  className={cn(
+                  className={({ isActive }) => cn(
                     "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate",
-                    isWhite
-                      ? "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white"
-                      : "text-white/90 hover:text-white",
+                    isWhite || dark
+                      ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
+                      : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
                   )}
                 >
                   {item.label}
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-teal group-hover:w-2/3 transition-all duration-300" />
-                </Link>
+                </NavLink>
               ))}
             </div>
 
@@ -93,7 +98,7 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
                       variant="ghost"
                       className={cn(
                         "font-semibold transition-all duration-300 rounded-lg",
-                        isWhite
+                        isWhite || dark
                           ? "!text-navy dark:!text-white hover:bg-slate-100 dark:hover:bg-white/10"
                           : "!text-white hover:bg-white/10",
                       )}
@@ -106,7 +111,7 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
                       onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                       className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
-                        isWhite
+                        isWhite || dark
                           ? "hover:bg-slate-100"
                           : "hover:bg-white/10",
                         profileDropdownOpen && "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]"
@@ -188,7 +193,7 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
                       variant="ghost"
                       className={cn(
                         "font-bold transition-all duration-300 rounded-xl px-6",
-                        isWhite
+                        isWhite || dark
                           ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10"
                           : "text-white hover:bg-white/10",
                       )}
@@ -200,7 +205,7 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
                     <Button
                       className={cn(
                         "font-bold px-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl",
-                        isWhite
+                        isWhite || dark
                           ? "bg-teal text-white shadow-teal/20 hover:bg-[#128a7f]"
                           : "bg-white text-navy shadow-white/10 hover:bg-slate-100",
                       )}
@@ -216,7 +221,7 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
               <button
                 className={cn(
                   "p-2 rounded-lg transition-colors",
-                  isWhite ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5" : "text-white hover:bg-white/10",
+                  isWhite || dark ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5" : "text-white hover:bg-white/10",
                 )}
                 onClick={() => {
                   setMobileMenuOpen(!mobileMenuOpen);
@@ -284,12 +289,12 @@ export const PublicNavbar = ({ variant = "transparent" }: { variant?: "transpare
           <div className="space-y-1">
             {[
               { label: "Find Talent", href: "/freelancers" },
-              { label: "Find Work", href: "/freelancer/projects" },
-              { label: "Categories Hub", href: "/categories" },
+              { label: "Find Work", href: "/projects" },
+              { label: "Categories", href: "/categories" },
               { label: "How It Works", href: "/how-it-works" },
-              { label: "Pricing Tiers", href: "/pricing" },
-              { label: "About Us", href: "/about" },
-              { label: "Contact Support", href: "/contact" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "About", href: "/about" },
+              { label: "Support & Contact", href: "/contact" },
             ].map((item) => (
               <Link
                 key={item.label}

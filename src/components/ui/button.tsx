@@ -5,24 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-teal text-white hover:bg-teal-light shadow-sm",
-        destructive: "bg-red-500 text-white hover:bg-red-600",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
         outline:
-          "border border-slate-200 bg-transparent text-text-primary hover:bg-page-bg hover:border-slate-300 dark:border-white/10 dark:text-white dark:hover:bg-white/5",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-royal-blue text-white hover:bg-royal-blue-hover shadow-sm",
-        ghost: "text-text-secondary hover:bg-page-bg hover:text-text-primary",
-        link: "text-royal-blue underline-offset-4 hover:underline",
-        navy: "bg-navy text-white hover:bg-navy-light shadow-sm",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-xs",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        navy: "bg-navy text-white hover:bg-navy/90 shadow-sm",
+        teal: "bg-teal text-white hover:bg-teal/90 shadow-sm shadow-teal-500/20",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-lg px-3",
-        lg: "h-11 rounded-xl px-8 text-base",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-12 rounded-lg px-8 text-base",
         icon: "h-10 w-10",
       },
     },
@@ -30,7 +32,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps

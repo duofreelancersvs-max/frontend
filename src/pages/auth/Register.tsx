@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -14,7 +14,6 @@ import {
   Quote,
   CheckCircle,
   Github,
-  Home as HomeIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ type Step = "role" | "form";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const initialRole = searchParams.get("role") as UserRole;
   const isValidRole = initialRole === "client" || initialRole === "freelancer";
 
@@ -142,7 +140,7 @@ const Register = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-transparent" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Logo isDark size="lg" />
@@ -195,16 +193,24 @@ const Register = () => {
       </div>
 
       {/* RIGHT SIDE - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 dark:bg-[#050B15] relative">
-        <div className="absolute top-8 right-8 flex items-center gap-4">
-          <ThemeToggle />
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white transition-colors bg-white dark:bg-white/5 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-white/10"
-          >
-            <HomeIcon size={18} className="mr-2" />
-            Back to Home
-          </button>
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050B15] relative">
+        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
+          <div className="lg:hidden">
+            <Logo size="sm" />
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link to="/">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                <span className="font-bold text-xs uppercase tracking-wider">Home</span>
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="w-full max-w-lg mt-10">

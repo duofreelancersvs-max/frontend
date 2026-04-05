@@ -130,15 +130,13 @@ const ProjectApplicationModal = ({
       } else {
         navigate("/freelancer/applications");
       }
-    } catch (err: unknown) {
-      const error = err as {
-        response?: {
-          data?: { message?: string; error?: { message?: string } };
-        };
-      };
-      const msg =
-        error?.response?.data?.error?.message ||
-        error?.response?.data?.message ||
+    } catch (err: any) {
+      console.error("[ProjectApplicationModal] Submit error:", err);
+      // Try to extract the clearest message from the error object
+      const msg = 
+        err.message || 
+        err.response?.data?.error?.message || 
+        err.response?.data?.message || 
         "Failed to submit application. Please try again.";
       setSubmitError(msg);
     } finally {
@@ -190,15 +188,15 @@ const ProjectApplicationModal = ({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Client</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-medium text-navy text-sm">
+                    <p className="text-xs text-slate-500 mb-1.5">Client</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-navy text-sm leading-tight">
                         {project.client.name}
                       </span>
-                      <div className="flex items-center gap-0.5">
-                        <Star size={12} className="text-gold fill-gold" />
-                        <span className="text-xs text-slate-600">
-                          {project.client.rating}
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gold/10 rounded-lg shrink-0">
+                        <Star size={10} className="text-gold fill-gold" />
+                        <span className="text-[10px] font-bold text-gold">
+                          {project.client.rating || 0}
                         </span>
                       </div>
                     </div>
@@ -317,14 +315,10 @@ const ProjectApplicationModal = ({
                         )}
                       />
                     </div>
-                    {errors.proposedRate ? (
+                    {errors.proposedRate && (
                       <p className="text-xs text-red-500 flex items-center gap-1 mt-1.5">
                         <AlertCircle size={12} />
                         {errors.proposedRate}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-slate-400 mt-1">
-                        Budget: ₹{(project.budget.minAmount || 0).toLocaleString()} - ₹{(project.budget.maxAmount || 0).toLocaleString()}
                       </p>
                     )}
                   </div>

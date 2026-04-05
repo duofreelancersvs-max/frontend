@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useOutletContext, useNavigate, Link, useLocation } from "react-router-dom";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
-  Menu,
   Bookmark,
   BookmarkCheck,
   MapPin,
@@ -14,14 +13,7 @@ import {
   SlidersHorizontal,
   DollarSign,
   AlertCircle,
-  MessageSquare,
-  Bell,
-  ChevronDown,
-  User as UserIcon,
-  Settings,
-  LogOut,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,7 +23,7 @@ import { TermsModal } from "@/components/modals/TermsModal";
 import { projectService, conversationService } from "@/services";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
-import { useUnreadStore } from "@/stores/unread.store";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 // Filter options
 const categories = [
@@ -77,25 +69,14 @@ const userSkills = [
   "DaVinci Resolve",
 ];
 
-const BrowseProjects = () => {
-  const context = useOutletContext<FreelancerLayoutContext>();
-  const setSidebarOpen = context?.setSidebarOpen;
-  const totalUnreadCount = useUnreadStore((s) => s.totalUnreadCount);
+const FindWork = () => {
+  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"browse" | "saved">("browse");
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("newest");
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const { user } = useAuth();
 
   // API state
   const [projects, setProjects] = useState<Project[]>([]);
@@ -113,6 +94,7 @@ const BrowseProjects = () => {
   // Saved projects state
   const [savedProjects, setSavedProjects] = useState<string[]>([]);
 
+  // Application modal state
   // Application modal state
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -235,7 +217,7 @@ const BrowseProjects = () => {
       if (
         !project.title.toLowerCase().includes(query) &&
         !project.description.toLowerCase().includes(query) &&
-        !project.skills.some((s) => s.toLowerCase().includes(query))
+        !(project.requiredSkills || []).some((s) => s.toLowerCase().includes(query))
       ) {
         return false;
       }
@@ -277,172 +259,47 @@ const BrowseProjects = () => {
       {!user && <PublicNavbar variant="white" />}
       <div className={cn("w-full", !user && "pt-[72px]")}>
         {/* Header Bar */}
-        {user ? (
-          <header className="sticky top-0 z-20 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
-            <div className="flex items-center justify-between w-full md:w-auto">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setSidebarOpen && setSidebarOpen(true)}
-                  className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-                >
-                  <Menu size={24} />
-                </button>
-                <div>
-                  <h1 className="text-xl lg:text-2xl font-bold text-navy dark:text-white">
-                    Browse Projects
-                  </h1>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                    Find work that matches your skills
-                  </p>
-                </div>
-              </div>
-
-              {/* Mobile View Profile Header Actions */}
-              <div className="flex md:hidden items-center gap-2">
-                <Link
-                  to="/freelancer/messages"
-                  className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-                >
-                  <MessageSquare size={20} />
-                  {totalUnreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
-                  )}
-                </Link>
-
-                <div className="relative">
-                  <button
-                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                      {user?.fullName
-                        ? user.fullName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                        : (user?.email?.[0] || "U").toUpperCase()}
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-xl w-full md:w-auto overflow-x-auto scrollbar-hide hide-scrollbar">
-              <button
-                onClick={() => setActiveTab("browse")}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 md:flex-none whitespace-nowrap",
-                  activeTab === "browse"
-                    ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
-                )}
-              >
-                <Search size={16} className="inline mr-2" />
-                Browse
-              </button>
-              <button
-                onClick={() => setActiveTab("saved")}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap",
-                  activeTab === "saved"
-                    ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
-                )}
-              >
-                <Bookmark size={16} />
-                Saved
-                {savedProjects.length > 0 && (
-                  <span className="px-1.5 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
-                    {savedProjects.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2 lg:gap-4">
-              <Link
-                to="/freelancer/messages"
-                className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex"
-              >
-                <MessageSquare size={20} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full border-2 border-white dark:border-[#050B15]" />
-                )}
-              </Link>
-
-              <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg hidden sm:flex">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-
-              <ThemeToggle className="w-9 h-9" />
-              <div className="relative">
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                      : (user?.email?.[0] || "U").toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-slate-500 hidden sm:block"
-                  />
-                </button>
-
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                      <p className="font-semibold text-navy dark:text-white">
-                        {user?.fullName ||
-                          user?.email?.split("@")[0] ||
-                          "Freelancer"}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to="/freelancer/profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <UserIcon size={16} />
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/freelancer/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2 border-slate-100 dark:border-white/5" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
-        ) : null}
+        {user && (
+          <DashboardHeader
+            title="Find Work"
+            onMenuClick={() => setSidebarOpen(true)}
+          />
+        )}
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 space-y-4 lg:space-y-6">
+        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-4 lg:space-y-6">
+          {/* Tabs */}
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-xl w-full md:w-fit overflow-x-auto scrollbar-hide hide-scrollbar mb-6">
+            <button
+              onClick={() => setActiveTab("browse")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 md:flex-none whitespace-nowrap",
+                activeTab === "browse"
+                  ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
+              )}
+            >
+              <Search size={16} className="inline mr-2" />
+              Browse
+            </button>
+            <button
+              onClick={() => setActiveTab("saved")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap",
+                activeTab === "saved"
+                  ? "bg-white dark:bg-teal text-navy dark:text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
+              )}
+            >
+              <Bookmark size={16} />
+              Saved
+              {savedProjects.length > 0 && (
+                <span className="px-1.5 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
+                  {savedProjects.length}
+                </span>
+              )}
+            </button>
+          </div>
           {/* LOADING STATE */}
           {loading && (
             <div className="flex items-center justify-center py-20">
@@ -731,9 +588,9 @@ const BrowseProjects = () => {
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-1.5 mb-4">
-                          {project.skills.slice(0, 4).map((skill) => (
+                          {project.requiredSkills.slice(0, 4).map((skill, index) => (
                             <span
-                              key={skill}
+                              key={`${project._id}-${skill}-${index}`}
                               className={cn(
                                 "px-2 py-1 rounded-md text-xs font-medium",
                                 userSkills.includes(skill)
@@ -744,9 +601,9 @@ const BrowseProjects = () => {
                               {skill}
                             </span>
                           ))}
-                          {project.skills.length > 4 && (
+                          {project.requiredSkills.length > 4 && (
                             <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded-md text-xs">
-                              +{project.skills.length - 4}
+                              +{project.requiredSkills.length - 4}
                             </span>
                           )}
                         </div>
@@ -830,7 +687,7 @@ const BrowseProjects = () => {
                       onClick={() => setActiveTab("browse")}
                       className="bg-teal hover:bg-teal-light text-white font-bold"
                     >
-                      Browse Projects
+                      Browse All Projects
                     </Button>
                   )}
                 </div>
@@ -928,4 +785,4 @@ const BrowseProjects = () => {
   );
 };
 
-export default BrowseProjects;
+export default FindWork;

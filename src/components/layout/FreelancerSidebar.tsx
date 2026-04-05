@@ -35,7 +35,7 @@ const sidebarNavItems = [
     href: "/freelancer/portfolio",
     badge: null,
   },
-  { icon: Search, label: "Browse Projects", href: "/freelancer/projects", badge: null },
+  { icon: Search, label: "Find Work", href: "/freelancer/projects", badge: null },
   {
     icon: FileText,
     label: "My Applications",
@@ -113,26 +113,25 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
 
   return (
     <>
-      {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-[#050B15] border-r border-white/5 transition-transform duration-300 lg:translate-x-0 flex flex-col",
+          "fixed left-0 top-0 z-40 h-screen w-64 bg-navy-dark border-r border-border transition-transform duration-300 lg:translate-x-0 lg:fixed flex flex-col shadow-2xl",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-3 px-6 h-20 border-b border-border shrink-0">
           <Logo isDark withText size="sm" />
           <button
             onClick={onClose}
-            className="lg:hidden ml-auto text-white/60 hover:text-white"
+            className="lg:hidden ml-auto text-muted-foreground hover:text-white"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto min-h-0">
+        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto min-h-0">
           {sidebarNavItems.map((item) => {
             const isActive =
               location.pathname === item.href ||
@@ -145,20 +144,19 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                 key={item.label}
                 to={item.href}
                 onClick={() => {
-                  // Close sidebar on mobile after clicking a link
                   if (window.innerWidth < 1024) onClose();
                 }}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition-all group",
                   isActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    : "text-slate-400 hover:bg-white/5 hover:text-white",
                 )}
               >
-                <item.icon size={20} />
+                <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-white transition-colors")} />
                 <span className="flex-1">{item.label}</span>
                 {itemBadge && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-teal text-white rounded-full">
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-primary-foreground text-primary rounded-full">
                     {itemBadge}
                   </span>
                 )}
@@ -170,19 +168,19 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
         {/* Bottom Section (Fixed) */}
         <div className="shrink-0 pt-2 pb-4">
           {/* Profile Completeness Indicator */}
-          <div className="px-4 py-2 border-t border-white/10">
-            <div className="bg-white/5 rounded-xl p-4">
+          <div className="px-4 py-2 border-t border-border">
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-white/70">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
                   Profile Complete
                 </span>
-                <span className="text-sm font-bold text-teal-light">
+                <span className="text-sm font-black text-teal-light">
                   {profileCompletion}%
                 </span>
               </div>
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-teal to-teal-light rounded-full transition-all"
+                  className="h-full bg-gradient-to-r from-primary to-teal-primary rounded-full transition-all duration-1000"
                   style={{ width: `${profileCompletion}%` }}
                 />
               </div>
@@ -193,12 +191,12 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
           <div className="px-4 pb-2">
             <div
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg",
+                "flex items-center gap-2 px-3 py-2 rounded-xl border border-transparent",
                 subscriptionPlan === "free"
-                  ? "bg-slate-500/20"
+                  ? "bg-slate-500/10 border-slate-500/20"
                   : subscriptionPlan === "pro"
-                    ? "bg-royal-blue/20"
-                    : "bg-gold/20",
+                    ? "bg-primary/10 border-primary/20"
+                    : "bg-gold/10 border-gold/20",
               )}
             >
               <Award
@@ -207,28 +205,26 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                   subscriptionPlan === "free"
                     ? "text-slate-400"
                     : subscriptionPlan === "pro"
-                      ? "text-royal-blue"
+                      ? "text-primary"
                       : "text-gold",
                 )}
               />
               <span
                 className={cn(
-                  "text-xs font-semibold",
+                  "text-[10px] font-bold uppercase tracking-widest",
                   subscriptionPlan === "free"
                     ? "text-slate-400"
                     : subscriptionPlan === "pro"
-                      ? "text-royal-blue"
+                      ? "text-primary"
                       : "text-gold",
                 )}
               >
-                {subscriptionPlan.charAt(0).toUpperCase() +
-                  subscriptionPlan.slice(1)}{" "}
-                Plan
+                {subscriptionPlan} Plan
               </span>
               {subscriptionPlan === "free" && (
                 <Link
                   to="/freelancer/subscription"
-                  className="ml-auto text-xs text-teal-light hover:underline"
+                  className="ml-auto text-[10px] font-black text-teal-light hover:underline uppercase tracking-tighter"
                 >
                   Upgrade
                 </Link>
@@ -237,20 +233,20 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
           </div>
 
           {/* User Profile Card */}
-          <div className="px-4 pt-2 border-t border-white/10">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 overflow-hidden">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm shrink-0">
+          <div className="px-4 pt-2 border-t border-border">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-teal-primary flex items-center justify-center text-white font-heading font-bold text-sm shrink-0 shadow-lg">
                 {avatarInitial}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-sm font-heading font-semibold text-white truncate">
                   {freelancerName}
                 </p>
-                <p className="text-xs text-white/50 truncate">Freelancer</p>
+                <p className="text-[10px] font-medium text-slate-500 truncate uppercase tracking-wider">Freelancer</p>
               </div>
               <button
                 onClick={handleLogout}
-                className="text-white/50 hover:text-white transition-colors shrink-0"
+                className="text-slate-500 hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg active-scale"
                 title="Log Out"
               >
                 <LogOut size={18} />

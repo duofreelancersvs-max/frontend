@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -29,7 +30,7 @@ const ForgotPassword = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-transparent" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Logo isDark size="lg" />
@@ -64,7 +65,26 @@ const ForgotPassword = () => {
       </div>
 
       {/* RIGHT SIDE - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050B15] relative">
+        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
+          <div className="lg:hidden">
+            <Logo size="sm" />
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link to="/">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                <span className="font-bold text-xs uppercase tracking-wider">Home</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">

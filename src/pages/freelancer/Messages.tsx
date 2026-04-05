@@ -1,21 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useOutletContext, Link, useLocation, useNavigate } from "react-router-dom";
+import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
   Star,
   X,
-  Menu,
   BadgeCheck,
   Building2,
   ExternalLink,
   FileSignature,
   AlertCircle,
-  Bell,
-  ChevronDown,
-  User,
-  Settings,
-  LogOut,
-  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +20,7 @@ import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
 import { useUnreadStore } from "@/stores/unread.store";
 import { ChatAvatar, ChatArea } from "@/components/chat";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 const termsText = `
 TERMS AND CONDITIONS FOR FREELANCER MESSAGING
@@ -60,9 +54,9 @@ By accepting these terms, you agree to abide by all platform rules and guideline
 `;
 
 const FreelancerMessages = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const { setActiveConversation, addPendingMessage, getPendingMessages, clearPendingMessages, resetCount, totalUnreadCount } = useUnreadStore();
+  const { setActiveConversation, addPendingMessage, getPendingMessages, clearPendingMessages, resetCount } = useUnreadStore();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -70,7 +64,6 @@ const FreelancerMessages = () => {
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [modalChecked, setModalChecked] = useState(false);
   const [_loading, _setLoading] = useState(true);
@@ -362,77 +355,10 @@ const FreelancerMessages = () => {
     <div className="w-full h-screen flex flex-col bg-slate-50 dark:bg-[#050B15] overflow-hidden relative">
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
         {/* Header Bar */}
-        <header className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 lg:px-6 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg"
-            >
-              <Menu size={24} />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-navy dark:text-white">Messages</h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link to="/freelancer/messages" className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-              <MessageSquare size={20} />
-              {totalUnreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-teal rounded-full" />
-              )}
-            </Link>
-            <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-              >
-                <ChatAvatar
-                  name={user?.fullName || "U"}
-                  size="sm"
-                  showOnlineIndicator={false}
-                />
-                <ChevronDown
-                  size={16}
-                  className="text-slate-500 hidden sm:block"
-                />
-              </button>
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121A2A] rounded-xl shadow-xl border border-slate-100 dark:border-white/5 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
-                    <p className="font-semibold text-navy dark:text-white">
-                      {user?.fullName || "User"}
-                    </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email || ""}</p>
-                  </div>
-                  <Link
-                    to="/freelancer/profile"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                  >
-                    <User size={16} /> My Profile
-                  </Link>
-                  <Link
-                    to="/freelancer/settings"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                  >
-                    <Settings size={16} /> Settings
-                  </Link>
-                  <div className="h-px bg-slate-100 dark:bg-white/5 my-1"></div>
-                  <button
-                    onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <LogOut size={16} /> Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          title="Messages"
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
         {/* Three Column Content */}
         <div className="flex-1 flex overflow-hidden relative">

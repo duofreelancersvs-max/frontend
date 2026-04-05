@@ -180,13 +180,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
-      <PublicNavbar />
+      <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
+      <section className="relative pt-28 pb-24 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.05]" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
@@ -242,7 +241,6 @@ const About = () => {
             <AnimatedSection>
               <div className="relative group">
                 <div className="aspect-square md:aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-teal/20 to-royal-blue/30 dark:from-navy dark:to-royal-blue/30 p-1 border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-none">
-                  <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-10" />
                   <div className="h-full w-full bg-white dark:bg-[#050B15]/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
                     {/* Animated Shapes */}
                     <div className="absolute top-10 left-10 w-32 h-32 bg-teal/10 dark:bg-teal/20 blur-3xl animate-pulse" />

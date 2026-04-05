@@ -26,6 +26,7 @@ const FreelancerProfile = lazy(
 );
 const Categories = lazy(() => import("@/pages/public/Categories"));
 const Contact = lazy(() => import("@/pages/public/Contact"));
+const FindWorkPublic = lazy(() => import("@/pages/public/FindWork"));
 
 // Auth
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -54,7 +55,7 @@ const FreelancerDashboard = lazy(() => import("@/pages/freelancer/Dashboard"));
 const FreelancerProfileEdit = lazy(
   () => import("@/pages/freelancer/ProfileEdit"),
 );
-const BrowseProjects = lazy(() => import("@/pages/freelancer/BrowseProjects"));
+const FindWork = lazy(() => import("@/pages/freelancer/FindWork"));
 const FreelancerMessages = lazy(() => import("@/pages/freelancer/Messages"));
 const FreelancerSubscription = lazy(
   () => import("@/pages/freelancer/Subscription"),
@@ -78,16 +79,14 @@ const RazorpaySettings = lazy(() => import("@/pages/admin/RazorpaySettings"));
 const SendNotifications = lazy(() => import("@/pages/admin/SendNotifications"));
 const ProjectManagement = lazy(() => import("@/pages/admin/ProjectManagement"));
 
+import { PageSkeleton } from "@/components/shared/Skeleton";
+
 /**
  * Inline Suspense wrapper for lazy-loaded pages inside layouts.
  * This prevents the entire layout (sidebar, header) from unmounting
  * during navigation — only the content area shows a brief loader.
  */
-const ContentLoader = () => (
-  <div className="flex-1 flex items-center justify-center p-8">
-    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal"></div>
-  </div>
-);
+const ContentLoader = () => <PageSkeleton />;
 
 function SP({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<ContentLoader />}>{children}</Suspense>;
@@ -154,6 +153,14 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <Contact />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <FindWorkPublic />
             </Suspense>
           }
         />
@@ -409,7 +416,7 @@ function App() {
             path="/freelancer/projects"
             element={
               <SP>
-                <BrowseProjects />
+                <FindWork />
               </SP>
             }
           />
