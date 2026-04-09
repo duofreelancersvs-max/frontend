@@ -28,29 +28,23 @@ const Logo: React.FC<LogoProps> = ({
   };
 
   return (
-    <Link to="/" className={cn("flex items-center gap-3 group", className)}>
+    <Link to="/" className={cn("flex items-center gap-3 transition-all hover:opacity-90 active:scale-95 group", className)}>
       <div
         className={cn(
           iconSizes[size],
-          "flex items-center justify-center transition-all duration-300 rounded-full overflow-hidden",
-          "bg-white dark:bg-[#050B15]/80 dark:backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-none",
-          isDark
-            ? "ring-4 ring-white/10"
-            : "border border-slate-100 dark:border-white/10",
+          "flex items-center justify-center rounded-xl overflow-hidden bg-white dark:bg-white shadow-sm ring-1 ring-slate-200 dark:ring-white/10",
         )}
       >
         <img
           src="/logo.png"
           alt="CMI"
-          className="w-full h-full object-contain p-0 scale-150 group-hover:scale-170 transition-transform duration-500"
+          className="w-full h-full object-contain scale-[1.8] group-hover:scale-[2] transition-transform duration-500"
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = "none";
             const parent = (e.target as HTMLImageElement).parentElement;
             if (parent) {
-              parent.style.background =
-                "linear-gradient(135deg, #0D9488 0%, #172554 100%)";
               parent.innerHTML =
-                '<span class="text-white font-bold select-none text-xs">C</span>';
+                '<span class="text-[#001D3D] font-black text-lg">C</span>';
             }
           }}
         />
@@ -59,23 +53,13 @@ const Logo: React.FC<LogoProps> = ({
         <div
           className={cn(
             titleSizes[size],
-            "font-extrabold tracking-tighter transition-all duration-300",
+            "font-black tracking-tight flex items-center leading-none",
           )}
         >
-          <span className={isDark ? "text-white" : "text-navy dark:text-white"}>Connect</span>
-          <span className="text-teal">
-            Me
-          </span>
-          <span
-            className={cn(
-              "transition-colors duration-300",
-              isDark
-                ? "text-white/90 group-hover:text-white"
-                : "text-navy/90 dark:text-white/90 group-hover:text-navy dark:group-hover:text-white",
-            )}
-          >
-            India
-          </span>
+          <span className={cn(isDark ? "text-white" : "text-navy dark:text-white")}>Connect</span>
+          <span className="text-teal">Me</span>
+          <span className={cn(isDark ? "text-white" : "text-navy dark:text-white")}>India</span>
+          <div className="ml-1.5 w-1.5 h-1.5 rounded-full bg-teal" />
         </div>
       )}
     </Link>

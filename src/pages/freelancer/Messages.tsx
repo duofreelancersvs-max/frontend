@@ -352,7 +352,7 @@ const FreelancerMessages = () => {
   );
 
   return (
-    <div className="w-full h-screen flex flex-col bg-slate-50 dark:bg-[#050B15] overflow-hidden relative">
+    <div className="w-full h-screen flex flex-col bg-slate-50 dark:bg-background overflow-hidden relative">
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
         {/* Header Bar */}
         <DashboardHeader

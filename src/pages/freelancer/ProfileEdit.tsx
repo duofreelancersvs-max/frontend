@@ -394,7 +394,7 @@ const FreelancerProfileEdit = () => {
   // ---------- LOADING STATE ----------
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#050B15]">
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50 dark:bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={36} className="animate-spin text-teal" />
           <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -410,7 +410,7 @@ const FreelancerProfileEdit = () => {
     "?";
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen transition-colors duration-300">
+    <div className="w-full bg-slate-50 dark:bg-background min-h-screen transition-colors duration-300">
       <div className="w-full">
         {/* Header Bar */}
         <DashboardHeader
@@ -451,7 +451,7 @@ const FreelancerProfileEdit = () => {
               <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                 {/* Cover Image */}
                 <div className="relative h-32 lg:h-40 bg-gradient-to-r from-navy via-royal-blue to-teal">
-                  <button className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#050B15]/80 hover:bg-white dark:hover:bg-[#050B15] rounded-lg text-sm font-medium text-navy dark:text-white transition-colors backdrop-blur-sm">
+                  <button className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-background/80 hover:bg-white dark:hover:bg-[#050B15] rounded-lg text-sm font-medium text-navy dark:text-white transition-colors backdrop-blur-sm">
                     <Camera size={14} />
                     Change Cover
                   </button>

@@ -90,11 +90,11 @@ const FindWork = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15]">
+    <div className="min-h-screen bg-slate-50 dark:bg-background">
       <PublicNavbar dark />
 
       {/* Hero/Header Section - White Background like Categories/Find Talent */}
-      <section className="relative pt-28 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
+      <section className="relative pt-28 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         

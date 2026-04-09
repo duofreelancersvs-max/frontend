@@ -59,7 +59,7 @@ const FreelancerReviews = () => {
       : 0;
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen">
+    <div className="w-full bg-slate-50 dark:bg-background min-h-screen">
       <div className="w-full">
         <DashboardHeader
           title="My Reviews"

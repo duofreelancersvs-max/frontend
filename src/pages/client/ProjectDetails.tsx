@@ -147,7 +147,7 @@ const ProjectDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
@@ -155,7 +155,7 @@ const ProjectDetails = () => {
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-background flex flex-col items-center justify-center">
         <p className="text-slate-600 dark:text-slate-400 mb-4">{error || "Project not found"}</p>
         <Link to="/client/projects">
           <Button variant="outline" className="dark:border-white/10 dark:text-white dark:hover:bg-white/5">Back to Projects</Button>
@@ -213,7 +213,7 @@ const ProjectDetails = () => {
   };
 
    return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
       <DashboardHeader
         title="Project Details"
         onMenuClick={() => setSidebarOpen(true)}

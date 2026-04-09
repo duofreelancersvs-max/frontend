@@ -181,7 +181,7 @@ const ClientFreelancers = () => {
     selectedCategories.length > 0 || selectedSkills.length > 0 || searchQuery;
 
    return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
        {/* MAIN CONTENT */}
       <div>
         <DashboardHeader

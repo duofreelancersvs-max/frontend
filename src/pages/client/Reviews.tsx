@@ -61,7 +61,7 @@ const ClientReviews = () => {
   };
 
    return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
       <DashboardHeader
         title="My Reviews"
         onMenuClick={() => setSidebarOpen(true)}

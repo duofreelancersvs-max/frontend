@@ -65,7 +65,7 @@ const ForgotPassword = () => {
       </div>
 
       {/* RIGHT SIDE - Form */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050B15] relative">
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-background relative">
         <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
           <div className="lg:hidden">
             <Logo size="sm" />

@@ -517,7 +517,7 @@ const ClientMessages = () => {
   };
 
    return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-[#050B15] font-sans overflow-hidden">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-background font-sans overflow-hidden">
        {/* Header */}
       <DashboardHeader
         title="Messages"
@@ -525,7 +525,7 @@ const ClientMessages = () => {
       />
 
        {/* Chat Container */}
-      <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-[#050B15]">
+      <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-background">
         {/* Conversation List */}
         <ConversationList
           conversations={conversationItems}

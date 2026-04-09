@@ -149,11 +149,11 @@ const FreelancerDirectory = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-28 pb-12 md:pt-32 md:pb-20 overflow-hidden bg-white dark:bg-[#050B15]">
+      <section className="relative pt-28 pb-12 md:pt-32 md:pb-20 overflow-hidden bg-white dark:bg-background">
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-3xl">
@@ -173,7 +173,7 @@ const FreelancerDirectory = () => {
       </section>
 
       {/* 2. SEARCH & COMPACT FILTER BAR */}
-      <section className="sticky top-0 z-40 bg-white/95 dark:bg-[#050B15]/95 backdrop-blur-xl border-b border-slate-100 dark:border-white/5 py-3 shadow-sm">
+      <section className="sticky top-0 z-40 bg-white/95 dark:bg-background/95 backdrop-blur-xl border-b border-slate-100 dark:border-white/5 py-3 shadow-sm">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">

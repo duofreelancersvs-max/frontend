@@ -241,7 +241,7 @@ const FreelancerSubscription = () => {
   };
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15]">
+    <div className="w-full bg-slate-50 dark:bg-background">
       <div className="w-full">
         {/* Header Bar */}
         <DashboardHeader
@@ -303,12 +303,12 @@ const FreelancerSubscription = () => {
                 className={cn(
                   "px-6 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
                   billingPeriod === "yearly"
-                    ? "bg-navy text-white"
-                    : "text-slate-600 hover:text-navy",
+                    ? "bg-navy dark:bg-teal text-white"
+                    : "text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 Yearly
-                <span className="px-2 py-0.5 bg-success-green text-white text-xs font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-success-green text-white text-[10px] font-bold rounded-full">
                   Save 20%
                 </span>
               </button>
@@ -360,7 +360,7 @@ const FreelancerSubscription = () => {
                       <span
                         className={cn(
                           "text-sm",
-                          item.included ? "text-navy" : "text-slate-400",
+                          item.included ? "text-navy dark:text-white" : "text-slate-400 dark:text-white/30",
                         )}
                       >
                         {item.feature}
@@ -433,7 +433,7 @@ const FreelancerSubscription = () => {
                       <span
                         className={cn(
                           "text-sm",
-                          item.included ? "text-navy" : "text-slate-400",
+                          item.included ? "text-navy dark:text-white" : "text-slate-400 dark:text-white/30",
                         )}
                       >
                         {item.feature}
@@ -477,7 +477,7 @@ const FreelancerSubscription = () => {
                   )}
                 </div>
 
-                <p className="text-sm text-slate-500 mb-6">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                   For top freelancers who want it all
                 </p>
 
@@ -551,7 +551,7 @@ const FreelancerSubscription = () => {
                             <X size={16} className="mx-auto text-slate-300" />
                           )
                         ) : (
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                          <span className="text-sm text-slate-600 dark:text-white/60">
                             {feature.free}
                           </span>
                         )}
@@ -694,7 +694,7 @@ const FreelancerSubscription = () => {
                     }
                     className="w-full flex items-center justify-between text-left"
                   >
-                    <span className="font-medium text-navy">
+                    <span className="font-medium text-navy dark:text-white">
                       {item.question}
                     </span>
                     {expandedFaq === idx ? (
@@ -704,7 +704,7 @@ const FreelancerSubscription = () => {
                     )}
                   </button>
                   {expandedFaq === idx && (
-                    <p className="mt-3 text-slate-600 text-sm leading-relaxed">
+                    <p className="mt-3 text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                       {item.answer}
                     </p>
                   )}
@@ -714,15 +714,15 @@ const FreelancerSubscription = () => {
           </section>
 
           {/* CANCELLATION INFO */}
-          <section className="bg-slate-50 rounded-2xl p-6 lg:p-8">
+          <section className="bg-slate-50 dark:bg-white/5 rounded-2xl p-6 lg:p-8 mb-8">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-center">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-success-green/10 flex items-center justify-center">
                   <Check size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy">Cancel Anytime</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-semibold text-navy dark:text-white">Cancel Anytime</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     No long-term commitment
                   </p>
                 </div>
@@ -732,8 +732,8 @@ const FreelancerSubscription = () => {
                   <Lock size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy">No Hidden Fees</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-semibold text-navy dark:text-white">No Hidden Fees</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     What you see is what you pay
                   </p>
                 </div>
@@ -743,8 +743,8 @@ const FreelancerSubscription = () => {
                   <Shield size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy">7-Day Guarantee</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-semibold text-navy dark:text-white">7-Day Guarantee</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Full refund if not satisfied
                   </p>
                 </div>

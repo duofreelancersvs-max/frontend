@@ -67,7 +67,7 @@ const FreelancerProfileView = () => {
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15]">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background">
       <DashboardHeader
         title="Freelancer Profile"
         onMenuClick={() => navigate(-1)}
@@ -82,7 +82,7 @@ const FreelancerProfileView = () => {
       </DashboardHeader>
 
       {/* Header Info */}
-      <div className="bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
+      <div className="bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
         <div className="px-6 lg:px-8 py-6 lg:py-8">
 
           <div className="flex flex-col md:flex-row gap-8 items-start">

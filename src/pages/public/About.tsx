@@ -179,7 +179,7 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
@@ -241,7 +241,7 @@ const About = () => {
             <AnimatedSection>
               <div className="relative group">
                 <div className="aspect-square md:aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-teal/20 to-royal-blue/30 dark:from-navy dark:to-royal-blue/30 p-1 border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-none">
-                  <div className="h-full w-full bg-white dark:bg-[#050B15]/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
+                  <div className="h-full w-full bg-white dark:bg-background/80 rounded-[1.9rem] flex items-center justify-center relative overflow-hidden">
                     {/* Animated Shapes */}
                     <div className="absolute top-10 left-10 w-32 h-32 bg-teal/10 dark:bg-teal/20 blur-3xl animate-pulse" />
                     <div className="absolute bottom-10 right-10 w-32 h-32 bg-royal-blue/10 dark:bg-royal-blue/20 blur-3xl animate-pulse delay-1000" />

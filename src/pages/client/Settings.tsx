@@ -264,14 +264,14 @@ const ClientSettings = () => {
 
   if (loading) {
     return (
-       <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans flex items-center justify-center">
+       <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans flex items-center justify-center">
         <div className="text-slate-500 dark:text-slate-400">Loading settings...</div>
       </div>
     );
   }
 
    return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
       <DashboardHeader
         title="Settings"
         onMenuClick={() => setSidebarOpen(true)}

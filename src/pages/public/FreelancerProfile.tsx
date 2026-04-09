@@ -217,7 +217,7 @@ const FreelancerProfile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white">
       <PublicNavbar dark />
 
       {/* 1. PROFILE HEADER */}

@@ -14,8 +14,8 @@ const Login = () => {
   const initialRole = searchParams.get("role") as UserRole;
   const isValidRole = initialRole === "client" || initialRole === "freelancer";
 
-  const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "role");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
+  const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "form");
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : "freelancer"); // Default to freelancer for OAuth if not selected
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
@@ -83,7 +83,7 @@ const Login = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-transparent" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          <Logo isDark size="lg" />
+          <Logo size="lg" />
 
           {/* Center Content */}
           <div className="flex-1 flex flex-col justify-center">
@@ -145,7 +145,7 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050B15] relative">
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-background relative">
         <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
           <div className="lg:hidden">
             <Logo size="sm" />
@@ -167,9 +167,8 @@ const Login = () => {
         
         <div className="w-full max-w-md mt-10">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <Logo size="md" />
-          </div>
+          {/* Mobile Logo spacer - removed overlap */}
+          <div className="lg:hidden mb-6" />
 
           {/* Form Card */}
           <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-8 border border-slate-100 dark:border-white/10">
@@ -405,7 +404,7 @@ const Login = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    className="w-full h-12 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/90 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-all"
                     onClick={() => handleOAuthSignIn('google')}
                     disabled={isLoading}
                   >
@@ -434,7 +433,7 @@ const Login = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    className="w-full h-12 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/90 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-all"
                     onClick={() => handleOAuthSignIn('github')}
                     disabled={isLoading}
                   >
@@ -445,8 +444,7 @@ const Login = () => {
               </form>
             )}
 
-            {/* Sign Up Link */}
-            <p className="text-center mt-8 text-slate-500">
+            <p className="text-center mt-8 text-slate-500 dark:text-slate-400">
               Don&apos;t have an account?{" "}
               <Link
                 to="/register"

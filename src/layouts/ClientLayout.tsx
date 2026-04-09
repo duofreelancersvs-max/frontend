@@ -17,7 +17,7 @@ const ClientLayout = () => {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col h-screen lg:ml-64 transition-all duration-300 relative w-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen lg:ml-64 transition-all duration-300 relative w-full overflow-y-auto overflow-x-hidden">
         <Outlet context={{ setSidebarOpen, sidebarOpen }} />
       </div>
     </div>

@@ -222,14 +222,14 @@ const FreelancerSettings = () => {
 
   if (loading) {
     return (
-      <div className="w-full bg-slate-50 dark:bg-[#050B15] flex items-center justify-center h-64">
+      <div className="w-full bg-slate-50 dark:bg-background flex items-center justify-center h-64">
         <div className="text-slate-500 dark:text-slate-400">Loading settings...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen">
+    <div className="w-full bg-slate-50 dark:bg-background min-h-screen">
       <div className="w-full">
         <DashboardHeader
           title="Settings"

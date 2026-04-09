@@ -327,14 +327,14 @@ const PostProject = () => {
 
   if (loadingProject) {
     return (
-      <div className="flex-1 h-full flex items-center justify-center bg-slate-50 dark:bg-[#050B15]">
+      <div className="flex-1 h-full flex items-center justify-center bg-slate-50 dark:bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
   }
 
   return (
-    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-[#050B15] font-sans">
+    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
       {/* Header Bar */}
       <DashboardHeader
         title={isEditing ? "Edit Project" : "Post a New Project"}

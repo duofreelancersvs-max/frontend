@@ -55,7 +55,7 @@ export const PublicNavbar = ({
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Logo isDark={!isWhite && !dark} />
+            <Logo />
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-4">
@@ -242,7 +242,7 @@ export const PublicNavbar = ({
         )}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-[#050B15]">
-          <Logo isDark={!isWhite} />
+          <Logo />
           <button
             className="p-2 rounded-lg text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
             onClick={() => setMobileMenuOpen(false)}

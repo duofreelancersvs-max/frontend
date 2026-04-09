@@ -133,7 +133,7 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
 
       {/* 1. HERO SECTION */}
@@ -249,10 +249,10 @@ const Contact = () => {
                           onChange={handleChange}
                           className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl h-14 px-4 text-sm focus:outline-none focus:border-teal appearance-none text-navy dark:text-white"
                         >
-                          <option className="bg-white dark:bg-[#050B15]">General Inquiry</option>
-                          <option className="bg-white dark:bg-[#050B15]">Production Booking</option>
-                          <option className="bg-white dark:bg-[#050B15]">Partnership Proposal</option>
-                          <option className="bg-white dark:bg-[#050B15]">Vetting Support</option>
+                          <option className="bg-white dark:bg-background">General Inquiry</option>
+                          <option className="bg-white dark:bg-background">Production Booking</option>
+                          <option className="bg-white dark:bg-background">Partnership Proposal</option>
+                          <option className="bg-white dark:bg-background">Vetting Support</option>
                         </select>
                       </div>
                     </div>

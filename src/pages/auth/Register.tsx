@@ -143,7 +143,7 @@ const Register = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-transparent" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          <Logo isDark size="lg" />
+          <Logo size="lg" />
 
           {/* Center Content */}
           <div className="flex-1 flex flex-col justify-center">
@@ -193,7 +193,7 @@ const Register = () => {
       </div>
 
       {/* RIGHT SIDE - Registration Form */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050B15] relative">
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-background relative">
         <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
           <div className="lg:hidden">
             <Logo size="sm" />
@@ -215,9 +215,8 @@ const Register = () => {
 
         <div className="w-full max-w-lg mt-10">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <Logo size="md" />
-          </div>
+          {/* Mobile Logo spacer - removed overlap */}
+          <div className="lg:hidden mb-6" />
 
           {/* Form Card */}
           <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-8 border border-slate-100 dark:border-white/10">
@@ -632,7 +631,7 @@ const Register = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    className="w-full h-12 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/90 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-all"
                     onClick={() => handleOAuthSignUp("google")}
                     disabled={isLoading}
                   >
@@ -660,7 +659,7 @@ const Register = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                    className="w-full h-12 border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/90 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-all"
                     onClick={() => handleOAuthSignUp("github")}
                     disabled={isLoading}
                   >

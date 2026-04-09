@@ -247,7 +247,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       {/* Floating Scroll Progress */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-slate-100 dark:bg-white/10 z-[100]">
         <div
@@ -261,7 +261,7 @@ const Home = () => {
       <PublicNavbar dark />
 
       {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
-      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 overflow-hidden bg-white dark:bg-[#050B15]">
+      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 overflow-hidden bg-white dark:bg-background">
         {/* Subtle Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Main Gradient Surface */}
@@ -283,15 +283,22 @@ const Home = () => {
 
             {/* Headline */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
-              Empower Your Business with <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue">
-                Elite Talent
-              </span>
+              {isAuthenticated ? (
+                <>
+                  Welcome, <span className="text-teal">{user?.fullName || user?.email?.split('@')[0] || 'User'}</span>
+                </>
+              ) : (
+                <>
+                  The Bridge Between <br className="hidden sm:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue">
+                    Thinking & Ruling
+                  </span>
+                </>
+              )}
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
-              Connect with India's most skilled freelancers. From creative arts
-              to professional services, we bring the best to your doorstep.
+              "ConnectMeIndia: Where Talent Earns and Dreams Unite."
             </p>
 
             {/* Role Switcher CTAs */}
@@ -373,7 +380,7 @@ const Home = () => {
                 </div>
                 <Button
                   onClick={handleSearchSubmit}
-                  className="hidden sm:flex m-2 bg-navy dark:bg-white text-white dark:text-navy hover:opacity-90 px-8 py-6 rounded-xl font-bold transition-all"
+                  className="hidden sm:flex m-2 bg-navy dark:bg-white text-white dark:text-navy hover:bg-teal dark:hover:bg-teal hover:text-white dark:hover:text-white px-8 py-6 rounded-xl font-bold transition-all duration-300 shadow-md"
                 >
                   Search
                 </Button>
@@ -429,7 +436,7 @@ const Home = () => {
       </section>
 
       {/* 2. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
-      <section className="py-24 bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
+      <section className="py-24 bg-white dark:bg-background relative z-20 border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
@@ -604,7 +611,7 @@ const Home = () => {
       </section>
 
       {/* 4. PLANS & PRICING PREVIEW */}
-      <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
+      <section className="py-24 bg-white dark:bg-background overflow-hidden relative border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -747,7 +754,7 @@ const Home = () => {
       </section>
 
       {/* 6. CLIENT REVIEWS - FINAL SECTION */}
-      <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
+      <section className="py-24 bg-white dark:bg-background relative overflow-hidden border-t border-slate-200 dark:border-none">
         <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
@@ -774,7 +781,7 @@ const Home = () => {
                       <Star key={i} size={16} fill="currentColor" />
                     ))}
                   </div>
-                  <p className="text-xl text-slate-700 dark:text-white/90 leading-relaxed mb-10 flex-1 italic group-hover:text-navy dark:group-hover:text-white transition-colors">
+                  <p className="text-xl text-slate-700 dark:text-white/90 leading-relaxed mb-10 flex-1 group-hover:text-navy dark:group-hover:text-white transition-colors">
                     "{t.quote}"
                   </p>
                   <div className="flex items-center gap-4">

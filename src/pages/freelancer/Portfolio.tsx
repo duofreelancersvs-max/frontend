@@ -130,7 +130,7 @@ const FreelancerPortfolio = () => {
       : portfolioItemsState.filter((item) => (item.skills?.[0] || item.category) === selectedCategory);
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15] min-h-screen transition-colors duration-300">
+    <div className="w-full bg-slate-50 dark:bg-background min-h-screen transition-colors duration-300">
       <div className="w-full">
         <DashboardHeader
           title="My Portfolio"

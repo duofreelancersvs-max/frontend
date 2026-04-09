@@ -133,7 +133,7 @@ const FreelancerApplications = () => {
   };
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#050B15]">
+    <div className="w-full bg-slate-50 dark:bg-background">
       <div className="w-full">
         {/* Header Bar */}
       <DashboardHeader

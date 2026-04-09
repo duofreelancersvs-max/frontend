@@ -98,7 +98,7 @@ const HomePage = () => {
   const actions = isClient ? clientActions : isFreelancer ? freelancerActions : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] relative overflow-hidden font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-background relative overflow-hidden font-sans transition-colors duration-300">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-primary/10 dark:bg-teal-primary/20 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute top-[40%] right-[-10%] w-[30%] h-[50%] bg-royal-blue/10 dark:bg-royal-blue/15 blur-[150px] rounded-full pointer-events-none" />
@@ -109,7 +109,7 @@ const HomePage = () => {
         className={cn(
           "sticky top-0 z-50 transition-all duration-300 border-b border-transparent",
           isScrolled
-            ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-xl border-slate-200 dark:border-white/10 shadow-lg"
+            ? "bg-white/80 dark:bg-background/80 backdrop-blur-xl border-slate-200 dark:border-white/10 shadow-lg"
             : "bg-transparent py-2"
         )}
       >
