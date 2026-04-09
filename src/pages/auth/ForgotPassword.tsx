@@ -65,12 +65,12 @@ const ForgotPassword = () => {
       </div>
 
       {/* RIGHT SIDE - Form */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-background relative">
-        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-8 lg:gap-4 z-20">
+      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-slate-50 dark:bg-background relative py-20 lg:py-24 overflow-y-auto">
+        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-10 lg:gap-6 z-30">
           <div className="lg:hidden">
             <Logo size="sm" />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 lg:gap-6">
             <ThemeToggle />
             <Link to="/">
               <Button 
@@ -85,14 +85,14 @@ const ForgotPassword = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md px-4 sm:px-0">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <Logo size="md" />
           </div>
 
           {/* Form Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100 dark:border-white/10">
             {/* Back Button */}
             <Link
               to="/login"
