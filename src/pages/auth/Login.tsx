@@ -14,8 +14,8 @@ const Login = () => {
   const initialRole = searchParams.get("role") as UserRole;
   const isValidRole = initialRole === "client" || initialRole === "freelancer";
 
-  const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "form");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : "freelancer"); // Default to freelancer for OAuth if not selected
+  const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "role");
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
