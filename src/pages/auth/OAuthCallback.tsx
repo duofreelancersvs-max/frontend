@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 import type { User } from "@/types/auth.types";
+import { formatBackendApiError } from "@/lib/auth-request-errors";
 import { toast } from "react-toastify";
 
+/**
+ * OAuth return handler. If users see "Network Error" on mobile only:
+ * Safari → Develop → [device] → Web Inspector → Network: inspect failed calls to your API host vs *.supabase.co
+ * and compare request `Origin` to Railway CORS_ORIGIN (www vs apex must match).
+ */
 export default function OAuthCallback() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -82,17 +89,23 @@ export default function OAuthCallback() {
         navigate("/home");
       } catch (err: unknown) {
         console.error("OAuth Callback Error:", err);
-        const error = err as {
-          response?: {
-            data?: { error?: { message?: string }; message?: string };
-          };
-          message?: string;
-        };
-        const message =
-          error.response?.data?.error?.message ||
-          error.response?.data?.message ||
-          error.message ||
-          "Authentication failed";
+        let message: string;
+        if (isAxiosError(err)) {
+          const url =
+            typeof err.config?.url === "string"
+              ? err.config.url
+              : err.config?.baseURL != null
+                ? `${err.config.baseURL}${err.config.url ?? ""}`
+                : "API";
+          message = `${formatBackendApiError(err, "Could not reach the server")} (sync: ${url})`;
+        } else if (err instanceof Error) {
+          message =
+            err.message === "No authenticated user found"
+              ? "Sign-in did not complete. Check Supabase Auth redirect URLs include this site's /auth/callback."
+              : err.message;
+        } else {
+          message = "Authentication failed";
+        }
 
         setError(message);
         toast.error(message);

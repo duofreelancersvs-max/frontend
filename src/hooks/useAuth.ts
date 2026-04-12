@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
+import { formatBackendApiError } from "@/lib/auth-request-errors";
 import type { LoginCredentials, RegisterData, User } from "@/types/auth.types";
 import { toast } from "react-toastify";
 
@@ -97,14 +99,7 @@ export function useAuth(): UseAuthReturn {
         // Redirect to home page
         navigate("/home");
       } catch (err: unknown) {
-        const error = err as {
-          response?: { data?: { error?: { message?: string } } };
-          message?: string;
-        };
-        const message =
-          error.response?.data?.error?.message ||
-          error.message ||
-          "Invalid email or password";
+        const message = formatBackendApiError(err, "Invalid email or password");
         setError(message);
         toast.error(message);
         throw err;
@@ -174,30 +169,17 @@ export function useAuth(): UseAuthReturn {
         // Redirect to home page
         navigate("/home");
       } catch (err: unknown) {
-        const error = err as {
-          response?: {
-            data?: {
-              error?: {
-                message?: string;
-                details?: Array<{ field: string; message: string }>;
-              };
-              message?: string;
-            };
-          };
-          message?: string;
-        };
-        let message = "Registration failed";
-        if (
-          error.response?.data?.error?.details &&
-          error.response.data.error.details.length > 0
-        ) {
-          // Show the first validation error detail for clarity
-          const detail = error.response.data.error.details[0];
-          message = `${detail.field}: ${detail.message}`;
-        } else if (error.response?.data?.error?.message) {
-          message = error.response.data.error.message;
-        } else if (error.message) {
-          message = error.message;
+        let message = formatBackendApiError(err, "Registration failed");
+        if (isAxiosError(err)) {
+          const details = (
+            err.response?.data as {
+              error?: { details?: Array<{ field: string; message: string }> };
+            }
+          )?.error?.details;
+          if (details && details.length > 0) {
+            const detail = details[0];
+            message = `${detail.field}: ${detail.message}`;
+          }
         }
         setError(message);
         toast.error(message);
