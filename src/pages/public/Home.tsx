@@ -23,7 +23,6 @@ import type { FreelancerProfile } from "@/services/freelancer.service";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -266,7 +265,7 @@ const Home = () => {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Main Gradient Surface */}
           <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-[#050B15] dark:via-[#0A1628] dark:to-[#112240]" />
-          
+
           {/* Floating Decorative Blobs - Light Mode Accent */}
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
@@ -285,7 +284,10 @@ const Home = () => {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
               {isAuthenticated ? (
                 <>
-                  Welcome, <span className="text-teal">{user?.fullName || user?.email?.split('@')[0] || 'User'}</span>
+                  Welcome,{" "}
+                  <span className="text-teal">
+                    {user?.fullName || user?.email?.split("@")[0] || "User"}
+                  </span>
                 </>
               ) : (
                 <>
@@ -301,23 +303,30 @@ const Home = () => {
               "ConnectMeIndia: Where Talent Earns and Dreams Unite."
             </p>
 
-            {/* Role Switcher CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-6 mb-12">
+            {/* Hero CTAs - Mobile-first unified layout */}
+            <div className="mt-8 mb-12 w-full max-w-lg mx-auto px-4 sm:px-0 space-y-3">
               {isAuthenticated ? (
                 <>
-                  <Link to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"} className="w-full sm:w-auto">
+                  <Link
+                    to={
+                      user?.role === "client"
+                        ? "/client/dashboard"
+                        : "/freelancer/dashboard"
+                    }
+                    className="block"
+                  >
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl shadow-xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
                     >
                       Go to Dashboard
                     </Button>
                   </Link>
-                  <Link to="/projects" className="w-full sm:w-auto">
+                  <Link to="/projects" className="block">
                     <Button
                       size="lg"
-                      variant="ghost"
-                      className="w-full sm:w-auto border-2 border-navy/20 dark:border-white/30 text-navy dark:text-white hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      variant="outline"
+                      className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
                       Browse Projects
                     </Button>
@@ -325,23 +334,50 @@ const Home = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/freelancers" className="w-full sm:w-auto">
+                  {/* Primary: Role selection */}
+                  <Link to="/freelancers" className="block">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-teal hover:bg-[#128a7f] text-white px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl shadow-xl shadow-teal/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
                     >
                       I want to Hire Talent
                     </Button>
                   </Link>
-                  <Link to="/projects" className="w-full sm:w-auto">
+                  <Link to="/projects" className="block">
                     <Button
                       size="lg"
-                      variant="ghost"
-                      className="w-full sm:w-auto border-2 border-navy/20 dark:border-white/30 text-navy dark:text-white hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy px-6 py-6 md:px-10 md:py-8 text-base md:text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 active:scale-95"
+                      variant="outline"
+                      className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
                       I want to find Work
                     </Button>
                   </Link>
+
+                  {/* Separator */}
+                  <div className="flex items-center gap-4 py-1">
+                    <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      or
+                    </span>
+                    <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+                  </div>
+
+                  {/* Secondary: Auth */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link to="/login" className="block">
+                      <Button
+                        variant="outline"
+                        className="w-full h-14 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-teal hover:text-teal dark:hover:border-teal dark:hover:text-teal text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+                      >
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link to="/register" className="block">
+                      <Button className="w-full h-14 bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light hover:bg-teal hover:text-white border-none text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]">
+                        Create account
+                      </Button>
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
@@ -499,7 +535,10 @@ const Home = () => {
       </section>
 
       {/* 3. FEATURED FREELANCERS */}
-      <section className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5" id="find-talent">
+      <section
+        className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5"
+        id="find-talent"
+      >
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
@@ -665,7 +704,9 @@ const Home = () => {
                     <span className="text-2xl font-bold text-navy dark:text-white">
                       ₹{plan.monthlyPrice}
                     </span>
-                    <span className="text-slate-500 dark:text-slate-400 text-xs">/mo</span>
+                    <span className="text-slate-500 dark:text-slate-400 text-xs">
+                      /mo
+                    </span>
                   </div>
                   <ul className="space-y-2 mb-6 flex-1">
                     {plan.features.map((f) => (
@@ -673,7 +714,11 @@ const Home = () => {
                         key={f}
                         className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium text-left"
                       >
-                        <Check size={14} className="text-teal dark:text-teal-light shrink-0" /> {f}
+                        <Check
+                          size={14}
+                          className="text-teal dark:text-teal-light shrink-0"
+                        />{" "}
+                        {f}
                       </li>
                     ))}
                   </ul>
@@ -746,7 +791,9 @@ const Home = () => {
                 <h3 className="text-2xl font-bold text-navy dark:text-white mb-4 transition-colors group-hover:text-royal-blue">
                   {step.title}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{step.desc}</p>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {step.desc}
+                </p>
               </AnimatedSection>
             ))}
           </div>
@@ -792,7 +839,9 @@ const Home = () => {
                       <div className="text-navy dark:text-white font-bold text-lg group-hover:text-teal dark:group-hover:text-teal-light transition-colors">
                         {t.author}
                       </div>
-                      <div className="text-slate-500 dark:text-slate-500">{t.role}</div>
+                      <div className="text-slate-500 dark:text-slate-500">
+                        {t.role}
+                      </div>
                     </div>
                   </div>
                 </div>

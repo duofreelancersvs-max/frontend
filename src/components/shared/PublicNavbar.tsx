@@ -53,12 +53,14 @@ export const PublicNavbar = ({
       )}
     >
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Logo />
+          <div className="flex items-center">
+            {/* Logo Section - Takes 1/3 space or flex-1 */}
+            <div className="flex-1 flex justify-start">
+              <Logo />
+            </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-4">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center justify-center gap-1">
               {[
                 { label: "Find Talent", href: "/freelancers" },
                 { label: "Find Work", href: "/projects" },
@@ -82,153 +84,156 @@ export const PublicNavbar = ({
               ))}
             </div>
 
-            {/* Auth Buttons */}
-            <div className="hidden lg:flex items-center gap-3">
-              <ThemeToggle className="mr-2" />
-              {isAuthenticated ? (
-                <div className="flex items-center gap-4">
-                  <Link
-                    to={
-                      user?.role === "client"
-                        ? "/client/dashboard"
-                        : "/freelancer/dashboard"
-                    }
-                  >
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "font-semibold transition-all duration-300 rounded-lg",
-                        isWhite || dark
-                          ? "!text-navy dark:!text-white hover:bg-slate-100 dark:hover:bg-white/10"
-                          : "!text-white hover:bg-white/10",
-                      )}
+            {/* Auth & Actions Section - Takes 1/3 space or flex-1 */}
+            <div className="flex-1 flex justify-end items-center gap-3">
+              <div className="hidden lg:flex items-center gap-3">
+                <ThemeToggle className="mr-2" />
+                {isAuthenticated ? (
+                  <div className="flex items-center gap-4">
+                    <Link
+                      to={
+                        user?.role === "client"
+                          ? "/client/dashboard"
+                          : "/freelancer/dashboard"
+                      }
                     >
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <div className="relative">
-                    <button
-                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
-                        isWhite || dark
-                          ? "hover:bg-slate-100"
-                          : "hover:bg-white/10",
-                        profileDropdownOpen && "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]"
-                      )}
-                    >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs shadow-lg">
-                        {user?.fullName
-                          ? user.fullName
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")
-                              .toUpperCase()
-                          : (user?.email?.[0] || "U").toUpperCase()}
-                      </div>
-                    </button>
-
-                    {/* Profile Dropdown */}
-                    {profileDropdownOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setProfileDropdownOpen(false)}
-                        />
-                        <div 
-                          className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 py-2 z-20 animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden"
-                          onClick={() => setProfileDropdownOpen(false)}
-                        >
-                          <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
-                            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
-                              Logged in as
-                            </p>
-                            <p className="font-bold text-navy dark:text-white truncate">
-                              {user?.fullName || user?.email?.split('@')[0]}
-                            </p>
-                          </div>
-                          
-                          <div className="p-1.5">
-                            <Link
-                              to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"}
-                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
-                                <Menu size={16} />
-                              </div>
-                              Dashboard
-                            </Link>
-
-                            <Link
-                              to={user?.role === "client" ? "/client/settings" : "/freelancer/profile"}
-                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
-                                <X size={16} className="rotate-45" />
-                              </div>
-                              Profile Settings
-                            </Link>
-
-                            <hr className="my-1.5 border-slate-100 dark:border-white/5" />
-
-                            <button
-                              onClick={() => logout()}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
-                                <Menu size={16} className="rotate-90" />
-                              </div>
-                              Sign Out
-                            </button>
-                          </div>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "font-semibold transition-all duration-300 rounded-lg",
+                          isWhite || dark
+                            ? "!text-navy dark:!text-white hover:bg-slate-100 dark:hover:bg-white/10"
+                            : "!text-white hover:bg-white/10",
+                        )}
+                      >
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <div className="relative">
+                      <button
+                        onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                        className={cn(
+                          "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
+                          isWhite || dark
+                            ? "hover:bg-slate-100"
+                            : "hover:bg-white/10",
+                          profileDropdownOpen && "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]"
+                        )}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                          {user?.fullName
+                            ? user.fullName
+                                .split(" ")
+                                .map((n: string) => n[0])
+                                .join("")
+                                .toUpperCase()
+                            : (user?.email?.[0] || "U").toUpperCase()}
                         </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Link to="/login">
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "font-bold transition-all duration-300 rounded-xl px-6",
-                        isWhite || dark
-                          ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10"
-                          : "text-white hover:bg-white/10",
-                      )}
-                    >
-                      Log In
-                    </Button>
-                  </Link>
-                  <Link to="/register">
-                    <Button
-                      className={cn(
-                        "font-bold px-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl",
-                        isWhite || dark
-                          ? "bg-teal text-white shadow-teal/20 hover:bg-[#128a7f]"
-                          : "bg-white text-navy shadow-white/10 hover:bg-slate-100",
-                      )}
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
+                      </button>
 
-            <div className="lg:hidden flex items-center gap-2">
-              <button
-                className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  isWhite || dark ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5" : "text-white hover:bg-white/10",
+                      {/* Profile Dropdown */}
+                      {profileDropdownOpen && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setProfileDropdownOpen(false)}
+                          />
+                          <div 
+                            className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 py-2 z-20 animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden"
+                            onClick={() => setProfileDropdownOpen(false)}
+                          >
+                            <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+                              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                                Logged in as
+                              </p>
+                              <p className="font-bold text-navy dark:text-white truncate">
+                                {user?.fullName || user?.email?.split('@')[0]}
+                              </p>
+                            </div>
+                            
+                            <div className="p-1.5">
+                              <Link
+                                to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"}
+                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
+                                  <Menu size={16} />
+                                </div>
+                                Dashboard
+                              </Link>
+
+                              <Link
+                                to={user?.role === "client" ? "/client/settings" : "/freelancer/profile"}
+                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
+                                  <X size={16} className="rotate-45" />
+                                </div>
+                                Profile Settings
+                              </Link>
+
+                              <hr className="my-1.5 border-slate-100 dark:border-white/5" />
+
+                              <button
+                                onClick={() => logout()}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                                  <Menu size={16} className="rotate-90" />
+                                </div>
+                                Sign Out
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "font-bold transition-all duration-300 rounded-xl px-6",
+                          isWhite || dark
+                            ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10"
+                            : "text-white hover:bg-white/10",
+                        )}
+                      >
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button
+                        className={cn(
+                          "font-bold px-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl",
+                          isWhite || dark
+                            ? "bg-teal text-white shadow-teal/20 hover:bg-[#128a7f]"
+                            : "bg-white text-navy shadow-white/10 hover:bg-slate-100",
+                        )}
+                      >
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
                 )}
-                onClick={() => {
-                  setMobileMenuOpen(!mobileMenuOpen);
-                }}
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              </div>
+
+              {/* Mobile Menu Toggle */}
+              <div className="lg:hidden flex items-center gap-2">
+                <button
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    isWhite || dark ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5" : "text-white hover:bg-white/10",
+                  )}
+                  onClick={() => {
+                    setMobileMenuOpen(!mobileMenuOpen);
+                  }}
+                >
+                  {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -286,6 +291,21 @@ export const PublicNavbar = ({
             </div>
           )}
 
+          {!isAuthenticated && (
+            <div className="mb-8 grid grid-cols-2 gap-4">
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button variant="outline" className="w-full h-14 rounded-2xl border-slate-200 dark:border-white/10 text-navy dark:text-white font-bold text-base">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button className="w-full h-14 rounded-2xl bg-teal text-white font-bold text-base shadow-xl shadow-teal/20">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          )}
+
           <div className="space-y-1">
             {[
               { label: "Find Talent", href: "/freelancers" },
@@ -308,7 +328,7 @@ export const PublicNavbar = ({
             ))}
           </div>
 
-          <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/5 space-y-6">
+          <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/5">
             <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-[1.5rem] border border-slate-100 dark:border-white/10">
               <div>
                 <p className="font-bold text-navy dark:text-white">Interface Theme</p>
@@ -316,21 +336,6 @@ export const PublicNavbar = ({
               </div>
               <ThemeToggle />
             </div>
-
-            {!isAuthenticated && (
-              <div className="grid grid-cols-2 gap-4">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
-                  <Button variant="outline" className="w-full h-16 rounded-2xl border-slate-200 dark:border-white/10 text-navy dark:text-white font-bold text-base">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
-                  <Button className="w-full h-16 rounded-2xl bg-teal text-white font-bold text-base shadow-xl shadow-teal/20">
-                    Get Started
-                  </Button>
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </div>

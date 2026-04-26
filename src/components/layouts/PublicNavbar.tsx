@@ -42,11 +42,14 @@ const PublicNavbar = () => {
       )}
       style={{ height: "64px" }}
     >
-      <div className="container mx-auto px-4 h-full flex items-center justify-between">
-        <Logo size="sm" isDark={isDark} />
+      <div className="container mx-auto px-4 h-full flex items-center">
+        {/* Logo Section */}
+        <div className="flex-1 flex justify-start">
+          <Logo size="sm" isDark={isDark} />
+        </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop Links - Centered */}
+        <div className="hidden md:flex items-center justify-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -58,31 +61,33 @@ const PublicNavbar = () => {
           ))}
         </div>
 
-        {/* Auth Buttons */}
-        <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle className="mr-2" />
-          <Link to="/login">
-            <Button
-              variant="outline"
-              className="border-royal-blue text-royal-blue dark:border-teal-light dark:text-teal-light hover:bg-royal-blue/5 dark:hover:bg-teal-light/10"
-            >
-              Log In
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button className="bg-teal hover:bg-teal/90 text-white">
-              Sign Up
-            </Button>
-          </Link>
-        </div>
+        {/* Auth Buttons - Right Aligned */}
+        <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle className="mr-2" />
+            <Link to="/login">
+              <Button
+                variant="outline"
+                className="border-royal-blue text-royal-blue dark:border-teal-light dark:text-teal-light hover:bg-royal-blue/5 dark:hover:bg-teal-light/10"
+              >
+                Log In
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button className="bg-teal hover:bg-teal/90 text-white">
+                Sign Up
+              </Button>
+            </Link>
+          </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden p-2 text-slate-500 hover:text-navy"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden p-2 text-slate-500 hover:text-navy"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
