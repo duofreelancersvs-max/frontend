@@ -5,12 +5,12 @@ import {
   MapPin,
   Briefcase,
   SlidersHorizontal,
-  DollarSign,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
   Calendar,
   AlertCircle,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -348,7 +348,7 @@ const ProjectCard = ({ project, onApply }: { project: Project; onApply: () => vo
           <div className="flex flex-wrap items-center gap-y-3 gap-x-6 mb-5 text-[13px] sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-teal/5 flex items-center justify-center text-teal">
-                <DollarSign size={14} />
+                <Wallet size={14} />
               </div>
               <span>₹{project.budget.minAmount.toLocaleString()} - ₹{project.budget.maxAmount.toLocaleString()}</span>
             </div>

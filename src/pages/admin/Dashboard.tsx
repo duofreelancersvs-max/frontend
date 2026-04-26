@@ -12,7 +12,6 @@ import {
   MessageSquare,
   UserPlus,
   FileCheck,
-  DollarSign,
   Send,
   Download,
   CheckCircle,
@@ -518,7 +517,7 @@ const getActivityIcon = (type: ActivityItem["type"]) => {
     case "verification":
       return { Icon: FileCheck, color: "amber" };
     case "payment":
-      return { Icon: DollarSign, color: "emerald" };
+      return { Icon: Wallet, color: "emerald" };
   }
 };
 

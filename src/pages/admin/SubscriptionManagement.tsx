@@ -11,7 +11,7 @@ import {
   CreditCard,
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  Wallet,
   Calendar,
   Download,
   Filter,
@@ -296,7 +296,7 @@ const PlanCard = ({
         </span>
       </div>
       <div className="sm-plan-stat">
-        <DollarSign size={16} />
+        <Wallet size={16} />
         <span>MRR: ₹{plan.mrr.toLocaleString()}</span>
       </div>
       {plan.conversionRate && (
@@ -792,7 +792,7 @@ const SubscriptionManagement = () => {
               <StatCard
                 label="Monthly Recurring Revenue"
                 value={`₹${analyticsData.mrr.toLocaleString()}`}
-                icon={DollarSign}
+                icon={Wallet}
                 color="indigo"
                 trend="up"
                 trendValue="+4.2%"

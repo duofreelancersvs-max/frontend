@@ -8,7 +8,7 @@ import {
   ArrowUpRight,
   PieChart,
   BarChart3,
-  DollarSign,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services/project.service";
@@ -190,7 +190,7 @@ const FreelancerEarnings = () => {
             <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-success-green/10 flex items-center justify-center">
-                  <DollarSign size={20} className="text-success-green" />
+                  <Wallet size={20} className="text-success-green" />
                 </div>
                 <span className="flex items-center gap-1 text-success-green text-xs font-medium">
                   <ArrowUpRight size={14} />

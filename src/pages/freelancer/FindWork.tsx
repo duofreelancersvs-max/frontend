@@ -11,8 +11,8 @@ import {
   ChevronRight,
   Briefcase,
   SlidersHorizontal,
-  DollarSign,
   AlertCircle,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -217,7 +217,9 @@ const FindWork = () => {
       if (
         !project.title.toLowerCase().includes(query) &&
         !project.description.toLowerCase().includes(query) &&
-        !(project.requiredSkills || []).some((s) => s.toLowerCase().includes(query))
+        !(project.requiredSkills || []).some((s) =>
+          s.toLowerCase().includes(query),
+        )
       ) {
         return false;
       }
@@ -304,7 +306,9 @@ const FindWork = () => {
           {loading && (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal"></div>
-              <span className="ml-3 text-slate-500 dark:text-slate-400">Loading projects...</span>
+              <span className="ml-3 text-slate-500 dark:text-slate-400">
+                Loading projects...
+              </span>
             </div>
           )}
 
@@ -312,7 +316,9 @@ const FindWork = () => {
           {!loading && error && (
             <div className="bg-white dark:bg-white/5 rounded-2xl border border-red-100 dark:border-red-900/20 shadow-sm p-8 text-center">
               <AlertCircle size={40} className="mx-auto text-red-400 mb-3" />
-              <p className="text-red-600 dark:text-red-400 font-medium mb-4">{error}</p>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-4">
+                {error}
+              </p>
               <button
                 onClick={fetchProjects}
                 className="px-6 py-2 bg-teal text-white rounded-lg hover:bg-teal-light transition-colors text-sm font-medium"
@@ -490,7 +496,9 @@ const FindWork = () => {
 
                 {/* Sort */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500 dark:text-slate-400">Sort by:</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    Sort by:
+                  </span>
                   <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 dark:bg-white/5 rounded-lg p-0.5">
                     {sortOptions.map((opt) => (
                       <button
@@ -588,19 +596,21 @@ const FindWork = () => {
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-1.5 mb-4">
-                          {project.requiredSkills.slice(0, 4).map((skill, index) => (
-                            <span
-                              key={`${project._id}-${skill}-${index}`}
-                              className={cn(
-                                "px-2 py-1 rounded-md text-xs font-medium",
-                                userSkills.includes(skill)
-                                  ? "bg-teal/10 text-teal border border-teal/20"
-                                  : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
-                              )}
-                            >
-                              {skill}
-                            </span>
-                          ))}
+                          {project.requiredSkills
+                            .slice(0, 4)
+                            .map((skill, index) => (
+                              <span
+                                key={`${project._id}-${skill}-${index}`}
+                                className={cn(
+                                  "px-2 py-1 rounded-md text-xs font-medium",
+                                  userSkills.includes(skill)
+                                    ? "bg-teal/10 text-teal border border-teal/20"
+                                    : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
+                                )}
+                              >
+                                {skill}
+                              </span>
+                            ))}
                           {project.requiredSkills.length > 4 && (
                             <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded-md text-xs">
                               +{project.requiredSkills.length - 4}
@@ -611,7 +621,7 @@ const FindWork = () => {
                         {/* Footer Info */}
                         <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-4 pb-4 border-b border-slate-100 dark:border-white/5">
                           <div className="flex items-center gap-1">
-                            <DollarSign size={14} />
+                            <Wallet size={14} />
                             <span className="font-semibold text-navy dark:text-white">
                               ₹{project.budget.minAmount?.toLocaleString() || 0}{" "}
                               - ₹
@@ -661,7 +671,10 @@ const FindWork = () => {
                 /* EMPTY STATE */
                 <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-12 text-center text-navy dark:text-white">
                   <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
-                    <Briefcase size={40} className="text-slate-300 dark:text-slate-600" />
+                    <Briefcase
+                      size={40}
+                      className="text-slate-300 dark:text-slate-600"
+                    />
                   </div>
                   <h3 className="text-xl font-semibold text-navy dark:text-white mb-2">
                     {activeTab === "saved"
