@@ -279,6 +279,9 @@ const FindWork = () => {
                     setSelectedCategory("All Categories");
                     setSelectedLevel("All Levels");
                     setSelectedLocation("All Locations");
+                    setSearchQuery("");
+                    setSelectedSkill("");
+                    setSearchParams({});
                   }}
                 >
                   Reset
