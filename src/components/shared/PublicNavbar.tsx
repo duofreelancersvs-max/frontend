@@ -1,15 +1,114 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { Menu, X, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { publicService } from "@/services";
+import type { CategoryWithSkills } from "@/services";
+
+// Module-level timestamp — persists across component remounts caused by navigation
+let menuLastClickTime = 0;
+
+const MegaMenu = ({
+  label,
+  href,
+  isActive,
+  isWhite,
+  dark,
+  categories,
+  isJobType = false,
+}: {
+  label: string;
+  href: string;
+  isActive: boolean;
+  isWhite: boolean;
+  dark: boolean;
+  categories: CategoryWithSkills[];
+  isJobType?: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = () => {
+    menuLastClickTime = Date.now();
+    setIsOpen(false);
+  };
+
+  return (
+    <div 
+      className="static"
+      onMouseEnter={() => { if (Date.now() - menuLastClickTime > 600) setIsOpen(true); }}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <NavLink
+        to={href}
+        className={cn(
+          "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300",
+          isWhite || dark
+            ? isActive
+              ? "text-teal dark:text-teal-light font-bold"
+              : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white"
+            : isActive
+            ? "text-teal-light font-bold"
+            : "text-white/90 hover:text-white"
+        )}
+        onClick={handleClose}
+      >
+        {label}
+        <ChevronDown size={14} className={cn("transition-transform duration-300", isOpen && "rotate-180")} />
+      </NavLink>
+
+      {/* Full-width Dropdown Content */}
+      <div 
+        className={cn(
+          "absolute left-0 top-full w-full bg-white dark:bg-[#050B15] shadow-2xl border-t border-slate-100 dark:border-white/5 transition-all duration-300 ease-out z-50",
+          isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"
+        )}
+      >
+        {/* Invisible bridge */}
+        <div className="absolute left-0 -top-8 w-full h-8 bg-transparent" />
+        
+        <div className="container mx-auto px-4 lg:px-8 py-10 max-h-[80vh] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-12">
+            {categories.map((category) => (
+              <div key={category._id} className="space-y-4">
+                <Link 
+                  to={`${href}?category=${encodeURIComponent(category.name)}`} 
+                  className="block text-navy dark:text-white font-bold mb-3 hover:text-teal dark:hover:text-teal-light transition-colors"
+                  onClick={handleClose}
+                >
+                  {category.name}{isJobType ? " jobs" : ""}
+                </Link>
+                <ul className="space-y-3">
+                  {category.skills.slice(0, 6).map((skill) => {
+                    const displayName = isJobType ? skill.skillName.replace(/s$/, '') + " jobs" : skill.skillName;
+                    return (
+                      <li key={skill._id}>
+                        <Link
+                          to={`${href}?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
+                          className="text-sm text-slate-600 dark:text-white/60 hover:text-teal dark:hover:text-teal-light hover:underline transition-all block"
+                          onClick={handleClose}
+                        >
+                          {displayName}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const PublicNavbar = ({ 
   variant = "transparent",
-  dark = false // If true, navbar text will be dark (navy) instead of white when transparent
+  dark = false
 }: { 
   variant?: "transparent" | "white",
   dark?: boolean
@@ -17,7 +116,10 @@ export const PublicNavbar = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState<CategoryWithSkills[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +127,12 @@ export const PublicNavbar = ({
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    publicService.getCategoriesWithSkills()
+      .then(setCategories)
+      .catch((err) => console.error("Failed to fetch categories", err));
   }, []);
 
   useEffect(() => {
@@ -46,28 +154,43 @@ export const PublicNavbar = ({
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-4"
+          ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-3"
           : variant === "white"
-            ? "bg-white dark:bg-[#050B15] py-4 dark:shadow-none"
-            : "bg-transparent py-4",
+            ? "bg-white dark:bg-[#050B15] py-3 dark:shadow-none"
+            : "bg-transparent py-3",
       )}
     >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center">
             {/* Logo Section - Takes 1/3 space or flex-1 */}
             <div className="flex-1 flex justify-start">
-              <Logo />
+              <Logo size="md" />
             </div>
 
             {/* Desktop Navigation - Centered */}
             <div className="hidden lg:flex items-center justify-center gap-1">
+              <MegaMenu
+                label="Find Talent"
+                href="/freelancers"
+                isActive={location.pathname.startsWith('/freelancers')}
+                isWhite={isWhite}
+                dark={dark}
+                categories={categories}
+                isJobType={false}
+              />
+              <MegaMenu
+                label="Find Work"
+                href="/projects"
+                isActive={location.pathname.startsWith('/projects')}
+                isWhite={isWhite}
+                dark={dark}
+                categories={categories}
+                isJobType={true}
+              />
               {[
-                { label: "Find Talent", href: "/freelancers" },
-                { label: "Find Work", href: "/projects" },
                 { label: "Categories", href: "/categories" },
                 { label: "How It Works", href: "/how-it-works" },
                 { label: "Pricing", href: "/pricing" },
-                { label: "About", href: "/about" },
               ].map((item) => (
                 <NavLink
                   key={item.label}
@@ -127,7 +250,7 @@ export const PublicNavbar = ({
                                 .map((n: string) => n[0])
                                 .join("")
                                 .toUpperCase()
-                            : (user?.email?.[0] || "U").toUpperCase()}
+                                : (user?.email?.[0] || "U").toUpperCase()}
                         </div>
                       </button>
 
@@ -307,9 +430,89 @@ export const PublicNavbar = ({
           )}
 
           <div className="space-y-1">
+            {/* Find Talent Mobile Accordion */}
+            <div className="rounded-2xl overflow-hidden mb-1">
+              <button 
+                onClick={() => setExpandedItems(prev => ({ ...prev, talent: !prev.talent }))}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
+                  expandedItems.talent ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                )}
+              >
+                Find Talent
+                <ChevronDown className={cn("transition-transform duration-300", expandedItems.talent && "rotate-180")} size={20} />
+              </button>
+              {expandedItems.talent && (
+                <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
+                  {categories.map(category => (
+                    <div key={category._id} className="space-y-3">
+                      <Link 
+                        to={`/freelancers?category=${encodeURIComponent(category.name)}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
+                      >
+                        {category.name}
+                      </Link>
+                      <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
+                        {category.skills.slice(0, 5).map(skill => (
+                          <Link 
+                            key={skill._id}
+                            to={`/freelancers?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
+                          >
+                            {skill.skillName}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Find Work Mobile Accordion */}
+            <div className="rounded-2xl overflow-hidden mb-1">
+              <button 
+                onClick={() => setExpandedItems(prev => ({ ...prev, work: !prev.work }))}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
+                  expandedItems.work ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                )}
+              >
+                Find Work
+                <ChevronDown className={cn("transition-transform duration-300", expandedItems.work && "rotate-180")} size={20} />
+              </button>
+              {expandedItems.work && (
+                <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
+                  {categories.map(category => (
+                    <div key={category._id} className="space-y-3">
+                      <Link 
+                        to={`/projects?category=${encodeURIComponent(category.name)}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
+                      >
+                        {category.name} jobs
+                      </Link>
+                      <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
+                        {category.skills.slice(0, 5).map(skill => (
+                          <Link 
+                            key={skill._id}
+                            to={`/projects?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
+                          >
+                            {skill.skillName.replace(/s$/, '')} jobs
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {[
-              { label: "Find Talent", href: "/freelancers" },
-              { label: "Find Work", href: "/projects" },
               { label: "Categories", href: "/categories" },
               { label: "How It Works", href: "/how-it-works" },
               { label: "Pricing", href: "/pricing" },
@@ -344,3 +547,4 @@ export const PublicNavbar = ({
 };
 
 export default PublicNavbar;
+

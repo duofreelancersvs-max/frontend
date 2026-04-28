@@ -25,7 +25,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen flex font-sans">
       {/* LEFT SIDE - Branding */}
-      <div className="hidden lg:flex lg:w-[45%] relative bg-navy overflow-hidden">
+      <div className="hidden md:flex md:w-[40%] lg:w-[45%] relative bg-navy overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#050B15] via-navy to-royal-blue" />
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
@@ -66,8 +66,8 @@ const ForgotPassword = () => {
 
       {/* RIGHT SIDE - Form */}
       <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-slate-50 dark:bg-background relative py-20 lg:py-24 overflow-y-auto">
-        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between lg:justify-end lg:p-10 lg:gap-6 z-30">
-          <div className="lg:hidden">
+        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between md:justify-end lg:p-10 lg:gap-6 z-30">
+          <div className="md:hidden">
             <Logo size="sm" />
           </div>
           <div className="flex items-center gap-4 lg:gap-6">
@@ -87,7 +87,7 @@ const ForgotPassword = () => {
 
         <div className="w-full max-w-md px-4 sm:px-0">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex justify-center mb-8">
+          <div className="md:hidden flex justify-center mb-8">
             <Logo size="md" />
           </div>
 

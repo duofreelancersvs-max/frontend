@@ -75,6 +75,7 @@ export interface ProjectFilters {
   minBudget?: number;
   maxBudget?: number;
   search?: string;
+  skills?: string[];
   page?: number;
   limit?: number;
 }
