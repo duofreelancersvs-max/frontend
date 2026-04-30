@@ -70,15 +70,15 @@ const ReviewProjectModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-navy text-xl">Review Project</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-navy dark:text-white text-xl font-bold">Review Project</DialogTitle>
+          <DialogDescription className="text-slate-500 dark:text-slate-400">
             Share your experience working with {freelancerName} on "{projectTitle}"
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="flex flex-col items-center gap-3">
-            <p className="text-sm font-medium text-slate-600">Your Rating</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Your Rating</p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -110,14 +110,14 @@ const ReviewProjectModal = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600">
+            <label className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Your Review
             </label>
             <Textarea
               placeholder="What was it like working with this freelancer? (optional)"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="min-h-[120px] border-slate-200 focus:border-teal focus:ring-teal"
+              className="min-h-[120px]"
             />
           </div>
         </div>
@@ -127,7 +127,7 @@ const ReviewProjectModal = ({
             variant="ghost"
             onClick={onClose}
             disabled={isSubmitting}
-            className="text-slate-600"
+            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           >
             Cancel
           </Button>

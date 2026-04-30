@@ -226,13 +226,13 @@ const ClientProjects = () => {
       case "in-progress":
         return "bg-royal-blue/10 text-royal-blue";
       case "completed":
-        return "bg-green-100 text-green-600";
+        return "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400";
       case "draft":
-        return "bg-slate-100 text-slate-500";
+        return "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400";
       case "cancelled":
-        return "bg-red-100 text-red-500";
+        return "bg-red-100 dark:bg-red-900/20 text-red-500 dark:text-red-400";
       default:
-        return "bg-slate-100 text-slate-500";
+        return "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400";
     }
   };
 
@@ -288,7 +288,7 @@ const ClientProjects = () => {
                         "px-2 py-0.5 text-xs font-bold rounded-full",
                         activeTab === tab.id
                           ? "bg-teal/10 text-teal"
-                          : "bg-slate-100 text-slate-500",
+                          : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400",
                       )}
                     >
                       {tab.count}
@@ -335,8 +335,8 @@ const ClientProjects = () => {
                 className={cn(
                   "p-2 rounded-md transition-all",
                   viewMode === "grid"
-                    ? "bg-white text-navy shadow-sm"
-                    : "text-slate-500 hover:text-navy",
+                    ? "bg-white dark:bg-[#121A2A] text-navy dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 <Grid3X3 size={18} />
@@ -346,8 +346,8 @@ const ClientProjects = () => {
                 className={cn(
                   "p-2 rounded-md transition-all",
                   viewMode === "list"
-                    ? "bg-white text-navy shadow-sm"
-                    : "text-slate-500 hover:text-navy",
+                    ? "bg-white dark:bg-[#121A2A] text-navy dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
               >
                 <List size={18} />
@@ -393,7 +393,7 @@ const ClientProjects = () => {
                             </button>
                             {openMenuId === project._id && (
                               <div
-                                className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
+                                className="absolute right-0 mt-1 w-40 bg-white dark:bg-[#121A2A] rounded-xl shadow-lg border border-slate-100 dark:border-white/10 py-1 z-50"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                  <button
@@ -501,7 +501,7 @@ const ClientProjects = () => {
                       <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
                         <div className="grid grid-cols-3 gap-3 mb-4">
                           <div className="flex flex-col items-center text-center">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Budget
                             </span>
                             <span className="text-sm font-semibold text-navy dark:text-white">
@@ -520,7 +520,7 @@ const ClientProjects = () => {
                             </span>
                           </div>
                           <div className="flex flex-col items-center text-center">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Deadline
                             </span>
                             <span className="text-sm font-semibold text-navy dark:text-white">
@@ -702,10 +702,10 @@ const ClientProjects = () => {
                                 >
                                   <Edit2 size={16} />
                                 </Button>
-                                <Button
+                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-8 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                  className="h-8 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                                   onClick={() => handleDelete(project._id)}
                                   disabled={deletingId === project._id}
                                 >
@@ -808,14 +808,14 @@ const ClientProjects = () => {
             </>
           ) : (
             /* EMPTY STATE */
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-              <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-6">
-                <Briefcase size={40} className="text-slate-300" />
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-12 text-center">
+              <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center mx-auto mb-6">
+                <Briefcase size={40} className="text-slate-300 dark:text-slate-600" />
               </div>
-              <h3 className="text-xl font-bold text-navy mb-2">
+              <h3 className="text-xl font-bold text-navy dark:text-white mb-2">
                 No projects yet
               </h3>
-              <p className="text-slate-500 mb-6 max-w-sm mx-auto">
+              <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
                 {activeTab === "all"
                   ? "Get started by posting your first project and find amazing freelancers."
                   : `You don't have any ${activeTab.replace("-", " ")} projects.`}

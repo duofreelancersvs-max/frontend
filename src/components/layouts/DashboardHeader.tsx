@@ -111,7 +111,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
             </div>
             <div className="hidden md:block text-left pr-1">
               <p className="text-[13px] font-heading font-semibold text-foreground leading-none">
-                {user?.fullName?.split(' ')[0] || "User"}
+                {user?.fullName || user?.email?.split('@')[0] || "Member"}
               </p>
               <p className="text-[10px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">{user?.role || 'Member'}</p>
             </div>

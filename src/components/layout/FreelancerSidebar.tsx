@@ -108,8 +108,8 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
     : 0;
 
   const subscriptionPlan = subscription?.plan || "free";
-  const freelancerName = user?.email?.split("@")[0] || "Freelancer";
-  const avatarInitial = freelancerName.charAt(0).toUpperCase();
+  const freelancerName = user?.fullName || user?.email?.split("@")[0] || "Freelancer";
+  const avatarInitial = (user?.fullName?.[0] || freelancerName.charAt(0)).toUpperCase();
 
   return (
     <>

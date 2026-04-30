@@ -34,33 +34,40 @@ import { toast } from "react-toastify";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 
+// Must match backend FreelancerCategory enum exactly
 const categories = [
   "Editing",
   "VFX",
   "3D Design",
   "Motion Graphics",
   "Color Grading",
-  "Web Development",
-  "Mobile Development",
-  "UI/UX Design",
-  "Content Writing",
-  "Digital Marketing",
+  "Admin & support",
+  "Design & creative",
+  "Marketing",
+  "Writing & content",
+  "AI & emerging tech",
+  "Development & tech",
+  "Video, audio & animation",
 ];
 
-const skillOptions = [
-  "Adobe Premiere Pro",
-  "After Effects",
-  "DaVinci Resolve",
-  "Final Cut Pro",
-  "Cinema 4D",
-  "Blender",
-  "Nuke",
-  "Houdini",
-  "Maya",
-  "Photoshop",
-  "Illustrator",
-  "Figma",
-];
+// Skills grouped by category, matching backend seed data
+const skillsByCategory: Record<string, string[]> = {
+  "Editing": ["Adobe Premiere Pro", "DaVinci Resolve", "Final Cut Pro", "Avid Media Composer"],
+  "VFX": ["After Effects", "Nuke", "Mocha"],
+  "3D Design": ["Blender", "Cinema 4D", "Maya"],
+  "Motion Graphics": ["After Effects Motion Graphics", "3D Motion Design"],
+  "Color Grading": ["Color Grading"],
+  "Admin & support": ["Virtual assistants", "Lead generation specialists", "Personal assistants", "Cold callers", "Content moderators"],
+  "Design & creative": ["Web designers", "Graphic designers", "UX designers", "Logo designers", "Illustrators"],
+  "Marketing": ["Social media managers", "Digital marketers", "SEO experts", "Google Ads experts", "Email marketers"],
+  "Writing & content": ["Content writers", "Copywriters", "Email copywriters", "Ghostwriters", "Book editors"],
+  "AI & emerging tech": ["Machine learning engineers", "Chatbot developers", "Automation engineers", "Ethical hackers", "Computer vision engineers"],
+  "Development & tech": ["Web developers", "Python developers", "Software developers", "Mobile app developers", "WordPress developers"],
+  "Video, audio & animation": ["Video editors", "Animators", "Voice actors", "Audio editors", "Music producers"],
+};
+
+// All skills flat (used for search fallback)
+const allSkillOptions = Object.values(skillsByCategory).flat();
 
 const experienceLevels = [
   {
@@ -113,8 +120,7 @@ const PostProject = () => {
     autoDetectLocation: true,
     // Step 3
     budgetType: "fixed",
-    minBudget: "",
-    maxBudget: "",
+    budget: "",
     deadline: "",
     visibility: "public",
     // Step 4
@@ -131,7 +137,7 @@ const PostProject = () => {
             title: project.title || "",
             categories: project.category ? [project.category] : [],
             description: project.description || "",
-            skills: (project as any).skills || [],
+            skills: (project as any).requiredSkills || (project as any).skills || [],
             experienceLevel: "",
             duration: "",
             location: project.location?.type || "remote",
@@ -139,8 +145,7 @@ const PostProject = () => {
             country: project.location?.country || "",
             autoDetectLocation: true,
             budgetType: project.budget?.type || "fixed",
-            minBudget: project.budget?.minAmount?.toString() || "",
-            maxBudget: project.budget?.maxAmount?.toString() || "",
+            budget: project.budget?.maxAmount?.toString() || "",
             deadline: project.deadline ? project.deadline.split("T")[0] : "",
             visibility: project.visibility || "public",
             termsAccepted: false,
@@ -255,8 +260,8 @@ const PostProject = () => {
       if (formData.skills.length === 0) missingFields.push("Skills");
       if (!formData.experienceLevel) missingFields.push("Experience Level");
       if (!formData.duration) missingFields.push("Duration");
-      if (!formData.minBudget || !formData.maxBudget)
-        missingFields.push("Budget Range");
+      if (!formData.budget)
+        missingFields.push("Budget");
       if (!formData.deadline) missingFields.push("Deadline");
       if (
         formData.location === "onsite" &&
@@ -275,7 +280,7 @@ const PostProject = () => {
           setCurrentStep(1);
         } else if (["Skills", "Experience Level", "Duration", "Location (City & Country)"].includes(firstMissing)) {
           setCurrentStep(2);
-        } else if (["Budget Range", "Deadline"].includes(firstMissing)) {
+        } else if (["Budget", "Deadline"].includes(firstMissing)) {
           setCurrentStep(3);
         }
         
@@ -285,15 +290,16 @@ const PostProject = () => {
 
       setIsSubmitting(true);
 
+      const budgetAmount = Number(formData.budget) || 0;
       const projectData = {
         title: formData.title,
         description: formData.description,
         category: formData.categories[0],
-        skills: formData.skills,
+        requiredSkills: formData.skills,
         budget: {
           type: formData.budgetType,
-          minAmount: Number(formData.minBudget) || 0,
-          maxAmount: Number(formData.maxBudget) || 0,
+          minAmount: budgetAmount,
+          maxAmount: budgetAmount,
           currency: "INR",
         },
         deadline: formData.deadline,
@@ -311,17 +317,24 @@ const PostProject = () => {
         await projectService.create(projectData);
         setShowSuccessModal(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(
         isEditing ? "Error updating project:" : "Error creating project:",
         error,
       );
+      const msg = error?.response?.data?.error?.message || error?.message || "Something went wrong";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const filteredSkills = skillOptions.filter((skill) =>
+  // Skills filtered by selected category + search
+  const availableSkills = formData.categories.length > 0
+    ? (skillsByCategory[formData.categories[0]] || [])
+    : allSkillOptions;
+
+  const filteredSkills = availableSkills.filter((skill) =>
     skill.toLowerCase().includes(skillSearch.toLowerCase()),
   );
 
@@ -368,8 +381,8 @@ const PostProject = () => {
                         className={cn(
                           "text-xs font-medium mt-2 hidden sm:block",
                           currentStep >= step.id
-                            ? "text-navy"
-                            : "text-slate-400",
+                            ? "text-navy dark:text-white"
+                            : "text-slate-400 dark:text-slate-600",
                         )}
                       >
                         {step.label}
@@ -379,7 +392,7 @@ const PostProject = () => {
                       <div
                         className={cn(
                           "flex-1 h-0.5 mx-3",
-                          currentStep > step.id ? "bg-teal" : "bg-slate-200",
+                          currentStep > step.id ? "bg-teal" : "bg-slate-200 dark:bg-white/10",
                         )}
                       />
                     )}
@@ -477,7 +490,7 @@ const PostProject = () => {
                   <Link to="/client/dashboard">
                     <Button
                       variant="outline"
-                      className="border-slate-300 text-slate-600"
+                      className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
                     >
                       Cancel
                     </Button>
@@ -717,7 +730,7 @@ const PostProject = () => {
                   {/* Project Location (Mandatory) */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                       <label className="block text-sm font-semibold text-navy dark:text-slate-400">
+                      <label className="block text-sm font-semibold text-navy dark:text-white">
                         Project Location <span className="text-red-500">*</span>
                       </label>
                       <button
@@ -747,7 +760,7 @@ const PostProject = () => {
                         <div className="relative">
                           <MapPin
                             size={16}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                           />
                           <Input
                             placeholder="e.g., Hyderabad"
@@ -755,7 +768,7 @@ const PostProject = () => {
                             onChange={(e) =>
                               handleInputChange("city", e.target.value)
                             }
-                            className="h-12 pl-10 border-slate-200 focus:border-teal focus:ring-teal"
+                            className="h-12 pl-10 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                           />
                         </div>
                       </div>
@@ -766,7 +779,7 @@ const PostProject = () => {
                         <div className="relative">
                           <MapPin
                             size={16}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                           />
                           <Input
                             placeholder="e.g., India"
@@ -774,7 +787,7 @@ const PostProject = () => {
                             onChange={(e) =>
                               handleInputChange("country", e.target.value)
                             }
-                            className="h-12 pl-10 border-slate-200 focus:border-teal focus:ring-teal"
+                            className="h-12 pl-10 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                           />
                         </div>
                       </div>
@@ -786,7 +799,7 @@ const PostProject = () => {
                       </p>
                     )}
                     {!locationLoading && formData.city && formData.country && (
-                      <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1">
                         <CheckCircle size={12} className="text-teal" />
                         {formData.city}, {formData.country}
                       </p>
@@ -795,7 +808,7 @@ const PostProject = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
                    <Button
                     variant="outline"
                     onClick={prevStep}
@@ -822,55 +835,27 @@ const PostProject = () => {
                 </h2>
 
                 <div className="space-y-6">
-                  {/* Budget Type Toggle removed */}
-
-                  {/* Budget Range */}
+                  {/* Budget */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
-                      Budget Range (INR) <span className="text-red-500">*</span>
+                      Project Budget (INR) <span className="text-red-500">*</span>
                     </label>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Minimum
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                            ₹
-                          </span>
-                          <Input
-                            type="number"
-                            placeholder="5,000"
-                            value={formData.minBudget}
-                            onChange={(e) =>
-                              handleInputChange("minBudget", e.target.value)
-                            }
-                            className="h-12 pl-8 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">
-                          Maximum
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                            ₹
-                          </span>
-                          <Input
-                            type="number"
-                            placeholder="25,000"
-                            value={formData.maxBudget}
-                            onChange={(e) =>
-                              handleInputChange("maxBudget", e.target.value)
-                            }
-                            className="h-12 pl-8 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
-                          />
-                        </div>
-                      </div>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg font-medium">
+                        ₹
+                      </span>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 15000"
+                        value={formData.budget}
+                        onChange={(e) =>
+                          handleInputChange("budget", e.target.value)
+                        }
+                        className="h-14 pl-10 text-lg border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
+                      />
                     </div>
                     <p className="text-xs text-slate-400 mt-2">
-                      Total project budget range
+                      Total fixed price for the project
                     </p>
                   </div>
 
@@ -882,7 +867,7 @@ const PostProject = () => {
                     <div className="relative">
                       <Calendar
                         size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                       />
                       <Input
                         type="date"
@@ -951,7 +936,7 @@ const PostProject = () => {
                   {/* Project Details Section */}
                   <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent dark:border-white/5">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-navy flex items-center gap-2">
+                      <h3 className="font-semibold text-navy dark:text-white flex items-center gap-2">
                         <FileText size={16} className="text-teal" />
                         Project Details
                       </h3>
@@ -972,7 +957,7 @@ const PostProject = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Categories
                         </p>
                         <div className="flex flex-wrap gap-2 mt-1">
@@ -1004,9 +989,9 @@ const PostProject = () => {
                   </div>
 
                   {/* Requirements Section */}
-                  <div className="p-5 bg-slate-50 rounded-xl">
+                  <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent dark:border-white/5">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-navy flex items-center gap-2">
+                      <h3 className="font-semibold text-navy dark:text-white flex items-center gap-2">
                         <ClipboardList size={16} className="text-teal" />
                         Requirements
                       </h3>
@@ -1019,7 +1004,7 @@ const PostProject = () => {
                     </div>
                     <div className="grid gap-3">
                       <div>
-                        <p className="text-xs text-slate-500 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Required Skills
                         </p>
                         <div className="flex flex-wrap gap-2 mt-1">
@@ -1081,9 +1066,9 @@ const PostProject = () => {
                   </div>
 
                   {/* Budget Section */}
-                  <div className="p-5 bg-slate-50 rounded-xl">
+                  <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent dark:border-white/5">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-navy flex items-center gap-2">
+                      <h3 className="font-semibold text-navy dark:text-white flex items-center gap-2">
                         <Wallet size={16} className="text-teal" />
                         Budget & Timeline
                       </h3>
@@ -1094,22 +1079,14 @@ const PostProject = () => {
                         <Edit2 size={14} /> Edit
                       </button>
                     </div>
-                    <div className="grid sm:grid-cols-3 gap-3">
+                    <div className="grid sm:grid-cols-2 gap-3">
                       <div>
                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
-                          Budget Type
-                        </p>
-                        <p className="font-medium text-navy dark:text-white capitalize">
-                          Fixed Price
-                        </p>
-                      </div>
-                      <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
-                          Budget Range
+                          Budget
                         </p>
                         <p className="font-medium text-navy dark:text-white">
-                          {formData.minBudget && formData.maxBudget
-                            ? `₹${parseInt(formData.minBudget).toLocaleString()} - ₹${parseInt(formData.maxBudget).toLocaleString()}`
+                          {formData.budget
+                            ? `₹${parseInt(formData.budget).toLocaleString()}`
                             : "Not specified"}
                         </p>
                       </div>
@@ -1134,7 +1111,7 @@ const PostProject = () => {
                   </div>
 
                   {/* Terms Checkbox */}
-                  <div className="p-4 border-2 border-slate-200 rounded-xl">
+                  <div className="p-4 border-2 border-slate-200 dark:border-white/10 rounded-xl">
                     <label className="flex items-start gap-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1164,21 +1141,30 @@ const PostProject = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
                   <Button
                     variant="outline"
                     onClick={prevStep}
-                    className="border-slate-300 text-slate-600"
+                    className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
                   >
                     Previous
                   </Button>
                   <Button
                     onClick={handleSubmit}
                     disabled={!formData.termsAccepted || isSubmitting}
-                    className="bg-teal hover:bg-teal-light text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-teal hover:bg-teal-light text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
                   >
-                    <Sparkles size={18} className="mr-2" />
-                    {isEditing ? "Update Project" : "Post Project"}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="mr-2 animate-spin" />
+                        {isEditing ? "Updating..." : "Posting..."}
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={18} className="mr-2" />
+                        {isEditing ? "Update Project" : "Post Project"}
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1189,7 +1175,7 @@ const PostProject = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-4">
               {/* Tips Card */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
                     <Lightbulb size={18} className="text-gold" />
@@ -1210,7 +1196,7 @@ const PostProject = () => {
                   ].map((tip, index) => (
                     <li
                       key={index}
-                      className="flex items-start gap-2 text-sm text-slate-600"
+                      className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400"
                     >
                       <CheckCircle
                         size={14}
@@ -1255,8 +1241,8 @@ const PostProject = () => {
 
       {/* SUCCESS MODAL */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center animate-fade-in-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-md w-full mx-4 text-center animate-fade-in-up border border-transparent dark:border-white/10 shadow-2xl">
             <div className="w-16 h-16 rounded-full bg-teal/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={32} className="text-teal" />
             </div>

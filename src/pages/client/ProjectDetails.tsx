@@ -179,9 +179,9 @@ const ProjectDetails = () => {
       case "in-progress":
         return "bg-royal-blue/10 text-royal-blue border-royal-blue/20";
       case "completed":
-        return "bg-green-100 text-green-600 border-green-200";
+        return "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30";
       default:
-        return "bg-slate-100 text-slate-500 border-slate-200";
+        return "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10";
     }
   };
 
@@ -279,7 +279,7 @@ const ProjectDetails = () => {
               {project.status === "open" && (
                 <Button
                   variant="outline"
-                  className="border-red-200 text-red-500 hover:bg-red-50"
+                  className="border-red-200 dark:border-red-900/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={handleCancel}
                   disabled={canceling}
                 >
@@ -489,7 +489,7 @@ const ProjectDetails = () => {
                               {(application.status === "accepted" ||
                                 application.status === "hired" ||
                                 application.status === "shortlisted") && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-500 border border-orange-100">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
                                    {application.status === "shortlisted"
                                     ? "Shortlisted"
                                     : "Hired"}

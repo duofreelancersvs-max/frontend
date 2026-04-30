@@ -322,13 +322,13 @@ const Home = () => {
                       Go to Dashboard
                     </Button>
                   </Link>
-                  <Link to="/projects" className="block">
+                  <Link to={user?.role === "client" ? "/freelancers" : "/projects"} className="block">
                     <Button
                       size="lg"
                       variant="outline"
                       className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
-                      Browse Projects
+                      {user?.role === "client" ? "Find Freelancers" : "Browse Projects"}
                     </Button>
                   </Link>
                 </>

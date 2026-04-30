@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useOutletContext, useLocation } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,8 @@ const ClientMessages = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [conversationsLoaded, setConversationsLoaded] = useState(false);
+  const deepLinkHandled = useRef(false);
   const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
   const [currentApplication, setCurrentApplication] = useState<Application | null>(null);
   const [allClientApplications, setAllClientApplications] = useState<Application[]>([]);
@@ -179,6 +181,8 @@ const ClientMessages = () => {
         if (convs.length > 0) {
           setSelectedConversation(convs[0]);
         }
+        
+        setConversationsLoaded(true);
 
         // Also fetch all client applications for context enrichment
         const appsRes = await applicationService.getMyClientApplications();
@@ -192,20 +196,53 @@ const ClientMessages = () => {
 
   // ── Deep-link: auto-select conversation from navigation state ──
   const location = useLocation();
+
   useEffect(() => {
-    const state = location.state as { conversationId?: string } | null;
-    if (state?.conversationId && conversations.length > 0) {
-      const target = conversations.find(
-        (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
-      );
-      if (target) {
-        setSelectedConversation(target);
-        setMobileView("chat");
+    deepLinkHandled.current = false;
+  }, [location.key]);
+
+  useEffect(() => {
+    const state = location.state as { conversationId?: string; freelancerId?: string } | null;
+    
+    const handleDeepLink = async () => {
+      if (!state || !conversationsLoaded || deepLinkHandled.current) return;
+      
+      if (state.conversationId) {
+        deepLinkHandled.current = true;
+        const target = conversations.find(
+          (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
+        );
+        if (target) {
+          setSelectedConversation(target);
+          setMobileView("chat");
+        }
+        window.history.replaceState({}, "");
+      } else if (state.freelancerId) {
+        deepLinkHandled.current = true;
+        const target = conversations.find((c) => {
+          const freelancer = c.participants?.find(p => p.role === "freelancer") || c.participants?.[0];
+          return freelancer?.id === state.freelancerId || (freelancer as any)?._id === state.freelancerId;
+        });
+        
+        if (target) {
+          setSelectedConversation(target);
+          setMobileView("chat");
+          window.history.replaceState({}, "");
+        } else {
+          try {
+            const newConv = await conversationService.create({ participantId: state.freelancerId });
+            setConversations(prev => [newConv, ...prev]);
+            setSelectedConversation(newConv);
+            setMobileView("chat");
+            window.history.replaceState({}, "");
+          } catch (err) {
+            console.error("Failed to create conversation", err);
+          }
+        }
       }
-      // Clear state to prevent re-triggering
-      window.history.replaceState({}, "");
-    }
-  }, [location.state, conversations]);
+    };
+    handleDeepLink();
+  }, [location.state, conversationsLoaded, conversations]);
 
   useEffect(() => {
     const fetchMessages = async () => {

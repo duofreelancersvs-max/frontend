@@ -67,7 +67,7 @@ const FreelancerProfileView = () => {
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background">
+    <div className="flex-1 bg-slate-50 dark:bg-background">
       <DashboardHeader
         title="Freelancer Profile"
         onMenuClick={() => navigate(-1)}
@@ -114,9 +114,12 @@ const FreelancerProfileView = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button className="bg-teal hover:bg-teal-light text-white font-semibold shadow-sm">
+                  <Button 
+                    className="bg-teal hover:bg-teal-light text-white font-semibold shadow-sm"
+                    onClick={() => navigate(`/client/messages`, { state: { freelancerId: id } })}
+                  >
                     <MessageSquare size={18} className="mr-2" />
-                    Contact Me
+                    Connect Me
                   </Button>
                   <Button
                     variant="ghost"

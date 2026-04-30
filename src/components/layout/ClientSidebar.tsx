@@ -4,7 +4,6 @@ import {
   PlusCircle,
   Search,
   Mail,
-  CreditCard,
   Star,
   Settings,
   LogOut,
@@ -28,7 +27,6 @@ const sidebarNavItems = [
   { icon: PlusCircle, label: "Post Project", href: "/client/post-project" },
   { icon: Search, label: "Find Freelancers", href: "/client/freelancers" },
   { icon: Mail, label: "Messages", href: "/client/messages", id: "messages" },
-  { icon: CreditCard, label: "Payments", href: "/client/payments" },
   { icon: Star, label: "Reviews", href: "/client/reviews" },
   { icon: Settings, label: "Settings", href: "/client/settings" },
 ];
@@ -46,8 +44,8 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
     }
   };
 
-  const clientName = user?.email?.split("@")[0] || "Client";
-  const clientInitial = clientName[0].toUpperCase();
+  const clientName = user?.fullName || user?.email?.split("@")[0] || "Client";
+  const clientInitial = (user?.fullName?.[0] || clientName[0]).toUpperCase();
 
   return (
     <>
@@ -110,7 +108,7 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-heading font-semibold text-white truncate">
-                {user?.fullName || clientName}
+                {clientName}
               </p>
               <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Client Account</p>
             </div>

@@ -46,7 +46,6 @@ const PostProject = lazy(() => import("@/pages/client/PostProject"));
 const ClientProjects = lazy(() => import("@/pages/client/Projects"));
 const ProjectDetails = lazy(() => import("@/pages/client/ProjectDetails"));
 const ClientMessages = lazy(() => import("@/pages/client/Messages"));
-const ClientPayments = lazy(() => import("@/pages/client/Payments"));
 const ClientReviews = lazy(() => import("@/pages/client/Reviews"));
 const ClientSettings = lazy(() => import("@/pages/client/Settings"));
 
@@ -295,14 +294,6 @@ function App() {
             element={
               <SP>
                 <ClientMessages />
-              </SP>
-            }
-          />
-          <Route
-            path="payments"
-            element={
-              <SP>
-                <ClientPayments />
               </SP>
             }
           />

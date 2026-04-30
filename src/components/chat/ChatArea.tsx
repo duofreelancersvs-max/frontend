@@ -165,7 +165,7 @@ const ChatArea = ({
                   size="sm"
                   variant="outline"
                   onClick={onReject}
-                  className="hidden sm:flex items-center gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  className="hidden sm:flex items-center gap-1.5 border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300"
                 >
                   <XCircle size={16} />
                   Reject
@@ -184,10 +184,10 @@ const ChatArea = ({
                 className={cn(
                   "hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-medium border",
                   applicationStatus === "accepted" || applicationStatus === "hired"
-                    ? "bg-green-50 text-green-700 border-green-200"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30"
                     : applicationStatus === "rejected"
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : "bg-slate-100 text-slate-700 border-slate-200"
+                      ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/30"
+                      : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-white/10"
                 )}
               >
                 {applicationStatus.charAt(0).toUpperCase() + applicationStatus.slice(1)}

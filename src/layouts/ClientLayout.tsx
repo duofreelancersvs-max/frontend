@@ -11,13 +11,13 @@ const ClientLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background font-sans transition-colors duration-300 overflow-hidden">
+    <div className="flex h-[100dvh] bg-background font-sans transition-colors duration-300 overflow-hidden">
       <ClientSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col h-screen lg:ml-64 transition-all duration-300 relative w-full overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-[100dvh] lg:ml-64 transition-all duration-300 relative w-full overflow-y-auto overflow-x-hidden">
         <Outlet context={{ setSidebarOpen, sidebarOpen }} />
       </div>
     </div>

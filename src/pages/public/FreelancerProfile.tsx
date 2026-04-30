@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
-import Logo from "@/components/shared/Logo";
 import PublicNavbar from "@/components/shared/PublicNavbar";
+import PublicFooter from "@/components/shared/PublicFooter";
 import {
   ChevronRight,
   Star,
@@ -19,8 +19,6 @@ import {
   Building,
   ChevronDown,
   ArrowRight,
-  Twitter,
-  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -217,7 +215,7 @@ const FreelancerProfile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
 
       {/* 1. PROFILE HEADER */}
@@ -310,7 +308,7 @@ const FreelancerProfile = () => {
                 className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base border-0"
               >
                 <MessageSquare size={20} className="mr-2" />
-                Contact Me
+                Connect Me
               </Button>
               <Button
                 variant="ghost"
@@ -688,7 +686,7 @@ const FreelancerProfile = () => {
                   className="w-full bg-teal hover:bg-teal-light text-white font-semibold py-6 mb-3"
                 >
                   <MessageSquare size={18} className="mr-2" />
-                  Contact {freelancer.name.split(" ")[0]}
+                  Connect {freelancer.name.split(" ")[0]}
                 </Button>
 
                 <Button
@@ -791,78 +789,48 @@ const FreelancerProfile = () => {
       </section>
 
       {/* 11. FOOTER */}
-      <footer className="bg-navy text-white pt-20 pb-8">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-2 md:col-span-1">
-              <div className="mb-6">
-                <Logo isDark size="sm" />
-              </div>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                The premier marketplace for creative professionals in Telangana
-                and Andhra Pradesh.
-              </p>
-              <div className="flex gap-3">
-                {[Twitter, Linkedin].map((Icon, idx) => (
-                  <a
-                    key={idx}
-                    href="#"
-                    className="w-10 h-10 rounded-lg bg-white/5 hover:bg-teal flex items-center justify-center transition-colors"
-                  >
-                    <Icon size={18} />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {[
-              {
-                title: "For Clients",
-                links: ["Find Talent", "Post Project", "Pricing", "Enterprise"],
-              },
-              {
-                title: "For Freelancers",
-                links: [
-                  "Create Profile",
-                  "Browse Jobs",
-                  "Subscription",
-                  "Resources",
-                ],
-              },
-              {
-                title: "Support",
-                links: ["Contact Us", "Help Center", "Privacy Policy", "Terms"],
-              },
-            ].map((section) => (
-              <div key={section.title}>
-                <h3 className="font-bold text-lg mb-6">{section.title}</h3>
-                <ul className="space-y-4">
-                  {section.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-slate-400 hover:text-teal transition-colors text-sm"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 text-sm">
-              © 2024 ConnectMeIndia. All rights reserved.
-            </p>
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <MapPin size={14} />
-              <span>Made with ❤️ in Hyderabad</span>
-            </div>
-          </div>
+      <PublicFooter />
+      
+      {/* MOBILE FIXED CONTACT BAR */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#03070C]/95 backdrop-blur-xl border-t border-slate-100 dark:border-white/10 p-4 animate-in slide-in-from-bottom duration-300">
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => {
+              if (!isAuthenticated) {
+                navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+              } else {
+                navigate(`/client/messages`, { state: { freelancerId: id } });
+              }
+            }}
+            className="flex-1 bg-teal hover:bg-teal-light text-white font-bold py-6 rounded-xl shadow-lg transition-all active:scale-95 text-base"
+          >
+            <MessageSquare size={20} className="mr-2" />
+            Connect Me
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn(
+              "bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white px-4 py-6 rounded-xl transition-all active:scale-95",
+              isSaved && "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-900/30 text-pink-500",
+            )}
+            onClick={() => {
+              if (!isAuthenticated) {
+                navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                return;
+              }
+              setIsSaved(!isSaved);
+            }}
+          >
+            <Heart
+              size={24}
+              className={cn(
+                "transition-colors",
+                isSaved && "fill-pink-500",
+              )}
+            />
+          </Button>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };

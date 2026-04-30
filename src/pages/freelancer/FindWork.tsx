@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
   AlertCircle,
   Wallet,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -257,7 +258,7 @@ const FindWork = () => {
   );
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-background min-h-screen">
+    <div className="w-full bg-slate-50 dark:bg-background min-h-screen overflow-x-hidden">
       {!user && <PublicNavbar variant="white" />}
       <div className={cn("w-full", !user && "pt-[72px]")}>
         {/* Header Bar */}
@@ -560,49 +561,43 @@ const FindWork = () => {
                           )}
                         </button>
                       </div>
-
                       {/* Card Content */}
-                      <div className="p-5">
-                        {/* Title */}
-                        <h3 className="text-lg font-semibold text-navy dark:text-white mb-3 line-clamp-2 hover:text-royal-blue dark:hover:text-teal transition-colors">
-                          {project.title}
-                        </h3>
-
-                        {/* Client Info */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 text-xs font-bold">
-                            {project.client?.fullName?.charAt(0) ?? "C"}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-sm font-medium text-navy dark:text-white">
-                                {project.client?.fullName ?? "Client"}
-                              </span>
+                      <div className="p-5 flex-1 flex flex-col">
+                        {/* Title & Client */}
+                        <div className="mb-4">
+                          <h3 className="text-lg font-semibold text-navy dark:text-white mb-2 line-clamp-2 hover:text-royal-blue dark:hover:text-teal transition-colors min-h-[3.5rem]">
+                            {project.title}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 text-xs font-bold shrink-0">
+                              {project.client?.fullName?.charAt(0) ?? "C"}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Briefcase size={12} className="text-slate-400" />
-                              <span className="text-xs text-slate-500">
-                                {project.applications} applicant
-                                {project.applications !== 1 ? "s" : ""}
-                              </span>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-navy dark:text-white truncate">
+                                {project.client?.fullName ?? "Client"}
+                              </p>
+                              <div className="flex items-center gap-1">
+                                <Star size={10} className="text-gold fill-gold" />
+                                <span className="text-[10px] text-slate-500">4.9 (12 reviews)</span>
+                              </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4 flex-1">
                           {project.description}
                         </p>
 
                         {/* Skills */}
-                        <div className="flex flex-wrap gap-1.5 mb-4">
+                        <div className="flex flex-wrap gap-1.5 mb-5 min-h-[2.5rem]">
                           {project.requiredSkills
-                            .slice(0, 4)
+                            .slice(0, 3)
                             .map((skill, index) => (
                               <span
                                 key={`${project._id}-${skill}-${index}`}
                                 className={cn(
-                                  "px-2 py-1 rounded-md text-xs font-medium",
+                                  "px-2 py-1 rounded-md text-[10px] font-medium",
                                   userSkills.includes(skill)
                                     ? "bg-teal/10 text-teal border border-teal/20"
                                     : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
@@ -611,58 +606,58 @@ const FindWork = () => {
                                 {skill}
                               </span>
                             ))}
-                          {project.requiredSkills.length > 4 && (
-                            <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded-md text-xs">
-                              +{project.requiredSkills.length - 4}
+                          {project.requiredSkills.length > 3 && (
+                            <span className="px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-[10px]">
+                              +{project.requiredSkills.length - 3}
                             </span>
                           )}
                         </div>
 
-                        {/* Footer Info */}
-                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-4 pb-4 border-b border-slate-100 dark:border-white/5">
-                          <div className="flex items-center gap-1">
-                            <Wallet size={14} />
-                            <span className="font-semibold text-navy dark:text-white">
-                              ₹{project.budget.minAmount?.toLocaleString() || 0}{" "}
-                              - ₹
-                              {project.budget.maxAmount?.toLocaleString() || 0}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              ({project.budget.type})
-                            </span>
+                        {/* Footer Info Area */}
+                        <div className="mt-auto space-y-4">
+                          <div className="flex items-center justify-between py-3 border-t border-slate-50 dark:border-white/5">
+                            <div className="flex items-center gap-1.5">
+                              <Wallet size={14} className="text-teal" />
+                              <span className="font-bold text-navy dark:text-white text-sm">
+                                ₹{project.budget.minAmount?.toLocaleString() || 0} - ₹
+                                {project.budget.maxAmount?.toLocaleString() || 0}
+                              </span>
+                              <span className="text-[10px] text-slate-400 uppercase">
+                                ({project.budget.type})
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
-                          <div className="flex items-center gap-1">
-                            <Users size={14} />
-                            {project.applications} applicant
-                            {project.applications !== 1 ? "s" : ""}
+                          <div className="flex items-center justify-between text-xs text-slate-500 pb-2">
+                            <div className="flex items-center gap-1.5">
+                              <Users size={14} />
+                              <span>
+                                {project.applications} applicant
+                                {project.applications !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <MapPin size={14} />
+                              <span>
+                                {project.location?.type === "remote"
+                                  ? "Remote"
+                                  : project.location?.type === "onsite"
+                                    ? "Onsite"
+                                    : project.location?.type === "hybrid"
+                                      ? "Hybrid"
+                                      : project.location?.type}
+                                {project.location?.city ? `, ${project.location.city}` : ""}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin size={14} />
-                            {project.location?.type === "remote"
-                              ? "Remote"
-                              : project.location?.type === "onsite"
-                                ? "Onsite"
-                                : project.location?.type === "hybrid"
-                                  ? "Hybrid"
-                                  : (project.location?.type
-                                      ?.charAt(0)
-                                      .toUpperCase() ?? "R")}
-                            {project.location?.city
-                              ? `, ${project.location.city}`
-                              : ""}
-                          </div>
-                        </div>
 
-                        {/* Apply Button */}
-                        <Button
-                          className="w-full bg-teal hover:bg-teal-light text-white"
-                          onClick={() => handleApplyClick(project)}
-                        >
-                          Apply Now
-                        </Button>
+                          <Button
+                            className="w-full bg-teal hover:bg-teal-light text-white font-bold py-6 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                            onClick={() => handleApplyClick(project)}
+                          >
+                            Apply Now
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}

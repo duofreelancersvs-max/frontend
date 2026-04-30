@@ -53,7 +53,7 @@ export interface CreateProjectRequest {
   title: string;
   description: string;
   category: string;
-  skills: string[];
+  requiredSkills: string[];
   budget: {
     type: string;
     minAmount: number;

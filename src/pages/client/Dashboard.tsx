@@ -318,7 +318,7 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-background transition-colors duration-300">
+    <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-background transition-colors duration-300">
       {/* MAIN CONTENT */}
       <div className="min-h-full">
         <DashboardHeader
@@ -739,16 +739,16 @@ const ClientDashboard = () => {
               <div className="space-y-3">
                  <Link
                   to="/client/post-project"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:border-teal hover:bg-teal/5 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:border-teal hover:bg-teal/5 dark:hover:bg-teal/10 transition-all group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center text-teal group-hover:bg-teal group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-teal/10 dark:bg-teal/20 flex items-center justify-center text-teal group-hover:bg-teal group-hover:text-white transition-colors">
                     <PlusCircle size={20} />
                   </div>
                   <div>
                      <p className="font-semibold text-navy dark:text-white text-sm">
                       Post New Project
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Create a new job listing
                     </p>
                   </div>
@@ -759,16 +759,16 @@ const ClientDashboard = () => {
                 </Link>
                 <Link
                   to="/client/freelancers"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-royal-blue hover:bg-royal-blue/5 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/10 hover:border-royal-blue hover:bg-royal-blue/5 dark:hover:bg-royal-blue/10 transition-all group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue group-hover:bg-royal-blue group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-royal-blue/10 dark:bg-royal-blue/20 flex items-center justify-center text-royal-blue group-hover:bg-royal-blue group-hover:text-white transition-colors">
                     <Search size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-navy text-sm">
+                    <p className="font-semibold text-navy dark:text-white text-sm">
                       Browse Freelancers
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Find the perfect talent
                     </p>
                   </div>
@@ -779,16 +779,16 @@ const ClientDashboard = () => {
                 </Link>
                 <Link
                   to="/contact"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-gold hover:bg-gold/5 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/10 hover:border-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gold/10 dark:bg-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-colors">
                     <MessageSquare size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-navy text-sm">
+                    <p className="font-semibold text-navy dark:text-white text-sm">
                       Get Support
                     </p>
-                    <p className="text-xs text-slate-500">We're here to help</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">We're here to help</p>
                   </div>
                   <ArrowRight
                     size={16}
@@ -799,18 +799,18 @@ const ClientDashboard = () => {
             </section>
 
             {/* ACTIVITY FEED */}
-            <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5 lg:p-6">
-              <h3 className="text-lg font-bold text-navy mb-4">
+             <section className="lg:col-span-2 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5 lg:p-6">
+              <h3 className="text-lg font-bold text-navy dark:text-white mb-4">
                 Recent Activity
               </h3>
-              <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100" />
+               <div className="relative">
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100 dark:bg-white/10" />
                 <div className="space-y-4">
                   {activityFeed.map((activity) => (
-                    <div key={activity.id} className="relative pl-10">
+                     <div key={activity.id} className="relative pl-10">
                       <div
                         className={cn(
-                          "absolute left-2 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center",
+                          "absolute left-2 w-5 h-5 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center",
                           activity.type === "submission" && "bg-teal",
                           activity.type === "payment" && "bg-green-500",
                           activity.type === "application" && "bg-royal-blue",
@@ -830,8 +830,8 @@ const ClientDashboard = () => {
                           <AlertCircle size={10} className="text-white" />
                         )}
                       </div>
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-sm text-navy">{activity.action}</p>
+                       <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-3">
+                        <p className="text-sm text-navy dark:text-white">{activity.action}</p>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-royal-blue font-medium">
                             {activity.project}

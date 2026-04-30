@@ -53,11 +53,13 @@ const categoryOptions = [
   "3D Design",
   "Motion Graphics",
   "Color Grading",
-  "Web Development",
-  "Mobile Development",
-  "UI/UX Design",
-  "Content Writing",
-  "Digital Marketing",
+  "Admin & support",
+  "Design & creative",
+  "Marketing",
+  "Writing & content",
+  "AI & emerging tech",
+  "Development & tech",
+  "Video, audio & animation",
 ];
 
 const availabilityOptions = [
@@ -73,8 +75,8 @@ const suggestedSkills = [
   "Final Cut Pro",
   "Cinema 4D",
   "Blender",
-  "Photoshop",
-  "Illustrator",
+  "Nuke",
+  "Maya",
 ];
 
 const FreelancerProfileEdit = () => {
