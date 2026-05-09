@@ -48,9 +48,9 @@ export const PublicFooter = () => {
               title: "For Freelancers",
               links: [
                 { label: "Create Profile", href: "/register" },
-                { label: "Browse Jobs", href: "/freelancers" },
+                { label: "Browse Jobs", href: "/find-work" },
                 { label: "Subscription", href: "/pricing" },
-                { label: "Resources", href: "/how-it-works" },
+                { label: "Categories", href: "/categories" },
               ],
             },
             {
@@ -58,8 +58,8 @@ export const PublicFooter = () => {
               links: [
                 { label: "Contact Us", href: "/contact" },
                 { label: "Help Center", href: "/contact" },
-                { label: "Privacy Policy", href: "/" },
-                { label: "Terms", href: "/" },
+                { label: "Privacy Policy", href: "/privacy-policy" },
+                { label: "Terms & Conditions", href: "/terms-and-conditions" },
               ],
             },
           ].map((section) => (
@@ -86,9 +86,17 @@ export const PublicFooter = () => {
           <p className="text-slate-500 text-sm">
             © 2024 ConnectMeIndia. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <MapPin size={14} />
-            <span>Made with ❤️ in Hyderabad</span>
+          <div className="flex items-center gap-6 text-slate-500 text-sm">
+            <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <div className="flex items-center gap-2">
+              <MapPin size={14} />
+              <span>Made with ❤️ in Hyderabad</span>
+            </div>
           </div>
         </div>
       </div>

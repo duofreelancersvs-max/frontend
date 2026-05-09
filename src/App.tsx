@@ -27,6 +27,7 @@ const FreelancerProfile = lazy(
 const Categories = lazy(() => import("@/pages/public/Categories"));
 const Contact = lazy(() => import("@/pages/public/Contact"));
 const FindWorkPublic = lazy(() => import("@/pages/public/FindWork"));
+const LegalPage = lazy(() => import("@/pages/public/LegalPage"));
 
 // Auth
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -168,6 +169,30 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <Categories />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/terms-and-conditions"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LegalPage defaultSlug="terms-and-conditions" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LegalPage defaultSlug="privacy-policy" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/legal/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LegalPage />
             </Suspense>
           }
         />
