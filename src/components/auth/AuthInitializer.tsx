@@ -5,8 +5,13 @@ import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
 import type { User } from "@/types/auth.types";
 
-/** Max ms we'll wait for Supabase before declaring the session dead and unblocking the UI */
-const AUTH_INIT_TIMEOUT_MS = 5000;
+/**
+ * Max ms we wait for Supabase to respond before unblocking the UI.
+ * If Supabase is reachable but slow we just unblock — we do NOT touch
+ * auth state here.  Only a true network failure in checkSession() clears
+ * auth and redirects.
+ */
+const AUTH_INIT_TIMEOUT_MS = 8000;
 
 interface AuthInitializerProps {
   children: ReactNode;
@@ -30,24 +35,27 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const isOAuthCallback = location.pathname === "/auth/callback";
   const isOAuthCallbackRef = useRef(isOAuthCallback);
   isOAuthCallbackRef.current = isOAuthCallback;
-  // Track whether we've already resolved so the timeout doesn't double-fire
+
+  // Guards against double-firing between the timer and the normal auth flow
   const resolvedRef = useRef(false);
+  // Promoted to a ref so the timer callback can read the live value
+  const syncInProgressRef = useRef(false);
 
   /**
-   * Mark auth as resolved — called either by a successful Supabase response
-   * OR by the safety timeout below.
+   * Unblock the loading spinner.
+   * - Called by the normal auth flow once Supabase responds
+   * - Also called by the safety timer as a last-resort unblock
+   * NOTE: This NEVER touches auth state or redirects — those only happen
+   *       in the explicit error paths (checkSession catch, axios interceptor).
    */
   const markResolved = useCallback(
-    (clearAuth = false) => {
+    () => {
       if (resolvedRef.current) return;
       resolvedRef.current = true;
-      if (clearAuth) {
-        logout();
-      }
       setLoading(false);
       setIsInitialized(true);
     },
-    [logout, setLoading],
+    [setLoading],
   );
 
   // Sync Supabase session with backend and Zustand store
@@ -93,30 +101,34 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   // Supabase auth state listener
   useEffect(() => {
     setLoading(true);
-    let syncInProgress = false;
 
     /**
-     * Safety timeout — if Supabase never responds (e.g. project paused/deleted,
-     * DNS failure, network offline) we must NOT leave the user on an infinite
-     * spinner.  After AUTH_INIT_TIMEOUT_MS we clear any stale auth state and
-     * let the app render so ProtectedRoute can redirect to /login normally.
+     * Safety timeout — last-resort unblock if Supabase takes too long.
+     *
+     * IMPORTANT: This ONLY unblocks the spinner.  It does NOT clear auth state
+     * or redirect to /login.  Reasons:
+     *   1. Zustand persists isAuthenticated:true from the previous session, so
+     *      reading it here would give a false positive even mid-sync.
+     *   2. If a sync is in progress (syncInProgressRef.current === true) we must
+     *      not interfere — the sync will call markResolved() when done.
+     *   3. Actual session expiry / network failure is handled by checkSession()'s
+     *      catch block and the axios interceptor — not here.
      */
     const safetyTimer = setTimeout(() => {
       if (resolvedRef.current) return;
-      console.warn(
-        "[AuthInitializer] Supabase did not respond within timeout. " +
-          "Clearing stale session and unblocking the app.",
-      );
-      const { isAuthenticated } = useAuthStore.getState();
-      // If we had tokens stored but Supabase couldn't validate them,
-      // treat the session as expired and force the user to re-login.
-      markResolved(isAuthenticated);
-      if (isAuthenticated) {
-        navigate("/login", {
-          replace: true,
-          state: { sessionExpired: true },
-        });
+      if (syncInProgressRef.current) {
+        // Sync is running but taking longer than the timeout — extend patience
+        // rather than forcing a logout.  The sync will call markResolved() itself.
+        console.warn(
+          "[AuthInitializer] Safety timeout hit while sync is in progress — waiting for sync to finish.",
+        );
+        return;
       }
+      console.warn(
+        "[AuthInitializer] Supabase did not respond within timeout. Unblocking UI.",
+      );
+      // Only unblock — do NOT clear auth or redirect
+      markResolved();
     }, AUTH_INIT_TIMEOUT_MS);
 
     // Set up auth state listener
@@ -133,7 +145,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         useAuthStore.getState();
 
       // IMPORTANT: Prevent race conditions during login/sync
-      if (syncInProgress) {
+      if (syncInProgressRef.current) {
           console.log("[AuthInitializer] Sync already in progress, skipping");
           return;
       }
@@ -152,11 +164,12 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         if (storeAuthenticated && isInitialized && event !== 'TOKEN_REFRESHED') {
           console.log("[AuthInitializer] Already authenticated, skipping re-sync");
           setLoading(false);
+          markResolved();
           return;
         }
 
         try {
-          syncInProgress = true;
+          syncInProgressRef.current = true;
           console.log("[AuthInitializer] Syncing session with backend...");
           const synced = await syncSessionWithBackend(
             session.access_token,
@@ -179,7 +192,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         } catch (error) {
           console.error("[AuthInitializer] Sync error caught:", error);
         } finally {
-          syncInProgress = false;
+          syncInProgressRef.current = false;
         }
       } else {
         console.log("[AuthInitializer] No session from Supabase");
@@ -202,22 +215,28 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         } = await supabase.auth.getSession();
 
         if (error) {
-          // Supabase returned an error — treat as no session
+          // Supabase returned an auth error — session is definitively invalid
           console.warn("[AuthInitializer] getSession() error:", error.message);
-          markResolved(true);
+          logout();
+          markResolved();
           return;
         }
 
         if (!session) {
-          // No stored session — unblock immediately
+          // No stored session — unblock immediately (user is not logged in)
           markResolved();
         }
-        // If session exists, onAuthStateChange will fire and call markResolved()
+        // If session exists, onAuthStateChange will fire INITIAL_SESSION and
+        // call markResolved() after the backend sync completes.
       } catch (err) {
-        // Network failure (ERR_NAME_NOT_RESOLVED, etc.) — Supabase is unreachable
+        // True network failure (ERR_NAME_NOT_RESOLVED, offline, etc.)
+        // Supabase is completely unreachable — this is the ONLY place we
+        // clear auth and redirect, because we have definitive evidence the
+        // session cannot be validated.
         console.error("[AuthInitializer] getSession() network failure:", err);
         const { isAuthenticated } = useAuthStore.getState();
-        markResolved(isAuthenticated); // clear stale auth if any
+        logout();
+        markResolved();
         if (isAuthenticated) {
           navigate("/login", {
             replace: true,
