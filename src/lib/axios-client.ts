@@ -92,7 +92,7 @@ axiosClient.interceptors.response.use(
         } = await supabase.auth.refreshSession();
 
         if (refreshError || !session) {
-          throw new Error("Failed to refresh session");
+          throw new Error(refreshError?.message || "Failed to refresh session");
         }
 
         // Update tokens in store
@@ -109,9 +109,12 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout and redirect to login
+        // Refresh failed (auth error OR network error — Supabase unreachable)
+        // In both cases clear stale tokens and send user to login
+        console.error("[axios-client] Token refresh failed, logging out:", refreshError);
         useAuthStore.getState().logout();
-        window.location.href = "/login";
+        // Use replace so the user can't "back" into a broken state
+        window.location.replace("/login");
         return Promise.reject(refreshError);
       }
     }

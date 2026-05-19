@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Quote, Github, Briefcase, Building, CheckCircle, ArrowLeft } from "lucide-react";
 import type { UserRole } from "@/types/auth.types";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const Login = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const sessionExpired = (location.state as { sessionExpired?: boolean } | null)?.sessionExpired ?? false;
   const initialRole = searchParams.get("role") as UserRole;
   const isValidRole = initialRole === "client" || initialRole === "freelancer";
 
@@ -18,6 +20,7 @@ const Login = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
+  const [showSessionBanner, setShowSessionBanner] = useState(sessionExpired);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -182,6 +185,22 @@ const Login = () => {
                   : "Sign in to your account"}
               </p>
             </div>
+
+            {showSessionBanner && (
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm flex items-start gap-2">
+                <span className="text-base">⏱️</span>
+                <span>
+                  Your session has expired. Please sign in again.
+                  <button
+                    type="button"
+                    onClick={() => setShowSessionBanner(false)}
+                    className="ml-2 font-bold underline hover:no-underline"
+                  >
+                    Dismiss
+                  </button>
+                </span>
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">

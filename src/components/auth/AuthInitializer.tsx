@@ -1,9 +1,12 @@
-import { useEffect, useState, useRef, type ReactNode } from "react";
+import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
 import type { User } from "@/types/auth.types";
+
+/** Max ms we'll wait for Supabase before declaring the session dead and unblocking the UI */
+const AUTH_INIT_TIMEOUT_MS = 5000;
 
 interface AuthInitializerProps {
   children: ReactNode;
@@ -27,6 +30,25 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const isOAuthCallback = location.pathname === "/auth/callback";
   const isOAuthCallbackRef = useRef(isOAuthCallback);
   isOAuthCallbackRef.current = isOAuthCallback;
+  // Track whether we've already resolved so the timeout doesn't double-fire
+  const resolvedRef = useRef(false);
+
+  /**
+   * Mark auth as resolved — called either by a successful Supabase response
+   * OR by the safety timeout below.
+   */
+  const markResolved = useCallback(
+    (clearAuth = false) => {
+      if (resolvedRef.current) return;
+      resolvedRef.current = true;
+      if (clearAuth) {
+        logout();
+      }
+      setLoading(false);
+      setIsInitialized(true);
+    },
+    [logout, setLoading],
+  );
 
   // Sync Supabase session with backend and Zustand store
   const syncSessionWithBackend = async (
@@ -72,6 +94,30 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   useEffect(() => {
     setLoading(true);
     let syncInProgress = false;
+
+    /**
+     * Safety timeout — if Supabase never responds (e.g. project paused/deleted,
+     * DNS failure, network offline) we must NOT leave the user on an infinite
+     * spinner.  After AUTH_INIT_TIMEOUT_MS we clear any stale auth state and
+     * let the app render so ProtectedRoute can redirect to /login normally.
+     */
+    const safetyTimer = setTimeout(() => {
+      if (resolvedRef.current) return;
+      console.warn(
+        "[AuthInitializer] Supabase did not respond within timeout. " +
+          "Clearing stale session and unblocking the app.",
+      );
+      const { isAuthenticated } = useAuthStore.getState();
+      // If we had tokens stored but Supabase couldn't validate them,
+      // treat the session as expired and force the user to re-login.
+      markResolved(isAuthenticated);
+      if (isAuthenticated) {
+        navigate("/login", {
+          replace: true,
+          state: { sessionExpired: true },
+        });
+      }
+    }, AUTH_INIT_TIMEOUT_MS);
 
     // Set up auth state listener
     const {
@@ -144,26 +190,47 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         }
       }
 
-      setLoading(false);
-      setIsInitialized(true);
+      markResolved();
     });
 
     // Check for existing session on mount
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-      if (!session) {
-        setLoading(false);
-        setIsInitialized(true);
+        if (error) {
+          // Supabase returned an error — treat as no session
+          console.warn("[AuthInitializer] getSession() error:", error.message);
+          markResolved(true);
+          return;
+        }
+
+        if (!session) {
+          // No stored session — unblock immediately
+          markResolved();
+        }
+        // If session exists, onAuthStateChange will fire and call markResolved()
+      } catch (err) {
+        // Network failure (ERR_NAME_NOT_RESOLVED, etc.) — Supabase is unreachable
+        console.error("[AuthInitializer] getSession() network failure:", err);
+        const { isAuthenticated } = useAuthStore.getState();
+        markResolved(isAuthenticated); // clear stale auth if any
+        if (isAuthenticated) {
+          navigate("/login", {
+            replace: true,
+            state: { sessionExpired: true },
+          });
+        }
       }
-      // If session exists, the onAuthStateChange callback above will handle it
     };
 
     checkSession();
 
     return () => {
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
