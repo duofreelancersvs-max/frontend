@@ -9,14 +9,6 @@ interface AuthInitializerProps {
   children: ReactNode;
 }
 
-/**
- * AuthInitializer
- *
- * Simple rule: Supabase is the source of truth.
- *  - Valid session       → sync with backend, allow access.
- *  - No / expired session → logout immediately, redirect to /login.
- *  - Network failure      → logout immediately, redirect to /login.
- */
 export function AuthInitializer({ children }: AuthInitializerProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const { setAuth, setLoading, logout } = useAuthStore();
@@ -26,10 +18,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const isOAuthCallbackRef = useRef(location.pathname === "/auth/callback");
   isOAuthCallbackRef.current = location.pathname === "/auth/callback";
 
-  const syncInProgressRef = useRef(false);
-  const initializedRef = useRef(false); // mirrors isInitialized for refs
-
-  // ─── helpers ───────────────────────────────────────────────────────────────
+  const initializedRef = useRef(false);
 
   /** Unblock the loading spinner. Never touches auth state. */
   const unblock = useCallback(() => {
@@ -39,7 +28,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     setIsInitialized(true);
   }, [setLoading]);
 
-  /** Hard logout → redirect to /login with "session expired" banner. */
+  /** Hard logout -> redirect to /login with "session expired" banner. */
   const forceLogout = useCallback(() => {
     logout();
     unblock();
@@ -72,96 +61,19 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   // ─── main effect ───────────────────────────────────────────────────────────
 
   useEffect(() => {
-    setLoading(true);
-
-    /**
-     * Safety unblock — pure last resort.
-     * Only releases the spinner; NEVER touches auth state or redirects.
-     * If a sync is in-flight we skip it (the sync will call unblock itself).
-     */
     const safetyTimer = setTimeout(() => {
-      if (!initializedRef.current && !syncInProgressRef.current) {
+      if (!initializedRef.current) {
         console.warn("[AuthInitializer] Timeout — unblocking spinner.");
         unblock();
       }
     }, 10_000);
 
-    // ── auth state listener ──────────────────────────────────────────────────
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("[AuthInitializer] auth event:", event, session?.user?.email);
-
-        // Let OAuthCallback page handle its own session setup
-        if (isOAuthCallbackRef.current) {
-          setIsInitialized(true);
-          setLoading(false);
-          return;
-        }
-
-        if (syncInProgressRef.current) return; // debounce concurrent events
-
-        if (session?.user) {
-          // ── Valid session ────────────────────────────────────────────────
-          const { isAuthenticated } = useAuthStore.getState();
-
-          // Already authenticated and nothing critical changed — skip re-sync
-          if (isAuthenticated && initializedRef.current && event !== "TOKEN_REFRESHED") {
-            unblock();
-            return;
-          }
-
-          try {
-            syncInProgressRef.current = true;
-            const synced = await syncSessionWithBackend(
-              session.access_token,
-              session.refresh_token,
-            );
-
-            if (synced && !initializedRef.current) {
-              // After first login, redirect away from auth pages
-              const user = useAuthStore.getState().user;
-              if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
-                navigate("/home");
-              }
-            }
-
-            if (!synced && !useAuthStore.getState().isAuthenticated) {
-              logout();
-            }
-          } catch (err) {
-            console.error("[AuthInitializer] sync error:", err);
-          } finally {
-            syncInProgressRef.current = false;
-          }
-
-        } else {
-          // ── No session / session gone ────────────────────────────────────
-          // Supabase confirmed no valid session (expired, signed-out, refresh
-          // failed, etc.).  If the store still thinks we're authenticated,
-          // that's stale localStorage data — logout immediately.
-          const { isAuthenticated } = useAuthStore.getState();
-          if (event === "SIGNED_OUT" || isAuthenticated) {
-            console.warn(
-              `[AuthInitializer] No session (event: ${event}) — logging out.`
-            );
-            forceLogout();
-            return;
-          }
-        }
-
-        unblock();
-      },
-    );
-
-    // ── check session on mount ───────────────────────────────────────────────
+    // ── initialise: getSession then sync ─────────────────────────────────────
     (async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (error || !session) {
-          // Supabase has no valid session.
-          // If the Zustand store thinks we're logged in (stale localStorage),
-          // logout immediately so the user lands on /login cleanly.
+        if (error || !session?.user) {
           if (useAuthStore.getState().isAuthenticated) {
             console.warn(
               "[AuthInitializer] No Supabase session but store has auth — logging out."
@@ -172,14 +84,70 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           }
           return;
         }
-        // Session exists → onAuthStateChange (INITIAL_SESSION) will fire next
-        // and call unblock() after the backend sync completes.
+
+        const synced = await syncSessionWithBackend(
+          session.access_token,
+          session.refresh_token,
+        );
+
+        if (synced) {
+          const user = useAuthStore.getState().user;
+          if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
+            navigate("/home");
+          }
+        }
+
+        if (!synced && !useAuthStore.getState().isAuthenticated) {
+          logout();
+        }
+
+        unblock();
       } catch (err) {
-        // Network failure — Supabase is completely unreachable.
-        console.error("[AuthInitializer] getSession() failed (network):", err);
-        forceLogout();
+        console.error("[AuthInitializer] init error:", err);
+        if (useAuthStore.getState().isAuthenticated) {
+          forceLogout();
+        } else {
+          unblock();
+        }
       }
     })();
+
+    // ── auth state listener for subsequent changes (NOT initial) ────────────
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (isOAuthCallbackRef.current) {
+          setIsInitialized(true);
+          return;
+        }
+
+        if (session?.user) {
+          if (event === "INITIAL_SESSION") return;
+
+          const { isAuthenticated } = useAuthStore.getState();
+
+          if (isAuthenticated && initializedRef.current && event !== "TOKEN_REFRESHED") {
+            return;
+          }
+
+          const synced = await syncSessionWithBackend(
+            session.access_token,
+            session.refresh_token,
+          );
+
+          if (!synced && !useAuthStore.getState().isAuthenticated) {
+            logout();
+          }
+        } else {
+          const { isAuthenticated } = useAuthStore.getState();
+          if (event === "SIGNED_OUT" || isAuthenticated) {
+            console.warn(
+              `[AuthInitializer] No session (event: ${event}) — logging out.`
+            );
+            forceLogout();
+          }
+        }
+      },
+    );
 
     return () => {
       clearTimeout(safetyTimer);

@@ -68,7 +68,11 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({ 
         user: state.user, 
         tokens: state.tokens,
-        isAuthenticated: state.isAuthenticated 
+      }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<AuthState>),
+        isAuthenticated: !!((persisted as Partial<AuthState>).user ?? current.user),
       }),
     }
   )

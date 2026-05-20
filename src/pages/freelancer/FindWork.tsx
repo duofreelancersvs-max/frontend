@@ -600,14 +600,14 @@ const FindWork = () => {
                                   "px-2 py-1 rounded-md text-[10px] font-medium",
                                   userSkills.includes(skill)
                                     ? "bg-teal/10 text-teal border border-teal/20"
-                                    : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400",
+                                    : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 border border-transparent",
                                 )}
                               >
                                 {skill}
                               </span>
                             ))}
                           {project.requiredSkills.length > 3 && (
-                            <span className="px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-[10px]">
+                            <span className="px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-[10px] border border-transparent">
                               +{project.requiredSkills.length - 3}
                             </span>
                           )}
