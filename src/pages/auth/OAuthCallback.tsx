@@ -78,10 +78,24 @@ export default function OAuthCallback() {
           // We don't throw error anymore, just proceed with the actual role
         }
 
+        // Backend returns the Supabase accessToken verbatim but refreshToken is empty.
+        // Use the Supabase session's refreshToken as fallback since we need it for token refresh.
+        const finalRefreshToken = tokens.refreshToken || session.refresh_token;
+
+        // Keep Supabase client in sync with the tokens we're about to store
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: tokens.accessToken,
+          refresh_token: finalRefreshToken,
+        });
+
+        if (setSessionError) {
+          console.error("Supabase session sync error:", setSessionError);
+        }
+
         // Set auth state in Zustand store
         setAuth(user, {
-          accessToken: session.access_token,
-          refreshToken: session.refresh_token,
+          accessToken: tokens.accessToken,
+          refreshToken: finalRefreshToken,
           expiresIn: tokens.expiresIn || 3600,
         });
 

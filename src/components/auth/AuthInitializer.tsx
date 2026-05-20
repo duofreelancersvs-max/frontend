@@ -37,16 +37,18 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
   // ─── backend sync ──────────────────────────────────────────────────────────
 
-  const syncSessionWithBackend = async (
-    accessToken: string,
-    refreshToken: string,
-  ): Promise<boolean> => {
+  const syncSessionWithBackend = async (): Promise<boolean> => {
+    const storedTokens = useAuthStore.getState().tokens;
+    const token = storedTokens?.accessToken;
+
+    if (!token) return false;
+
     try {
       const { data } = await axiosClient.get<{ data: { user: User } }>(
         "/auth/me",
-        { headers: { Authorization: `Bearer ${accessToken}` } },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      setAuth(data.data.user, { accessToken, refreshToken, expiresIn: 3600 });
+      setAuth(data.data.user, storedTokens);
       return true;
     } catch (error: any) {
       const status = error?.response?.status;
@@ -85,10 +87,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           return;
         }
 
-        const synced = await syncSessionWithBackend(
-          session.access_token,
-          session.refresh_token,
-        );
+        const synced = await syncSessionWithBackend();
 
         if (synced) {
           const user = useAuthStore.getState().user;
@@ -129,10 +128,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
             return;
           }
 
-          const synced = await syncSessionWithBackend(
-            session.access_token,
-            session.refresh_token,
-          );
+          const synced = await syncSessionWithBackend();
 
           if (!synced && !useAuthStore.getState().isAuthenticated) {
             logout();
