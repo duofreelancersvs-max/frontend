@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   Star,
   User,
@@ -13,10 +14,11 @@ import {
   ChevronDown,
   ChevronUp,
   Lock,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { subscriptionService } from "@/services";
+import { subscriptionService, paymentService } from "@/services";
 import type { Subscription } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -190,7 +192,130 @@ const FreelancerSubscription = () => {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [currentSubscription, setCurrentSubscription] =
     useState<Subscription | null>(null);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isSwitchingFromPremium, setIsSwitchingFromPremium] = useState(false);
 
+  // Upgrade Plan specific states
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradePreview, setUpgradePreview] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+
+  const handlePayment = useCallback(async (planId: string) => {
+    if (isProcessing) return;
+    setIsProcessing(planId);
+    try {
+      const order = await paymentService.createOrder(planId);
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Connect Me",
+        description: "Freelancer Subscription",
+        order_id: order.order_id,
+        theme: { color: "#0d9488" },
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const result = await paymentService.verifyPayment({
+              ...response,
+              planId,
+            });
+            if (result.status === "ok") {
+              toast.success("Subscription activated successfully!");
+              const sub = await subscriptionService.getMySubscription();
+              setCurrentSubscription(sub);
+            } else {
+              toast.error("Payment verification failed. Please contact support.");
+            }
+          } catch {
+            toast.error("Payment verification failed. Please contact support.");
+          }
+          setIsProcessing(null);
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(null);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", () => {
+        toast.error("Payment failed. Please try again.");
+        setIsProcessing(null);
+      });
+      rzp.open();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to initiate payment. Please try again.");
+      setIsProcessing(null);
+    }
+  }, [isProcessing]);
+
+  const handleCancel = useCallback(async () => {
+    if (isCancelling) return;
+    if (currentSubscription?.status === "cancelled") {
+      toast.warning("Your subscription is already scheduled for downgrade.");
+      return;
+    }
+    setIsCancelling(true);
+    try {
+      await subscriptionService.cancel();
+      toast.success("Subscription cancelled. You are now on the Free plan.");
+      const sub = await subscriptionService.getMySubscription();
+      setCurrentSubscription(sub);
+    } catch {
+      toast.error("Failed to cancel subscription");
+    }
+    setIsCancelling(false);
+  }, [isCancelling, currentSubscription]);
+
+  const handleSwitchFromPremiumToPro = useCallback(async () => {
+    if (isSwitchingFromPremium) return;
+    if (currentSubscription?.status === "cancelled") {
+      toast.warning("Your subscription is already scheduled for downgrade.");
+      return;
+    }
+    setIsSwitchingFromPremium(true);
+    try {
+      await subscriptionService.cancel();
+      toast.success("Downgraded from Premium. Click Upgrade to Pro to subscribe.");
+      setIsSwitchingFromPremium(false);
+      const sub = await subscriptionService.getMySubscription();
+      setCurrentSubscription(sub);
+    } catch {
+      toast.error("Failed to cancel Premium subscription");
+      setIsSwitchingFromPremium(false);
+    }
+  }, [isSwitchingFromPremium, currentSubscription]);
+
+  const handlePaymentClick = useCallback(async (planId: string) => {
+    if (currentSubscription?.status === "cancelled") {
+      toast.warning("Your subscription is already scheduled for downgrade.");
+      return;
+    }
+    const activePlan = currentSubscription?.plan || "free";
+    if (activePlan.toLowerCase() === "pro" && planId.toLowerCase() === "premium") {
+      setIsUpgradeModalOpen(true);
+      setIsLoadingPreview(true);
+      try {
+        const preview = await paymentService.getUpgradePreview(planId);
+        setUpgradePreview(preview);
+      } catch (error: any) {
+        toast.error(error?.message || "Failed to load upgrade preview details");
+        setIsUpgradeModalOpen(false);
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    } else {
+      handlePayment(planId);
+    }
+  }, [currentSubscription, handlePayment]);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -266,19 +391,36 @@ const FreelancerSubscription = () => {
                   <div>
                     <h2 className="text-lg font-bold text-navy dark:text-white">
                       Your Current Plan:{" "}
-                      <span className="text-teal">{currentPlan}</span>
+                      <span className="text-teal capitalize">{currentPlan}</span>
+                      {currentSubscription?.status === "cancelled" && (
+                        <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full">
+                          Cancelled
+                        </span>
+                      )}
                     </h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       <Clock size={14} className="inline mr-1" />
-                      Renews on {renewalDate}
+                      {currentSubscription?.status === "cancelled"
+                        ? `Expires on ${renewalDate}`
+                        : `Renews on ${renewalDate}`}
                     </p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
-                  className="border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent"
+                  className={cn(
+                    "border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent",
+                    currentSubscription?.status === "cancelled" && "border-red-500 text-red-500 hover:bg-transparent hover:text-red-500 cursor-not-allowed opacity-60"
+                  )}
+                  onClick={handleCancel}
+                  disabled={isCancelling || currentSubscription?.status === "cancelled"}
                 >
-                  Manage Subscription
+                  {isCancelling ? (
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                  ) : null}
+                  {currentSubscription?.status === "cancelled"
+                    ? "Cancellation Pending"
+                    : "Cancel Subscription"}
                 </Button>
               </div>
             </section>
@@ -343,8 +485,23 @@ const FreelancerSubscription = () => {
                   >
                     Current Plan
                   </Button>
+                ) : currentSubscription?.status === "cancelled" ? (
+                  <Button
+                    disabled
+                    className="w-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  >
+                    Downgrade Pending
+                  </Button>
                 ) : (
-                  <Button variant="outline" className="w-full border-slate-200 dark:border-white/10 dark:text-white">
+                  <Button
+                    variant="outline"
+                    className="w-full border-slate-200 dark:border-white/10 dark:text-white"
+                    onClick={handleCancel}
+                    disabled={isCancelling}
+                  >
+                    {isCancelling ? (
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                    ) : null}
                     Downgrade
                   </Button>
                 )}
@@ -410,15 +567,34 @@ const FreelancerSubscription = () => {
                 {currentPlan === "pro" ? (
                   <Button
                     disabled
-                    className="w-full bg-teal/20 text-teal cursor-not-allowed"
+                    className={cn(
+                      "w-full bg-teal/20 text-teal cursor-not-allowed",
+                      currentSubscription?.status === "cancelled" && "bg-slate-100 dark:bg-white/10 text-slate-500"
+                    )}
                   >
-                    Current Plan
+                    {currentSubscription?.status === "cancelled" ? "Current Plan (Ending)" : "Current Plan"}
+                  </Button>
+                ) : currentPlan === "premium" ? (
+                  <Button
+                    className="w-full bg-teal hover:bg-teal-light text-white font-bold"
+                    onClick={handleSwitchFromPremiumToPro}
+                    disabled={isSwitchingFromPremium || currentSubscription?.status === "cancelled"}
+                  >
+                    {isSwitchingFromPremium ? (
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                    ) : null}
+                    Switch to Pro
                   </Button>
                 ) : (
-                  <Button className="w-full bg-teal hover:bg-teal-light text-white font-bold">
-                    {currentPlan === "premium"
-                      ? "Downgrade to Pro"
-                      : "Upgrade to Pro"}
+                  <Button
+                    className="w-full bg-teal hover:bg-teal-light text-white font-bold"
+                    onClick={() => handlePaymentClick("pro")}
+                    disabled={isProcessing === "pro" || currentSubscription?.status === "cancelled"}
+                  >
+                    {isProcessing === "pro" ? (
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                    ) : null}
+                    Upgrade to Pro
                   </Button>
                 )}
 
@@ -484,12 +660,22 @@ const FreelancerSubscription = () => {
                 {currentPlan === "premium" ? (
                   <Button
                     disabled
-                    className="w-full bg-gold/20 text-gold cursor-not-allowed"
+                    className={cn(
+                      "w-full bg-gold/20 text-gold cursor-not-allowed",
+                      currentSubscription?.status === "cancelled" && "bg-slate-100 dark:bg-white/10 text-slate-500"
+                    )}
                   >
-                    Current Plan
+                    {currentSubscription?.status === "cancelled" ? "Current Plan (Ending)" : "Current Plan"}
                   </Button>
                 ) : (
-                  <Button className="w-full bg-gold hover:bg-gold/90 text-white">
+                  <Button
+                    className="w-full bg-gold hover:bg-gold/90 text-white"
+                    onClick={() => handlePaymentClick("premium")}
+                    disabled={isProcessing === "premium" || currentSubscription?.status === "cancelled"}
+                  >
+                    {isProcessing === "premium" ? (
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                    ) : null}
                     Go Premium
                   </Button>
                 )}
@@ -753,6 +939,124 @@ const FreelancerSubscription = () => {
           </section>
         </main>
       </div>
+
+      {/* UPGRADE CONFIRMATION MODAL */}
+      {isUpgradeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-lg overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-3xl animate-scale-up">
+            {/* Background glowing effects */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-teal/20 rounded-full blur-[60px]" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold/20 rounded-full blur-[60px]" />
+
+            <div className="p-8 relative z-10">
+              <button
+                onClick={() => setIsUpgradeModalOpen(false)}
+                className="absolute top-6 right-6 p-2 text-slate-400 hover:text-navy dark:hover:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-full transition-all"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-gold/20 flex items-center justify-center text-gold">
+                  <Crown size={24} className="animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-navy dark:text-white">
+                    Upgrade to Premium
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Unlock elite features instantly
+                  </p>
+                </div>
+              </div>
+
+              {isLoadingPreview ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-3">
+                  <Loader2 size={36} className="animate-spin text-gold" />
+                  <p className="text-sm text-slate-400">Calculating your prorated price...</p>
+                </div>
+              ) : upgradePreview ? (
+                <div className="space-y-6">
+                  {/* Info Alert Box */}
+                  <div className="bg-teal/10 border border-teal/20 rounded-2xl p-4 text-xs md:text-sm text-teal dark:text-teal-light flex gap-3">
+                    <Sparkles size={20} className="shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1 text-teal dark:text-teal-light">Prorated Credit Applied!</p>
+                      <p className="leading-relaxed opacity-90 text-teal dark:text-teal-light">
+                        We've calculated the unused value of your current{" "}
+                        <strong className="capitalize">{upgradePreview.currentPlan.name}</strong> plan and deducted it from your new subscription.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Calculations Details */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-6 border border-slate-100 dark:border-white/5 space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        New Premium Plan (1 month)
+                      </span>
+                      <span className="font-semibold text-navy dark:text-white">
+                        ₹{upgradePreview.newPlan.price}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm border-b border-dashed border-slate-200 dark:border-white/10 pb-4">
+                      <span className="text-success-green flex items-center gap-1.5 font-medium">
+                        <Check size={16} /> Prorated Credit ({upgradePreview.proration.remainingDays} days left)
+                      </span>
+                      <span className="font-bold text-success-green">
+                        -₹{upgradePreview.proration.creditAmount}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="font-extrabold text-navy dark:text-white">
+                        Amount Payable Today
+                      </span>
+                      <span className="text-3xl font-extrabold text-gold">
+                        ₹{upgradePreview.proration.dueAmount}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Reset Period Note */}
+                  <p className="text-xs text-slate-400 leading-relaxed text-center px-4">
+                    By clicking confirm, your old Pro subscription will end today, and your 1-month Premium benefits will begin immediately. Your billing cycle will reset.
+                  </p>
+
+                  {/* CTA Buttons */}
+                  <div className="flex gap-4">
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-14 rounded-2xl border-slate-200 dark:border-white/10 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                      onClick={() => setIsUpgradeModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1 h-14 rounded-2xl bg-gold hover:bg-gold/90 text-white font-extrabold shadow-lg shadow-gold/20"
+                      onClick={() => {
+                        setIsUpgradeModalOpen(false);
+                        handlePayment("premium");
+                      }}
+                      disabled={isProcessing === "premium"}
+                    >
+                      {isProcessing === "premium" ? (
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                      ) : null}
+                      Confirm & Pay
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-12 text-center text-red-500">
+                  Failed to load upgrade details. Please try again.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

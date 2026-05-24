@@ -26,9 +26,9 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
   //   md: h-14 (56px) → width ≈ 85px
   //   lg: h-16 (64px) → width ≈ 98px
   const heightClasses: Record<string, string> = {
-    sm: "h-10",
-    md: "h-14",
-    lg: "h-16",
+    sm: "h-8",
+    md: "h-10",
+    lg: "h-14",
   };
 
   const imageClasses = cn(

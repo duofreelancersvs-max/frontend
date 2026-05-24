@@ -37,9 +37,8 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
   // ─── backend sync ──────────────────────────────────────────────────────────
 
-  const syncSessionWithBackend = async (): Promise<boolean> => {
-    const storedTokens = useAuthStore.getState().tokens;
-    const token = storedTokens?.accessToken;
+  const syncSessionWithBackend = async (tokenOverride?: string): Promise<boolean> => {
+    const token = tokenOverride || useAuthStore.getState().tokens?.accessToken;
 
     if (!token) return false;
 
@@ -48,12 +47,21 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         "/auth/me",
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      setAuth(data.data.user, storedTokens);
+      
+      const latestTokens = tokenOverride
+        ? {
+            accessToken: tokenOverride,
+            refreshToken: useAuthStore.getState().tokens?.refreshToken || "",
+            expiresIn: useAuthStore.getState().tokens?.expiresIn || 3600,
+          }
+        : useAuthStore.getState().tokens!;
+        
+      setAuth(data.data.user, latestTokens);
       return true;
     } catch (error: any) {
       const status = error?.response?.status;
       if ((status === 401 || status === 404) && !isOAuthCallbackRef.current) {
-        try { await supabase.auth.signOut(); } catch { /* ignore */ }
+        supabase.auth.signOut().catch(() => {});
         logout();
       }
       return false;
@@ -87,7 +95,14 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           return;
         }
 
-        const synced = await syncSessionWithBackend();
+        // Sync session tokens to Zustand store first so other parts of the app have them
+        useAuthStore.getState().setTokens({
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+          expiresIn: session.expires_in || 3600,
+        });
+
+        const synced = await syncSessionWithBackend(session.access_token);
 
         if (synced) {
           const user = useAuthStore.getState().user;
@@ -120,6 +135,13 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         }
 
         if (session?.user) {
+          // Update tokens in Zustand store
+          useAuthStore.getState().setTokens({
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token,
+            expiresIn: session.expires_in || 3600,
+          });
+
           if (event === "INITIAL_SESSION") return;
 
           const { isAuthenticated } = useAuthStore.getState();
@@ -128,7 +150,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
             return;
           }
 
-          const synced = await syncSessionWithBackend();
+          const synced = await syncSessionWithBackend(session.access_token);
 
           if (!synced && !useAuthStore.getState().isAuthenticated) {
             logout();

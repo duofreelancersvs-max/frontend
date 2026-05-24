@@ -2,13 +2,19 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User, AuthTokens } from '@/types/auth.types';
 
+/** Current Supabase URL used to fingerprint the auth provider */
+export const CURRENT_SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || '';
+
 interface AuthState {
   user: User | null;
   tokens: AuthTokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+  /** Supabase project URL at the time the token was saved — detects project switches */
+  lastSupabaseUrl: string;
+
   // Actions
   setUser: (user: User | null) => void;
   setTokens: (tokens: AuthTokens | null) => void;
@@ -27,36 +33,39 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      lastSupabaseUrl: '',
 
-      setUser: (user) => 
-        set({ 
-          user, 
-          isAuthenticated: !!user 
+      setUser: (user) =>
+        set({
+          user,
+          isAuthenticated: !!user,
         }),
 
-      setTokens: (tokens) => 
-        set({ tokens }),
+      setTokens: (tokens) =>
+        set({ tokens, lastSupabaseUrl: CURRENT_SUPABASE_URL }),
 
-      setAuth: (user, tokens) => 
-        set({ 
-          user, 
-          tokens, 
+      setAuth: (user, tokens) =>
+        set({
+          user,
+          tokens,
           isAuthenticated: true,
-          error: null 
+          error: null,
+          lastSupabaseUrl: CURRENT_SUPABASE_URL,
         }),
 
-      setLoading: (isLoading) => 
+      setLoading: (isLoading) =>
         set({ isLoading }),
 
-      setError: (error) => 
+      setError: (error) =>
         set({ error }),
 
-      logout: () => 
-        set({ 
-          user: null, 
-          tokens: null, 
+      logout: () =>
+        set({
+          user: null,
+          tokens: null,
           isAuthenticated: false,
-          error: null 
+          error: null,
+          lastSupabaseUrl: '',
         }),
 
       clearError: () => 
@@ -65,9 +74,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        user: state.user, 
+      partialize: (state) => ({
+        user: state.user,
         tokens: state.tokens,
+        lastSupabaseUrl: state.lastSupabaseUrl,
       }),
       merge: (persisted, current) => ({
         ...current,

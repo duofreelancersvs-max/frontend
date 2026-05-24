@@ -7,6 +7,7 @@ export { clientService } from "./client.service";
 export { applicationService } from "./application.service";
 export { conversationService } from "./conversation.service";
 export { subscriptionService } from "./subscription.service";
+export { paymentService } from "./payment.service";
 export { notificationService } from "./notification.service";
 export { reviewService } from "./review.service";
 export { adminService } from "./admin.service";
@@ -55,6 +56,10 @@ export type {
 } from "./conversation.service";
 
 export type { Subscription, SubscriptionPlan } from "./subscription.service";
+export type {
+  CreateOrderResponse,
+  VerifyPaymentResponse,
+} from "./payment.service";
 
 export type { Notification, NotificationCount } from "./notification.service";
 
