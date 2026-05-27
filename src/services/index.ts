@@ -76,6 +76,12 @@ export type {
   VerificationItem,
   PaginationMeta,
   NotificationHistoryItem,
+  AdminReview,
+  AdminApplication,
+  AdminConversation,
+  AdminCategory,
+  AdminPayment,
+  AuditLogEntry,
 } from "./admin.service";
 
 export type { CategoryWithSkills, Skill } from "./public.service";

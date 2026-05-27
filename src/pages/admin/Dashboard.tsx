@@ -16,10 +16,16 @@ import {
   Download,
   CheckCircle,
   ShieldCheck,
+  Star,
+  FileText,
+  FolderTree,
+  History,
+  DollarSign,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 import { adminService } from "@/services";
-import type { AdminStats, AdminProject, VerificationItem } from "@/services";
+import type { AdminStats, AdminProject, VerificationItem, AuditLogEntry } from "@/services";
 
 // ============ DATA ============
 
@@ -49,73 +55,7 @@ const getTimeAgo = (date: Date): string => {
 
 
 
-interface ActivityItem {
-  id: string;
-  type: "registration" | "project" | "verification" | "payment";
-  text: string;
-  time: string;
-}
-
-const activityFeed: ActivityItem[] = [
-  {
-    id: "1",
-    type: "registration",
-    text: "New freelancer Akash Kumar joined the platform",
-    time: "5 min ago",
-  },
-  {
-    id: "2",
-    type: "project",
-    text: 'Project "Corporate Video Edits" posted by TechCorp',
-    time: "15 min ago",
-  },
-  {
-    id: "3",
-    type: "verification",
-    text: "Sneha Reddy submitted ID verification documents",
-    time: "1 hour ago",
-  },
-  {
-    id: "4",
-    type: "payment",
-    text: "Payment of ₹45,000 received from Priya M.",
-    time: "2 hours ago",
-  },
-  {
-    id: "5",
-    type: "project",
-    text: 'Project "Animation Reel" marked as completed',
-    time: "3 hours ago",
-  },
-];
-
-// Revenue data for chart
-const revenueData = [
-  { month: "Sep", value: 125000 },
-  { month: "Oct", value: 148000 },
-  { month: "Nov", value: 162000 },
-  { month: "Dec", value: 155000 },
-  { month: "Jan", value: 172000 },
-  { month: "Feb", value: 185000 },
-];
-
-// User growth data
-const userGrowthData = [
-  { month: "Sep", newUsers: 180, activeUsers: 420 },
-  { month: "Oct", newUsers: 210, activeUsers: 480 },
-  { month: "Nov", newUsers: 245, activeUsers: 510 },
-  { month: "Dec", newUsers: 198, activeUsers: 545 },
-  { month: "Jan", newUsers: 280, activeUsers: 580 },
-  { month: "Feb", newUsers: 310, activeUsers: 620 },
-];
-
-// Category data for donut chart
-const categoryData = [
-  { name: "Video Editing", value: 35, color: "#6366F1" },
-  { name: "VFX", value: 28, color: "#06B6D4" },
-  { name: "3D Design", value: 22, color: "#8B5CF6" },
-  { name: "Color Grading", value: 15, color: "#10B981" },
-];
+type ActivityType = "registration" | "project" | "verification" | "payment";
 
 // ============ COMPONENTS ============
 
@@ -187,8 +127,12 @@ const MetricCard = ({ metric }: { metric: MetricData }) => {
   );
 };
 
-const RevenueChart = () => {
+const RevenueChart = ({ monthly, yearly }: { monthly: number; yearly: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const data = [
+    { label: "Monthly", value: monthly || 1 },
+    { label: "Yearly", value: yearly || 1 },
+  ];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -196,7 +140,6 @@ const RevenueChart = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // High DPI support
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
@@ -209,13 +152,10 @@ const RevenueChart = () => {
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Find max value
-    const maxValue = Math.max(...revenueData.map((d) => d.value)) * 1.1;
+    const maxValue = Math.max(...data.map((d) => d.value)) * 1.1;
 
-    // Draw grid lines
     ctx.strokeStyle = "#334155";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
@@ -225,7 +165,6 @@ const RevenueChart = () => {
       ctx.lineTo(width - padding.right, y);
       ctx.stroke();
 
-      // Y-axis labels
       const value = Math.round(maxValue - (maxValue / 5) * i);
       ctx.fillStyle = "#94A3B8";
       ctx.font = "11px Inter";
@@ -233,61 +172,21 @@ const RevenueChart = () => {
       ctx.fillText(`₹${(value / 1000).toFixed(0)}k`, padding.left - 10, y + 4);
     }
 
-    // Draw area chart
-    const points: { x: number; y: number }[] = [];
-    revenueData.forEach((d, i) => {
-      const x = padding.left + (chartWidth / (revenueData.length - 1)) * i;
-      const y = padding.top + chartHeight - (d.value / maxValue) * chartHeight;
-      points.push({ x, y });
-    });
-
-    // Fill gradient
-    const gradient = ctx.createLinearGradient(
-      0,
-      padding.top,
-      0,
-      height - padding.bottom,
-    );
-    gradient.addColorStop(0, "rgba(99, 102, 241, 0.3)");
-    gradient.addColorStop(1, "rgba(99, 102, 241, 0.02)");
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, height - padding.bottom);
-    points.forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    // Draw line
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.strokeStyle = "#6366F1";
-    ctx.lineWidth = 3;
-    ctx.lineJoin = "round";
-    ctx.stroke();
-
-    // Draw points
-    points.forEach((p) => {
+    const barWidth = (chartWidth / data.length) * 0.4;
+    data.forEach((d, i) => {
+      const x = padding.left + (chartWidth / (data.length - 1 || 1)) * i + (chartWidth / data.length - barWidth) / 2;
+      const barH = (d.value / maxValue) * chartHeight;
+      ctx.fillStyle = i === 0 ? "#6366F1" : "#06B6D4";
       ctx.beginPath();
-      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "#6366F1";
+      ctx.roundRect(x, padding.top + chartHeight - barH, barWidth, barH, 6);
       ctx.fill();
-      ctx.strokeStyle = "#020617";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    });
 
-    // X-axis labels
-    revenueData.forEach((d, i) => {
-      const x = padding.left + (chartWidth / (revenueData.length - 1)) * i;
       ctx.fillStyle = "#94A3B8";
       ctx.font = "11px Inter";
       ctx.textAlign = "center";
-      ctx.fillText(d.month, x, height - 15);
+      ctx.fillText(d.label, x + barWidth / 2, height - 15);
     });
-  }, []);
+  }, [monthly, yearly]);
 
   return (
     <canvas
@@ -298,7 +197,7 @@ const RevenueChart = () => {
   );
 };
 
-const UserGrowthChart = () => {
+const UserGrowthChart = ({ activeUsers, totalUsers }: { activeUsers: number; totalUsers: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -321,13 +220,10 @@ const UserGrowthChart = () => {
 
     ctx.clearRect(0, 0, width, height);
 
-    const maxValue =
-      Math.max(...userGrowthData.flatMap((d) => [d.newUsers, d.activeUsers])) *
-      1.1;
-    const barWidth = (chartWidth / userGrowthData.length) * 0.35;
-    const barGap = barWidth * 0.4;
+    const maxValue = Math.max(totalUsers, activeUsers) * 1.1;
+    const barWidth = chartWidth * 0.2;
+    const gap = (chartWidth - 2 * barWidth) / 3;
 
-    // Grid lines
     ctx.strokeStyle = "#334155";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
@@ -338,46 +234,25 @@ const UserGrowthChart = () => {
       ctx.stroke();
     }
 
-    // Draw bars
-    userGrowthData.forEach((d, i) => {
-      const groupX =
-        padding.left +
-        (chartWidth / userGrowthData.length) * i +
-        chartWidth / userGrowthData.length / 2;
+    const labels = [
+      { label: "Total", value: totalUsers, color: "#6366F1" },
+      { label: "Active", value: activeUsers, color: "#06B6D4" },
+    ];
 
-      // New users bar (indigo)
-      const newHeight = (d.newUsers / maxValue) * chartHeight;
-      ctx.fillStyle = "#6366F1";
+    labels.forEach((d, i) => {
+      const x = padding.left + gap + (barWidth + gap) * i;
+      const barH = (d.value / maxValue) * chartHeight;
+      ctx.fillStyle = d.color;
       ctx.beginPath();
-      ctx.roundRect(
-        groupX - barWidth - barGap / 2,
-        padding.top + chartHeight - newHeight,
-        barWidth,
-        newHeight,
-        4,
-      );
+      ctx.roundRect(x, padding.top + chartHeight - barH, barWidth, barH, 6);
       ctx.fill();
 
-      // Active users bar (cyan)
-      const activeHeight = (d.activeUsers / maxValue) * chartHeight;
-      ctx.fillStyle = "#06B6D4";
-      ctx.beginPath();
-      ctx.roundRect(
-        groupX + barGap / 2,
-        padding.top + chartHeight - activeHeight,
-        barWidth,
-        activeHeight,
-        4,
-      );
-      ctx.fill();
-
-      // X-axis labels
       ctx.fillStyle = "#94A3B8";
       ctx.font = "11px Inter";
       ctx.textAlign = "center";
-      ctx.fillText(d.month, groupX, height - 15);
+      ctx.fillText(d.label, x + barWidth / 2, height - 15);
     });
-  }, []);
+  }, [activeUsers, totalUsers]);
 
   return (
     <div>
@@ -389,7 +264,7 @@ const UserGrowthChart = () => {
       <div className="admin-chart-legend">
         <div className="admin-legend-item">
           <div className="admin-legend-dot indigo"></div>
-          <span>New Users</span>
+          <span>Total Users</span>
         </div>
         <div className="admin-legend-item">
           <div className="admin-legend-dot cyan"></div>
@@ -450,8 +325,13 @@ const CircularProgress = ({ percentage }: { percentage: number }) => {
   );
 };
 
-const DonutChart = () => {
+const DonutChart = ({ categories }: { categories: { name: string; count: number }[] }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const colors = ["#6366F1", "#06B6D4", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444"];
+  const total = categories.reduce((a, c) => a + c.count, 0) || 1;
+  const data = categories.length > 0
+    ? categories.slice(0, 6).map((c, i) => ({ name: c.name, value: Math.round((c.count / total) * 100), color: colors[i % colors.length] }))
+    : [{ name: "No Data", value: 100, color: "#334155" }];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -471,10 +351,10 @@ const DonutChart = () => {
     const innerRadius = 45;
 
     let startAngle = -Math.PI / 2;
-    const total = categoryData.reduce((acc, d) => acc + d.value, 0);
+    const grandTotal = data.reduce((acc, d) => acc + d.value, 0) || 1;
 
-    categoryData.forEach((d) => {
-      const sliceAngle = (d.value / total) * Math.PI * 2;
+    data.forEach((d) => {
+      const sliceAngle = (d.value / grandTotal) * Math.PI * 2;
       const endAngle = startAngle + sliceAngle;
 
       ctx.beginPath();
@@ -486,13 +366,13 @@ const DonutChart = () => {
 
       startAngle = endAngle;
     });
-  }, []);
+  }, [data]);
 
   return (
     <div className="admin-donut-chart">
       <canvas ref={canvasRef} style={{ width: "160px", height: "160px" }} />
       <div className="admin-donut-legend">
-        {categoryData.map((d) => (
+        {data.map((d) => (
           <div key={d.name} className="admin-legend-item">
             <div
               className="admin-legend-dot"
@@ -508,7 +388,7 @@ const DonutChart = () => {
   );
 };
 
-const getActivityIcon = (type: ActivityItem["type"]) => {
+const getActivityIcon = (type: ActivityType) => {
   switch (type) {
     case "registration":
       return { Icon: UserPlus, color: "cyan" };
@@ -538,20 +418,42 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [recentProjects, setRecentProjects] = useState<AdminProject[]>([]);
   const [verifications, setVerifications] = useState<VerificationItem[]>([]);
+  const [activityLogs, setActivityLogs] = useState<AuditLogEntry[]>([]);
+  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
+  const [completionRate, setCompletionRate] = useState(0);
+  const [subscriptionRevenue, setSubscriptionRevenue] = useState(0);
   const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [statsData, projectsData, verificationsData] = await Promise.allSettled([
+        const [statsData, projectsData, verificationsData, auditData, catsData, subPayments] = await Promise.allSettled([
           adminService.getDashboardStats(),
           adminService.getAllProjects({ page: 1, limit: 5 }),
           adminService.getVerifications({ page: 1, limit: 4, status: "pending" }),
+          adminService.getAuditLogs({ page: 1, limit: 8 }),
+          adminService.getAllCategories({ page: 1, limit: 10 }),
+          adminService.getAllPayments({ page: 1, limit: 100, type: "subscription" }),
         ]);
         if (statsData.status === "fulfilled") setStats(statsData.value);
-        if (projectsData.status === "fulfilled") setRecentProjects(projectsData.value.projects || []);
+        if (projectsData.status === "fulfilled") {
+          const proj = projectsData.value.projects || [];
+          setRecentProjects(proj);
+          const completedCount = proj.filter((p: AdminProject) => p.status === "completed").length;
+          const totalCount = proj.length || 1;
+          setCompletionRate(Math.round((completedCount / (proj as any[]).length) * 100));
+        }
         if (verificationsData.status === "fulfilled") setVerifications(verificationsData.value.verifications || []);
+        if (auditData.status === "fulfilled") setActivityLogs(auditData.value.logs || []);
+        if (catsData.status === "fulfilled") {
+          const cats = catsData.value.categories || [];
+          setCategories(cats.map((c: any) => ({ name: c.name, count: (c.projectCount || 0) + (c.freelancerCount || 0) })));
+        }
+        if (subPayments.status === "fulfilled") {
+          const pays = subPayments.value.payments || [];
+          setSubscriptionRevenue(pays.reduce((sum: number, p: any) => sum + (p.amount || 0), 0));
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -705,7 +607,7 @@ const AdminDashboard = () => {
             </select>
           </div>
           <div className="admin-chart-container">
-            <RevenueChart />
+            <RevenueChart monthly={stats?.revenue?.monthly || 0} yearly={stats?.revenue?.yearly || 0} />
           </div>
         </div>
 
@@ -718,13 +620,13 @@ const AdminDashboard = () => {
               <option>This Year</option>
             </select>
           </div>
-          <UserGrowthChart />
+          <UserGrowthChart activeUsers={stats?.activeUsers || 0} totalUsers={stats?.totalUsers || 0} />
         </div>
       </div>
 
       {/* Secondary Charts */}
       <div className="admin-secondary-charts">
-        {/* Placeholder for Left Chart */}
+        {/* Revenue Sources */}
         <div className="admin-card">
           <div className="admin-card-header">
             <h3 className="admin-card-title">Revenue Sources</h3>
@@ -732,13 +634,17 @@ const AdminDashboard = () => {
           <div className="flex flex-col items-center justify-center py-4">
             <div className="flex gap-4 text-center">
               <div>
-                <div className="text-2xl font-bold text-white">₹1.2L</div>
+                <div className="text-2xl font-bold text-white">
+                  ₹{(subscriptionRevenue).toLocaleString("en-IN")}
+                </div>
                 <div className="text-sm text-[#94A3B8]">Subscriptions</div>
               </div>
               <div className="w-px bg-[#334155]"></div>
               <div>
-                <div className="text-2xl font-bold text-white">₹65K</div>
-                <div className="text-sm text-[#94A3B8]">Commissions</div>
+                <div className="text-2xl font-bold text-white">
+                  ₹{(stats?.revenue?.yearly || 0).toLocaleString("en-IN")}
+                </div>
+                <div className="text-sm text-[#94A3B8]">Total Revenue</div>
               </div>
             </div>
           </div>
@@ -749,7 +655,7 @@ const AdminDashboard = () => {
           <div className="admin-card-header">
             <h3 className="admin-card-title">Project Completion</h3>
           </div>
-          <CircularProgress percentage={87} />
+          <CircularProgress percentage={completionRate} />
         </div>
 
         {/* Top Categories */}
@@ -757,7 +663,7 @@ const AdminDashboard = () => {
           <div className="admin-card-header">
             <h3 className="admin-card-title">Top Categories</h3>
           </div>
-          <DonutChart />
+          <DonutChart categories={categories} />
         </div>
       </div>
 
@@ -893,16 +799,26 @@ const AdminDashboard = () => {
           </Link>
         </div>
         <div className="admin-timeline">
-          {activityFeed.map((activity) => {
-            const { Icon, color } = getActivityIcon(activity.type);
+          {activityLogs.length === 0 && (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>
+              No recent activity
+            </div>
+          )}
+          {activityLogs.slice(0, 8).map((log) => {
+            const adminName = log.adminId?.fullName || log.adminId?.email || "System";
+            const resource = log.resource?.toLowerCase() || "unknown";
+            const type: ActivityType = resource === "payment" ? "payment" : resource === "project" ? "project" : resource === "verification" ? "verification" : "registration";
+            const { Icon, color } = getActivityIcon(type);
             return (
-              <div key={activity.id} className="admin-timeline-item">
+              <div key={log._id} className="admin-timeline-item">
                 <div className={`admin-timeline-icon ${color}`}>
                   <Icon size={10} color="white" />
                 </div>
                 <div className="admin-timeline-content">
-                  <div className="admin-timeline-text">{activity.text}</div>
-                  <div className="admin-timeline-time">{activity.time}</div>
+                  <div className="admin-timeline-text">
+                    {adminName} {log.action} {resource}{log.resourceId ? ` #${log.resourceId.slice(-6)}` : ""}
+                  </div>
+                  <div className="admin-timeline-time">{getTimeAgo(new Date(log.createdAt))}</div>
                 </div>
               </div>
             );
@@ -910,21 +826,48 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions Bar */}
-      <div className="admin-quick-actions">
-        <button className="admin-btn admin-btn-primary">
-          <MessageSquare size={16} />
-          Send Push Notification
-        </button>
-        <button className="admin-btn admin-btn-outline">
-          <Download size={16} />
-          Export Report
-        </button>
-        <div className="admin-quick-actions-spacer"></div>
-        <div className="admin-system-status">
-          <span className="status-indicator"></span>
-          <CheckCircle size={16} />
-          <span>System Health: Operational</span>
+      {/* Quick Actions Grid */}
+      <div className="admin-metrics-grid" style={{ marginBottom: "1.5rem" }}>
+        <div className="admin-card" style={{ padding: "1.25rem" }}>
+          <div className="admin-card-header" style={{ marginBottom: "0.75rem" }}>
+            <h3 className="admin-card-title" style={{ fontSize: "0.875rem" }}>Quick Actions</h3>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+            <Link to="/admin/reviews" className="admin-btn admin-btn-outline admin-btn-sm">
+              <Star size={14} /> Review Moderation
+            </Link>
+            <Link to="/admin/applications" className="admin-btn admin-btn-outline admin-btn-sm">
+              <FileText size={14} /> Applications
+            </Link>
+            <Link to="/admin/categories" className="admin-btn admin-btn-outline admin-btn-sm">
+              <FolderTree size={14} /> Categories
+            </Link>
+            <Link to="/admin/conversations" className="admin-btn admin-btn-outline admin-btn-sm">
+              <MessageSquare size={14} /> Conversations
+            </Link>
+            <Link to="/admin/payments" className="admin-btn admin-btn-outline admin-btn-sm">
+              <DollarSign size={14} /> Payments
+            </Link>
+            <Link to="/admin/audit-logs" className="admin-btn admin-btn-outline admin-btn-sm">
+              <History size={14} /> Audit Logs
+            </Link>
+            <Link to="/admin/notifications" className="admin-btn admin-btn-outline admin-btn-sm">
+              <Send size={14} /> Send Notification
+            </Link>
+          </div>
+        </div>
+        <div className="admin-card" style={{ padding: "1.25rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", height: "100%" }}>
+            <div className="admin-system-status" style={{ margin: 0 }}>
+              <span className="status-indicator"></span>
+              <CheckCircle size={16} />
+              <span>System Health: Operational</span>
+            </div>
+            <button className="admin-btn admin-btn-outline admin-btn-sm" style={{ marginLeft: "auto" }}>
+              <Download size={14} />
+              Export Report
+            </button>
+          </div>
         </div>
       </div>
     </AdminLayout>

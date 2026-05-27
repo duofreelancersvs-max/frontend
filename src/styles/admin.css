@@ -7100,3 +7100,148 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== GLOBAL ADMIN UTILITIES ===== */
+
+/* Hover background utility */
+.hover\:bg-white\/5:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Admin table enhancements */
+.admin-table tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.03);
+}
+
+.admin-table tbody tr.selected {
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+/* Spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state enhancements */
+.admin-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.admin-empty-state h3 {
+  color: var(--admin-white);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.admin-empty-state p {
+  color: var(--admin-cloud-gray);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Status badge variants used by new pages */
+.admin-status-badge.pending {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--admin-amber);
+}
+
+.admin-status-badge.cancelled {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: var(--admin-rose);
+}
+
+.admin-status-badge.completed {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--admin-emerald);
+}
+
+/* Skill tags */
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--admin-indigo);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.skill-tag .remove-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.skill-tag .remove-btn:hover {
+  opacity: 1;
+}
+
+/* Conversation type badges */
+.conv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Payment type badges */
+.payment-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.payment-type-badge.incoming {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--admin-emerald);
+}
+
+.payment-type-badge.outgoing {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--admin-rose);
+}
+
+/* Action badge for audit logs */
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Grid mode for categories */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+}

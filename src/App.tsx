@@ -78,6 +78,12 @@ const SubscriptionManagement = lazy(
 const RazorpaySettings = lazy(() => import("@/pages/admin/RazorpaySettings"));
 const SendNotifications = lazy(() => import("@/pages/admin/SendNotifications"));
 const ProjectManagement = lazy(() => import("@/pages/admin/ProjectManagement"));
+const ReviewsManagement = lazy(() => import("@/pages/admin/ReviewsManagement"));
+const ApplicationsManagement = lazy(() => import("@/pages/admin/ApplicationsManagement"));
+const ConversationsManagement = lazy(() => import("@/pages/admin/ConversationsManagement"));
+const CategoriesManagement = lazy(() => import("@/pages/admin/CategoriesManagement"));
+const PaymentsManagement = lazy(() => import("@/pages/admin/PaymentsManagement"));
+const AuditLogs = lazy(() => import("@/pages/admin/AuditLogs"));
 
 import { PageSkeleton } from "@/components/shared/Skeleton";
 
@@ -505,6 +511,76 @@ function App() {
             <AdminRoute>
               <Suspense fallback={<PageLoader />}>
                 <SendNotifications />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/reviews"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ReviewsManagement />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/applications"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ApplicationsManagement />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/conversations"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ConversationsManagement />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/categories"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <CategoriesManagement />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/payments"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <PaymentsManagement />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <AuditLogs />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/payment-gateway"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<PageLoader />}>
+                <RazorpaySettings />
               </Suspense>
             </AdminRoute>
           }

@@ -11,6 +11,12 @@ import {
   Wallet,
   Bell,
   Briefcase,
+  Star,
+  FileText,
+  MessageSquare,
+  FolderTree,
+  History,
+  DollarSign,
 } from "lucide-react";
 
 interface NavItem {
@@ -70,6 +76,16 @@ const AdminSidebar = () => {
           badgeColor: "indigo",
         },
         {
+          name: "Applications",
+          path: "/admin/applications",
+          icon: FileText,
+        },
+        {
+          name: "Reviews",
+          path: "/admin/reviews",
+          icon: Star,
+        },
+        {
           name: "Verifications",
           path: "/admin/verifications",
           icon: ShieldCheck,
@@ -77,13 +93,24 @@ const AdminSidebar = () => {
           badgeColor: "amber",
         },
         { name: "Subscriptions", path: "/admin/subscriptions", icon: CreditCard },
-        { name: "Payments", path: "/admin/payments", icon: Wallet },
+      ],
+    },
+    {
+      title: "MARKETPLACE",
+      items: [
+        { name: "Categories", path: "/admin/categories", icon: FolderTree },
       ],
     },
     {
       title: "COMMUNICATION",
       items: [
-        { name: "Notifications", path: "/admin/notifications", icon: Bell },
+        { name: "Conversations", path: "/admin/conversations", icon: MessageSquare },
+      ],
+    },
+    {
+      title: "SYSTEM",
+      items: [
+        { name: "Audit Logs", path: "/admin/audit-logs", icon: History },
       ],
     },
   ];

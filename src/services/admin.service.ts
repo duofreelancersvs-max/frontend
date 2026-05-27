@@ -117,6 +117,84 @@ export interface NotificationHistoryItem {
   sentAt: string;
 }
 
+export interface AdminReview {
+  _id: string;
+  reviewerId: { _id: string; fullName?: string; email: string };
+  freelancerId: { _id: string; fullName?: string; email: string };
+  projectId: { _id: string; title: string };
+  rating: number;
+  review: string;
+  createdAt: string;
+  status?: "visible" | "hidden" | "flagged";
+}
+
+export interface AdminApplication {
+  _id: string;
+  projectId: { _id: string; title: string; clientId?: { _id: string; fullName?: string; email: string } };
+  freelancerId: { _id: string; fullName?: string; email: string };
+  coverLetter?: string;
+  proposedRate?: number;
+  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  createdAt: string;
+}
+
+export interface AdminConversation {
+  _id: string;
+  participants: Array<{ _id: string; fullName?: string; email: string; role: string }>;
+  lastMessage?: { content: string; senderId: string; createdAt: string };
+  projectId?: { _id: string; title: string };
+  unreadCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminMessage {
+  _id: string;
+  conversationId: string;
+  senderId: { _id: string; email: string; fullName?: string; role?: string };
+  content: string;
+  attachments?: Array<{ type: string; url: string; name?: string }>;
+  isRead: boolean;
+  sentAt: string;
+  createdAt: string;
+}
+
+export interface AdminCategory {
+  _id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+  projectCount: number;
+  freelancerCount: number;
+  skills: Array<{ _id: string; name: string }>;
+  createdAt: string;
+}
+
+export interface AdminPayment {
+  _id: string;
+  transactionId: string;
+  amount: number;
+  currency: string;
+  status: "captured" | "failed" | "refunded" | "pending";
+  type: "project_payment" | "subscription" | "withdrawal";
+  payerId: { _id: string; fullName?: string; email: string };
+  payeeId?: { _id: string; fullName?: string; email: string };
+  projectId?: { _id: string; title: string };
+  createdAt: string;
+}
+
+export interface AuditLogEntry {
+  _id: string;
+  adminId: { _id: string; fullName?: string; email: string };
+  action: string;
+  resource: string;
+  resourceId?: string;
+  details?: string;
+  ip?: string;
+  createdAt: string;
+}
+
 // ─── Service ──────────────────────────────────────────────────
 
 export const adminService = {
@@ -212,6 +290,117 @@ export const adminService = {
 
   getNotificationHistory: (params?: { page?: number; limit?: number }) =>
     api.get<{ history: NotificationHistoryItem[] }>("/admin/notifications/history", { params }),
+
+  // ─── Reviews ─────────────────────────────────────────────────
+  getAllReviews: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    rating?: number;
+    search?: string;
+  }) =>
+    api.get<{ reviews: AdminReview[]; pagination: PaginationMeta }>(
+      "/admin/reviews",
+      { params },
+    ),
+
+  moderateReview: (reviewId: string, action: string) =>
+    api.patch<{ message: string }>(`/admin/reviews/${reviewId}/moderate`, { action }),
+
+  deleteReview: (reviewId: string) =>
+    api.delete<{ message: string }>(`/admin/reviews/${reviewId}`),
+
+  // ─── Applications ────────────────────────────────────────────
+  getAllApplications: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }) =>
+    api.get<{ applications: AdminApplication[]; pagination: PaginationMeta }>(
+      "/admin/applications",
+      { params },
+    ),
+
+  updateApplicationStatus: (applicationId: string, status: string) =>
+    api.patch<{ message: string }>(`/admin/applications/${applicationId}/status`, { status }),
+
+  // ─── Conversations ───────────────────────────────────────────
+  getAllConversations: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) =>
+    api.get<{ conversations: AdminConversation[]; pagination: PaginationMeta }>(
+      "/admin/conversations",
+      { params },
+    ),
+
+  getConversationMessages: (conversationId: string) =>
+    api.get<{ conversation: AdminConversation; messages: AdminMessage[] }>(
+      `/admin/conversations/${conversationId}/messages`,
+    ),
+
+  deleteConversation: (conversationId: string) =>
+    api.delete<{ message: string }>(`/admin/conversations/${conversationId}`),
+
+  // ─── Categories & Skills ─────────────────────────────────────
+  getAllCategories: (params?: {
+    page?: number;
+    limit?: number;
+    isActive?: boolean;
+  }) =>
+    api.get<{ categories: AdminCategory[]; pagination: PaginationMeta }>(
+      "/admin/categories",
+      { params },
+    ),
+
+  createCategory: (data: { name: string; description?: string; icon?: string }) =>
+    api.post<{ message: string; category: AdminCategory }>("/admin/categories", data),
+
+  updateCategory: (categoryId: string, data: Partial<AdminCategory>) =>
+    api.patch<{ message: string; category: AdminCategory }>(
+      `/admin/categories/${categoryId}`,
+      data,
+    ),
+
+  deleteCategory: (categoryId: string) =>
+    api.delete<{ message: string }>(`/admin/categories/${categoryId}`),
+
+  addSkill: (categoryId: string, data: { name: string }) =>
+    api.post<{ message: string }>(`/admin/categories/${categoryId}/skills`, data),
+
+  removeSkill: (categoryId: string, skillId: string) =>
+    api.delete<{ message: string }>(`/admin/categories/${categoryId}/skills/${skillId}`),
+
+  // ─── Payments ────────────────────────────────────────────────
+  getAllPayments: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    type?: string;
+    search?: string;
+  }) =>
+    api.get<{ payments: AdminPayment[]; pagination: PaginationMeta }>(
+      "/admin/payments",
+      { params },
+    ),
+
+  refundPayment: (paymentId: string, reason?: string) =>
+    api.post<{ message: string }>(`/admin/payments/${paymentId}/refund`, { reason }),
+
+  // ─── Audit Logs ──────────────────────────────────────────────
+  getAuditLogs: (params?: {
+    page?: number;
+    limit?: number;
+    adminId?: string;
+    action?: string;
+    resource?: string;
+  }) =>
+    api.get<{ logs: AuditLogEntry[]; pagination: PaginationMeta }>(
+      "/admin/audit-logs",
+      { params },
+    ),
 };
 
 export default adminService;
