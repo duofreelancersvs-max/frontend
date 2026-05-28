@@ -16,7 +16,6 @@ import {
   Users,
   Briefcase,
   CheckCircle,
-  XCircle,
   Save,
 } from "lucide-react";
 

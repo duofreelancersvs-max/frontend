@@ -3,19 +3,11 @@ import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AuditLogEntry, PaginationMeta } from "@/services";
 import {
-  Search,
-  X,
   ChevronLeft,
   ChevronRight,
   Loader2,
   History,
-  User,
-  Shield,
   Activity,
-  Calendar,
-  Clock,
-  Filter,
-  type LucideIcon,
 } from "lucide-react";
 
 const actionColors: Record<string, string> = {

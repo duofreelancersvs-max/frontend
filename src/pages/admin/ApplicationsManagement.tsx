@@ -13,11 +13,7 @@ import {
   XCircle,
   Loader2,
   FileText,
-  User,
-  Briefcase,
   Clock,
-  Calendar,
-  type LucideIcon,
 } from "lucide-react";
 
 const ApplicationsManagement = () => {

@@ -21,7 +21,6 @@ import {
   FolderTree,
   History,
   DollarSign,
-  Activity,
   type LucideIcon,
 } from "lucide-react";
 import { adminService } from "@/services";
@@ -442,7 +441,7 @@ const AdminDashboard = () => {
           setRecentProjects(proj);
           const completedCount = proj.filter((p: AdminProject) => p.status === "completed").length;
           const totalCount = proj.length || 1;
-          setCompletionRate(Math.round((completedCount / (proj as any[]).length) * 100));
+          setCompletionRate(Math.round((completedCount / totalCount) * 100));
         }
         if (verificationsData.status === "fulfilled") setVerifications(verificationsData.value.verifications || []);
         if (auditData.status === "fulfilled") setActivityLogs(auditData.value.logs || []);

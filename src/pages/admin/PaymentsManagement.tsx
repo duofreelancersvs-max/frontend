@@ -15,9 +15,6 @@ import {
   CreditCard,
   ArrowUpRight,
   ArrowDownLeft,
-  Calendar,
-  FileText,
-  type LucideIcon,
 } from "lucide-react";
 
 const PaymentsManagement = () => {

@@ -79,6 +79,7 @@ export type {
   AdminReview,
   AdminApplication,
   AdminConversation,
+  AdminMessage,
   AdminCategory,
   AdminPayment,
   AuditLogEntry,

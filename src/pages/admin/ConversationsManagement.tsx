@@ -349,7 +349,7 @@ const ConversationsManagement = () => {
                               <div>{msg.content}</div>
                               {msg.attachments && msg.attachments.length > 0 && (
                                 <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                  {msg.attachments.map((att, i) => (
+                                  {msg.attachments.map((att: { type: string; url: string; name?: string }, i: number) => (
                                     <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" style={{
                                       display: "flex", alignItems: "center", gap: 4,
                                       fontSize: "0.75rem", color: "var(--admin-cyan)",
