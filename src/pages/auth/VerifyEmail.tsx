@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle, XCircle, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/shared/Logo";
@@ -8,10 +8,12 @@ import axiosClient from "@/lib/axios-client";
 type VerificationStatus = "loading" | "success" | "error";
 
 const VerifyEmail = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const [status, setStatus] = useState<VerificationStatus>("loading");
   const [message, setMessage] = useState("");
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!token) {
@@ -24,16 +26,26 @@ const VerifyEmail = () => {
 
     const verify = async () => {
       try {
-        const { data } = await axiosClient.get<{ data: { verified: boolean } }>(
-          "/auth/verify-email",
-          { params: { token } },
-        );
+        const { data } = await axiosClient.get<{
+          data: { verified: boolean; alreadyVerified?: boolean };
+        }>("/auth/verify-email", { params: { token } });
 
         if (cancelled) return;
 
         if (data.data.verified) {
+          const isAlready = data.data.alreadyVerified;
           setStatus("success");
-          setMessage("Your email has been verified successfully!");
+          setMessage(
+            isAlready
+              ? "Your email is already verified! Redirecting to login..."
+              : "Your email has been verified successfully! Redirecting to login...",
+          );
+
+          redirectTimerRef.current = setTimeout(() => {
+            if (!cancelled) {
+              navigate("/login", { state: { emailVerified: true }, replace: true });
+            }
+          }, 2000);
         } else {
           setStatus("error");
           setMessage("Verification failed. Please try again.");
@@ -54,8 +66,11 @@ const VerifyEmail = () => {
 
     return () => {
       cancelled = true;
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
     };
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="min-h-screen flex font-sans">
