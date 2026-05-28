@@ -71,6 +71,7 @@ export function useAuth(): UseAuthReturn {
           {
             email: credentials.email,
             password: credentials.password,
+            ...(credentials.role ? { role: credentials.role } : {}),
           },
           {
             skipAuth: true,
@@ -78,6 +79,13 @@ export function useAuth(): UseAuthReturn {
         );
 
         const { user: apiUser, tokens: apiTokens } = response.data;
+
+        // Validate that the returned role matches the requested role
+        if (credentials.role && apiUser.role !== credentials.role) {
+          throw new Error(
+            `This account is registered as a ${apiUser.role}. Please log in as a ${apiUser.role} instead.`,
+          );
+        }
 
         // Sync Supabase Client in the frontend with the session from the backend
         const { error: sessionError } = await supabase.auth.setSession({
@@ -117,15 +125,11 @@ export function useAuth(): UseAuthReturn {
         setLoading(true);
         setError(null);
 
-        // Register directly with backend (which creates Supabase user)
+        // Register with backend (creates Supabase user unconfirmed, sends verification email)
         const result = await axiosClient.post<{
           data: {
             user: User;
-            tokens: {
-              accessToken: string;
-              refreshToken: string;
-              expiresIn: number;
-            };
+            emailVerificationSent: boolean;
           };
         }>(
           "/auth/register",
@@ -144,30 +148,16 @@ export function useAuth(): UseAuthReturn {
           } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
-        // Sign in with Supabase to get the session
-        const { data: authData, error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email: data.email,
-            password: data.password,
-          });
+        const emailVerificationSent = result.data.data.emailVerificationSent;
 
-        if (signInError || !authData.session) {
-          // If sign-in fails, use the tokens from backend response
-          setAuth(result.data.data.user, {
-            accessToken: result.data.data.tokens.accessToken,
-            refreshToken: result.data.data.tokens.refreshToken,
-            expiresIn: result.data.data.tokens.expiresIn || 1800,
-          });
-        } else {
-          setAuth(result.data.data.user, {
-            accessToken: authData.session.access_token,
-            refreshToken: authData.session.refresh_token,
-            expiresIn: authData.session.expires_in || 1800,
-          });
+        if (emailVerificationSent) {
+          // Navigate to "check your email" page
+          navigate(`/verify-email-sent?email=${encodeURIComponent(data.email)}`);
+          return;
         }
 
-        // Redirect to home page
-        navigate("/home");
+        // Fallback: if somehow registered without verification flow, redirect to login
+        navigate("/login");
       } catch (err: unknown) {
         let message = formatBackendApiError(err, "Registration failed");
         if (isAxiosError(err)) {
@@ -188,7 +178,7 @@ export function useAuth(): UseAuthReturn {
         setLoading(false);
       }
     },
-    [navigate, setAuth, setError, setLoading],
+    [navigate, setError, setLoading],
   );
 
   // Logout

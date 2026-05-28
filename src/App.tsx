@@ -34,6 +34,8 @@ const Login = lazy(() => import("@/pages/auth/Login"));
 const Register = lazy(() => import("@/pages/auth/Register"));
 const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
 const OAuthCallback = lazy(() => import("@/pages/auth/OAuthCallback"));
+const VerifyEmailSent = lazy(() => import("@/pages/auth/VerifyEmailSent"));
+const VerifyEmail = lazy(() => import("@/pages/auth/VerifyEmail"));
 
 // Client
 const ClientDashboard = lazy(() => import("@/pages/client/Dashboard"));
@@ -233,6 +235,22 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <OAuthCallback />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/verify-email-sent"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <VerifyEmailSent />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/verify-email"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <VerifyEmail />
             </Suspense>
           }
         />

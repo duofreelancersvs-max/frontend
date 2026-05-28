@@ -28,6 +28,7 @@ export interface AuthTokens {
 export interface LoginCredentials {
   email: string;
   password: string;
+  role?: UserRole;
 }
 
 export interface RegisterData {

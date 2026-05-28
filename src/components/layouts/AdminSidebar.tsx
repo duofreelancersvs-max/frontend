@@ -8,16 +8,15 @@ import {
   Users,
   ShieldCheck,
   CreditCard,
-  Wallet,
-  Bell,
   Briefcase,
   Star,
   FileText,
   MessageSquare,
   FolderTree,
   History,
-  DollarSign,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   name: string;
@@ -34,6 +33,7 @@ interface NavSection {
 
 const AdminSidebar = () => {
   const location = useLocation();
+  const { logout } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
 
   useEffect(() => {
@@ -164,6 +164,18 @@ const AdminSidebar = () => {
               <span>Online</span>
             </div>
           </div>
+          <button
+            onClick={() => logout()}
+            title="Logout"
+            style={{
+              background: "none", border: "none", color: "var(--admin-cloud-gray)",
+              cursor: "pointer", padding: 8, borderRadius: 6, flexShrink: 0,
+              transition: "color 0.15s",
+            }}
+            className="hover:text-red-400"
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </aside>

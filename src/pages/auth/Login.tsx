@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Quote, Github, Briefcase, Building, CheckCircle, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Quote, Github, Briefcase, Building, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import type { UserRole } from "@/types/auth.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import axiosClient from "@/lib/axios-client";
+import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -21,6 +24,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
   const [showSessionBanner, setShowSessionBanner] = useState(sessionExpired);
+  const [showVerifiedBanner, setShowVerifiedBanner] = useState(
+    (location.state as { emailVerified?: boolean } | null)?.emailVerified ?? false
+  );
+  const [resending, setResending] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -59,9 +66,30 @@ const Login = () => {
       await login({
         email: formData.email,
         password: formData.password,
+        role: selectedRole || undefined,
       });
     } catch {
       // Error is handled in the hook
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) return;
+
+    setResending(true);
+    try {
+      await axiosClient.post(
+        "/auth/resend-verification-email",
+        { email: formData.email },
+        {
+          skipAuth: true,
+        } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
+      );
+      toast.success("Verification email resent! Please check your inbox.");
+    } catch {
+      toast.error("Failed to resend verification email.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -186,6 +214,22 @@ const Login = () => {
               </p>
             </div>
 
+            {showVerifiedBanner && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm flex items-start gap-2">
+                <CheckCircle size={18} className="text-green-600 shrink-0 mt-0.5" />
+                <span>
+                  Email verified! You can now sign in.
+                  <button
+                    type="button"
+                    onClick={() => setShowVerifiedBanner(false)}
+                    className="ml-2 font-bold underline hover:no-underline"
+                  >
+                    Dismiss
+                  </button>
+                </span>
+              </div>
+            )}
+
             {showSessionBanner && (
               <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm flex items-start gap-2">
                 <span className="text-base">⏱️</span>
@@ -204,7 +248,18 @@ const Login = () => {
 
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                {error}
+                <p>{error}</p>
+                {error.toLowerCase().includes("email not verified") && (
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resending}
+                    className="mt-2 flex items-center gap-1.5 text-red-700 font-medium hover:underline"
+                  >
+                    <RefreshCw size={14} className={resending ? "animate-spin" : ""} />
+                    {resending ? "Resending..." : "Resend verification email"}
+                  </button>
+                )}
               </div>
             )}
 
