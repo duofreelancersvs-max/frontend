@@ -418,12 +418,12 @@ export const PublicNavbar = ({
             <div className="mb-8 grid grid-cols-2 gap-4">
               <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
                 <Button variant="outline" className="w-full h-14 rounded-2xl border-slate-200 dark:border-white/10 text-navy dark:text-white font-bold text-base">
-                  Sign In
+                  Login
                 </Button>
               </Link>
               <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
                 <Button className="w-full h-14 rounded-2xl bg-teal text-white font-bold text-base shadow-xl shadow-teal/20">
-                  Get Started
+                  Create Account
                 </Button>
               </Link>
             </div>

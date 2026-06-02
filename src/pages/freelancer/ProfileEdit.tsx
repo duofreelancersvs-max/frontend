@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import {
   User,
@@ -111,11 +111,19 @@ const FreelancerProfileEdit = () => {
     useState<PortfolioItem | null>(null);
   const [showEducationModal, setShowEducationModal] = useState(false);
 
+  // Custom date states for smooth experience calendar
+  const [expStartMonth, setExpStartMonth] = useState("");
+  const [expStartYear, setExpStartYear] = useState("");
+  const [expEndMonth, setExpEndMonth] = useState("");
+  const [expEndYear, setExpEndYear] = useState("");
+
+  // Profile picture upload ref
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
   // Modal form refs
   const expTitleRef = useRef<HTMLInputElement>(null);
   const expCompanyRef = useRef<HTMLInputElement>(null);
-  const expStartRef = useRef<HTMLInputElement>(null);
-  const expEndRef = useRef<HTMLInputElement>(null);
   const expDescRef = useRef<HTMLTextAreaElement>(null);
   const eduInstRef = useRef<HTMLInputElement>(null);
   const eduDegreeRef = useRef<HTMLInputElement>(null);
@@ -224,6 +232,56 @@ const FreelancerProfileEdit = () => {
     }
   };
 
+  // ---------- PROFILE PHOTO HANDLER ----------
+  const handleProfilePhotoChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type and size
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+
+      try {
+        setUploadingPhoto(true);
+        // Convert to base64 data URL
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64 = reader.result as string;
+          try {
+            const data = await freelancerService.updateProfile({
+              profilePicture: base64,
+            } as any);
+            applyProfileToState(data);
+            toast.success("Profile photo updated!");
+          } catch (err) {
+            console.error("Failed to upload photo:", err);
+            toast.error("Failed to upload photo");
+          } finally {
+            setUploadingPhoto(false);
+          }
+        };
+        reader.onerror = () => {
+          toast.error("Failed to read image file");
+          setUploadingPhoto(false);
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        toast.error("Failed to process image");
+        setUploadingPhoto(false);
+      }
+      // Reset input value so same file can be re-selected
+      e.target.value = "";
+    },
+    [],
+  );
+
   // ---------- SKILLS HANDLERS ----------
   const addSkill = (skillName: string) => {
     if (skillName && !skills.find((s) => s.name === skillName)) {
@@ -316,18 +374,29 @@ const FreelancerProfileEdit = () => {
       toast.error("Job title and company are required");
       return;
     }
-    const startDateVal = expStartRef.current?.value?.trim();
+    const startDateVal =
+      expStartYear && expStartMonth
+        ? `${expStartYear}-${expStartMonth}`
+        : undefined;
+    const endDateVal =
+      expEndYear && expEndMonth ? `${expEndYear}-${expEndMonth}` : undefined;
     try {
       setActionLoading("experience-add");
       const data = await freelancerService.addExperience({
         title,
         company,
         startDate: startDateVal || new Date().toISOString(),
-        endDate: expEndRef.current?.value?.trim() || undefined,
+        endDate: endDateVal || undefined,
         description: expDescRef.current?.value?.trim() || undefined,
       });
       applyProfileToState(data);
       setShowExperienceModal(false);
+
+      // Reset state for dates
+      setExpStartMonth("");
+      setExpStartYear("");
+      setExpEndMonth("");
+      setExpEndYear("");
       toast.success("Experience added!");
     } catch (err) {
       console.error("Failed to add experience:", err);
@@ -445,19 +514,14 @@ const FreelancerProfileEdit = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8">
+        <main className="p-4 lg:p-8 pb-24 sm:pb-8">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* LEFT - Main Form */}
             <div className="flex-1 space-y-6">
               {/* PROFILE PREVIEW CARD */}
               <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                 {/* Cover Image */}
-                <div className="relative h-32 lg:h-40 bg-gradient-to-r from-navy via-royal-blue to-teal">
-                  <button className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-background/80 hover:bg-white dark:hover:bg-[#050B15] rounded-lg text-sm font-medium text-navy dark:text-white transition-colors backdrop-blur-sm">
-                    <Camera size={14} />
-                    Change Cover
-                  </button>
-                </div>
+                <div className="relative h-32 lg:h-40 bg-gradient-to-r from-navy via-royal-blue to-teal" />
 
                 {/* Profile Photo */}
                 <div className="relative px-6 pb-6">
@@ -473,8 +537,23 @@ const FreelancerProfileEdit = () => {
                         {initials}
                       </div>
                     )}
-                    <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-teal hover:bg-teal-light rounded-full flex items-center justify-center text-white shadow-lg transition-colors border-2 border-white dark:border-[#111827]">
-                      <Camera size={14} />
+                    <input
+                      ref={profilePicInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleProfilePhotoChange}
+                    />
+                    <button
+                      onClick={() => profilePicInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      className="absolute -bottom-1 -right-1 w-8 h-8 bg-teal hover:bg-teal-light rounded-full flex items-center justify-center text-white shadow-lg transition-colors border-2 border-white dark:border-[#111827]"
+                    >
+                      {uploadingPhoto ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Camera size={14} />
+                      )}
                     </button>
                   </div>
 
@@ -864,17 +943,17 @@ const FreelancerProfileEdit = () => {
 
                             {/* Content */}
                             <div className="p-4">
-                              <h5 className="font-semibold text-navy mb-1">
+                              <h5 className="font-semibold text-navy dark:text-white mb-1">
                                 {item.title}
                               </h5>
-                              <p className="text-sm text-slate-500 line-clamp-2 mb-3">
+                              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
                                 {item.description}
                               </p>
                               <div className="flex flex-wrap gap-1">
                                 {(item.skills || []).map((skill) => (
                                   <span
                                     key={skill}
-                                    className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded"
+                                    className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 text-xs rounded"
                                   >
                                     {skill}
                                   </span>
@@ -1250,6 +1329,30 @@ const FreelancerProfileEdit = () => {
             </div>
           </div>
         </main>
+        {/* MOBILE STICKY SAVE BAR */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-white/10 px-4 py-3 flex gap-3 shadow-lg">
+          <Link to="/freelancer/profile" className="flex-1">
+            <Button
+              variant="outline"
+              className="w-full border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300"
+            >
+              <Eye size={16} className="mr-2" />
+              Preview
+            </Button>
+          </Link>
+          <Button
+            className="flex-1 bg-teal hover:bg-teal-light text-white"
+            onClick={handleSaveChanges}
+            disabled={saving}
+          >
+            {saving ? (
+              <Loader2 size={16} className="mr-2 animate-spin" />
+            ) : (
+              <Save size={16} className="mr-2" />
+            )}
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </div>
       </div>
 
       {/* PORTFOLIO MODAL */}
@@ -1310,22 +1413,82 @@ const FreelancerProfileEdit = () => {
                   <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                     Start Date
                   </label>
-                  <input
-                    ref={expStartRef}
-                    type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <select
+                      value={expStartMonth}
+                      onChange={(e) => setExpStartMonth(e.target.value)}
+                      className="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
+                    >
+                      <option value="">Month</option>
+                      {Array.from({ length: 12 }).map((_, i) => {
+                        const m = (i + 1).toString().padStart(2, "0");
+                        return (
+                          <option key={m} value={m}>
+                            {new Date(0, i).toLocaleString("default", {
+                              month: "short",
+                            })}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <select
+                      value={expStartYear}
+                      onChange={(e) => setExpStartYear(e.target.value)}
+                      className="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
+                    >
+                      <option value="">Year</option>
+                      {Array.from({ length: 40 }).map((_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                     End Date
                   </label>
-                  <input
-                    ref={expEndRef}
-                    type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
-                    placeholder="Leave empty for Present"
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <select
+                      value={expEndMonth}
+                      onChange={(e) => setExpEndMonth(e.target.value)}
+                      className="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
+                    >
+                      <option value="">Month</option>
+                      {Array.from({ length: 12 }).map((_, i) => {
+                        const m = (i + 1).toString().padStart(2, "0");
+                        return (
+                          <option key={m} value={m}>
+                            {new Date(0, i).toLocaleString("default", {
+                              month: "short",
+                            })}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <select
+                      value={expEndYear}
+                      onChange={(e) => setExpEndYear(e.target.value)}
+                      className="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
+                    >
+                      <option value="">Year</option>
+                      {Array.from({ length: 40 }).map((_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Leave empty for Present
+                  </p>
                 </div>
               </div>
 

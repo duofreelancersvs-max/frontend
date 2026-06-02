@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
+import { isAxiosError } from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import axiosClient from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
+import { formatBackendApiError } from "@/lib/auth-request-errors";
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -86,8 +88,11 @@ const Login = () => {
         } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
       );
       toast.success("Verification email resent! Please check your inbox.");
-    } catch {
-      toast.error("Failed to resend verification email.");
+    } catch (err: unknown) {
+      const message = isAxiosError(err)
+        ? formatBackendApiError(err, "Failed to resend verification email.")
+        : "Failed to resend verification email.";
+      toast.error(message);
     } finally {
       setResending(false);
     }

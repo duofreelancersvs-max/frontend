@@ -99,8 +99,8 @@ export default function OAuthCallback() {
           expiresIn: tokens.expiresIn || 3600,
         });
 
-        // Redirect to home page
-        navigate("/home");
+        // Redirect to entry route (root page)
+        navigate("/");
       } catch (err: unknown) {
         console.error("OAuth Callback Error:", err);
         let message: string;

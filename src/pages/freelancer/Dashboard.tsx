@@ -164,10 +164,10 @@ const FreelancerDashboard = () => {
     },
     {
       label: "Email Verification",
-      value: "Pending",
-      icon: AlertCircle,
-      color: "bg-gold",
-      change: "Verify now to apply",
+      value: user?.isEmailVerified ? "Verified" : "Pending",
+      icon: user?.isEmailVerified ? CheckCircle : AlertCircle,
+      color: user?.isEmailVerified ? "bg-success-green" : "bg-gold",
+      change: user?.isEmailVerified ? "Email confirmed" : "Verify now to apply",
       trend: "neutral" as const,
     },
     {

@@ -671,7 +671,6 @@ const ClientSettings = () => {
                       className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
                     >
                       <option value="en">English</option>
-                      <option value="hi">Hindi</option>
                     </select>
                   </div>
                    <div>
@@ -689,7 +688,6 @@ const ClientSettings = () => {
                       className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
                     >
                       <option value="Asia/Kolkata">IST (UTC+5:30)</option>
-                      <option value="UTC">UTC</option>
                     </select>
                   </div>
                   <div>
@@ -707,7 +705,6 @@ const ClientSettings = () => {
                       className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
                     >
                       <option value="INR">INR (₹)</option>
-                      <option value="USD">USD ($)</option>
                     </select>
                   </div>
                 </div>

@@ -3,9 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Mail, ArrowLeft, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import { isAxiosError } from "axios";
 import Logo from "@/components/shared/Logo";
 import axiosClient from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
+import { formatBackendApiError } from "@/lib/auth-request-errors";
 
 const VerifyEmailSent = () => {
   const [searchParams] = useSearchParams();
@@ -26,8 +28,11 @@ const VerifyEmailSent = () => {
         } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
       );
       toast.success("Verification email resent!");
-    } catch {
-      toast.error("Failed to resend verification email. Please try again.");
+    } catch (err: unknown) {
+      const message = isAxiosError(err)
+        ? formatBackendApiError(err, "Failed to resend verification email. Please try again.")
+        : "Failed to resend verification email. Please try again.";
+      toast.error(message);
     } finally {
       setResending(false);
     }

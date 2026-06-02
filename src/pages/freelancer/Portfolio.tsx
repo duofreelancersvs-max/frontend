@@ -33,12 +33,16 @@ interface PortfolioDisplayItem extends PortfolioItem {
 
 const categories = [
   "All",
-  "Product Videos",
+  "Video Editing",
   "Motion Graphics",
-  "Wedding Videos",
+  "VFX & Animation",
+  "Graphic Design",
+  "Web Development",
+  "Content Writing",
+  "Photography",
+  "Audio & Music",
   "Social Media",
-  "Intros & Outros",
-  "Real Estate",
+  "3D Design",
 ];
 
 const FreelancerPortfolio = () => {

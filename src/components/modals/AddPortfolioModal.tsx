@@ -92,9 +92,9 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto overscroll-contain">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-navy">
+          <DialogTitle className="text-xl font-bold text-navy dark:text-white">
             {editItem ? "Edit Project" : "Add New Project"}
           </DialogTitle>
         </DialogHeader>
@@ -103,7 +103,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-sm font-semibold text-slate-700">Project Title</Label>
+                <Label htmlFor="title" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Project Title</Label>
                 <Input
                   id="title"
                   placeholder="e.g. Modern Brand Identity"
@@ -115,21 +115,23 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category" className="text-sm font-semibold text-slate-700">Category</Label>
+                <Label htmlFor="category" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Category</Label>
                 <select
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-10 px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal"
+                  className="w-full h-12 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal transition-all duration-200 shadow-sm"
                 >
                   {categories.filter(c => c !== "All").map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat} className="bg-white dark:bg-[#111827] text-slate-900 dark:text-white">
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="url" className="text-sm font-semibold text-slate-700">Project Link (Optional)</Label>
+                <Label htmlFor="url" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Project Link (Optional)</Label>
                 <Input
                   id="url"
                   placeholder="https://behance.net/..."
@@ -141,7 +143,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-slate-700">Thumbnail Preview</Label>
+              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Thumbnail Preview</Label>
               <div className={cn(
                 "aspect-square rounded-xl flex flex-col items-center justify-center text-white shadow-inner transition-all duration-500 bg-gradient-to-br",
                 Style.gradient
@@ -154,7 +156,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="desc" className="text-sm font-semibold text-slate-700">Description</Label>
+            <Label htmlFor="desc" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Description</Label>
             <Textarea
               id="desc"
               placeholder="Describe your role and what you achieved..."
@@ -169,7 +171,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-200"
+              className="border-slate-200 dark:border-white/10 dark:text-white"
             >
               Cancel
             </Button>

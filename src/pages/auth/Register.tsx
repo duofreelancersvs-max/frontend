@@ -557,26 +557,27 @@ const Register = () => {
                 </div>
 
                 {/* Terms Checkbox */}
-                <label className="flex items-start gap-3 cursor-pointer">
+                <div className="flex items-start gap-3">
                   <input
+                    id="terms-checkbox"
                     type="checkbox"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-300 text-teal focus:ring-teal mt-0.5"
+                    className="w-5 h-5 rounded border-slate-300 text-teal focus:ring-teal mt-0.5 cursor-pointer"
                     required
                     disabled={isLoading}
                   />
-                  <span className="text-sm text-slate-600">
-                    I agree to the{" "}
-                    <Link to="/terms" className="text-teal hover:underline">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <label htmlFor="terms-checkbox" className="cursor-pointer">I agree to the </label>
+                    <Link to="/terms-and-conditions" className="text-teal hover:underline">
                       Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link to="/privacy" className="text-teal hover:underline">
+                    </Link>
+                    {" and "}
+                    <Link to="/privacy-policy" className="text-teal hover:underline">
                       Privacy Policy
                     </Link>
                   </span>
-                </label>
+                </div>
 
                 {/* Submit Button */}
                 <Button

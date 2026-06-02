@@ -104,8 +104,8 @@ export function useAuth(): UseAuthReturn {
           expiresIn: apiTokens.expiresIn || 1800,
         });
 
-        // Redirect to home page
-        navigate("/home");
+        // Redirect to entry route (root page)
+        navigate("/");
       } catch (err: unknown) {
         const message = formatBackendApiError(err, "Invalid email or password");
         setError(message);

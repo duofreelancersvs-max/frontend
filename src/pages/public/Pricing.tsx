@@ -83,7 +83,7 @@ const Pricing = () => {
   useEffect(() => {
     if (isAuthenticated && user?.role === "client") {
       toast.error("Pricing plans are only available for freelancers.");
-      navigate("/home");
+      navigate("/");
     }
   }, [isAuthenticated, user, navigate]);
 

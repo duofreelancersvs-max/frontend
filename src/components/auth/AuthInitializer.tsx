@@ -107,7 +107,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         if (synced) {
           const user = useAuthStore.getState().user;
           if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
-            navigate("/home");
+            navigate("/");
           }
         }
 

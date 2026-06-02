@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import {
   ClientRoute,
   FreelancerRoute,
@@ -255,14 +255,10 @@ function App() {
           }
         />
 
-        {/* Authenticated Home Page */}
+        {/* Authenticated Home Page redirected to Root */}
         <Route
           path="/home"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <HomePage />
-            </Suspense>
-          }
+          element={<Navigate to="/" replace />}
         />
 
         {/* Client Dashboard Pages — Suspense per-page keeps sidebar stable */}

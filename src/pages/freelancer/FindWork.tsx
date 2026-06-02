@@ -38,12 +38,6 @@ const categories = [
   "Graphic Design",
 ];
 
-const experienceLevels = [
-  "All Levels",
-  "Entry Level",
-  "Intermediate",
-  "Expert",
-];
 
 const locationTypes = ["All Locations", "Remote", "On-site", "Hybrid"];
 
@@ -88,7 +82,7 @@ const FindWork = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
-  const [selectedExperience, setSelectedExperience] = useState("All Levels");
+
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [selectedPostedDate, setSelectedPostedDate] = useState("Any Time");
 
@@ -192,7 +186,6 @@ const FindWork = () => {
     setSelectedCategory("All Categories");
     setBudgetMin("");
     setBudgetMax("");
-    setSelectedExperience("All Levels");
     setSelectedLocation("All Locations");
     setSelectedPostedDate("Any Time");
     setCurrentPage(1);
@@ -203,7 +196,6 @@ const FindWork = () => {
     selectedCategory !== "All Categories" ||
     budgetMin ||
     budgetMax ||
-    selectedExperience !== "All Levels" ||
     selectedLocation !== "All Locations" ||
     selectedPostedDate !== "Any Time";
 
@@ -369,7 +361,7 @@ const FindWork = () => {
                 {/* Filters */}
                 {showFilters && (
                   <div className="pt-4 border-t border-slate-100 dark:border-white/10">
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {/* Category */}
                       <div>
                         <label className="block text-xs font-medium text-slate-500 mb-1.5">
@@ -411,25 +403,7 @@ const FindWork = () => {
                         </div>
                       </div>
 
-                      {/* Experience Level */}
-                      <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                          Experience Level
-                        </label>
-                        <select
-                          value={selectedExperience}
-                          onChange={(e) =>
-                            setSelectedExperience(e.target.value)
-                          }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
-                        >
-                          {experienceLevels.map((level) => (
-                            <option key={level} value={level}>
-                              {level}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+
 
                       {/* Location */}
                       <div>
