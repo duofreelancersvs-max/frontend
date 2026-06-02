@@ -106,8 +106,8 @@ const ClientFreelancers = () => {
         const data = await publicService.getCategoriesWithSkills();
         const catNames = data.map((c: any) => c.name);
         const allSkills = Array.from(
-          new Set(data.flatMap((c: any) => c.skills))
-        ) as string[];
+          new Set(data.flatMap((c: any) => (c.skills || []).map((s: any) => typeof s === 'string' ? s : (s.skillName || s.name || ''))))
+        ).filter(Boolean) as string[];
         setCategories(catNames);
         setSkillOptions(allSkills);
       } catch (error) {

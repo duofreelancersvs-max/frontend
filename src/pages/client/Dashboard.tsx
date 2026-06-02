@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
@@ -23,79 +22,42 @@ import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useClientProjects } from "@/hooks/queries/useProjects";
 import {
-  projectService,
-  freelancerService,
-  conversationService,
-  userService,
-  clientService,
-  applicationService,
-} from "@/services";
-import type {
-  Project,
-  Application,
-  FreelancerProfile,
-  Conversation,
-} from "@/services";
+  useTopRatedFreelancers,
+  useConversations,
+  useMyUser,
+  useMyClientProfile,
+  useMyClientApplications,
+  useHireFreelancer,
+  useCreateConversation
+} from "@/hooks/queries/useClientDashboardQueries";
 
 // Mock Data
 
 const ClientDashboard = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [loading, setLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
   const { user } = useAuth();
-  const [clientProfile, setClientProfile] = useState<any>(null);
-  const [userFullName, setUserFullName] = useState<string>("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [projectsData, freeData, convData, userData, profileData, appsData] = await Promise.allSettled([
-          projectService
-            .getMyClientProjects({ limit: 100 })
-            .then((r) => r.projects)
-            .catch(() => []),
-          freelancerService
-            .getTopRated()
-            .then((r) => r.profiles || (r as any).freelancers)
-            .catch(() => []),
-          conversationService
-            .getAll()
-            .then((r) => r.conversations)
-            .catch(() => []),
-          userService.getMe().catch(() => null),
-          clientService.getMyProfile().catch(() => null),
-          applicationService.getMyClientApplications().then(r => r.applications).catch(() => []),
-        ]);
+  const { data: projectsData, isLoading: loadingProjects } = useClientProjects({ limit: 100 });
+  const { data: appsData, isLoading: loadingApps } = useMyClientApplications();
+  const { data: freeData, isLoading: loadingFreelancers } = useTopRatedFreelancers();
+  const { data: convData, isLoading: loadingConversations } = useConversations();
+  const { data: userData, isLoading: loadingUser } = useMyUser();
+  const { data: profileData, isLoading: loadingProfile } = useMyClientProfile();
 
-        if (projectsData.status === "fulfilled")
-          setProjects(projectsData.value || []);
-        if (appsData.status === "fulfilled")
-          setApplications(appsData.value || []);
-        if (freeData.status === "fulfilled")
-          setFreelancers(freeData.value || []);
-        if (convData.status === "fulfilled")
-          setConversations(convData.value || []);
-        if (userData.status === "fulfilled" && userData.value) {
-          setUserFullName(userData.value.fullName || "");
-        }
-        if (profileData.status === "fulfilled" && profileData.value) {
-          setClientProfile(profileData.value);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const loading = loadingProjects || loadingApps || loadingFreelancers || loadingConversations || loadingUser || loadingProfile;
+
+  const projects = projectsData?.projects || [];
+  const applications = appsData?.applications || [];
+  const freelancers = (freeData as any)?.profiles || (freeData as any)?.freelancers || [];
+  const conversations = convData?.conversations || [];
+  const userFullName = userData?.fullName || "";
+  const clientProfile = profileData || null;
+
+  const hireMutation = useHireFreelancer();
+  const createConvMutation = useCreateConversation();
 
   const getClientName = () => {
     if (userFullName) return userFullName;
@@ -118,7 +80,7 @@ const ClientDashboard = () => {
         avatar:
           p.freelancer?.fullName
             ?.split(" ")
-            .map((n) => n[0])
+            .map((n: string) => n[0])
             .join("") || "?",
       },
       progress: 50,
@@ -145,16 +107,8 @@ const ClientDashboard = () => {
 
   const handleHireFreelancer = async (applicationId: string) => {
     try {
-      await applicationService.updateStatus(applicationId, "hired");
+      await hireMutation.mutateAsync(applicationId);
       toast.success("Freelancer hired successfully!");
-      // Update local state
-      setApplications((prev) =>
-        prev.map((app) =>
-          (app._id === applicationId || app.id === applicationId)
-            ? { ...app, status: "hired" as any }
-            : app
-        )
-      );
     } catch (error) {
       console.error("Error hiring freelancer:", error);
       toast.error("Failed to hire freelancer. Please try again.");
@@ -166,7 +120,7 @@ const ClientDashboard = () => {
     projectId?: string
   ) => {
     try {
-      const conv = await conversationService.create({
+      const conv = await createConvMutation.mutateAsync({
         participantId: freelancerId,
         projectId,
       });
@@ -217,7 +171,7 @@ const ClientDashboard = () => {
         avatar:
           app.freelancer?.fullName
             ?.split(" ")
-            .map((n) => n[0])
+            .map((n: string) => n[0])
             .join("") || "?",
         title: "Freelancer",
       },
@@ -230,13 +184,13 @@ const ClientDashboard = () => {
       rawStatus: app.status,
     }));
 
-  const recommendedFreelancers = (freelancers || []).slice(0, 3).map((f) => ({
+  const recommendedFreelancers = (freelancers || []).slice(0, 3).map((f: any) => ({
     id: f._id || f.id,
     name: f.userId,
     avatar:
       f.title
         ?.split(" ")
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("") || "F",
     title: f.title || "Freelancer",
     skills: (f.skills || []).map((s: any) => typeof s === 'string' ? s : s.name || 'Skill'),
@@ -250,7 +204,7 @@ const ClientDashboard = () => {
     avatar:
       conv.participants?.[0]?.fullName
         ?.split(" ")
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("") || "?",
     message: conv.lastMessage?.content || "No messages",
     time: conv.lastMessage
@@ -612,7 +566,7 @@ const ClientDashboard = () => {
                 </Link>
               </div>
               <div className="p-5 lg:p-6 flex gap-4 overflow-x-auto pb-4">
-                {recommendedFreelancers.map((freelancer) => (
+                {recommendedFreelancers.map((freelancer: any) => (
                    <div
                     key={freelancer.id}
                     className="min-w-[260px] p-4 rounded-xl border border-slate-100 dark:border-white/10 hover:border-teal/30 hover:shadow-md transition-all flex-shrink-0"
@@ -631,7 +585,7 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {freelancer.skills.slice(0, 2).map((skill) => (
+                      {freelancer.skills.slice(0, 2).map((skill: string) => (
                         <span
                           key={skill}
                            className="px-2 py-1 bg-slate-100 dark:bg-white/10 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400"

@@ -362,7 +362,7 @@ const FreelancerApplications = () => {
 
       {selectedApplication && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-start justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-white/5">
               <div>
@@ -375,9 +375,9 @@ const FreelancerApplications = () => {
               </div>
               <button
                 onClick={() => setSelectedApplication(null)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors -mr-2 -mt-2"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors -mr-2 -mt-2"
               >
-                <X size={20} className="text-slate-500" />
+                <X size={20} className="text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 

@@ -21,8 +21,10 @@ import {
   DollarSign,
   type LucideIcon,
 } from "lucide-react";
-import { adminService } from "@/services";
-import type { AdminStats, AdminProject, AuditLogEntry } from "@/services";
+import type { AdminProject } from "@/services";
+import { useAdminStats } from "@/hooks/queries/useAdminStats";
+import { useAdminCategories } from "@/hooks/queries/useAdminCategories";
+import { useAdminProjects, useAdminAuditLogs, useAdminPayments } from "@/hooks/queries/useAdminQueries";
 
 // ============ DATA ============
 
@@ -439,54 +441,29 @@ const getStatusLabel = (status: "open" | "in-progress" | "completed") => {
 // ============ MAIN COMPONENT ============
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [recentProjects, setRecentProjects] = useState<AdminProject[]>([]);
-  const [activityLogs, setActivityLogs] = useState<AuditLogEntry[]>([]);
-  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
-  const [completionRate, setCompletionRate] = useState(0);
-  const [subscriptionRevenue, setSubscriptionRevenue] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: stats, isLoading: loadingStats } = useAdminStats();
+  const { data: projectsData, isLoading: loadingProjects } = useAdminProjects({ page: 1, limit: 5 });
+  const { data: auditData, isLoading: loadingAudit } = useAdminAuditLogs({ page: 1, limit: 8 });
+  const { data: catsData, isLoading: loadingCats } = useAdminCategories({ page: 1, limit: 10 });
+  const { data: paymentsData, isLoading: loadingPayments } = useAdminPayments({ page: 1, limit: 100, type: "subscription" });
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        const [statsData, projectsData, auditData, catsData, subPayments] = await Promise.allSettled([
-          adminService.getDashboardStats(),
-          adminService.getAllProjects({ page: 1, limit: 5 }),
-          adminService.getAuditLogs({ page: 1, limit: 8 }),
-          adminService.getAllCategories({ page: 1, limit: 10 }),
-          adminService.getAllPayments({ page: 1, limit: 100, type: "subscription" }),
-        ]);
-        if (statsData.status === "fulfilled") setStats(statsData.value);
-        if (projectsData.status === "fulfilled") {
-          const proj = projectsData.value.projects || [];
-          setRecentProjects(proj);
-          const completedCount = proj.filter((p: AdminProject) => p.status === "completed").length;
-          const totalCount = proj.length || 1;
-          setCompletionRate(Math.round((completedCount / totalCount) * 100));
-        }
+  const loading = loadingStats || loadingProjects || loadingAudit || loadingCats || loadingPayments;
 
-        if (auditData.status === "fulfilled") setActivityLogs(auditData.value.logs || []);
-        if (catsData.status === "fulfilled") {
-          const cats = catsData.value.categories || [];
-          setCategories(cats.map((c: any) => ({ name: c.name, count: (c.projectCount || 0) + (c.freelancerCount || 0) })));
-        }
-        if (subPayments.status === "fulfilled") {
-          const payments = subPayments.value.payments || [];
-          const totalSubRevenue = payments
-            .filter((p: any) => p.status === "captured")
-            .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-          setSubscriptionRevenue(totalSubRevenue);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
+  const recentProjects = projectsData?.projects || [];
+  const activityLogs = auditData?.logs || [];
+  
+  const categories = (catsData?.categories || []).map((c: any) => ({ 
+    name: c.name, 
+    count: (c.projectCount || 0) + (c.freelancerCount || 0) 
+  }));
+
+  const completionRate = recentProjects.length > 0 
+    ? Math.round((recentProjects.filter((p: AdminProject) => p.status === "completed").length / recentProjects.length) * 100) 
+    : 0;
+
+  const subscriptionRevenue = (paymentsData?.payments || [])
+    .filter((p: any) => p.status === "captured")
+    .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
   const metricsData = stats ? [
     {

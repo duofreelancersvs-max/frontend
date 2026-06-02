@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import {
   User,
@@ -24,20 +24,14 @@ import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import type { Application } from "@/services";
+import { useProjects } from "@/hooks/queries/useProjects";
 import {
-  freelancerService,
-  applicationService,
-  projectService,
-  subscriptionService,
-  conversationService,
-} from "@/services";
-import type {
-  FreelancerProfile,
-  Application,
-  Project,
-  Subscription,
-  Conversation,
-} from "@/services";
+  useMyFreelancerProfile,
+  useMyApplications,
+  useMySubscription,
+  useMyConversations,
+} from "@/hooks/queries/useFreelancerDashboardQueries";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { getCategoryStyle } from "@/lib/category-styles";
 
@@ -61,59 +55,25 @@ const getStatusBadgeStyle = (status: string) => {
 
 const FreelancerDashboard = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<FreelancerProfile | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [
-          profileData,
-          appsData,
-          projectsData,
-          subData,
-          convData,
-        ] = await Promise.allSettled([
-          freelancerService.getMyProfile().catch(() => null),
-          applicationService
-            .getMyApplications()
-            .then((r) => r.applications)
-            .catch(() => []),
-          projectService
-            .search({ status: "open", limit: 3 })
-            .then((r) => r.projects)
-            .catch(() => []),
-          subscriptionService.getMySubscription().catch(() => null),
-          conversationService
-            .getAll()
-            .then((r) => r.conversations)
-            .catch(() => []),
-        ]);
+  const { data: profileData, isLoading: loadingProfile } = useMyFreelancerProfile();
+  const { data: appsData, isLoading: loadingApps } = useMyApplications();
+  const { data: projectsData, isLoading: loadingProjects } = useProjects({ status: "open", limit: 3 });
+  const { data: subData, isLoading: loadingSub } = useMySubscription();
+  const { data: convData, isLoading: loadingConv } = useMyConversations();
 
-        if (profileData.status === "fulfilled") setProfile(profileData.value);
-        if (appsData.status === "fulfilled") setApplications(appsData.value);
-        if (projectsData.status === "fulfilled")
-          setRecommendedProjects(projectsData.value);
-        if (subData.status === "fulfilled") setSubscription(subData.value);
-        if (convData.status === "fulfilled") setConversations(convData.value);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const loading = loadingProfile || loadingApps || loadingProjects || loadingSub || loadingConv;
+
+  const profile = profileData || null;
+  const applications = appsData?.applications || [];
+  const recommendedProjects = projectsData?.projects || [];
+  const subscription = subData || null;
+  const conversations = convData?.conversations || [];
+  
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
 
   const profileCompletion = profile
@@ -739,13 +699,13 @@ const FreelancerDashboard = () => {
           </section>
 
           {/* QUICK ACTIONS */}
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 lg:p-6">
-            <h3 className="text-lg font-bold text-navy mb-4">Quick Actions</h3>
+          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+            <h3 className="text-lg font-bold text-navy dark:text-white mb-4">Quick Actions</h3>
             <div className="flex flex-wrap gap-3">
               <Link to="/freelancer/profile">
                 <Button
                   variant="outline"
-                  className="border-slate-200 hover:border-royal-blue hover:text-royal-blue"
+                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-royal-blue dark:hover:border-royal-blue hover:text-royal-blue dark:hover:text-royal-blue dark:hover:bg-white/5"
                 >
                   <User size={16} className="mr-2" />
                   Update Profile
@@ -754,7 +714,7 @@ const FreelancerDashboard = () => {
               <Link to="/freelancer/portfolio">
                 <Button
                   variant="outline"
-                  className="border-slate-200 hover:border-teal hover:text-teal"
+                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-teal dark:hover:border-teal hover:text-teal dark:hover:text-teal dark:hover:bg-white/5"
                 >
                   <Plus size={16} className="mr-2" />
                   Add Portfolio
@@ -763,7 +723,7 @@ const FreelancerDashboard = () => {
               <Link to="/projects">
                 <Button
                   variant="outline"
-                  className="border-slate-200 hover:border-success-green hover:text-success-green"
+                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-success-green dark:hover:border-success-green hover:text-success-green dark:hover:text-success-green dark:hover:bg-white/5"
                 >
                   <Briefcase size={16} className="mr-2" />
                   Browse Projects

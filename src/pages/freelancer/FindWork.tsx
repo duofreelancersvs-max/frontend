@@ -21,8 +21,9 @@ import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import { TermsModal } from "@/components/modals/TermsModal";
-import { projectService, conversationService } from "@/services";
-import { publicService } from "@/services/public.service";
+import { conversationService } from "@/services";
+import { useProjects } from "@/hooks/queries/useProjects";
+import { useCategories } from "@/hooks/queries/useCategories";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -65,9 +66,9 @@ const FindWork = () => {
   const { user } = useAuth();
 
   // API state
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: projectsData, isLoading: loadingProjects, error: projectsError } = useProjects({ limit: 50 });
+  const projects = projectsData?.projects || [];
+  const error = projectsError ? "Failed to load projects. Please try again." : null;
 
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -90,39 +91,11 @@ const FindWork = () => {
 
   const navigate = useNavigate();
 
-  // Fetch real projects from backend
-  const fetchProjects = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await projectService.search({ limit: 50 });
-      setProjects(result.projects || []);
-    } catch (err) {
-      console.error("Failed to fetch projects:", err);
-      setError("Failed to load projects. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const [categories, setCategories] = useState<string[]>(["All Categories"]);
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const data = await publicService.getCategoriesWithSkills();
-      const catNames = data.map((c: any) => c.name);
-      setCategories(["All Categories", ...catNames]);
-    } catch (err) {
-      console.error("Failed to fetch categories:", err);
-    }
-  }, []);
+  // Categories Query
+  const { data: categoriesData } = useCategories();
+  const categories = ["All Categories", ...(categoriesData?.map(c => c.name) || [])];
 
   const location = useLocation();
-
-  useEffect(() => {
-    fetchProjects();
-    fetchCategories();
-  }, [fetchProjects, fetchCategories]);
 
   const handleApplyClick = useCallback(
     (project: Project) => {
@@ -300,7 +273,7 @@ const FindWork = () => {
             </button>
           </div>
           {/* LOADING STATE */}
-          {loading && (
+          {loadingProjects && (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal"></div>
               <span className="ml-3 text-slate-500 dark:text-slate-400">
@@ -310,23 +283,17 @@ const FindWork = () => {
           )}
 
           {/* ERROR STATE */}
-          {!loading && error && (
+          {!loadingProjects && error && (
             <div className="bg-white dark:bg-white/5 rounded-2xl border border-red-100 dark:border-red-900/20 shadow-sm p-8 text-center">
               <AlertCircle size={40} className="mx-auto text-red-400 mb-3" />
               <p className="text-red-600 dark:text-red-400 font-medium mb-4">
                 {error}
               </p>
-              <button
-                onClick={fetchProjects}
-                className="px-6 py-2 bg-teal text-white rounded-lg hover:bg-teal-light transition-colors text-sm font-medium"
-              >
-                Try Again
-              </button>
             </div>
           )}
 
           {/* CONTENT (only shown when not loading) */}
-          {!loading && !error && (
+          {!loadingProjects && !error && (
             <>
               {/* SEARCH & FILTER BAR */}
               <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-4 lg:p-6">

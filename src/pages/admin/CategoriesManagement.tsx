@@ -1,6 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { adminService } from "@/services";
-import type { AdminCategory, PaginationMeta } from "@/services";
+import { useState, useEffect, useMemo } from "react";
+import type { AdminCategory } from "@/services";
+import { 
+  useAdminCategories, 
+  useCreateCategory, 
+  useUpdateCategory, 
+  useDeleteCategory, 
+  useAddSkill, 
+  useRemoveSkill 
+} from "@/hooks/queries/useAdminCategories";
 import {
   Search,
   X,
@@ -19,9 +26,6 @@ import {
 } from "lucide-react";
 
 const CategoriesManagement = () => {
-  const [categories, setCategories] = useState<AdminCategory[]>([]);
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [processing, setProcessing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,32 +35,31 @@ const CategoriesManagement = () => {
   const [newSkills, setNewSkills] = useState<Record<string, string>>({});
   const limit = 15;
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params: any = { page: currentPage, limit };
-      if (searchQuery.trim()) params.search = searchQuery.trim();
-      const data = await adminService.getAllCategories(params);
-      setCategories(data.categories || []);
-      setPagination(data.pagination || null);
-    } catch (err) {
-      console.error("Failed to load categories:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, searchQuery]);
+  const queryParams = useMemo(() => {
+    const params: any = { page: currentPage, limit };
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    return params;
+  }, [currentPage, limit, searchQuery]);
 
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  const { data, isLoading: loading } = useAdminCategories(queryParams);
+  const categories = data?.categories || [];
+  const pagination = data?.pagination || null;
+
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+  const addSkillMutation = useAddSkill();
+  const removeSkillMutation = useRemoveSkill();
+
   useEffect(() => { setCurrentPage(1); }, [searchQuery]);
 
   const handleCreate = async () => {
     if (!newCategory.name.trim()) return;
     try {
       setProcessing("create");
-      await adminService.createCategory(newCategory);
+      await createMutation.mutateAsync(newCategory);
       setShowCreateModal(false);
       setNewCategory({ name: "", description: "", icon: "" });
-      fetchCategories();
     } catch (err) {
       console.error("Failed to create category:", err);
     } finally {
@@ -68,9 +71,11 @@ const CategoriesManagement = () => {
     if (!editCategory || !editCategory.name.trim()) return;
     try {
       setProcessing(editCategory._id);
-      await adminService.updateCategory(editCategory._id, { name: editCategory.name, description: editCategory.description, isActive: editCategory.isActive });
+      await updateMutation.mutateAsync({
+        id: editCategory._id,
+        data: { name: editCategory.name, description: editCategory.description, isActive: editCategory.isActive }
+      });
       setEditCategory(null);
-      fetchCategories();
     } catch (err) {
       console.error("Failed to update category:", err);
     } finally {
@@ -82,8 +87,7 @@ const CategoriesManagement = () => {
     if (!window.confirm("Delete this category and all its skills?")) return;
     try {
       setProcessing(categoryId);
-      await adminService.deleteCategory(categoryId);
-      fetchCategories();
+      await deleteMutation.mutateAsync(categoryId);
     } catch (err) {
       console.error("Failed to delete category:", err);
     } finally {
@@ -95,9 +99,8 @@ const CategoriesManagement = () => {
     const skillName = newSkills[categoryId];
     if (!skillName || !skillName.trim()) return;
     try {
-      await adminService.addSkill(categoryId, { name: skillName.trim() });
+      await addSkillMutation.mutateAsync({ categoryId, name: skillName.trim() });
       setNewSkills(prev => ({ ...prev, [categoryId]: "" }));
-      fetchCategories();
     } catch (err) {
       console.error("Failed to add skill:", err);
     }
@@ -105,8 +108,7 @@ const CategoriesManagement = () => {
 
   const handleRemoveSkill = async (categoryId: string, skillId: string) => {
     try {
-      await adminService.removeSkill(categoryId, skillId);
-      fetchCategories();
+      await removeSkillMutation.mutateAsync({ categoryId, skillId });
     } catch (err) {
       console.error("Failed to remove skill:", err);
     }
