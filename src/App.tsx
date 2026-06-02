@@ -14,7 +14,7 @@ import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
-const HomePage = lazy(() => import("@/pages/home/Home"));
+
 const About = lazy(() => import("@/pages/public/About"));
 const HowItWorks = lazy(() => import("@/pages/public/HowItWorks"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
