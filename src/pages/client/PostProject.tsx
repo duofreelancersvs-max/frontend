@@ -6,6 +6,7 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
+import { useAuth } from "@/hooks/useAuth";
 import {
   FileText,
   ClipboardList,
@@ -28,46 +29,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
+import { publicService, type CategoryWithSkills } from "@/services/public.service";
 import { toast } from "react-toastify";
 
 // Form Options
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 
-// Must match backend FreelancerCategory enum exactly
-const categories = [
-  "Editing",
-  "VFX",
-  "3D Design",
-  "Motion Graphics",
-  "Color Grading",
-  "Admin & support",
-  "Design & creative",
-  "Marketing",
-  "Writing & content",
-  "AI & emerging tech",
-  "Development & tech",
-  "Video, audio & animation",
-];
-
-// Skills grouped by category, matching backend seed data
-const skillsByCategory: Record<string, string[]> = {
-  "Editing": ["Adobe Premiere Pro", "DaVinci Resolve", "Final Cut Pro", "Avid Media Composer"],
-  "VFX": ["After Effects", "Nuke", "Mocha"],
-  "3D Design": ["Blender", "Cinema 4D", "Maya"],
-  "Motion Graphics": ["After Effects Motion Graphics", "3D Motion Design"],
-  "Color Grading": ["Color Grading"],
-  "Admin & support": ["Virtual assistants", "Lead generation specialists", "Personal assistants", "Cold callers", "Content moderators"],
-  "Design & creative": ["Web designers", "Graphic designers", "UX designers", "Logo designers", "Illustrators"],
-  "Marketing": ["Social media managers", "Digital marketers", "SEO experts", "Google Ads experts", "Email marketers"],
-  "Writing & content": ["Content writers", "Copywriters", "Email copywriters", "Ghostwriters", "Book editors"],
-  "AI & emerging tech": ["Machine learning engineers", "Chatbot developers", "Automation engineers", "Ethical hackers", "Computer vision engineers"],
-  "Development & tech": ["Web developers", "Python developers", "Software developers", "Mobile app developers", "WordPress developers"],
-  "Video, audio & animation": ["Video editors", "Animators", "Voice actors", "Audio editors", "Music producers"],
-};
-
-// All skills flat (used for search fallback)
-const allSkillOptions = Object.values(skillsByCategory).flat();
+// We will fetch categories and skills dynamically from the backend
 
 const experienceLevels = [
   {
@@ -94,6 +63,8 @@ const steps = [
 
 const PostProject = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const { id: projectId } = useParams<{ id: string }>();
   const isEditing = Boolean(projectId);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
@@ -127,6 +98,34 @@ const PostProject = () => {
     termsAccepted: false,
   });
 
+  // Dynamic Data
+  const [categories, setCategories] = useState<string[]>([]);
+  const [skillsByCategory, setSkillsByCategory] = useState<Record<string, string[]>>({});
+  const [allSkillOptions, setAllSkillOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await publicService.getCategoriesWithSkills();
+        const catNames = data.map((c: CategoryWithSkills) => c.name);
+        setCategories(catNames);
+        
+        const skillsMap: Record<string, string[]> = {};
+        const allSkills: string[] = [];
+        data.forEach((c: CategoryWithSkills) => {
+          const skillNames = (c.skills || []).map(s => s.skillName);
+          skillsMap[c.name] = skillNames;
+          allSkills.push(...skillNames);
+        });
+        setSkillsByCategory(skillsMap);
+        setAllSkillOptions(allSkills);
+      } catch (error) {
+        console.error("Error fetching categories", error);
+      }
+    };
+    fetchCats();
+  }, []);
+
   useEffect(() => {
     if (isEditing && projectId) {
       const fetchProject = async () => {
@@ -152,7 +151,7 @@ const PostProject = () => {
           });
         } catch (error) {
           console.error("Error fetching project:", error);
-          navigate("/client/projects");
+          navigate(isAdmin ? "/admin/projects" : "/client/projects");
         } finally {
           setLoadingProject(false);
         }
@@ -312,7 +311,7 @@ const PostProject = () => {
 
       if (isEditing && projectId) {
         await projectService.update(projectId, projectData);
-        navigate(`/client/project/${projectId}`);
+        navigate(isAdmin ? "/admin/projects" : `/client/project/${projectId}`);
       } else {
         await projectService.create(projectData);
         setShowSuccessModal(true);
@@ -349,10 +348,12 @@ const PostProject = () => {
   return (
     <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
       {/* Header Bar */}
-      <DashboardHeader
-        title={isEditing ? "Edit Project" : "Post a New Project"}
-        onMenuClick={() => setSidebarOpen(true)}
-      />
+      {!isAdmin && (
+        <DashboardHeader
+          title={isEditing ? "Edit Project" : "Post a New Project"}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="px-6 lg:px-8 py-6 lg:py-8">
@@ -1256,13 +1257,13 @@ const PostProject = () => {
             <div className="flex gap-3">
                <Button
                 variant="outline"
-                onClick={() => navigate("/client/dashboard")}
+                onClick={() => navigate(isAdmin ? "/admin/dashboard" : "/client/dashboard")}
                 className="flex-1 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
               >
                 Go to Dashboard
               </Button>
               <Button
-                onClick={() => navigate("/client/projects")}
+                onClick={() => navigate(isAdmin ? "/admin/projects" : "/client/projects")}
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
               >
                 View Projects

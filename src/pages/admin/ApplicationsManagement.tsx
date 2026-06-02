@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AdminApplication, PaginationMeta } from "@/services";
 import {
@@ -88,7 +87,7 @@ const ApplicationsManagement = () => {
   ];
 
   return (
-    <AdminLayout title="Applications Management" breadcrumb="Applications">
+    <>
       <div className="admin-content">
         <div className="admin-metrics-grid" style={{ marginBottom: "1.5rem" }}>
           {stats.map((s) => (
@@ -259,7 +258,7 @@ const ApplicationsManagement = () => {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   );
 };
 

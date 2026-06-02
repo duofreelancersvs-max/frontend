@@ -8,6 +8,7 @@ import {
 import { ToastContainer } from "react-toastify";
 import ClientLayout from "@/layouts/ClientLayout";
 import FreelancerLayout from "@/layouts/FreelancerLayout";
+import AdminLayout from "@/components/layouts/AdminLayout";
 import { UnreadListener } from "@/components/chat/UnreadListener";
 import PageLoader from "@/components/shared/PageLoader";
 import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
@@ -74,7 +75,6 @@ const FreelancerSettings = lazy(() => import("@/pages/freelancer/Settings"));
 // Admin
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
-const VerificationQueue = lazy(() => import("@/pages/admin/VerificationQueue"));
 const SubscriptionManagement = lazy(
   () => import("@/pages/admin/SubscriptionManagement"),
 );
@@ -464,150 +464,120 @@ function App() {
           path="/admin"
           element={
             <AdminRoute>
-              <Navigate to="/admin/dashboard" replace />
+              <Suspense fallback={<PageLoader />}>
+                <AdminLayout />
+              </Suspense>
             </AdminRoute>
           }
-        />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="dashboard"
+            element={
+              <SP>
                 <AdminDashboard />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              </SP>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <SP>
                 <UserManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/verifications"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <VerificationQueue />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/subscriptions"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              </SP>
+            }
+          />
+
+          <Route
+            path="subscriptions"
+            element={
+              <SP>
                 <SubscriptionManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/payments"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <RazorpaySettings />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/projects"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <ProjectManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/notifications"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <SendNotifications />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/reviews"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <ReviewsManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/applications"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <ApplicationsManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/conversations"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <ConversationsManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/categories"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
-                <CategoriesManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/payments"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              </SP>
+            }
+          />
+          <Route
+            path="payments"
+            element={
+              <SP>
                 <PaymentsManagement />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/audit-logs"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              </SP>
+            }
+          />
+          <Route
+            path="projects"
+            element={
+              <SP>
+                <ProjectManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="post-project"
+            element={
+              <SP>
+                <PostProject />
+              </SP>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <SP>
+                <SendNotifications />
+              </SP>
+            }
+          />
+          <Route
+            path="reviews"
+            element={
+              <SP>
+                <ReviewsManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="applications"
+            element={
+              <SP>
+                <ApplicationsManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="conversations"
+            element={
+              <SP>
+                <ConversationsManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="categories"
+            element={
+              <SP>
+                <CategoriesManagement />
+              </SP>
+            }
+          />
+
+          <Route
+            path="audit-logs"
+            element={
+              <SP>
                 <AuditLogs />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/payment-gateway"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              </SP>
+            }
+          />
+          <Route
+            path="payment-gateway"
+            element={
+              <SP>
                 <RazorpaySettings />
-              </Suspense>
-            </AdminRoute>
-          }
-        />
+              </SP>
+            }
+          />
+        </Route>
 
         <Route
           path="*"

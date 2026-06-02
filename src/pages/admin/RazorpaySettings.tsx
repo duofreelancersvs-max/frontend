@@ -1,5 +1,4 @@
 import { useState } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   CheckCircle,
   XCircle,
@@ -355,7 +354,7 @@ const RazorpaySettings = () => {
   };
 
   return (
-    <AdminLayout title="Razorpay Integration" breadcrumb="Payment Settings">
+    <>
       {/* Page Header */}
       <div className="rp-page-header">
         <div className="rp-header-left">
@@ -818,7 +817,7 @@ const RazorpaySettings = () => {
           setShowLiveModeModal(false);
         }}
       />
-    </AdminLayout>
+    </>
   );
 };
 

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AdminCategory, PaginationMeta } from "@/services";
 import {
@@ -29,7 +28,7 @@ const CategoriesManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editCategory, setEditCategory] = useState<AdminCategory | null>(null);
   const [newCategory, setNewCategory] = useState({ name: "", description: "", icon: "" });
-  const [newSkill, setNewSkill] = useState("");
+  const [newSkills, setNewSkills] = useState<Record<string, string>>({});
   const limit = 15;
 
   const fetchCategories = useCallback(async () => {
@@ -93,10 +92,11 @@ const CategoriesManagement = () => {
   };
 
   const handleAddSkill = async (categoryId: string) => {
-    if (!newSkill.trim()) return;
+    const skillName = newSkills[categoryId];
+    if (!skillName || !skillName.trim()) return;
     try {
-      await adminService.addSkill(categoryId, { name: newSkill.trim() });
-      setNewSkill("");
+      await adminService.addSkill(categoryId, { name: skillName.trim() });
+      setNewSkills(prev => ({ ...prev, [categoryId]: "" }));
       fetchCategories();
     } catch (err) {
       console.error("Failed to add skill:", err);
@@ -127,7 +127,7 @@ const CategoriesManagement = () => {
   );
 
   return (
-    <AdminLayout title="Categories & Skills" breadcrumb="Manage Skills">
+    <>
       <div className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <div className="admin-metrics-grid" style={{ flex: 1, marginBottom: 0 }}>
@@ -220,8 +220,8 @@ const CategoriesManagement = () => {
                       <input
                         type="text"
                         placeholder="Add skill..."
-                        value={newSkill}
-                        onChange={(e) => setNewSkill(e.target.value)}
+                        value={newSkills[cat._id] || ""}
+                        onChange={(e) => setNewSkills(prev => ({ ...prev, [cat._id]: e.target.value }))}
                         onKeyDown={(e) => { if (e.key === "Enter") handleAddSkill(cat._id); }}
                         style={{
                           flex: 1, padding: "4px 8px", fontSize: "0.75rem",
@@ -316,7 +316,7 @@ const CategoriesManagement = () => {
           </div>
         </ModalOverlay>
       )}
-    </AdminLayout>
+    </>
   );
 };
 

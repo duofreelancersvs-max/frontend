@@ -3,9 +3,9 @@
 /* ===== ADMIN COLOR PALETTE ===== */
 :root {
   /* Primary Admin Colors */
-  --admin-deep-slate: #0f172a;
-  --admin-dark-navy: #1e293b;
-  --admin-midnight: #020617;
+  --admin-deep-slate: #18181b; /* Sidebar / Header */
+  --admin-dark-navy: #18181b;  /* Cards */
+  --admin-midnight: #09090b;   /* Main Background */
 
   /* Accent Colors */
   --admin-indigo: #6366f1;
@@ -19,15 +19,15 @@
 
   /* Text Colors */
   --admin-white: #ffffff;
-  --admin-cloud-gray: #94a3b8;
+  --admin-cloud-gray: #a1a1aa; /* Zinc 400 */
 
   /* Border & Surface */
-  --admin-border: #334155;
-  --admin-border-hover: #475569;
+  --admin-border: #27272a; /* Zinc 800 */
+  --admin-border-hover: #3f3f46; /* Zinc 700 */
 
   /* Glassmorphism */
-  --admin-glass-bg: rgba(30, 41, 59, 0.7);
-  --admin-glass-border: rgba(51, 65, 85, 0.5);
+  --admin-glass-bg: rgba(24, 24, 27, 0.7);
+  --admin-glass-border: rgba(39, 39, 42, 0.5);
 }
 
 /* ===== BASE ADMIN STYLES ===== */

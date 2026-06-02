@@ -19,46 +19,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { freelancerService } from "@/services";
+import { publicService } from "@/services/public.service";
 import type { FreelancerProfile } from "@/services";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
-const categories = [
-  "Editing",
-  "VFX",
-  "3D Design",
-  "Motion Graphics",
-  "Color Grading",
-  "Admin & support",
-  "Design & creative",
-  "Marketing",
-  "Writing & content",
-  "AI & emerging tech",
-  "Development & tech",
-  "Video, audio & animation",
-];
-
-const skillOptions = [
-  "Adobe Premiere Pro",
-  "DaVinci Resolve",
-  "Final Cut Pro",
-  "Avid Media Composer",
-  "After Effects",
-  "Nuke",
-  "Mocha",
-  "Blender",
-  "Cinema 4D",
-  "Maya",
-  "After Effects Motion Graphics",
-  "3D Motion Design",
-  "Color Grading",
-  "Web designers",
-  "Graphic designers",
-  "UX designers",
-  "Web developers",
-  "Python developers",
-  "Software developers",
-  "Mobile app developers",
-];
+// Categories and skills will be fetched dynamically from the backend
 
 const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
   const navigate = useNavigate();
@@ -131,7 +96,26 @@ const ClientFreelancers = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [skillOptions, setSkillOptions] = useState<string[]>([]);
   useAuth();
+
+  useEffect(() => {
+    const fetchCategoriesAndSkills = async () => {
+      try {
+        const data = await publicService.getCategoriesWithSkills();
+        const catNames = data.map((c: any) => c.name);
+        const allSkills = Array.from(
+          new Set(data.flatMap((c: any) => c.skills))
+        ) as string[];
+        setCategories(catNames);
+        setSkillOptions(allSkills);
+      } catch (error) {
+        console.error("Error fetching categories and skills:", error);
+      }
+    };
+    fetchCategoriesAndSkills();
+  }, []);
 
 
   useEffect(() => {

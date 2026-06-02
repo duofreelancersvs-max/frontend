@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   Bell,
   Mail,
@@ -420,7 +419,7 @@ const SendNotifications = () => {
   };
 
   return (
-    <AdminLayout title="Send Notifications" breadcrumb="Communications">
+    <>
       {/* Page Header */}
       <div className="sn-page-header">
         <div className="sn-header-left">
@@ -1051,7 +1050,7 @@ const SendNotifications = () => {
         recipientCount={recipientCount}
         type={notificationType}
       />
-    </AdminLayout>
+    </>
   );
 };
 

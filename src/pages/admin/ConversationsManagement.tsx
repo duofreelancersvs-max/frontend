@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AdminConversation, AdminMessage, PaginationMeta } from "@/services";
 import {
@@ -124,7 +123,7 @@ const ConversationsManagement = () => {
   ];
 
   return (
-    <AdminLayout title="Conversations" breadcrumb="Monitor Messages">
+    <>
       <div className="admin-content">
         <div className="admin-metrics-grid" style={{ marginBottom: "1.5rem" }}>
           {stats.map((s) => (
@@ -380,7 +379,7 @@ const ConversationsManagement = () => {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

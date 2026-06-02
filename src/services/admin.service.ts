@@ -120,12 +120,12 @@ export interface NotificationHistoryItem {
 export interface AdminReview {
   _id: string;
   reviewerId: { _id: string; fullName?: string; email: string };
-  freelancerId: { _id: string; fullName?: string; email: string };
+  revieweeId: { _id: string; fullName?: string; email: string };
   projectId: { _id: string; title: string };
   rating: number;
-  review: string;
+  comment: string;
   createdAt: string;
-  status?: "visible" | "hidden" | "flagged";
+  moderationStatus: "visible" | "hidden" | "flagged";
 }
 
 export interface AdminApplication {
@@ -182,6 +182,16 @@ export interface AdminPayment {
   payeeId?: { _id: string; fullName?: string; email: string };
   projectId?: { _id: string; title: string };
   createdAt: string;
+}
+
+export interface SubscriptionPlan {
+  _id: string;
+  name: string;
+  price: number;
+  billingCycle: string;
+  features: string[];
+  isActive: boolean;
+  stripePriceId?: string;
 }
 
 export interface AuditLogEntry {
@@ -388,6 +398,10 @@ export const adminService = {
 
   refundPayment: (paymentId: string, reason?: string) =>
     api.post<{ message: string }>(`/admin/payments/${paymentId}/refund`, { reason }),
+
+  // ─── Subscriptions ───────────────────────────────────────────
+  getAllSubscriptionPlans: () =>
+    api.get<{ plans: SubscriptionPlan[] }>("/admin/subscription-plans"),
 
   // ─── Audit Logs ──────────────────────────────────────────────
   getAuditLogs: (params?: {

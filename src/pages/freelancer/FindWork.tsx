@@ -22,21 +22,12 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { projectService, conversationService } from "@/services";
+import { publicService } from "@/services/public.service";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
-// Filter options
-const categories = [
-  "All Categories",
-  "Video Editing",
-  "Motion Graphics",
-  "3D Animation",
-  "VFX",
-  "Color Grading",
-  "Audio Editing",
-  "Graphic Design",
-];
+// We will fetch categories dynamically from the backend
 
 
 const locationTypes = ["All Locations", "Remote", "On-site", "Hybrid"];
@@ -114,11 +105,24 @@ const FindWork = () => {
     }
   }, []);
 
+  const [categories, setCategories] = useState<string[]>(["All Categories"]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await publicService.getCategoriesWithSkills();
+      const catNames = data.map((c: any) => c.name);
+      setCategories(["All Categories", ...catNames]);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  }, []);
+
   const location = useLocation();
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    fetchCategories();
+  }, [fetchProjects, fetchCategories]);
 
   const handleApplyClick = useCallback(
     (project: Project) => {

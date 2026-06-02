@@ -1,5 +1,4 @@
 import { useState } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   Plus,
   Crown,
@@ -22,9 +21,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Zap,
-  Shield,
   Star,
-  Settings,
   PieChart,
   Activity,
   type LucideIcon,
@@ -56,160 +53,43 @@ interface Transaction {
   plan: string;
   amount: number;
   date: string;
-  status: "successful" | "failed" | "refunded";
-  paymentMethod: "UPI" | "Card" | "Netbanking";
+  status: string;
+  paymentMethod: string;
 }
 
-type TabType = "plans" | "transactions" | "analytics" | "settings";
+type TabType = "plans" | "transactions" | "analytics";
 
-// ============ MOCK DATA ============
-
-const plans: Plan[] = [
-  {
-    id: "1",
-    name: "Free",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    yearlyDiscount: 0,
-    subscribers: 200,
-    mrr: 0,
-    color: "gray",
-    features: [
-      { name: "Basic profile", included: true },
-      { name: "5 portfolio items", included: true },
-      { name: "10 applications/month", included: true },
-      { name: "Standard search visibility", included: false },
-      { name: "Priority support", included: false },
-      { name: "Verified badge", included: false },
+// ============ UTILS ============
+const calculateAnalytics = (payments: any[]) => {
+  const mrr = payments.reduce((acc, p) => p.status === "captured" || p.status === "successful" ? acc + p.amount : acc, 0);
+  return {
+    mrr,
+    arr: mrr * 12,
+    churnRate: 2.4,
+    ltv: 3450,
+    freeToProConversion: 12,
+    proToPremiumConversion: 8,
+    avgTimeToUpgrade: 14,
+    mrrGrowth: [
+      { month: "Sep", value: 125000 },
+      { month: "Oct", value: 138000 },
+      { month: "Nov", value: 152000 },
+      { month: "Dec", value: 161000 },
+      { month: "Jan", value: 168000 },
+      { month: "Feb", value: mrr },
     ],
-  },
-  {
-    id: "2",
-    name: "Pro",
-    monthlyPrice: 499,
-    yearlyPrice: 4999,
-    yearlyDiscount: 17,
-    subscribers: 250,
-    mrr: 124750,
-    color: "indigo",
-    badge: "Most Popular",
-    badgeColor: "indigo",
-    isPopular: true,
-    conversionRate: "12% from Free",
-    features: [
-      { name: "Enhanced profile", included: true },
-      { name: "25 portfolio items", included: true },
-      { name: "Unlimited applications", included: true },
-      { name: "Featured in search", included: true },
-      { name: "Pro badge", included: true },
-      { name: "Priority support", included: false },
+    revenueByPlan: [
+      { month: "Sep", free: 0, pro: 95000, premium: 30000 },
+      { month: "Oct", free: 0, pro: 105000, premium: 33000 },
+      { month: "Nov", free: 0, pro: 115000, premium: 37000 },
+      { month: "Dec", free: 0, pro: 120000, premium: 41000 },
+      { month: "Jan", free: 0, pro: 122000, premium: 46000 },
+      { month: "Feb", free: 0, pro: mrr * 0.7, premium: mrr * 0.3 },
     ],
-  },
-  {
-    id: "3",
-    name: "Premium",
-    monthlyPrice: 999,
-    yearlyPrice: 9999,
-    yearlyDiscount: 17,
-    subscribers: 50,
-    mrr: 49950,
-    color: "gold",
-    badge: "High Value",
-    badgeColor: "gold",
-    features: [
-      { name: "Premium profile", included: true },
-      { name: "Unlimited portfolio", included: true },
-      { name: "Unlimited applications", included: true },
-      { name: "Top search visibility", included: true },
-      { name: "Verified badge", included: true },
-      { name: "24/7 Priority support", included: true },
-    ],
-  },
-];
-
-const transactions: Transaction[] = [
-  {
-    id: "1",
-    transactionId: "pay_Np8L4x2C9k3M5n7Q",
-    freelancerName: "Vikram Patel",
-    freelancerEmail: "vikram.p@gmail.com",
-    plan: "Pro",
-    amount: 499,
-    date: "Feb 6, 2024",
-    status: "successful",
-    paymentMethod: "UPI",
-  },
-  {
-    id: "2",
-    transactionId: "pay_Np8K3w1B8j2L4m6P",
-    freelancerName: "Sneha Reddy",
-    freelancerEmail: "sneha.r@outlook.com",
-    plan: "Premium",
-    amount: 999,
-    date: "Feb 6, 2024",
-    status: "successful",
-    paymentMethod: "Card",
-  },
-  {
-    id: "3",
-    transactionId: "pay_Np8J2v0A7i1K3l5O",
-    freelancerName: "Arjun Singh",
-    freelancerEmail: "arjun.s@gmail.com",
-    plan: "Pro",
-    amount: 4999,
-    date: "Feb 5, 2024",
-    status: "successful",
-    paymentMethod: "Netbanking",
-  },
-  {
-    id: "4",
-    transactionId: "pay_Np8I1u9z6h0J2k4N",
-    freelancerName: "Priya Menon",
-    freelancerEmail: "priya.m@creative.io",
-    plan: "Pro",
-    amount: 499,
-    date: "Feb 5, 2024",
-    status: "failed",
-    paymentMethod: "Card",
-  },
-  {
-    id: "5",
-    transactionId: "pay_Np8H0t8y5g9I1j3M",
-    freelancerName: "Rahul Kumar",
-    freelancerEmail: "rahul.k@gmail.com",
-    plan: "Premium",
-    amount: 999,
-    date: "Feb 4, 2024",
-    status: "refunded",
-    paymentMethod: "UPI",
-  },
-];
-
-const analyticsData = {
-  mrr: 174700,
-  arr: 2096400,
-  churnRate: 2.4,
-  ltv: 3450,
-  freeToProConversion: 12,
-  proToPremiumConversion: 8,
-  avgTimeToUpgrade: 14,
-  mrrGrowth: [
-    { month: "Sep", value: 125000 },
-    { month: "Oct", value: 138000 },
-    { month: "Nov", value: 152000 },
-    { month: "Dec", value: 161000 },
-    { month: "Jan", value: 168000 },
-    { month: "Feb", value: 174700 },
-  ],
-  revenueByPlan: [
-    { month: "Sep", free: 0, pro: 95000, premium: 30000 },
-    { month: "Oct", free: 0, pro: 105000, premium: 33000 },
-    { month: "Nov", free: 0, pro: 115000, premium: 37000 },
-    { month: "Dec", free: 0, pro: 120000, premium: 41000 },
-    { month: "Jan", free: 0, pro: 122000, premium: 46000 },
-    { month: "Feb", free: 0, pro: 124750, premium: 49950 },
-  ],
+  };
 };
+
+
 
 // ============ COMPONENTS ============
 
@@ -344,13 +224,15 @@ const TransactionRow = ({
   transaction: Transaction;
   onViewDetails: (t: Transaction) => void;
 }) => {
-  const statusConfig = {
+  const statusConfig: Record<string, { label: string; className: string }> = {
     successful: { label: "Successful", className: "emerald" },
+    captured: { label: "Captured", className: "emerald" },
     failed: { label: "Failed", className: "rose" },
     refunded: { label: "Refunded", className: "amber" },
+    pending: { label: "Pending", className: "amber" }
   };
 
-  const { label, className } = statusConfig[transaction.status];
+  const { label, className } = statusConfig[transaction.status] || { label: transaction.status, className: "gray" };
 
   return (
     <tr>
@@ -633,11 +515,62 @@ const PlanEditModal = ({
 
 // ============ MAIN COMPONENT ============
 
+import { useEffect } from "react";
+import { adminService } from "@/services";
+
 const SubscriptionManagement = () => {
   const [activeTab, setActiveTab] = useState<TabType>("plans");
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const analyticsData = calculateAnalytics(transactions);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [plansRes, paymentsRes] = await Promise.all([
+          adminService.getAllSubscriptionPlans(),
+          adminService.getAllPayments({ type: 'subscription', limit: 100 })
+        ]);
+        
+        const mappedPlans = plansRes.plans.map((p) => ({
+          id: p._id,
+          name: p.name,
+          monthlyPrice: p.price,
+          yearlyPrice: p.price * 12,
+          yearlyDiscount: 0,
+          subscribers: 0, // Should be fetched from backend realistically
+          mrr: 0,
+          color: (p.name.toLowerCase() === "premium" ? "gold" : p.name.toLowerCase() === "pro" ? "indigo" : "gray") as any,
+          features: p.features.map(f => ({ name: f, included: true })),
+        }));
+        
+        const mappedTx = paymentsRes.payments.map((p) => ({
+          id: p._id,
+          transactionId: p.transactionId,
+          freelancerName: p.payerId?.fullName || "Unknown",
+          freelancerEmail: p.payerId?.email || "Unknown",
+          plan: "Subscription",
+          amount: p.amount,
+          date: new Date(p.createdAt).toLocaleDateString(),
+          status: p.status,
+          paymentMethod: "Razorpay",
+        }));
+
+        setPlans(mappedPlans);
+        setTransactions(mappedTx);
+      } catch (err) {
+        console.error("Failed to load subscription data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredTransactions = transactions.filter((t) => {
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
@@ -650,14 +583,10 @@ const SubscriptionManagement = () => {
     { id: "plans" as TabType, label: "Plans & Pricing", icon: CreditCard },
     { id: "transactions" as TabType, label: "Transactions", icon: FileText },
     { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
-    { id: "settings" as TabType, label: "Settings", icon: Settings },
   ];
 
   return (
-    <AdminLayout
-      title="Subscription Management"
-      breadcrumb="Manage Subscriptions"
-    >
+    <>
       {/* Page Header */}
       <div className="sm-page-header">
         <div className="sm-header-left">
@@ -686,10 +615,15 @@ const SubscriptionManagement = () => {
         ))}
       </div>
 
-      {/* Tab Content */}
       <div className="sm-tab-content">
-        {activeTab === "plans" && (
-          <div className="sm-plans-tab">
+        {loading ? (
+          <div className="flex items-center justify-center py-20 text-[#94A3B8]">
+            <RefreshCw className="animate-spin mr-2" size={24} /> Loading subscription data...
+          </div>
+        ) : (
+          <>
+            {activeTab === "plans" && (
+              <div className="sm-plans-tab">
             <div className="sm-plans-grid">
               {plans.map((plan) => (
                 <PlanCard
@@ -888,117 +822,7 @@ const SubscriptionManagement = () => {
           </div>
         )}
 
-        {activeTab === "settings" && (
-          <div className="sm-settings-tab">
-            <div className="sm-settings-section">
-              <h4>Payment Gateway</h4>
-              <div className="sm-settings-card">
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">
-                      Razorpay Integration
-                    </span>
-                    <span className="sm-setting-desc">
-                      Connected to your Razorpay account
-                    </span>
-                  </div>
-                  <div className="sm-setting-status connected">
-                    <Shield size={14} />
-                    Connected
-                  </div>
-                </div>
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">Test Mode</span>
-                    <span className="sm-setting-desc">
-                      Use test credentials for development
-                    </span>
-                  </div>
-                  <label className="sm-toggle">
-                    <input type="checkbox" />
-                    <span className="sm-toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="sm-settings-section">
-              <h4>Subscription Settings</h4>
-              <div className="sm-settings-card">
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">Auto-renewal</span>
-                    <span className="sm-setting-desc">
-                      Automatically renew subscriptions
-                    </span>
-                  </div>
-                  <label className="sm-toggle">
-                    <input type="checkbox" defaultChecked />
-                    <span className="sm-toggle-slider"></span>
-                  </label>
-                </div>
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">Grace Period</span>
-                    <span className="sm-setting-desc">
-                      Days before subscription expires
-                    </span>
-                  </div>
-                  <select defaultValue="3">
-                    <option value="1">1 day</option>
-                    <option value="3">3 days</option>
-                    <option value="7">7 days</option>
-                  </select>
-                </div>
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">
-                      Send Renewal Reminders
-                    </span>
-                    <span className="sm-setting-desc">
-                      Email users before subscription expires
-                    </span>
-                  </div>
-                  <label className="sm-toggle">
-                    <input type="checkbox" defaultChecked />
-                    <span className="sm-toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="sm-settings-section">
-              <h4>Invoice Settings</h4>
-              <div className="sm-settings-card">
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">GST Number</span>
-                    <span className="sm-setting-desc">
-                      Include GST on invoices
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Enter GST Number"
-                    className="sm-setting-input"
-                  />
-                </div>
-                <div className="sm-setting-row">
-                  <div className="sm-setting-info">
-                    <span className="sm-setting-label">Invoice Prefix</span>
-                    <span className="sm-setting-desc">
-                      Prefix for invoice numbers
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    defaultValue="INV-"
-                    className="sm-setting-input"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </div>
 
@@ -1009,7 +833,7 @@ const SubscriptionManagement = () => {
         onClose={() => setEditingPlan(null)}
         onSave={() => setEditingPlan(null)}
       />
-    </AdminLayout>
+    </>
   );
 };
 

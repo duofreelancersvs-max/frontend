@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AdminReview, PaginationMeta } from "@/services";
 import {
@@ -100,13 +99,13 @@ const ReviewsManagement = () => {
 
   const statsCards = [
     { label: "Total Reviews", value: pagination?.totalItems ?? reviews.length, icon: MessageSquareText, color: "indigo" },
-    { label: "Flagged", value: reviews.filter(r => r.status === "flagged").length, icon: Flag, color: "rose" },
-    { label: "Hidden", value: reviews.filter(r => r.status === "hidden").length, icon: EyeOff, color: "amber" },
-    { label: "Visible", value: reviews.filter(r => r.status === "visible" || !r.status).length, icon: CheckCircle, color: "emerald" },
+    { label: "Flagged", value: reviews.filter(r => r.moderationStatus === "flagged").length, icon: Flag, color: "rose" },
+    { label: "Hidden", value: reviews.filter(r => r.moderationStatus === "hidden").length, icon: EyeOff, color: "amber" },
+    { label: "Visible", value: reviews.filter(r => r.moderationStatus === "visible" || !r.moderationStatus).length, icon: CheckCircle, color: "emerald" },
   ];
 
   return (
-    <AdminLayout title="Reviews Management" breadcrumb="Moderate Reviews">
+    <>
       <div className="admin-content">
         {/* Stats */}
         <div className="admin-metrics-grid" style={{ marginBottom: "1.5rem" }}>
@@ -174,7 +173,7 @@ const ReviewsManagement = () => {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="admin-table" style={{ minWidth: 800 }}>
+              <table className="um-table" style={{ minWidth: 800 }}>
                 <thead>
                   <tr>
                     <th>Reviewer</th>
@@ -190,9 +189,9 @@ const ReviewsManagement = () => {
                 <tbody>
                   {reviews.map((review) => {
                     const reviewerName = review.reviewerId?.fullName || review.reviewerId?.email || "Unknown";
-                    const freelancerName = review.freelancerId?.fullName || review.freelancerId?.email || "Unknown";
+                    const freelancerName = review.revieweeId?.fullName || review.revieweeId?.email || "Unknown";
                     const projectTitle = review.projectId?.title || "—";
-                    const status = review.status || "visible";
+                    const status = review.moderationStatus || "visible";
                     const initials = (reviewerName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2));
 
                     return (
@@ -208,7 +207,7 @@ const ReviewsManagement = () => {
                         <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{freelancerName}</td>
                         <td style={{ color: "var(--admin-white)", fontSize: "0.875rem", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{projectTitle}</td>
                         <td>{renderStars(review.rating)}</td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{review.review || "—"}</td>
+                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{review.comment || "—"}</td>
                         <td>
                           <span className={`admin-status-badge ${status === "visible" ? "completed" : status === "flagged" ? "cancelled" : "pending"}`}>
                             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -251,7 +250,7 @@ const ReviewsManagement = () => {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

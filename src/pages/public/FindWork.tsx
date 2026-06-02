@@ -17,19 +17,10 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import { projectService } from "@/services";
+import { publicService } from "@/services/public.service";
 import type { Project } from "@/services";
 
-// Filter options
-const categories = [
-  "All Categories",
-  "Video Editing",
-  "Motion Graphics",
-  "3D Animation",
-  "VFX",
-  "Color Grading",
-  "Audio Editing",
-  "Graphic Design",
-];
+// We will fetch categories dynamically from the backend
 
 const experienceLevels = ["All Levels", "Entry", "Intermediate", "Expert"];
 
@@ -96,9 +87,22 @@ const FindWork = () => {
     }
   }, [currentPage, searchQuery, selectedCategory, selectedSkill, selectedLocation]);
 
+  const [categories, setCategories] = useState<string[]>(["All Categories"]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await publicService.getCategoriesWithSkills();
+      const catNames = data.map((c: any) => c.name);
+      setCategories(["All Categories", ...catNames]);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    fetchCategories();
+  }, [fetchProjects, fetchCategories]);
 
   const handleApply = (projectId: string) => {
     if (!isAuthenticated) {

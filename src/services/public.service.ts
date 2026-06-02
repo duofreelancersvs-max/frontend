@@ -1,5 +1,16 @@
 import { api } from '../lib/api';
 
+export interface SubscriptionPlan {
+  _id: string;
+  name: string;
+  price: number;
+  durationInDays: number;
+  features: string[];
+  isActive: boolean;
+  tier: string;
+  isPopular?: boolean;
+}
+
 export interface Skill {
   _id: string;
   skillName: string;
@@ -60,6 +71,11 @@ export const publicService = {
 
   getAllLegalSlugs: async (): Promise<LegalSlug[]> => {
     const response = await api.get<LegalSlug[]>('/public/legal');
+    return response;
+  },
+
+  getSubscriptionPlans: async (): Promise<SubscriptionPlan[]> => {
+    const response = await api.get<SubscriptionPlan[]>('/public/subscriptions');
     return response;
   },
 };

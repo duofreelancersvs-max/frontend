@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import {
   Clock,
   CheckCircle,
@@ -756,7 +755,7 @@ const VerificationQueue = () => {
   };
 
   return (
-    <AdminLayout title="Verification Queue" breadcrumb="Review Documents">
+    <>
       {/* Page Header */}
       <div className="vq-page-header">
         <div className="vq-header-left">
@@ -932,7 +931,7 @@ const VerificationQueue = () => {
         }}
         onReject={handleReject}
       />
-    </AdminLayout>
+    </>
   );
 };
 

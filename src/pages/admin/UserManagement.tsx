@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import {
   Users,
@@ -595,7 +594,7 @@ const UserManagement = () => {
     locationFilter !== "all";
 
   return (
-    <AdminLayout title="User Management" breadcrumb="Manage Users">
+    <>
       {/* Page Header */}
       <div className="um-page-header">
         <div className="um-header-left">
@@ -883,7 +882,7 @@ const UserManagement = () => {
         isOpen={!!slideOverUser}
         onClose={() => setSlideOverUser(null)}
       />
-    </AdminLayout>
+    </>
   );
 };
 

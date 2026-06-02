@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
 import { toast } from "react-toastify";
 import { subscriptionService, paymentService } from "@/services";
+import { publicService, type SubscriptionPlan } from "@/services/public.service";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -78,6 +79,73 @@ const Pricing = () => {
   );
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [displayPlans, setDisplayPlans] = useState<any[]>([]);
+
+  // Fetch dynamic public plans
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const dbPlans = await publicService.getSubscriptionPlans();
+        
+        const defaultAesthetics: Record<string, any> = {
+          free: {
+            description: "Ideal for beginners",
+            badge: null,
+            borderColor: "border-slate-200 dark:border-white/10",
+            highlighted: false,
+            buttonVariant: "outline",
+            buttonClass: "border-navy/20 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10",
+            buttonText: "Start Free",
+          },
+          pro: {
+            description: "For active professionals",
+            badge: { text: "Best For Growth", color: "bg-teal text-white" },
+            borderColor: "border-teal/50",
+            highlighted: true,
+            buttonVariant: "default",
+            buttonClass: "bg-teal hover:bg-[#128a7f] text-white shadow-xl shadow-teal/20",
+            buttonText: "Go Pro",
+          },
+          premium: {
+            description: "For industry leaders",
+            badge: { text: "Exclusive", color: "bg-royal-blue text-white" },
+            borderColor: "border-royal-blue/50",
+            highlighted: false,
+            buttonVariant: "default",
+            buttonClass: "bg-navy dark:bg-white text-white dark:text-navy hover:opacity-90 dark:hover:bg-slate-100 shadow-xl",
+            buttonText: "Join Elite",
+          }
+        };
+
+        const mappedPlans = dbPlans.map((dbPlan: SubscriptionPlan) => {
+          const tier = (dbPlan.tier || "free").toLowerCase();
+          const aesthetics = defaultAesthetics[tier] || defaultAesthetics.free;
+          
+          return {
+            name: dbPlan.name,
+            tier: dbPlan.tier,
+            description: aesthetics.description,
+            monthlyPrice: dbPlan.price,
+            yearlyPrice: dbPlan.price * 10,
+            badge: aesthetics.badge,
+            borderColor: aesthetics.borderColor,
+            highlighted: aesthetics.highlighted,
+            buttonVariant: aesthetics.buttonVariant,
+            buttonClass: aesthetics.buttonClass,
+            buttonText: aesthetics.buttonText,
+            features: dbPlan.features.map(f => ({ text: f, included: true }))
+          };
+        });
+
+        if (mappedPlans.length > 0) {
+          setDisplayPlans(mappedPlans);
+        }
+      } catch (error) {
+        console.error("Error fetching public plans:", error);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   // Redirection check for clients
   useEffect(() => {
@@ -173,70 +241,21 @@ const Pricing = () => {
     }
   };
 
-  const plans = [
+  // We will use displayPlans if loaded, otherwise fallback to a loading state or nothing
+  const plans = displayPlans.length > 0 ? displayPlans : [
     {
-      name: "Free",
-      description: "Ideal for beginners",
+      name: "Loading...",
+      description: "Fetching plans",
       monthlyPrice: 0,
       yearlyPrice: 0,
       badge: null,
-      borderColor: "border-slate-200 dark:border-white/10",
+      borderColor: "border-slate-200",
       highlighted: false,
       buttonVariant: "outline" as const,
-      buttonClass:
-        "border-navy/20 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10",
-      buttonText: "Start Free",
-      features: [
-        { text: "Public Profile", included: true },
-        { text: "3 Portfolio Items", included: true },
-        { text: "5 Project Bids/mo", included: true },
-        { text: "Standard Support", included: true },
-        { text: "Premium Badge", included: false },
-        { text: "Advanced Analytics", included: false },
-      ],
-    },
-    {
-      name: "Pro",
-      description: "For active professionals",
-      monthlyPrice: 499,
-      yearlyPrice: 4999,
-      badge: { text: "Best For Growth", color: "bg-teal text-white" },
-      borderColor: "border-teal/50",
-      highlighted: true,
-      buttonVariant: "default" as const,
-      buttonClass:
-        "bg-teal hover:bg-[#128a7f] text-white shadow-xl shadow-teal/20",
-      buttonText: "Go Pro",
-      features: [
-        { text: "Everything in Free", included: true },
-        { text: "Unlimited Portfolio", included: true },
-        { text: "Unlimited Bidding", included: true },
-        { text: "Featured Badge", included: true },
-        { text: "Analytics Tools", included: true },
-        { text: "Early Job Access", included: true },
-      ],
-    },
-    {
-      name: "Elite",
-      description: "For industry leaders",
-      monthlyPrice: 999,
-      yearlyPrice: 9999,
-      badge: { text: "Exclusive", color: "bg-royal-blue text-white" },
-      borderColor: "border-royal-blue/50",
-      highlighted: false,
-      buttonVariant: "default" as const,
-      buttonClass:
-        "bg-navy dark:bg-white text-white dark:text-navy hover:opacity-90 dark:hover:bg-slate-100 shadow-xl",
-      buttonText: "Join Elite",
-      features: [
-        { text: "Everything in Pro", included: true },
-        { text: "Verified Elite Badge", included: true },
-        { text: "Top Search Spot", included: true },
-        { text: "Account Manager", included: true },
-        { text: "Featured on Home", included: true },
-        { text: "Priority Matching", included: true },
-      ],
-    },
+      buttonClass: "opacity-50 cursor-not-allowed",
+      buttonText: "Loading",
+      features: [],
+    }
   ];
 
   const comparisonFeatures = [
@@ -372,7 +391,7 @@ const Pricing = () => {
 
     const currentPlan = (currentSubscription?.plan || "free").toLowerCase();
     const cardPlan =
-      planName.toLowerCase() === "elite" ? "premium" : planName.toLowerCase();
+      (planName.toLowerCase() === "elite" || planName.toLowerCase() === "premium") ? "premium" : planName.toLowerCase();
 
     if (currentPlan === cardPlan) {
       return;
@@ -538,27 +557,14 @@ const Pricing = () => {
                   </div>
 
                   <ul className="space-y-4 mb-12 flex-1">
-                    {plan.features.map((feature, fIdx) => (
+                    {plan.features.map((feature: string, fIdx: number) => (
                       <li
                         key={fIdx}
                         className="flex items-center gap-3 text-sm"
                       >
-                        {feature.included ? (
-                          <Check size={16} className="text-teal" />
-                        ) : (
-                          <X
-                            size={16}
-                            className="text-slate-200 dark:text-white/10"
-                          />
-                        )}
-                        <span
-                          className={
-                            feature.included
-                              ? "text-slate-600 dark:text-slate-300"
-                              : "text-slate-300 dark:text-white/20"
-                          }
-                        >
-                          {feature.text}
+                        <Check size={16} className="text-teal" />
+                        <span className="text-slate-600 dark:text-slate-300">
+                          {feature}
                         </span>
                       </li>
                     ))}

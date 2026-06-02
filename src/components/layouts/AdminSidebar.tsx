@@ -6,7 +6,6 @@ import type { AdminStats } from "@/services/admin.service";
 import {
   LayoutDashboard,
   Users,
-  ShieldCheck,
   CreditCard,
   Briefcase,
   Star,
@@ -15,13 +14,14 @@ import {
   FolderTree,
   History,
   LogOut,
+  PlusCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   name: string;
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number | string }>;
   badge?: string | number;
   badgeColor?: "amber" | "rose" | "indigo";
 }
@@ -76,6 +76,11 @@ const AdminSidebar = () => {
           badgeColor: "indigo",
         },
         {
+          name: "Post Project",
+          path: "/admin/post-project",
+          icon: PlusCircle,
+        },
+        {
           name: "Applications",
           path: "/admin/applications",
           icon: FileText,
@@ -85,13 +90,7 @@ const AdminSidebar = () => {
           path: "/admin/reviews",
           icon: Star,
         },
-        {
-          name: "Verifications",
-          path: "/admin/verifications",
-          icon: ShieldCheck,
-          badge: stats && stats.pendingVerifications > 0 ? stats.pendingVerifications : undefined,
-          badgeColor: "amber",
-        },
+
         { name: "Subscriptions", path: "/admin/subscriptions", icon: CreditCard },
       ],
     },
@@ -116,17 +115,19 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="admin-sidebar">
+    <aside className="w-64 min-h-screen bg-[#18181b] border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-all duration-300">
       {/* Logo */}
       <div className="px-6 py-8 border-b border-white/5">
         <Logo isDark size="sm" />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
         {navSections.map((section) => (
-          <div key={section.title} className="admin-nav-section">
-            <div className="admin-nav-header">{section.title}</div>
+          <div key={section.title} className="flex flex-col gap-1">
+            <div className="text-slate-500 text-xs font-bold uppercase tracking-widest px-4 mb-2">
+              {section.title}
+            </div>
             {section.items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -135,13 +136,23 @@ const AdminSidebar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`admin-nav-item ${isActive ? "active" : ""}`}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+                    isActive
+                      ? "bg-indigo-500/20 text-white shadow-[inset_4px_0_0_0_#6366f1]"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  }`}
                 >
-                  <Icon className="nav-icon" />
+                  <Icon size={18} className={`${isActive ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300 transition-colors"}`} />
                   <span>{item.name}</span>
                   {item.badge !== undefined && (
                     <span
-                      className={`admin-nav-badge ${item.badgeColor || ""}`}
+                      className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
+                        item.badgeColor === "indigo"
+                          ? "bg-indigo-500/20 text-indigo-400"
+                          : item.badgeColor === "rose"
+                          ? "bg-rose-500/20 text-rose-400"
+                          : "bg-amber-500/20 text-amber-400"
+                      }`}
                     >
                       {item.badge}
                     </span>
@@ -154,27 +165,24 @@ const AdminSidebar = () => {
       </nav>
 
       {/* Admin Profile */}
-      <div className="admin-profile-card">
-        <div className="admin-profile-inner">
-          <div className="admin-avatar">SA</div>
-          <div className="admin-profile-info">
-            <div className="admin-profile-name">Super Admin</div>
-            <div className="admin-profile-status">
-              <span className="status-dot"></span>
+      <div className="p-4 border-t border-white/5 bg-[#18181b]/50">
+        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
+            SA
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-white text-sm font-semibold truncate">Super Admin</div>
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-0.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Online</span>
             </div>
           </div>
           <button
             onClick={() => logout()}
             title="Logout"
-            style={{
-              background: "none", border: "none", color: "var(--admin-cloud-gray)",
-              cursor: "pointer", padding: 8, borderRadius: 6, flexShrink: 0,
-              transition: "color 0.15s",
-            }}
-            className="hover:text-red-400"
+            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all flex-shrink-0"
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
           </button>
         </div>
       </div>

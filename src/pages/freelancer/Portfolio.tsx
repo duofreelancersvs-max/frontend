@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { freelancerService } from "@/services";
+import { publicService } from "@/services/public.service";
 import type { PortfolioItem } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { AddPortfolioModal } from "@/components/modals/AddPortfolioModal";
@@ -31,19 +32,7 @@ interface PortfolioDisplayItem extends PortfolioItem {
   client?: string;
 }
 
-const categories = [
-  "All",
-  "Video Editing",
-  "Motion Graphics",
-  "VFX & Animation",
-  "Graphic Design",
-  "Web Development",
-  "Content Writing",
-  "Photography",
-  "Audio & Music",
-  "Social Media",
-  "3D Design",
-];
+// Categories will be fetched dynamically from the backend
 
 const FreelancerPortfolio = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
@@ -55,7 +44,20 @@ const FreelancerPortfolio = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PortfolioDisplayItem | null>(null);
 
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await publicService.getCategoriesWithSkills();
+        const catNames = data.map((c: any) => c.name);
+        setCategories(["All", ...catNames]);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {

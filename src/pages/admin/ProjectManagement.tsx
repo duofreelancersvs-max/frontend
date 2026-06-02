@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { PaginationMeta } from "@/services/admin.service";
 import {
@@ -190,7 +189,7 @@ const ProjectManagement = () => {
   ];
 
   return (
-    <AdminLayout title="Project Management" breadcrumb="Projects">
+    <>
       <div className="admin-content">
         {/* Stats Row */}
         <div className="admin-metrics-grid" style={{ marginBottom: "1.5rem" }}>
@@ -430,7 +429,7 @@ const ProjectManagement = () => {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   );
 };
 

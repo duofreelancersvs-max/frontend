@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { adminService } from "@/services";
 import type { AuditLogEntry, PaginationMeta } from "@/services";
 import {
@@ -55,7 +54,7 @@ const AuditLogs = () => {
   };
 
   return (
-    <AdminLayout title="Audit Logs" breadcrumb="Activity History">
+    <>
       <div className="admin-content">
         <div className="um-filter-bar" style={{ marginBottom: "1.25rem" }}>
           <div className="um-filter-row">
@@ -171,7 +170,7 @@ const AuditLogs = () => {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 
