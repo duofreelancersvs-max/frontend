@@ -28,6 +28,7 @@ const Categories = lazy(() => import("@/pages/public/Categories"));
 const Contact = lazy(() => import("@/pages/public/Contact"));
 const FindWorkPublic = lazy(() => import("@/pages/public/FindWork"));
 const LegalPage = lazy(() => import("@/pages/public/LegalPage"));
+const NotFound = lazy(() => import("@/pages/public/NotFound"));
 
 // Auth
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -460,6 +461,10 @@ function App() {
 
         {/* Admin Dashboard Pages */}
         <Route
+          path="/admin"
+          element={<Navigate to="/admin/dashboard" replace />}
+        />
+        <Route
           path="/admin/dashboard"
           element={
             <AdminRoute>
@@ -604,7 +609,7 @@ function App() {
           path="*"
           element={
             <Suspense fallback={<PageLoader />}>
-              <Home />
+              <NotFound />
             </Suspense>
           }
         />

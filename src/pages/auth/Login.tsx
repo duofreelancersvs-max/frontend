@@ -523,15 +523,17 @@ const Login = () => {
               </form>
             )}
 
-            <p className="text-center mt-8 text-slate-500 dark:text-slate-400">
-              Don&apos;t have an account?{" "}
-              <Link
-                to="/register"
-                className="text-teal font-semibold hover:underline"
-              >
-                Sign Up
-              </Link>
-            </p>
+            <div className="text-center mt-8">
+              <p className="text-slate-500 dark:text-slate-400">
+                Don&apos;t have an account?{" "}
+                <Link
+                  to="/register"
+                  className="text-teal font-semibold hover:underline"
+                >
+                  Sign Up
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

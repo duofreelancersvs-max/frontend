@@ -62,7 +62,11 @@ export function FreelancerRoute({ children }: { children: React.ReactNode }) {
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return <ProtectedRoute allowedRoles={["admin"]}>{children}</ProtectedRoute>;
+  return (
+    <ProtectedRoute allowedRoles={["admin"]} redirectTo="/login?role=admin">
+      {children}
+    </ProtectedRoute>
+  );
 }
 
 export function AuthenticatedRoute({
