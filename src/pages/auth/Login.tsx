@@ -19,7 +19,7 @@ const Login = () => {
   const location = useLocation();
   const sessionExpired = (location.state as { sessionExpired?: boolean } | null)?.sessionExpired ?? false;
   const initialRole = searchParams.get("role") as UserRole;
-  const isValidRole = initialRole === "client" || initialRole === "freelancer";
+  const isValidRole = initialRole === "client" || initialRole === "freelancer" || initialRole === "admin";
 
   const [step, setStep] = useState<"role" | "form">(isValidRole ? "form" : "role");
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);

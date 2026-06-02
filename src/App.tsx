@@ -462,7 +462,11 @@ function App() {
         {/* Admin Dashboard Pages */}
         <Route
           path="/admin"
-          element={<Navigate to="/admin/dashboard" replace />}
+          element={
+            <AdminRoute>
+              <Navigate to="/admin/dashboard" replace />
+            </AdminRoute>
+          }
         />
         <Route
           path="/admin/dashboard"

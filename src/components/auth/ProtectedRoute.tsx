@@ -1,17 +1,20 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth.store";
 import type { UserRole } from "@/types/auth.types";
+import NotFound from "@/pages/public/NotFound";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
   redirectTo?: string;
+  returnNotFoundOnDeny?: boolean;
 }
 
 export function ProtectedRoute({
   children,
   allowedRoles,
   redirectTo = "/login",
+  returnNotFoundOnDeny = false,
 }: ProtectedRouteProps) {
   const location = useLocation();
   const { isAuthenticated, user, isLoading } = useAuthStore();
@@ -25,6 +28,9 @@ export function ProtectedRoute({
   }
 
   if (!isAuthenticated) {
+    if (returnNotFoundOnDeny) {
+      return <NotFound />;
+    }
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
@@ -33,6 +39,11 @@ export function ProtectedRoute({
     console.warn(
       `[ProtectedRoute] Access denied. User role: ${user.role}, Allowed: ${allowedRoles}`,
     );
+    
+    if (returnNotFoundOnDeny) {
+      return <NotFound />;
+    }
+
     // Redirect to appropriate dashboard based on role
     if (user.role === "client") {
       return <Navigate to="/client/dashboard" replace />;
@@ -63,7 +74,7 @@ export function FreelancerRoute({ children }: { children: React.ReactNode }) {
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   return (
-    <ProtectedRoute allowedRoles={["admin"]} redirectTo="/login?role=admin">
+    <ProtectedRoute allowedRoles={["admin"]} returnNotFoundOnDeny={true}>
       {children}
     </ProtectedRoute>
   );
