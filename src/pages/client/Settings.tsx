@@ -71,14 +71,7 @@ const ClientSettings = () => {
         ]);
 
         if (userData.status === "fulfilled" && userData.value) {
-          let displayName = userData.value.fullName || "";
-          if (
-            !displayName &&
-            clientData.status === "fulfilled" &&
-            clientData.value
-          ) {
-            displayName = clientData.value.companyName || "";
-          }
+          const displayName = userData.value.fullName || "";
           setAccountForm({
             fullName: displayName,
             email: userData.value.email || "",

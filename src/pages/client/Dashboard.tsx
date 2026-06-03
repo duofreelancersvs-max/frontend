@@ -27,7 +27,6 @@ import {
   useTopRatedFreelancers,
   useConversations,
   useMyUser,
-  useMyClientProfile,
   useMyClientApplications,
   useHireFreelancer,
   useCreateConversation
@@ -45,23 +44,19 @@ const ClientDashboard = () => {
   const { data: freeData, isLoading: loadingFreelancers } = useTopRatedFreelancers();
   const { data: convData, isLoading: loadingConversations } = useConversations();
   const { data: userData, isLoading: loadingUser } = useMyUser();
-  const { data: profileData, isLoading: loadingProfile } = useMyClientProfile();
-
-  const loading = loadingProjects || loadingApps || loadingFreelancers || loadingConversations || loadingUser || loadingProfile;
+  const loading = loadingProjects || loadingApps || loadingFreelancers || loadingConversations || loadingUser;
 
   const projects = projectsData?.projects || [];
   const applications = appsData?.applications || [];
   const freelancers = (freeData as any)?.profiles || (freeData as any)?.freelancers || [];
   const conversations = convData?.conversations || [];
   const userFullName = userData?.fullName || "";
-  const clientProfile = profileData || null;
 
   const hireMutation = useHireFreelancer();
   const createConvMutation = useCreateConversation();
 
   const getClientName = () => {
     if (userFullName) return userFullName;
-    if (clientProfile?.companyName) return clientProfile.companyName;
     return user?.email?.split("@")[0] || "Client";
   };
 

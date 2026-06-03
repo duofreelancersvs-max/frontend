@@ -1,28 +1,17 @@
 import { api } from "@/lib/api";
 
 export interface ClientProfile {
-  id: string;
+  _id: string;
   userId: string;
-  companyName?: string;
-  bio?: string;
-  industry?: string;
-  website?: string;
-  location?: string;
-  totalProjects: number;
-  activeProjects: number;
-  completedProjects: number;
-  rating: number;
-  totalReviews: number;
+  totalProjectsPosted: number;
+  totalHires: number;
+  averageRating: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateClientProfileRequest {
-  companyName?: string;
-  bio?: string;
-  industry?: string;
-  website?: string;
-  location?: string;
+  [key: string]: unknown;
 }
 
 export const clientService = {

@@ -41,7 +41,6 @@ const Register = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    companyName: "",
     email: "",
     phone: "",
     primarySkill: "Video Editing",
@@ -353,25 +352,6 @@ const Register = () => {
                             placeholder="John Doe"
                             className="pl-11 h-12"
                             required
-                            disabled={isLoading}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Company Name
-                        </label>
-                        <div className="relative">
-                          <Building
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                            size={18}
-                          />
-                          <Input
-                            name="companyName"
-                            value={formData.companyName}
-                            onChange={handleChange}
-                            placeholder="Company Ltd"
-                            className="pl-11 h-12"
                             disabled={isLoading}
                           />
                         </div>

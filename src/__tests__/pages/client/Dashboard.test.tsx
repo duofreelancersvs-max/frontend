@@ -60,7 +60,7 @@ vi.mock("@/services", () => ({
     getMe: vi.fn(() => Promise.resolve({ fullName: "Rajesh Kumar" })),
   },
   clientService: {
-    getMyProfile: vi.fn(() => Promise.resolve({ companyName: "Test Co" })),
+    getMyProfile: vi.fn(() => Promise.resolve({ _id: "1", userId: "1", totalProjectsPosted: 0, totalHires: 0, averageRating: 0 })),
   },
   applicationService: {
     getMyClientApplications: vi.fn(() => Promise.resolve({ 

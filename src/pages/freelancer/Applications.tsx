@@ -223,11 +223,9 @@ const FreelancerApplications = () => {
                             })()}
                           </div>
                           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {(application.project as any)?.client?.companyName ||
-                              (application.project as any)?.client?.fullName ||
+                            {(application.project as any)?.client?.fullName ||
                               (application.project as any)?.client?.name ||
                               (application.project as any)?.clientName ||
-                              (application.project?.clientId as any)?.companyName ||
                               (application.project?.clientId as any)?.fullName ||
                               (application.project?.clientId
                                 ? [

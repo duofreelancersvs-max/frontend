@@ -162,7 +162,7 @@ const FreelancerDashboard = () => {
   const applicationStatuses = applications.slice(0, 5).map((app, index) => ({
     id: app._id || app.id || `app-${index}`,
     project: app.project?.title || "Untitled Project",
-    client: (app.project as any)?.client?.companyName || (app.project as any)?.client?.fullName || (app.project as any)?.client?.name || (app.project as any)?.clientName || (app.project?.clientId as any)?.companyName || (app.project?.clientId as any)?.fullName || "Client",
+    client: (app.project as any)?.client?.fullName || (app.project as any)?.client?.name || (app.project as any)?.clientName || (app.project?.clientId as any)?.fullName || "Client",
     appliedDate: new Date(app.createdAt).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
