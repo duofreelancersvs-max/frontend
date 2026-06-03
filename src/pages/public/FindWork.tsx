@@ -13,7 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import { projectService } from "@/services";
@@ -456,8 +456,7 @@ const ProjectCard = ({
                 <Wallet size={14} />
               </div>
               <span>
-                ₹{project.budget.minAmount.toLocaleString()} - ₹
-                {project.budget.maxAmount.toLocaleString()}
+                {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
               </span>
             </div>
             <div className="flex items-center gap-2">

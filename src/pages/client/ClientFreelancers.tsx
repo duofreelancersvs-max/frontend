@@ -13,6 +13,7 @@ import {
   MapPin,
   Users,
   X,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +29,9 @@ import DashboardHeader from "@/components/layouts/DashboardHeader";
 const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
   const navigate = useNavigate();
   return (
-     <div 
+    <div 
       onClick={() => navigate(`/client/freelancer/${freelancer._id || freelancer.id}`)}
-      className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-all p-5 cursor-pointer hover:border-teal/30 dark:hover:border-teal/50 group"
+      className="h-full flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-all p-5 cursor-pointer hover:border-teal/30 dark:hover:border-teal/50 group"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="w-14 h-14 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-lg">
@@ -70,7 +71,7 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
         ))}
       </div>
 
-       <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5">
+      <div className="mt-auto flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5">
         <div className="flex items-center gap-1">
            <Star size={14} className="text-yellow-400 fill-yellow-400" />
           <span className="font-semibold text-navy dark:text-white">
@@ -98,24 +99,37 @@ const ClientFreelancers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState<string[]>([]);
   const [skillOptions, setSkillOptions] = useState<string[]>([]);
+  const [rawCategoriesData, setRawCategoriesData] = useState<any[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
   useAuth();
 
   useEffect(() => {
     const fetchCategoriesAndSkills = async () => {
       try {
         const data = await publicService.getCategoriesWithSkills();
+        setRawCategoriesData(data);
         const catNames = data.map((c: any) => c.name);
-        const allSkills = Array.from(
-          new Set(data.flatMap((c: any) => (c.skills || []).map((s: any) => typeof s === 'string' ? s : (s.skillName || s.name || ''))))
-        ).filter(Boolean) as string[];
         setCategories(catNames);
-        setSkillOptions(allSkills);
+        // Do not set all skills initially, wait for category selection
+        setSkillOptions([]);
       } catch (error) {
         console.error("Error fetching categories and skills:", error);
       }
     };
     fetchCategoriesAndSkills();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategories.length > 0) {
+      const selectedData = rawCategoriesData.filter(c => selectedCategories.includes(c.name));
+      const filteredSkills = Array.from(
+        new Set(selectedData.flatMap((c: any) => (c.skills || []).map((s: any) => typeof s === 'string' ? s : (s.skillName || s.name || ''))))
+      ).filter(Boolean) as string[];
+      setSkillOptions(filteredSkills);
+    } else {
+      setSkillOptions([]);
+    }
+  }, [selectedCategories, rawCategoriesData]);
 
 
   useEffect(() => {
@@ -171,7 +185,7 @@ const ClientFreelancers = () => {
    return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
        {/* MAIN CONTENT */}
-      <div>
+      <div className="min-h-full flex flex-col">
         <DashboardHeader
           title="Find Freelancers"
           onMenuClick={() => setSidebarOpen(true)}
@@ -185,22 +199,35 @@ const ClientFreelancers = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8">
+        <main className="px-6 lg:px-8 py-6 lg:py-8 flex-1 flex flex-col">
           {/* SEARCH & FILTERS */}
           <div className="mb-6 lg:mb-8">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               {/* Search */}
-              <div className="relative flex-1 w-full sm:max-w-md">
-                <Search
-                  size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                 <Input
-                  placeholder="Search freelancers by name, skill..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white"
-                />
+              <div className="flex w-full sm:max-w-md gap-3">
+                <div className="relative flex-1">
+                  <Search
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <Input
+                    placeholder="Search freelancers by name, skill..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-11 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(
+                    "h-11 border-slate-200 dark:border-white/10 dark:text-slate-300",
+                    showFilters && "bg-slate-100 dark:bg-white/10"
+                  )}
+                >
+                  <Filter size={18} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Filters</span>
+                </Button>
               </div>
 
               {/* View Toggle */}
@@ -260,7 +287,8 @@ const ClientFreelancers = () => {
           </div>
 
           {/* Category & Skill Filters */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          {showFilters && (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 animate-in slide-in-from-top-2 fade-in duration-200">
              {/* Categories */}
             <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-4 lg:p-6">
               <h3 className="font-semibold text-navy dark:text-white mb-4 flex items-center gap-2">
@@ -289,7 +317,7 @@ const ClientFreelancers = () => {
             <div className="lg:col-span-3 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-4 lg:p-6">
               <h3 className="font-semibold text-navy dark:text-white mb-4 flex items-center gap-2">
                 <Star size={18} />
-                Skills
+                Skills {selectedCategories.length === 0 && <span className="text-sm font-normal text-slate-400">(Select a category first)</span>}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {skillOptions.map((skill) => (
@@ -309,6 +337,7 @@ const ClientFreelancers = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Results */}
           {loading ? (
@@ -331,7 +360,7 @@ const ClientFreelancers = () => {
           ) : (
             <>
               {viewMode === "grid" ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4 lg:gap-6">
                   {freelancers.map((freelancer) => (
                     <FreelancerCard
                       key={freelancer._id || freelancer.id}
@@ -437,7 +466,7 @@ const ClientFreelancers = () => {
               )}
 
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-8">
+              <div className="flex items-center justify-between mt-auto pt-8">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Showing{" "}
                   {totalFreelancers > 0 ? (currentPage - 1) * 12 + 1 : 0} to{" "}

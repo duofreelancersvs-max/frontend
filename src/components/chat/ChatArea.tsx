@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import {
   ArrowLeft,
@@ -20,6 +21,7 @@ import MessageBubble from "./MessageBubble";
 import ChatTermsOverlay from "./ChatTermsOverlay";
 
 export interface ChatParticipant {
+  id?: string;
   name: string;
   avatar?: string;
   verified: boolean;
@@ -51,6 +53,7 @@ interface ChatAreaProps {
   applicationStatus?: string;
   onHire?: () => void;
   onReject?: () => void;
+  isWidget?: boolean;
 }
 
 const ChatArea = ({
@@ -73,6 +76,7 @@ const ChatArea = ({
   applicationStatus,
   onHire,
   onReject,
+  isWidget,
 }: ChatAreaProps) => {
   const { theme } = useThemeStore();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -132,30 +136,56 @@ const ChatArea = ({
           {onBack && (
             <button
               onClick={onBack}
-              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              className={cn("p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg", !isWidget && "lg:hidden")}
             >
               <ArrowLeft size={20} />
             </button>
           )}
-          <ChatAvatar
-            name={participant.name}
-            size="md"
-            online={participant.online}
-          />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-navy dark:text-white text-sm">
-                {participant.name}
-              </h3>
-              {participant.verified && (
-                <VerifyIcon size={14} className="text-teal" />
-              )}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {participant.online ? "Online" : "Offline"}
-              {project && ` • ${project.title}`}
-            </p>
-          </div>
+          {role === 'client' ? (
+            <Link to={`/client/freelancer/${participant.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <ChatAvatar
+                name={participant.name}
+                size="md"
+                online={participant.online}
+              />
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-semibold text-navy dark:text-white text-sm">
+                    {participant.name}
+                  </h3>
+                  {participant.verified && (
+                    <VerifyIcon size={14} className="text-teal" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {participant.online ? "Online" : "Offline"}
+                  {project && ` • ${project.title}`}
+                </p>
+              </div>
+            </Link>
+          ) : (
+            <button onClick={onToggleInfoPanel} className="flex items-center gap-3 hover:opacity-80 transition-opacity text-left">
+              <ChatAvatar
+                name={participant.name}
+                size="md"
+                online={participant.online}
+              />
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-semibold text-navy dark:text-white text-sm">
+                    {participant.name}
+                  </h3>
+                  {participant.verified && (
+                    <VerifyIcon size={14} className="text-teal" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {participant.online ? "Online" : "Offline"}
+                  {project && ` • ${project.title}`}
+                </p>
+              </div>
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           {role === "client" && applicationId ? (

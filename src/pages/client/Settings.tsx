@@ -3,19 +3,18 @@ import { useOutletContext } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
   User,
-  Bell,
   Lock,
   Shield,
   Palette,
-  Building2,
+  Phone,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useThemeStore } from "@/stores/theme.store";
 import { userService, settingsService, clientService } from "@/services";
-import type { ClientProfile } from "@/services/client.service";
 import type {
-  NotificationSettings,
   PrivacySettings,
   PreferenceSettings,
 } from "@/services/settings.service";
@@ -23,14 +22,12 @@ import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 const ClientSettings = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
+  const { theme, setTheme } = useThemeStore();
 
   const [activeSection, setActiveSection] = useState("account");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(
-    null,
-  );
 
   const [accountForm, setAccountForm] = useState({
     fullName: "",
@@ -38,21 +35,11 @@ const ClientSettings = () => {
     phone: "",
   });
 
-  const [companyForm, setCompanyForm] = useState({
-    companyName: "",
-    industry: "",
-    website: "",
-    companySize: "",
+  const [contactForm, setContactForm] = useState({
+    phone: "",
+    location: "",
+    linkedin: "",
   });
-
-  const [notificationsForm, setNotificationsForm] =
-    useState<NotificationSettings>({
-      email: true,
-      push: true,
-      sms: false,
-      projectUpdates: true,
-      messages: true,
-    });
 
   const [privacyForm, setPrivacyForm] = useState<PrivacySettings>({
     showInSearch: true,
@@ -100,18 +87,15 @@ const ClientSettings = () => {
         }
 
         if (settingsData.status === "fulfilled" && settingsData.value) {
-          setNotificationsForm(settingsData.value.notifications);
           setPrivacyForm(settingsData.value.privacy);
           setPreferencesForm(settingsData.value.preferences);
         }
 
         if (clientData.status === "fulfilled" && clientData.value) {
-          setClientProfile(clientData.value);
-          setCompanyForm({
-            companyName: clientData.value.companyName || "",
-            industry: clientData.value.industry || "",
-            website: clientData.value.website || "",
-            companySize: "",
+          setContactForm({
+            phone: (clientData.value as any).phone || "",
+            location: (clientData.value as any).location || "",
+            linkedin: (clientData.value as any).linkedin || "",
           });
         }
       } catch (error) {
@@ -139,41 +123,16 @@ const ClientSettings = () => {
     }
   };
 
-  const handleCompanySave = async () => {
+  const handleContactSave = async () => {
     try {
       setSaving(true);
-      if (clientProfile) {
-        await clientService.updateProfile({
-          companyName: companyForm.companyName,
-          industry: companyForm.industry,
-          website: companyForm.website,
-        });
-      } else {
-        await clientService.createProfile({
-          companyName: companyForm.companyName,
-          industry: companyForm.industry,
-          website: companyForm.website,
-        });
-      }
-      alert("Company information saved successfully!");
+      await userService.updateMe({
+        phone: contactForm.phone,
+      } as any);
+      alert("Contact details saved successfully!");
     } catch (error) {
-      console.error("Error saving company:", error);
-      alert("Failed to save company information");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleNotificationsSave = async () => {
-    try {
-      setSaving(true);
-      await settingsService.updateSettings({
-        notifications: notificationsForm,
-      });
-      alert("Notification settings saved successfully!");
-    } catch (error) {
-      console.error("Error saving notifications:", error);
-      alert("Failed to save notification settings");
+      console.error("Error saving contact:", error);
+      alert("Failed to save contact details");
     } finally {
       setSaving(false);
     }
@@ -239,13 +198,6 @@ const ClientSettings = () => {
     }
   };
 
-  const toggleNotification = (key: keyof NotificationSettings) => {
-    setNotificationsForm((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
   const togglePrivacy = (key: keyof PrivacySettings) => {
     setPrivacyForm((prev) => ({
       ...prev,
@@ -255,8 +207,7 @@ const ClientSettings = () => {
 
   const settingsSections = [
     { id: "account", label: "Account", icon: User },
-    { id: "company", label: "Company", icon: Building2 },
-    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "contact", label: "Contact Details", icon: Phone },
     { id: "security", label: "Security", icon: Lock },
     { id: "privacy", label: "Privacy", icon: Shield },
     { id: "preferences", label: "Preferences", icon: Palette },
@@ -360,164 +311,58 @@ const ClientSettings = () => {
                 </Button>
               </div>
             )}
-            {activeSection === "company" && (
-               <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
+            {activeSection === "contact" && (
+              <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
                 <h2 className="text-lg font-bold text-navy dark:text-white">
-                  Company Information
+                  Contact Details
                 </h2>
                 <div className="grid gap-4">
-                   <div>
+                  <div>
                     <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Company Name
+                      Phone Number
                     </label>
                     <Input
-                      value={companyForm.companyName}
+                      value={contactForm.phone}
                       onChange={(e) =>
-                        setCompanyForm((prev) => ({
-                          ...prev,
-                          companyName: e.target.value,
-                        }))
+                        setContactForm((prev) => ({ ...prev, phone: e.target.value }))
                       }
-                       placeholder="Enter your company name"
+                      placeholder="+91 00000 00000"
                       className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                     />
                   </div>
-                   <div>
+                  <div>
                     <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Industry
-                    </label>
-                    <select
-                      value={companyForm.industry}
-                      onChange={(e) =>
-                        setCompanyForm((prev) => ({
-                          ...prev,
-                          industry: e.target.value,
-                        }))
-                      }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
-                    >
-                      <option value="">Select industry</option>
-                      <option value="Technology">Technology</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="E-commerce">E-commerce</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Healthcare">Healthcare</option>
-                      <option value="Education">Education</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                   <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Website
+                      Location
                     </label>
                     <Input
-                      value={companyForm.website}
+                      value={contactForm.location}
                       onChange={(e) =>
-                        setCompanyForm((prev) => ({
-                          ...prev,
-                          website: e.target.value,
-                        }))
+                        setContactForm((prev) => ({ ...prev, location: e.target.value }))
                       }
-                       placeholder="https://example.com"
+                      placeholder="City, Country"
                       className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
                     />
                   </div>
-                   <div>
+                  <div>
                     <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Company Size
+                      LinkedIn Profile
                     </label>
-                    <select
-                      value={companyForm.companySize}
+                    <Input
+                      value={contactForm.linkedin}
                       onChange={(e) =>
-                        setCompanyForm((prev) => ({
-                          ...prev,
-                          companySize: e.target.value,
-                        }))
+                        setContactForm((prev) => ({ ...prev, linkedin: e.target.value }))
                       }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
-                    >
-                      <option value="">Select size</option>
-                      <option value="1-10">1-10 employees</option>
-                      <option value="11-50">11-50 employees</option>
-                      <option value="51-200">51-200 employees</option>
-                      <option value="200+">200+ employees</option>
-                    </select>
+                      placeholder="https://linkedin.com/in/yourprofile"
+                      className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
+                    />
                   </div>
                 </div>
                 <Button
                   className="bg-teal hover:bg-teal-light text-white"
-                  onClick={handleCompanySave}
+                  onClick={handleContactSave}
                   disabled={saving}
                 >
                   {saving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            )}
-            {activeSection === "notifications" && (
-               <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
-                <h2 className="text-lg font-bold text-navy dark:text-white">
-                  Notification Preferences
-                </h2>
-                <div className="space-y-4">
-                  {[
-                    {
-                      key: "email",
-                      label: "Email notifications for new applications",
-                    },
-                    { key: "push", label: "Push notifications" },
-                    { key: "sms", label: "SMS alerts for urgent updates" },
-                    {
-                      key: "projectUpdates",
-                      label: "Project milestone notifications",
-                    },
-                    {
-                      key: "messages",
-                      label: "Freelancer message notifications",
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.key}
-                     className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-white/5 last:border-0"
-                    >
-                       <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {item.label}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleNotification(
-                            item.key as keyof NotificationSettings,
-                          )
-                        }
-                        className={cn(
-                          "w-12 h-6 rounded-full relative transition-colors",
-                          notificationsForm[
-                            item.key as keyof NotificationSettings
-                          ]
-                            ? "bg-teal"
-                            : "bg-slate-300",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                            notificationsForm[
-                              item.key as keyof NotificationSettings
-                            ]
-                              ? "right-1"
-                              : "left-1",
-                          )}
-                        />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  className="bg-teal hover:bg-teal-light text-white"
-                  onClick={handleNotificationsSave}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Preferences"}
                 </Button>
               </div>
             )}
@@ -653,56 +498,72 @@ const ClientSettings = () => {
               </div>
             )}
             {activeSection === "preferences" && (
-               <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
+              <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
                 <h2 className="text-lg font-bold text-navy dark:text-white">Preferences</h2>
-                <div className="grid gap-4">
-                   <div>
+                <div className="grid gap-6">
+                  {/* Dark Mode Toggle */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-2">
+                        <Moon size={16} /> Dark Mode
+                      </label>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Switch between light and dark theme</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      className={cn(
+                        "w-12 h-6 rounded-full relative transition-colors",
+                        theme === "dark" ? "bg-teal" : "bg-slate-300 dark:bg-white/10"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
+                          theme === "dark" ? "right-1" : "left-1"
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                       Language
                     </label>
                     <select
                       value={preferencesForm.language}
                       onChange={(e) =>
-                        setPreferencesForm((prev) => ({
-                          ...prev,
-                          language: e.target.value,
-                        }))
+                        setPreferencesForm((prev) => ({ ...prev, language: e.target.value }))
                       }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                     >
                       <option value="en">English</option>
                     </select>
                   </div>
-                   <div>
+                  <div>
                     <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                       Timezone
                     </label>
                     <select
                       value={preferencesForm.timezone}
                       onChange={(e) =>
-                        setPreferencesForm((prev) => ({
-                          ...prev,
-                          timezone: e.target.value,
-                        }))
+                        setPreferencesForm((prev) => ({ ...prev, timezone: e.target.value }))
                       }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                     >
                       <option value="Asia/Kolkata">IST (UTC+5:30)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-2">
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                       Currency
                     </label>
                     <select
                       value={preferencesForm.currency}
                       onChange={(e) =>
-                        setPreferencesForm((prev) => ({
-                          ...prev,
-                          currency: e.target.value,
-                        }))
+                        setPreferencesForm((prev) => ({ ...prev, currency: e.target.value }))
                       }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg"
+                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                     >
                       <option value="INR">INR (₹)</option>
                     </select>

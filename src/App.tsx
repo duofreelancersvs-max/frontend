@@ -71,6 +71,7 @@ const FreelancerApplications = lazy(
 );
 const FreelancerReviews = lazy(() => import("@/pages/freelancer/Reviews"));
 const FreelancerSettings = lazy(() => import("@/pages/freelancer/Settings"));
+const FreelancerProjectDetails = lazy(() => import("@/pages/freelancer/ProjectDetails"));
 
 // Admin
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
@@ -454,6 +455,14 @@ function App() {
             element={
               <SP>
                 <FindWork />
+              </SP>
+            }
+          />
+          <Route
+            path="/freelancer/project/:id"
+            element={
+              <SP>
+                <FreelancerProjectDetails />
               </SP>
             }
           />

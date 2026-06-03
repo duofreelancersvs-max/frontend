@@ -2,26 +2,27 @@ import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
   User,
-  Bell,
   Lock,
   Shield,
   Palette,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useThemeStore } from "@/stores/theme.store";
 import { userService, settingsService, freelancerService } from "@/services";
 import type { FreelancerProfile } from "@/services/freelancer.service";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import type {
-  NotificationSettings,
   PrivacySettings,
   PreferenceSettings,
 } from "@/services/settings.service";
 
 const FreelancerSettings = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const { theme, setTheme } = useThemeStore();
   const [activeSection, setActiveSection] = useState("account");
 
 
@@ -33,15 +34,6 @@ const FreelancerSettings = () => {
     email: "",
     phone: "",
   });
-
-  const [notificationsForm, setNotificationsForm] =
-    useState<NotificationSettings>({
-      email: true,
-      push: true,
-      sms: false,
-      projectUpdates: true,
-      messages: true,
-    });
 
   const [privacyForm, setPrivacyForm] = useState<PrivacySettings>({
     showInSearch: true,
@@ -91,7 +83,6 @@ const FreelancerSettings = () => {
         }
 
         if (settingsData.status === "fulfilled" && settingsData.value) {
-          setNotificationsForm(settingsData.value.notifications);
           setPrivacyForm(settingsData.value.privacy);
           setPreferencesForm(settingsData.value.preferences);
         }
@@ -115,22 +106,6 @@ const FreelancerSettings = () => {
     } catch (error) {
       console.error("Error saving account:", error);
       alert("Failed to save account settings");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleNotificationsSave = async () => {
-    try {
-      setSaving(true);
-      const result = await settingsService.updateSettings({
-        notifications: notificationsForm,
-      });
-      setNotificationsForm(result.notifications);
-      alert("Notification settings saved successfully!");
-    } catch (error) {
-      console.error("Error saving notifications:", error);
-      alert("Failed to save notification settings");
     } finally {
       setSaving(false);
     }
@@ -198,12 +173,12 @@ const FreelancerSettings = () => {
     }
   };
 
-  const toggleNotification = (key: keyof NotificationSettings) => {
-    setNotificationsForm((prev: NotificationSettings) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+  const settingsSections = [
+    { id: "account", label: "Account", icon: User },
+    { id: "security", label: "Security", icon: Lock },
+    { id: "privacy", label: "Privacy", icon: Shield },
+    { id: "preferences", label: "Preferences", icon: Palette },
+  ];
 
   const togglePrivacy = (key: keyof PrivacySettings) => {
     setPrivacyForm((prev: PrivacySettings) => ({
@@ -211,14 +186,6 @@ const FreelancerSettings = () => {
       [key]: !prev[key],
     }));
   };
-
-  const settingsSections = [
-    { id: "account", label: "Account", icon: User },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "security", label: "Security", icon: Lock },
-    { id: "privacy", label: "Privacy", icon: Shield },
-    { id: "preferences", label: "Preferences", icon: Palette },
-  ];
 
   if (loading) {
     return (
@@ -316,65 +283,6 @@ const FreelancerSettings = () => {
                     disabled={saving}
                   >
                     {saving ? "Saving..." : "Save Changes"}
-                  </Button>
-                </div>
-              )}
-              {activeSection === "notifications" && (
-                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
-                  <h2 className="text-lg font-bold text-navy dark:text-white">
-                    Notification Preferences
-                  </h2>
-                  <div className="space-y-4">
-                    {[
-                      { key: "email", label: "Email notifications" },
-                      { key: "push", label: "Push notifications" },
-                      { key: "sms", label: "SMS alerts" },
-                      { key: "projectUpdates", label: "Project updates" },
-                      { key: "messages", label: "Message notifications" },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
-                      >
-                         <span className="text-sm text-slate-600 dark:text-slate-400">
-                          {item.label}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            toggleNotification(
-                              item.key as keyof NotificationSettings,
-                            )
-                          }
-                          className={cn(
-                            "w-12 h-6 rounded-full relative transition-colors",
-                            notificationsForm[
-                              item.key as keyof NotificationSettings
-                            ]
-                              ? "bg-teal"
-                              : "bg-slate-300 dark:bg-white/10",
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                              notificationsForm[
-                                item.key as keyof NotificationSettings
-                              ]
-                                ? "right-1"
-                                : "left-1",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="bg-teal hover:bg-teal-light text-white"
-                    onClick={handleNotificationsSave}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save Preferences"}
                   </Button>
                 </div>
               )}
@@ -509,53 +417,56 @@ const FreelancerSettings = () => {
               {activeSection === "preferences" && (
                 <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
                   <h2 className="text-lg font-bold text-navy dark:text-white">Preferences</h2>
-                  <div className="grid gap-4">
+                  <div className="grid gap-6">
+                    {/* Dark Mode Toggle */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-2">
+                          <Moon size={16} /> Dark Mode
+                        </label>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Switch between light and dark theme</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                        className={cn(
+                          "w-12 h-6 rounded-full relative transition-colors",
+                          theme === "dark" ? "bg-teal" : "bg-slate-300 dark:bg-white/10"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
+                            theme === "dark" ? "right-1" : "left-1"
+                          )}
+                        />
+                      </button>
+                    </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Language
-                      </label>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Language</label>
                       <select
                         value={preferencesForm.language}
-                        onChange={(e) =>
-                          setPreferencesForm((prev) => ({
-                            ...prev,
-                            language: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, language: e.target.value }))}
                         className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="en">English</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Timezone
-                      </label>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Timezone</label>
                       <select
                         value={preferencesForm.timezone}
-                        onChange={(e) =>
-                          setPreferencesForm((prev) => ({
-                            ...prev,
-                            timezone: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, timezone: e.target.value }))}
                         className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="Asia/Kolkata">IST (UTC+5:30)</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Currency
-                      </label>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Currency</label>
                       <select
                         value={preferencesForm.currency}
-                        onChange={(e) =>
-                          setPreferencesForm((prev) => ({
-                            ...prev,
-                            currency: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, currency: e.target.value }))}
                         className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
                       >
                         <option value="INR">INR (₹)</option>

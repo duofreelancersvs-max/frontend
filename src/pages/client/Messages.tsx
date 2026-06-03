@@ -20,9 +20,15 @@ import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
 
-const ClientMessages = () => {
+interface ClientMessagesProps {
+  isWidget?: boolean;
+  onWidgetClose?: () => void;
+}
+
+const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   const { user } = useAuth();
-  const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
+  const context = useOutletContext<ClientLayoutContext>();
+  const setSidebarOpen = context?.setSidebarOpen || (() => {});
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -41,7 +47,8 @@ const ClientMessages = () => {
 
   // Sync active conversation with unread store
   useEffect(() => {
-    setActiveConversation(selectedConversation?.id || null);
+    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    setActiveConversation(activeId || null);
     return () => setActiveConversation(null);
   }, [selectedConversation, setActiveConversation]);
 
@@ -155,7 +162,7 @@ const ClientMessages = () => {
     sendMessage: socketSendMessage,
     markAsRead,
   } = useSocket({
-    conversationId: selectedConversation?.id || null,
+    conversationId: selectedConversation?.id || (selectedConversation as any)?._id || null,
     onNewMessage: handleNewMessage,
     onMessageRead: handleMessageRead,
   });
@@ -246,27 +253,26 @@ const ClientMessages = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedConversation?.id) return;
+      const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+      if (!activeId) return;
       
       // Clear messages from other conversations immediately
       // but keep any that were already received for THIS conversation (e.g. via socket)
       setMessages((prev) => 
-        prev.filter(m => m.conversationId.toString() === selectedConversation.id.toString())
+        prev.filter(m => m.conversationId.toString() === activeId.toString())
       );
 
       // Get pending messages from store (messages received while on another page)
-      const pendingMsgs = getPendingMessages(selectedConversation.id.toString());
+      const pendingMsgs = getPendingMessages(activeId.toString());
 
       try {
-        const data = await conversationService.getMessages(
-          selectedConversation.id,
-        );
+        const data = await conversationService.getMessages(activeId);
         // Deduplicate and merge, ensuring we only keep messages for the current conversation
         setMessages((prev) => {
           const apiMessages = data.messages || [];
           const apiIds = new Set(apiMessages.map((m: any) => (m.id || m._id).toString()));
           
-          const cid = selectedConversation.id.toString();
+          const cid = activeId.toString();
 
           // Keep local messages that:
           // 1. Belong to THIS conversation
@@ -286,27 +292,27 @@ const ClientMessages = () => {
         });
 
         // Clear pending messages after merging
-        clearPendingMessages(selectedConversation.id.toString());
+        clearPendingMessages(activeId.toString());
 
-        markAsRead(selectedConversation.id);
+        markAsRead(activeId);
         // Also call the REST endpoint to reset server-side unread count
-        conversationService.markAsRead(selectedConversation.id).catch(() => {});
+        conversationService.markAsRead(activeId).catch(() => {});
         // Immediately reset unread count in local state
         setConversations((prev) =>
           prev.map((c) =>
-            (c.id === selectedConversation.id || (c as any)._id === selectedConversation.id) 
+            (c.id === activeId || (c as any)._id === activeId) 
               ? { ...c, unreadCount: 0 } 
               : c,
           ),
         );
         // Reset unread store for this conversation as well
-        resetCount(selectedConversation.id);
+        resetCount(activeId);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
     fetchMessages();
-  }, [selectedConversation?.id, markAsRead, resetCount]);
+  }, [selectedConversation?.id, (selectedConversation as any)?._id, markAsRead, resetCount]);
 
   // ─── Derived data ───────────────────────────────────────────────
 
@@ -386,7 +392,7 @@ const ClientMessages = () => {
       }
     }
     return {
-      id: conv.id,
+      id: conv.id || (conv as any)._id || "",
       participant: {
         userId: freelancer?.id || "",
         name: freelancer?.fullName || "User",
@@ -408,6 +414,7 @@ const ClientMessages = () => {
 
   const chatParticipant: ChatParticipant | null = selectedFreelancer
     ? {
+        id: selectedFreelancer.id || (selectedFreelancer as any)?._id || "",
         name: selectedFreelancer.fullName || "User",
         avatar: selectedFreelancer.avatar,
         verified: true,
@@ -451,6 +458,29 @@ const ClientMessages = () => {
       const appId = currentApplication.id || (currentApplication as any)._id;
       await applicationService.updateStatus(appId, "accepted");
       setCurrentApplication({ ...currentApplication, status: "accepted" });
+
+      const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+      if (isConnected && activeId) {
+        const contactDetails = `Hi! I have accepted your application. Here are my contact details:\nName: ${user?.fullName || "Not provided"}\nEmail: ${user?.email || "Not provided"}`;
+        
+        const optimisticMsg: Message = {
+          id: `temp-${Date.now()}`,
+          conversationId: activeId,
+          senderId: user?._id || "",
+          content: contactDetails,
+          read: false,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, optimisticMsg]);
+        setConversations((prev) =>
+          prev.map((c) =>
+            (c.id === activeId || (c as any)._id === activeId)
+              ? { ...c, lastMessage: optimisticMsg }
+              : c,
+          ),
+        );
+        socketSendMessage(activeId, contactDetails);
+      }
     } catch (err) {
       console.error("Failed to hire", err);
     }
@@ -468,7 +498,7 @@ const ClientMessages = () => {
   };
 
   const handleSelectConversation = (id: string) => {
-    const convo = conversations.find((c) => c.id === id);
+    const convo = conversations.find((c) => c.id === id || (c as any)._id === id);
     if (convo) {
       setSelectedConversation(convo);
       setMobileView("chat");
@@ -476,12 +506,13 @@ const ClientMessages = () => {
   };
 
   const handleAcceptTerms = async () => {
-    if (selectedConversation) {
+    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    if (selectedConversation && activeId) {
       try {
-        await conversationService.acceptTerms(selectedConversation.id);
+        await conversationService.acceptTerms(activeId);
         setConversations((prev) =>
           prev.map((c) =>
-            c.id === selectedConversation.id
+            (c.id === activeId || (c as any)._id === activeId)
               ? {
                   ...c,
                   termsAccepted: {
@@ -511,14 +542,15 @@ const ClientMessages = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedConversation || !isConnected) return;
+    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    if (!messageInput.trim() || !selectedConversation || !isConnected || !activeId) return;
     const content = messageInput;
     setMessageInput("");
 
     // Optimistically update current chat view
     const optimisticMsg: Message = {
       id: `temp-${Date.now()}`,
-      conversationId: selectedConversation.id,
+      conversationId: activeId,
       senderId: user?._id || "",
       content,
       read: false,
@@ -530,7 +562,7 @@ const ClientMessages = () => {
     // Update conversation's last message in the sidebar promptly
     setConversations((prev) =>
       prev.map((c) =>
-        c.id === selectedConversation.id
+        (c.id === activeId || (c as any)._id === activeId)
           ? {
               ...c,
               lastMessage: optimisticMsg,
@@ -540,7 +572,7 @@ const ClientMessages = () => {
     );
 
     console.log("[Socket] Emitting message:send for content:", content);
-    socketSendMessage(selectedConversation.id, content).then((res) => {
+    socketSendMessage(activeId, content).then((res) => {
         if (!res.success) {
             console.error("[Socket] Failed to send message via socket:", res.error);
             // Optionally handle UI rollback or error state
@@ -556,10 +588,12 @@ const ClientMessages = () => {
    return (
     <div className="h-full flex flex-col bg-slate-50 dark:bg-background font-sans overflow-hidden">
        {/* Header */}
-      <DashboardHeader
-        title="Messages"
-        onMenuClick={() => setSidebarOpen(true)}
-      />
+       {!isWidget && (
+         <DashboardHeader
+           title="Messages"
+           onMenuClick={() => setSidebarOpen(true)}
+         />
+       )}
 
        {/* Chat Container */}
       <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-background">
@@ -575,8 +609,10 @@ const ClientMessages = () => {
           onlineUsers={onlineUsers}
           role="client"
           className={cn(
-            "w-full md:w-80 flex-shrink-0",
-            mobileView === "chat" && "hidden md:flex",
+            "flex-shrink-0",
+            isWidget
+              ? (mobileView === "chat" ? "hidden" : "flex w-full")
+              : (mobileView === "chat" ? "hidden md:flex md:w-80 w-full" : "flex md:w-80 w-full")
           )}
         />
 
@@ -600,7 +636,13 @@ const ClientMessages = () => {
           applicationStatus={currentApplication?.status}
           onHire={handleHire}
           onReject={handleReject}
-          className={cn(mobileView === "list" && "hidden md:flex")}
+          className={cn(
+            "flex-1",
+            isWidget
+              ? (mobileView === "list" ? "hidden" : "flex")
+              : (mobileView === "list" ? "hidden md:flex" : "flex")
+          )}
+          isWidget={isWidget}
         />
 
         {/* Info Panel */}

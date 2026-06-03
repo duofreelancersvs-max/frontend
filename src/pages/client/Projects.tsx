@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { projectService } from "@/services";
 import { useSocket } from "@/hooks/useSocket";
 import type { Project, ProjectStats } from "@/services";
@@ -663,10 +663,7 @@ const ClientProjects = () => {
                             </td>
                             <td className="px-6 py-4">
                               <p className="text-sm font-medium text-navy dark:text-white">
-                                {project.budget?.minAmount !== undefined &&
-                                project.budget?.maxAmount !== undefined
-                                  ? `₹${project.budget.minAmount.toLocaleString()} - ₹${project.budget.maxAmount.toLocaleString()}`
-                                  : "Budget not set"}
+                                {formatBudget(project.budget?.minAmount, project.budget?.maxAmount)}
                               </p>
                             </td>
                             <td className="px-6 py-4">

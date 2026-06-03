@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
+import { useOutletContext, useLocation, useNavigate, Link } from "react-router-dom";
 import {
   Search,
   Star,
@@ -53,9 +53,15 @@ TERMS AND CONDITIONS FOR FREELANCER MESSAGING
 By accepting these terms, you agree to abide by all platform rules and guidelines.
 `;
 
-const FreelancerMessages = () => {
+interface FreelancerMessagesProps {
+  isWidget?: boolean;
+  onWidgetClose?: () => void;
+}
+
+const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
   const { user } = useAuth();
-  const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const context = useOutletContext<FreelancerLayoutContext>();
+  const setSidebarOpen = context?.setSidebarOpen || (() => {});
   const { setActiveConversation, addPendingMessage, getPendingMessages, clearPendingMessages, resetCount } = useUnreadStore();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
@@ -274,7 +280,7 @@ const FreelancerMessages = () => {
     return {
       id: conv.id,
       client: {
-        userId: clientParticipant?.id || "",
+        userId: clientParticipant?.id || (clientParticipant as any)?._id || "",
         name: clientParticipant?.fullName || "Unknown",
         avatar: clientParticipant?.avatar,
         verified: true,
@@ -352,20 +358,23 @@ const FreelancerMessages = () => {
   );
 
   return (
-    <div className="w-full h-screen flex flex-col bg-slate-50 dark:bg-background overflow-hidden relative">
+    <div className={cn("w-full flex flex-col bg-slate-50 dark:bg-background overflow-hidden relative", isWidget ? "h-full" : "h-[100dvh]")}>
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
-        {/* Header Bar */}
-        <DashboardHeader
-          title="Messages"
-          onMenuClick={() => setSidebarOpen(true)}
-        />
+        {/* Header */}
+        {!isWidget && (
+          <DashboardHeader
+            title="Messages"
+            onMenuClick={() => setSidebarOpen(true)}
+          />
+        )}
 
         {/* Three Column Content */}
         <div className="flex-1 flex overflow-hidden relative">
           {/* COLUMN 1: Conversations List */}
           <div className={cn(
-            "w-full lg:w-80 border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0A121E] flex flex-col flex-shrink-0",
-            selectedConversation ? "hidden lg:flex" : "flex"
+            "border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0A121E] flex flex-col flex-shrink-0",
+            isWidget ? "w-full" : "w-full lg:w-80",
+            selectedConversation ? (isWidget ? "hidden" : "hidden lg:flex") : "flex w-full"
           )}>
             {/* Search */}
             <div className="p-4 border-b border-slate-100 dark:border-white/5">
@@ -467,10 +476,11 @@ const FreelancerMessages = () => {
           <ChatArea
             className={cn(
               "flex-1",
-              selectedConversation ? "flex" : "hidden lg:flex"
+              selectedConversation ? "flex" : (isWidget ? "hidden" : "hidden lg:flex")
             )}
             onBack={() => setSelectedConversation(null)}
             participant={selectedConversation ? {
+              id: selectedConvData?.client.userId || "",
               name: selectedConvData?.client.name || selectedConversation.participants?.[0]?.fullName || "Unknown",
               avatar: "",
               verified: true,
@@ -494,15 +504,17 @@ const FreelancerMessages = () => {
             }}
             showInfoPanel={showInfoPanel}
             onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
+            isWidget={isWidget}
           />
 
           {/* COLUMN 3: Client Info Panel */}
           {selectedConversation && (
             <div className={cn(
-              "absolute lg:static inset-y-0 right-0 z-30 bg-white dark:bg-[#0A121E] border-l border-slate-200 dark:border-white/5 overflow-y-auto shadow-xl lg:shadow-none transition-transform duration-300",
+              "absolute inset-y-0 right-0 z-30 bg-white dark:bg-[#0A121E] border-l border-slate-200 dark:border-white/5 overflow-y-auto transition-transform duration-300",
+              !isWidget && "lg:static shadow-xl lg:shadow-none",
               showInfoPanel 
-                ? "translate-x-0 lg:translate-x-0 flex flex-col w-full sm:w-80" 
-                : "translate-x-full lg:translate-x-0 lg:hidden"
+                ? (isWidget ? "translate-x-0 flex flex-col w-full" : "translate-x-0 lg:translate-x-0 flex flex-col w-full sm:w-80") 
+                : (isWidget ? "translate-x-full hidden" : "translate-x-full lg:translate-x-0 lg:hidden")
             )}>
               {/* Client Header */}
               <div className="p-6 border-b border-slate-100 dark:border-white/5 text-center">
@@ -575,24 +587,24 @@ const FreelancerMessages = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="p-6">
-                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
-                  Quick Actions
-                </h4>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
-                  >
-                    <ExternalLink size={16} className="mr-2" />
-                    View Project
-                  </Button>
-                  <Button className="w-full justify-start bg-teal hover:bg-teal-light text-white">
-                    <FileSignature size={16} className="mr-2" />
-                    Send Proposal
-                  </Button>
+              {selectedConversation.project?.id && (
+                <div className="p-6">
+                  <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
+                    Quick Actions
+                  </h4>
+                  <div className="space-y-2">
+                    <Link to={`/freelancer/project/${selectedConversation.project.id}`} className="block">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
+                      >
+                        <ExternalLink size={16} className="mr-2" />
+                        View Project
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import type { Application } from "@/services";
 import { useProjects } from "@/hooks/queries/useProjects";
@@ -170,7 +170,7 @@ const FreelancerDashboard = () => {
     }),
     status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
     budget: app.project
-      ? `₹${app.project.budget.minAmount?.toLocaleString() || 0} - ₹${app.project.budget.maxAmount?.toLocaleString() || 0}`
+      ? formatBudget(app.project.budget?.minAmount, app.project.budget?.maxAmount)
       : "N/A",
     fullData: app,
   }));
@@ -179,7 +179,7 @@ const FreelancerDashboard = () => {
     id: project._id || project.id || `project-${index}`,
     title: project.title,
     client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
-    budget: `₹${project.budget.minAmount?.toLocaleString() || 0} - ₹${project.budget.maxAmount?.toLocaleString() || 0}`,
+    budget: formatBudget(project.budget.minAmount, project.budget.maxAmount),
     skillsMatch: 85,
     postedTime: new Date(project.createdAt).toLocaleDateString("en-US", {
       month: "short",

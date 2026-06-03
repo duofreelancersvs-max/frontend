@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Link,
   useNavigate,
@@ -15,7 +15,6 @@ import {
   Lightbulb,
   Calendar,
   MapPin,
-  Users,
   Edit2,
   CheckCircle,
   AlertCircle,
@@ -29,28 +28,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
-import { publicService, type CategoryWithSkills } from "@/services/public.service";
+import {
+  publicService,
+  type CategoryWithSkills,
+} from "@/services/public.service";
 import { toast } from "react-toastify";
 
 // Form Options
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
-
 // We will fetch categories and skills dynamically from the backend
-
-const experienceLevels = [
-  {
-    value: "entry",
-    label: "Entry Level",
-    desc: "Less than 2 years experience",
-  },
-  {
-    value: "intermediate",
-    label: "Intermediate",
-    desc: "2-5 years experience",
-  },
-  { value: "expert", label: "Expert", desc: "5+ years experience" },
-];
 
 const durations = ["Less than 1 week", "1-4 weeks", "1-3 months", "3+ months"];
 
@@ -60,6 +47,9 @@ const steps = [
   { id: 3, label: "Budget", icon: Wallet },
   { id: 4, label: "Review", icon: Eye },
 ];
+
+// OptimizedDateInput removed as it might be causing more perceived lag than helping,
+// and we will use an uncontrolled ref-based approach inline.
 
 const PostProject = () => {
   const navigate = useNavigate();
@@ -83,7 +73,6 @@ const PostProject = () => {
     description: "",
     // Step 2
     skills: [] as string[],
-    experienceLevel: "",
     duration: "",
     location: "remote",
     city: "",
@@ -100,7 +89,9 @@ const PostProject = () => {
 
   // Dynamic Data
   const [categories, setCategories] = useState<string[]>([]);
-  const [skillsByCategory, setSkillsByCategory] = useState<Record<string, string[]>>({});
+  const [skillsByCategory, setSkillsByCategory] = useState<
+    Record<string, string[]>
+  >({});
   const [allSkillOptions, setAllSkillOptions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -109,11 +100,11 @@ const PostProject = () => {
         const data = await publicService.getCategoriesWithSkills();
         const catNames = data.map((c: CategoryWithSkills) => c.name);
         setCategories(catNames);
-        
+
         const skillsMap: Record<string, string[]> = {};
         const allSkills: string[] = [];
         data.forEach((c: CategoryWithSkills) => {
-          const skillNames = (c.skills || []).map(s => s.skillName);
+          const skillNames = (c.skills || []).map((s) => s.skillName);
           skillsMap[c.name] = skillNames;
           allSkills.push(...skillNames);
         });
@@ -136,8 +127,8 @@ const PostProject = () => {
             title: project.title || "",
             categories: project.category ? [project.category] : [],
             description: project.description || "",
-            skills: (project as any).requiredSkills || (project as any).skills || [],
-            experienceLevel: "",
+            skills:
+              (project as any).requiredSkills || (project as any).skills || [],
             duration: "",
             location: project.location?.type || "remote",
             city: project.location?.city || "",
@@ -257,10 +248,8 @@ const PostProject = () => {
       if (formData.categories.length === 0) missingFields.push("Category");
       if (!formData.description?.trim()) missingFields.push("Description");
       if (formData.skills.length === 0) missingFields.push("Skills");
-      if (!formData.experienceLevel) missingFields.push("Experience Level");
       if (!formData.duration) missingFields.push("Duration");
-      if (!formData.budget)
-        missingFields.push("Budget");
+      if (!formData.budget) missingFields.push("Budget");
       if (!formData.deadline) missingFields.push("Deadline");
       if (
         formData.location === "onsite" &&
@@ -273,16 +262,20 @@ const PostProject = () => {
         toast.error(
           `Please provide all mandatory fields: ${missingFields.join(", ")}`,
         );
-        
+
         const firstMissing = missingFields[0];
         if (["Title", "Category", "Description"].includes(firstMissing)) {
           setCurrentStep(1);
-        } else if (["Skills", "Experience Level", "Duration", "Location (City & Country)"].includes(firstMissing)) {
+        } else if (
+          ["Skills", "Duration", "Location (City & Country)"].includes(
+            firstMissing,
+          )
+        ) {
           setCurrentStep(2);
         } else if (["Budget", "Deadline"].includes(firstMissing)) {
           setCurrentStep(3);
         }
-        
+
         topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -321,7 +314,10 @@ const PostProject = () => {
         isEditing ? "Error updating project:" : "Error creating project:",
         error,
       );
-      const msg = error?.response?.data?.error?.message || error?.message || "Something went wrong";
+      const msg =
+        error?.response?.data?.error?.message ||
+        error?.message ||
+        "Something went wrong";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -329,13 +325,19 @@ const PostProject = () => {
   };
 
   // Skills filtered by selected category + search
-  const availableSkills = formData.categories.length > 0
-    ? (skillsByCategory[formData.categories[0]] || [])
-    : allSkillOptions;
+  const availableSkills = React.useMemo(() => {
+    return formData.categories.length > 0
+      ? skillsByCategory[formData.categories[0]] || []
+      : allSkillOptions;
+  }, [formData.categories, skillsByCategory, allSkillOptions]);
 
-  const filteredSkills = availableSkills.filter((skill) =>
-    skill.toLowerCase().includes(skillSearch.toLowerCase()),
-  );
+  const filteredSkills = React.useMemo(() => {
+    if (!skillSearch) return availableSkills;
+    const lowerSearch = skillSearch.toLowerCase();
+    return availableSkills.filter((skill) =>
+      skill.toLowerCase().includes(lowerSearch),
+    );
+  }, [availableSkills, skillSearch]);
 
   if (loadingProject) {
     return (
@@ -346,7 +348,10 @@ const PostProject = () => {
   }
 
   return (
-    <div ref={topRef} className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
+    <div
+      ref={topRef}
+      className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans"
+    >
       {/* Header Bar */}
       {!isAdmin && (
         <DashboardHeader
@@ -393,7 +398,9 @@ const PostProject = () => {
                       <div
                         className={cn(
                           "flex-1 h-0.5 mx-3",
-                          currentStep > step.id ? "bg-teal" : "bg-slate-200 dark:bg-white/10",
+                          currentStep > step.id
+                            ? "bg-teal"
+                            : "bg-slate-200 dark:bg-white/10",
                         )}
                       />
                     )}
@@ -431,8 +438,6 @@ const PostProject = () => {
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
                       Project Categories <span className="text-red-500">*</span>
                     </label>
-
-
 
                     {/* Available Categories */}
                     <div className="flex flex-wrap gap-2">
@@ -563,62 +568,6 @@ const PostProject = () => {
                     </div>
                   </div>
 
-                  {/* Experience Level */}
-                  <div>
-                    <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
-                      Experience Level <span className="text-red-500">*</span>
-                    </label>
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      {experienceLevels.map((level) => (
-                        <label
-                          key={level.value}
-                          className={cn(
-                            "relative p-4 rounded-xl border-2 cursor-pointer transition-all",
-                            formData.experienceLevel === level.value
-                              ? "border-teal bg-teal/5 dark:bg-teal/10"
-                              : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20",
-                          )}
-                        >
-                          <input
-                            type="radio"
-                            name="experienceLevel"
-                            value={level.value}
-                            checked={formData.experienceLevel === level.value}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "experienceLevel",
-                                e.target.value,
-                              )
-                            }
-                            className="sr-only"
-                          />
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={cn(
-                                "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                                formData.experienceLevel === level.value
-                                  ? "border-teal bg-teal"
-                                  : "border-slate-300",
-                              )}
-                            >
-                              {formData.experienceLevel === level.value && (
-                                <Check size={12} className="text-white" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-navy dark:text-white">
-                                {level.label}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {level.desc}
-                              </p>
-                            </div>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Project Duration */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
@@ -708,7 +657,10 @@ const PostProject = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <MapPin size={16} className="text-slate-400 dark:text-slate-500" />
+                            <MapPin
+                              size={16}
+                              className="text-slate-400 dark:text-slate-500"
+                            />
                             <span className="font-medium text-navy dark:text-white capitalize">
                               {loc === "onsite" ? "On-site" : loc}
                             </span>
@@ -810,7 +762,7 @@ const PostProject = () => {
 
                 {/* Navigation */}
                 <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
-                   <Button
+                  <Button
                     variant="outline"
                     onClick={prevStep}
                     className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
@@ -839,7 +791,8 @@ const PostProject = () => {
                   {/* Budget */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
-                      Project Budget (INR) <span className="text-red-500">*</span>
+                      Project Budget (INR){" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg font-medium">
@@ -877,30 +830,8 @@ const PostProject = () => {
                           handleInputChange("deadline", e.target.value)
                         }
                         className="h-12 pl-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
+                        style={{ colorScheme: "light dark" }}
                       />
-                    </div>
-                  </div>
-
-                  {/* Visibility */}
-                  <div>
-                    <label className="block text-sm font-semibold text-navy dark:text-white mb-3">
-                      Project Visibility
-                    </label>
-                     <div className="p-4 rounded-xl border-2 border-teal bg-teal/5 dark:bg-teal/10">
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 mt-0.5 rounded-full bg-teal border-2 border-teal flex items-center justify-center flex-shrink-0">
-                          <Check size={12} className="text-white" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Users size={16} className="text-teal" />
-                            <p className="font-semibold text-navy dark:text-white">Public</p>
-                          </div>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            All freelancers can see and apply to this project
-                          </p>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -950,7 +881,7 @@ const PostProject = () => {
                     </div>
                     <div className="grid gap-3">
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Title
                         </p>
                         <p className="font-medium text-navy dark:text-white">
@@ -966,7 +897,7 @@ const PostProject = () => {
                             formData.categories.map((cat) => (
                               <span
                                 key={cat}
-                                 className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
+                                className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
                               >
                                 {cat}
                               </span>
@@ -979,7 +910,7 @@ const PostProject = () => {
                         </div>
                       </div>
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Description
                         </p>
                         <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -1013,7 +944,7 @@ const PostProject = () => {
                             formData.skills.map((skill) => (
                               <span
                                 key={skill}
-                                 className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
+                                className="px-2 py-1 bg-teal/10 dark:bg-teal/20 text-teal rounded-md text-xs font-medium"
                               >
                                 {skill}
                               </span>
@@ -1026,14 +957,6 @@ const PostProject = () => {
                         </div>
                       </div>
                       <div className="grid sm:grid-cols-3 gap-3">
-                         <div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
-                            Experience Level
-                          </p>
-                          <p className="font-medium text-navy dark:text-white capitalize">
-                            {formData.experienceLevel || "Any"}
-                          </p>
-                        </div>
                         <div>
                           <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                             Duration
@@ -1052,7 +975,7 @@ const PostProject = () => {
                         </div>
                       </div>
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Project Location
                         </p>
                         <p className="font-medium text-navy dark:text-white">
@@ -1082,7 +1005,7 @@ const PostProject = () => {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Budget
                         </p>
                         <p className="font-medium text-navy dark:text-white">
@@ -1092,7 +1015,7 @@ const PostProject = () => {
                         </p>
                       </div>
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Deadline
                         </p>
                         <p className="font-medium text-navy dark:text-white">
@@ -1181,7 +1104,7 @@ const PostProject = () => {
                   <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
                     <Lightbulb size={18} className="text-gold" />
                   </div>
-                   <h3 className="font-semibold text-navy dark:text-white">
+                  <h3 className="font-semibold text-navy dark:text-white">
                     Tips for a Great Post
                   </h3>
                 </div>
@@ -1247,23 +1170,27 @@ const PostProject = () => {
             <div className="w-16 h-16 rounded-full bg-teal/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={32} className="text-teal" />
             </div>
-             <h3 className="text-2xl font-bold text-navy dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-navy dark:text-white mb-2">
               Project Posted Successfully!
             </h3>
-             <p className="text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-slate-500 dark:text-slate-400 mb-6">
               Your project is now live. Freelancers will start applying soon.
               You'll receive notifications for new applications.
             </p>
             <div className="flex gap-3">
-               <Button
+              <Button
                 variant="outline"
-                onClick={() => navigate(isAdmin ? "/admin/dashboard" : "/client/dashboard")}
+                onClick={() =>
+                  navigate(isAdmin ? "/admin/dashboard" : "/client/dashboard")
+                }
                 className="flex-1 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
               >
                 Go to Dashboard
               </Button>
               <Button
-                onClick={() => navigate(isAdmin ? "/admin/projects" : "/client/projects")}
+                onClick={() =>
+                  navigate(isAdmin ? "/admin/projects" : "/client/projects")
+                }
                 className="flex-1 bg-teal hover:bg-teal-light text-white"
               >
                 View Projects

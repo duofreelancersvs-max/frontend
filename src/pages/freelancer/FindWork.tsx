@@ -16,7 +16,7 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
@@ -24,6 +24,7 @@ import { TermsModal } from "@/components/modals/TermsModal";
 import { conversationService } from "@/services";
 import { useProjects } from "@/hooks/queries/useProjects";
 import { useCategories } from "@/hooks/queries/useCategories";
+import { useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -69,6 +70,12 @@ const FindWork = () => {
   const { data: projectsData, isLoading: loadingProjects, error: projectsError } = useProjects({ limit: 50 });
   const projects = projectsData?.projects || [];
   const error = projectsError ? "Failed to load projects. Please try again." : null;
+
+  const { data: myAppsData } = useMyApplications();
+  const myApplications = myAppsData?.applications || [];
+  const appStatusByProjectId = new Map(
+    myApplications.map(app => [app.project?.id || app.project?._id || app.projectId, app.status])
+  );
 
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -564,8 +571,7 @@ const FindWork = () => {
                             <div className="flex items-center gap-1.5">
                               <Wallet size={14} className="text-teal" />
                               <span className="font-bold text-navy dark:text-white text-sm">
-                                ₹{project.budget.minAmount?.toLocaleString() || 0} - ₹
-                                {project.budget.maxAmount?.toLocaleString() || 0}
+                                {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
                               </span>
                               <span className="text-[10px] text-slate-400 uppercase">
                                 ({project.budget.type})
@@ -596,12 +602,50 @@ const FindWork = () => {
                             </div>
                           </div>
 
-                          <Button
-                            className="w-full bg-teal hover:bg-teal-light text-white font-bold py-6 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-                            onClick={() => handleApplyClick(project)}
-                          >
-                            Apply Now
-                          </Button>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              className="flex-1 bg-teal hover:bg-teal-light text-white font-bold py-2 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                              onClick={() => handleApplyClick(project)}
+                            >
+                              Apply
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1 border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent py-2 rounded-xl transition-all"
+                              onClick={() => navigate(`/freelancer/project/${project._id || project.id}`)}
+                            >
+                              View Details
+                            </Button>
+                            
+                            {appStatusByProjectId.get(project._id || project.id || "") === "rejected" ? (
+                              <Button
+                                variant="secondary"
+                                disabled
+                                className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-500 py-2 rounded-xl text-[11px]"
+                              >
+                                Rejected
+                              </Button>
+                            ) : (appStatusByProjectId.get(project._id || project.id || "") === "hired" || appStatusByProjectId.get(project._id || project.id || "") === "shortlisted") ? (
+                              <Button
+                                variant="secondary"
+                                className="flex-1 bg-royal-blue hover:bg-royal-blue/90 text-white dark:bg-royal-blue dark:text-white py-2 rounded-xl transition-all shadow-md hover:shadow-lg"
+                                onClick={() => {
+                                  navigate(`/freelancer/messages?projectId=${project._id || project.id}`);
+                                }}
+                              >
+                                Message Now
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                disabled
+                                className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-slate-500 py-2 rounded-xl"
+                                title="Available after shortlist or hire"
+                              >
+                                Message Now
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -730,8 +774,6 @@ const FindWork = () => {
             },
             budget: selectedProject.budget,
           }}
-          applicationsRemaining={5}
-          subscriptionPlan="Free"
         />
       )}
     </div>

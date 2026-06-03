@@ -4,6 +4,7 @@ import {
   useParams,
   useOutletContext,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
@@ -35,6 +36,12 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
+  const location = useLocation();
+  
+  const [activeTab, setActiveTab] = useState(
+    location.pathname.endsWith("applications") ? "applications" : "details"
+  );
+  
   const [applicationFilter, setApplicationFilter] = useState("all");
   const [applicationSort, setApplicationSort] = useState("recent");
   const [project, setProject] = useState<Project | null>(null);
@@ -310,8 +317,47 @@ const ProjectDetails = () => {
           </div>
         </div>
 
+        {/* TABS */}
+        <div className="flex border-b border-slate-200 dark:border-white/10 mt-6">
+          <button
+            onClick={() => setActiveTab("details")}
+            className={cn(
+              "px-6 py-3 font-medium text-sm border-b-2 transition-colors",
+              activeTab === "details"
+                ? "border-teal text-teal"
+                : "border-transparent text-slate-500 hover:text-navy dark:text-slate-400 dark:hover:text-white"
+            )}
+          >
+            Project Details
+          </button>
+          {project.status === "open" && (
+            <button
+              onClick={() => setActiveTab("applications")}
+              className={cn(
+                "flex items-center gap-2 px-6 py-3 font-medium text-sm border-b-2 transition-colors",
+                activeTab === "applications"
+                  ? "border-teal text-teal"
+                  : "border-transparent text-slate-500 hover:text-navy dark:text-slate-400 dark:hover:text-white"
+              )}
+            >
+              Applications
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full text-xs",
+                  activeTab === "applications"
+                    ? "bg-teal/10 text-teal"
+                    : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400"
+                )}
+              >
+                {applications.length}
+              </span>
+            </button>
+          )}
+        </div>
+
         {/* PROJECT DETAILS GRID */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        {activeTab === "details" && (
+        <div className="grid lg:grid-cols-3 gap-6 mt-6">
           {/* LEFT COLUMN - Project Details */}
           <div className="lg:col-span-2 space-y-6">
              {/* Description */}
@@ -410,10 +456,11 @@ const ProjectDetails = () => {
             </div>
           </div>
         </div>
+        )}
 
-         {/* APPLICATIONS SECTION */}
-        {project.status === "open" && (
-          <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+        {/* APPLICATIONS SECTION */}
+        {activeTab === "applications" && project.status === "open" && (
+          <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden mt-6">
             {/* Header */}
             <div className="p-6 border-b border-slate-100 dark:border-white/10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

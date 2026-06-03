@@ -8,7 +8,6 @@ import {
   CreditCard,
   Ban,
   Building2,
-  FileSignature,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -126,7 +125,7 @@ const ChatInfoPanel = ({
           </h4>
           <Link
             to={
-              role === "client" ? `/client/project/${project.id}` : `/projects`
+              role === "client" ? `/client/project/${project.id}` : `/freelancer/project/${project.id}`
             }
             className="block p-3 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
           >
@@ -141,49 +140,52 @@ const ChatInfoPanel = ({
       )}
 
       {/* Quick Actions */}
-      <div className="p-5 space-y-2">
-        <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
-          Quick Actions
-        </h4>
-        {role === "client" ? (
-          <>
-            <Link to={`/freelancer/${participant.userId}`} className="block">
+      {(role === "client" || (role === "freelancer" && project)) && (
+        <div className="p-5 space-y-2">
+          <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
+            Quick Actions
+          </h4>
+          {role === "client" ? (
+            <>
+              <Link to={`/freelancer/${participant.userId}`} className="block">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start h-9 text-sm border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
+                >
+                  <User size={14} className="mr-2" /> View Profile
+                </Button>
+              </Link>
               <Button
-                variant="outline"
                 size="sm"
-                className="w-full justify-start h-9 text-sm border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
+                className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
               >
-                <User size={14} className="mr-2" /> View Profile
+                <CreditCard size={14} className="mr-2" /> Hire Freelancer
               </Button>
-            </Link>
-            <Button
-              size="sm"
-              className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
-            >
-              <CreditCard size={14} className="mr-2" /> Hire Freelancer
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
-            >
-              <Ban size={14} className="mr-2" /> Block User
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              className="w-full justify-start border-slate-200"
-            >
-              <ExternalLink size={16} className="mr-2" /> View Project
-            </Button>
-            <Button className="w-full justify-start bg-teal hover:bg-teal-light text-white">
-              <FileSignature size={16} className="mr-2" /> Send Proposal
-            </Button>
-          </>
-        )}
-      </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+              >
+                <Ban size={14} className="mr-2" /> Block User
+              </Button>
+            </>
+          ) : (
+            <>
+              {project && (
+                <Link to={`/freelancer/project/${project.id}`} className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
+                  >
+                    <ExternalLink size={16} className="mr-2" /> View Project
+                  </Button>
+                </Link>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* Online Status Footer */}
       <div className="mt-auto p-5 border-t border-slate-100">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   X,
   Star,
@@ -8,7 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { applicationService } from "@/services";
 
 interface ProjectData {
@@ -35,8 +35,6 @@ interface ProjectApplicationModalProps {
   onClose: () => void;
   onSuccess?: (conversationId?: string) => void;
   project: ProjectData;
-  applicationsRemaining?: number;
-  subscriptionPlan?: "Free" | "Pro" | "Premium";
 }
 
 const durationOptions = [
@@ -52,8 +50,6 @@ const ProjectApplicationModal = ({
   onClose,
   onSuccess,
   project,
-  applicationsRemaining = 5,
-  subscriptionPlan = "Free",
 }: ProjectApplicationModalProps) => {
   const navigate = useNavigate();
   const [coverLetter, setCoverLetter] = useState("");
@@ -205,8 +201,7 @@ const ProjectApplicationModal = ({
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Budget</p>
                     <div className="flex items-center gap-1">
                       <span className="font-medium text-navy dark:text-white text-sm">
-                        ₹{(project.budget.minAmount || 0).toLocaleString()} - ₹
-                        {(project.budget.maxAmount || 0).toLocaleString()}
+                        {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
                       </span>
                     </div>
                   </div>
@@ -374,20 +369,6 @@ const ProjectApplicationModal = ({
                 </div>
               )}
 
-              {/* Applications Remaining (for Free plan) */}
-              {subscriptionPlan === "Free" && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-4 flex items-center justify-center gap-1">
-                  <AlertCircle size={12} />
-                  You have {applicationsRemaining} applications remaining this
-                  month.{" "}
-                  <Link
-                    to="/freelancer/subscription"
-                    className="text-teal font-medium hover:underline"
-                  >
-                    Upgrade
-                  </Link>
-                </p>
-              )}
 
               <div className="flex flex-col-reverse sm:flex-row gap-3">
                 <Button

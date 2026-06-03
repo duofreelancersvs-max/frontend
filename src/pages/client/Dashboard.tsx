@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
-import { cn } from "@/lib/utils";
+import { cn, formatBudget } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProjects } from "@/hooks/queries/useProjects";
 import {
@@ -91,10 +91,7 @@ const ClientDashboard = () => {
             day: "numeric",
           })
         : "No deadline",
-      budget:
-        p.budget?.minAmount !== undefined && p.budget?.maxAmount !== undefined
-          ? `₹${p.budget.minAmount.toLocaleString()} - ₹${p.budget.maxAmount.toLocaleString()}`
-          : "Budget not set",
+      budget: formatBudget(p.budget?.minAmount, p.budget?.maxAmount),
     }));
 
   const pendingApplications = (applications || []).filter(
