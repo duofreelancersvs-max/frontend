@@ -230,7 +230,7 @@ const HowItWorks = () => {
                   <div className="flex-1 w-full">
                     <div className="relative group">
                       <div className={cn(
-                        "aspect-[4/3] rounded-[2.5rem] bg-gradient-to-br p-[1px] overflow-hidden shadow-lg",
+                        "aspect-[4/3] rounded-[2.5rem] bg-gradient-to-br p-px overflow-hidden shadow-lg",
                         step.color
                       )}>
                         <div className="h-full w-full bg-white dark:bg-background/90 rounded-[2.4rem] flex items-center justify-center relative overflow-hidden">

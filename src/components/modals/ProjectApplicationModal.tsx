@@ -6,10 +6,16 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatBudget } from "@/lib/utils";
 import { applicationService } from "@/services";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
+import { PlanLimitWarning } from "@/components/feature-gate";
+import { useUpgradeModalStore } from "@/stores/upgrade-modal.store";
+import type { PlanErrorMeta, PlanErrorCode } from "@/types/feature-gate.types";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProjectData {
   id: string;
@@ -52,6 +58,8 @@ const ProjectApplicationModal = ({
   project,
 }: ProjectApplicationModalProps) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const gate = useFeatureGate();
   const [coverLetter, setCoverLetter] = useState("");
   const [estimatedDuration, setEstimatedDuration] = useState("");
   const [proposedRate, setProposedRate] = useState("");
@@ -61,7 +69,9 @@ const ProjectApplicationModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const openUpgradeModal = useUpgradeModalStore((s) => s.open);
 
+  const isGateClosed = gate.featureGatesEnabled && !gate.canApply;
   const maxCoverLetterLength = 1000;
 
   const handleQuestionChange = (index: number, value: string) => {
@@ -103,6 +113,18 @@ const ProjectApplicationModal = ({
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    // Pre-flight gate: if the user has hit the limit, surface the upgrade
+    // modal instead of burning a round-trip to the server.
+    if (isGateClosed) {
+      openUpgradeModal("limit", {
+        limit: gate.usage?.limit,
+        current: gate.usage?.used,
+        resetsAt: gate.usage?.resetsAt,
+        planName: gate.context?.planName,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -115,24 +137,50 @@ const ProjectApplicationModal = ({
       });
       const convId = (result as any)?.conversationId;
 
+      // Server returned a fresh usage snapshot — refetch the gate so other
+      // parts of the UI (banner, indicator) update in lock-step.
+      gate.refetch();
+      
+      // Invalidate applications query to ensure "Apply Now" updates to "Applied"
+      queryClient.invalidateQueries({ queryKey: ["myApplications"] });
+
       handleClose();
 
-      if (convId) {
+      if (onSuccess) {
+        onSuccess(convId);
+      } else if (convId) {
         navigate("/freelancer/messages", {
           state: { conversationId: convId },
         });
-      } else if (onSuccess) {
-        onSuccess(convId);
       } else {
         navigate("/freelancer/applications");
       }
     } catch (err: any) {
       console.error("[ProjectApplicationModal] Submit error:", err);
+      const code: PlanErrorCode | undefined = err?.data?.error?.code;
+      const meta: PlanErrorMeta | undefined = err?.data?.error?.meta;
+      if (
+        code === "PLAN_LIMIT_EXCEEDED" ||
+        code === "TRIAL_EXPIRED" ||
+        code === "UPGRADE_REQUIRED" ||
+        code === "FEATURE_NOT_AVAILABLE"
+      ) {
+        openUpgradeModal(
+          code === "TRIAL_EXPIRED"
+            ? "trial_expired"
+            : code === "FEATURE_NOT_AVAILABLE"
+              ? "feature_locked"
+              : "limit",
+          meta,
+        );
+        gate.refetch();
+        return;
+      }
       // Try to extract the clearest message from the error object
-      const msg = 
-        err.message || 
-        err.response?.data?.error?.message || 
-        err.response?.data?.message || 
+      const msg =
+        err.message ||
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
         "Failed to submit application. Please try again.";
       setSubmitError(msg);
     } finally {
@@ -177,6 +225,8 @@ const ProjectApplicationModal = ({
 
             {/* CONTENT */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-6">
+              {/* Plan limit / usage warning */}
+              <PlanLimitWarning />
               {/* PROJECT SUMMARY */}
               <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 border border-transparent dark:border-white/5">
                 <h3 className="text-sm font-semibold text-navy dark:text-white mb-3">
@@ -191,7 +241,7 @@ const ProjectApplicationModal = ({
                       </span>
                       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gold/10 rounded-lg shrink-0">
                         <Star size={10} className="text-gold fill-gold" />
-                        <span className="text-[10px] font-bold text-gold">
+                        <span className="text-xxs font-bold text-gold">
                           {project.client.rating || 0}
                         </span>
                       </div>
@@ -382,12 +432,18 @@ const ProjectApplicationModal = ({
                 <Button
                   className="w-full sm:flex-1 bg-teal hover:bg-teal-light text-white"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isGateClosed}
+                  title={isGateClosed ? "You've reached your application limit" : undefined}
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 size={18} className="mr-2 animate-spin" />
                       Submitting...
+                    </>
+                  ) : isGateClosed ? (
+                    <>
+                      <Lock size={14} className="mr-1" />
+                      Upgrade to apply
                     </>
                   ) : (
                     "Submit Application"

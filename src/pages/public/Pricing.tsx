@@ -7,7 +7,6 @@ import {
   Check,
   X,
   CreditCard,
-  Crown,
   Sparkles,
   Loader2,
 } from "lucide-react";
@@ -106,21 +105,12 @@ const Pricing = () => {
             buttonClass: "bg-teal hover:bg-[#128a7f] text-white shadow-xl shadow-teal/20",
             buttonText: "Go Pro",
           },
-          premium: {
-            description: "For industry leaders",
-            badge: { text: "Exclusive", color: "bg-royal-blue text-white" },
-            borderColor: "border-royal-blue/50",
-            highlighted: false,
-            buttonVariant: "default",
-            buttonClass: "bg-navy dark:bg-white text-white dark:text-navy hover:opacity-90 dark:hover:bg-slate-100 shadow-xl",
-            buttonText: "Join Elite",
-          }
         };
 
         const mappedPlans = dbPlans.map((dbPlan: SubscriptionPlan) => {
           const tier = (dbPlan.tier || "free").toLowerCase();
           const aesthetics = defaultAesthetics[tier] || defaultAesthetics.free;
-          
+
           return {
             name: dbPlan.name,
             tier: dbPlan.tier,
@@ -133,7 +123,7 @@ const Pricing = () => {
             buttonVariant: aesthetics.buttonVariant,
             buttonClass: aesthetics.buttonClass,
             buttonText: aesthetics.buttonText,
-            features: dbPlan.features.map(f => ({ text: f, included: true }))
+            features: dbPlan.features,
           };
         });
 
@@ -157,9 +147,6 @@ const Pricing = () => {
 
   // Upgrade, Downgrade & Checkout states
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [upgradePreview, setUpgradePreview] = useState<any>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isDowngradeModalOpen, setIsDowngradeModalOpen] = useState(false);
 
@@ -181,30 +168,19 @@ const Pricing = () => {
   const getButtonState = (planName: string) => {
     if (!isAuthenticated) {
       return {
-        text:
-          planName === "Free"
-            ? "Start Free"
-            : planName === "Pro"
-              ? "Go Pro"
-              : "Join Elite",
+        text: planName === "Free" ? "Start Free" : "Go Pro",
         disabled: false,
       };
     }
     if (user?.role !== "freelancer") {
       return {
-        text:
-          planName === "Free"
-            ? "Start Free"
-            : planName === "Pro"
-              ? "Go Pro"
-              : "Join Elite",
+        text: planName === "Free" ? "Start Free" : "Go Pro",
         disabled: true,
       };
     }
 
     const currentPlan = (currentSubscription?.plan || "free").toLowerCase();
-    const cardPlan =
-      planName.toLowerCase() === "elite" ? "premium" : planName.toLowerCase();
+    const cardPlan = planName.toLowerCase();
     const isCancelled = currentSubscription?.status === "cancelled";
 
     if (currentPlan === cardPlan) {
@@ -214,7 +190,7 @@ const Pricing = () => {
       };
     }
 
-    const planHierarchy = ["free", "pro", "premium"];
+    const planHierarchy = ["free", "pro"];
     const currentIdx = planHierarchy.indexOf(currentPlan);
     const cardIdx = planHierarchy.indexOf(cardPlan);
 
@@ -226,14 +202,14 @@ const Pricing = () => {
         return { text: "Downgrade Plan", disabled: true };
       }
       return {
-        text: planName === "Elite" ? "Upgrade to Elite" : "Upgrade to Pro",
+        text: "Upgrade to Pro",
         disabled: true,
       };
     }
 
     if (cardIdx > currentIdx) {
       return {
-        text: planName === "Elite" ? "Upgrade to Elite" : "Upgrade to Pro",
+        text: "Upgrade to Pro",
         disabled: false,
       };
     } else {
@@ -263,13 +239,11 @@ const Pricing = () => {
       name: "Portfolio Capacity",
       free: "3",
       pro: "Unlimited",
-      premium: "Unlimited",
     },
-    { name: "Global Reach", free: true, pro: true, premium: true },
-    { name: "Project Analytics", free: false, pro: true, premium: true },
-    { name: "Search Boost", free: false, pro: "Medium", premium: "Maximum" },
-    { name: "Direct Matching", free: false, pro: false, premium: true },
-    { name: "Custom Domain", free: false, pro: false, premium: true },
+    { name: "Global Reach", free: true, pro: true },
+    { name: "Project Analytics", free: false, pro: true },
+    { name: "Search Boost", free: false, pro: "Maximum" },
+    { name: "Custom Profile URL", free: false, pro: true },
   ];
 
   const faqs = [
@@ -294,8 +268,7 @@ const Pricing = () => {
     if (isProcessing) return;
     setIsProcessing(planId);
     try {
-      const dbPlanId =
-        planId.toLowerCase() === "elite" ? "premium" : planId.toLowerCase();
+      const dbPlanId = planId.toLowerCase();
       const order = await paymentService.createOrder(dbPlanId);
 
       const options = {
@@ -390,15 +363,14 @@ const Pricing = () => {
     }
 
     const currentPlan = (currentSubscription?.plan || "free").toLowerCase();
-    const cardPlan =
-      (planName.toLowerCase() === "elite" || planName.toLowerCase() === "premium") ? "premium" : planName.toLowerCase();
+    const cardPlan = planName.toLowerCase();
 
     if (currentPlan === cardPlan) {
       return;
     }
 
     // Downgrade flow
-    const planHierarchy = ["free", "pro", "premium"];
+    const planHierarchy = ["free", "pro"];
     const currentIdx = planHierarchy.indexOf(currentPlan);
     const cardIdx = planHierarchy.indexOf(cardPlan);
 
@@ -412,23 +384,8 @@ const Pricing = () => {
       return;
     }
 
-    // Upgrade flow
-    if (currentPlan === "pro" && cardPlan === "premium") {
-      setIsUpgradeModalOpen(true);
-      setIsLoadingPreview(true);
-      try {
-        const preview = await paymentService.getUpgradePreview("premium");
-        setUpgradePreview(preview);
-      } catch (error: any) {
-        toast.error(error?.message || "Failed to load upgrade preview details");
-        setIsUpgradeModalOpen(false);
-      } finally {
-        setIsLoadingPreview(false);
-      }
-    } else {
-      // Normal purchase
-      await handlePayment(planName);
-    }
+    // Normal upgrade / purchase
+    await handlePayment(planName);
   };
 
   const getPrice = (plan: (typeof plans)[0]) => {
@@ -500,7 +457,7 @@ const Pricing = () => {
                 >
                   Yearly
                 </span>
-                <span className="px-2 py-0.5 bg-teal/10 dark:bg-teal/20 text-teal text-[10px] font-bold rounded-full border border-teal/20 dark:border-teal/30">
+                <span className="px-2 py-0.5 bg-teal/10 dark:bg-teal/20 text-teal text-xxs font-bold rounded-full border border-teal/20 dark:border-teal/30">
                   Save 20%
                 </span>
               </div>
@@ -512,7 +469,7 @@ const Pricing = () => {
       {/* 2. PRICING CARDS */}
       <section className="pb-32 relative">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-end">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-end">
             {plans.map((plan, idx) => (
               <AnimatedSection key={plan.name} delay={idx * 100}>
                 <div
@@ -527,7 +484,7 @@ const Pricing = () => {
                     <div className="absolute -top-4 left-10">
                       <span
                         className={cn(
-                          "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg",
+                          "px-4 py-1.5 rounded-full text-xxs font-bold uppercase tracking-widest shadow-lg",
                           plan.badge.color,
                         )}
                       >
@@ -604,20 +561,17 @@ const Pricing = () => {
 
           <div className="max-w-4xl mx-auto bg-white dark:bg-transparent dark:glass-card shadow-lg dark:shadow-none rounded-3xl overflow-hidden border border-slate-200 dark:border-white/5">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-transparent">
-                  <th className="p-8 text-sm font-bold text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">
-                    Features
-                  </th>
-                  <th className="p-8 text-center font-bold text-navy dark:text-white">
-                    Free
-                  </th>
-                  <th className="p-8 text-center font-bold text-teal">Pro</th>
-                  <th className="p-8 text-center font-bold text-royal-blue">
-                    Elite
-                  </th>
-                </tr>
-              </thead>
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-transparent">
+                    <th className="p-8 text-sm font-bold text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">
+                      Features
+                    </th>
+                    <th className="p-8 text-center font-bold text-navy dark:text-white">
+                      Free
+                    </th>
+                    <th className="p-8 text-center font-bold text-teal">Pro</th>
+                  </tr>
+                </thead>
               <tbody>
                 {comparisonFeatures.map((f, i) => (
                   <tr
@@ -660,8 +614,8 @@ const Pricing = () => {
                       )}
                     </td>
                     <td className="p-8 text-center">
-                      {typeof f.premium === "boolean" ? (
-                        f.premium ? (
+                      {typeof f.pro === "boolean" ? (
+                        f.pro ? (
                           <Check className="mx-auto text-teal" size={20} />
                         ) : (
                           <X
@@ -670,8 +624,8 @@ const Pricing = () => {
                           />
                         )
                       ) : (
-                        <span className="text-sm font-bold text-royal-blue">
-                          {f.premium}
+                        <span className="text-sm font-bold text-teal">
+                          {f.pro}
                         </span>
                       )}
                     </td>
@@ -688,7 +642,7 @@ const Pricing = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-20 text-navy dark:text-white">
-              <span className="text-teal font-bold uppercase tracking-widest text-[10px] md:text-xs mb-4 block">
+              <span className="text-teal font-bold uppercase tracking-widest text-xxs md:text-xs mb-4 block">
                 Still Curious?
               </span>
               <h2 className="text-4xl font-bold">Frequently Asked Questions</h2>
@@ -767,134 +721,6 @@ const Pricing = () => {
         </div>
       </section>
 
-      {/* UPGRADE CONFIRMATION MODAL */}
-      {isUpgradeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-3xl animate-scale-up">
-            {/* Background glowing effects */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-teal/20 rounded-full blur-[60px]" />
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold/20 rounded-full blur-[60px]" />
-
-            <div className="p-8 relative z-10">
-              <button
-                onClick={() => setIsUpgradeModalOpen(false)}
-                className="absolute top-6 right-6 p-2 text-slate-400 hover:text-navy dark:hover:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-full transition-all"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-gold/20 flex items-center justify-center text-gold">
-                  <Crown size={24} className="animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-extrabold text-navy dark:text-white">
-                    Upgrade to Premium
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Unlock elite features instantly
-                  </p>
-                </div>
-              </div>
-
-              {isLoadingPreview ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-3">
-                  <Loader2 size={36} className="animate-spin text-gold" />
-                  <p className="text-sm text-slate-400">
-                    Calculating your prorated price...
-                  </p>
-                </div>
-              ) : upgradePreview ? (
-                <div className="space-y-6">
-                  {/* Info Alert Box */}
-                  <div className="bg-teal/10 border border-teal/20 rounded-2xl p-4 text-xs md:text-sm text-teal dark:text-teal-light flex gap-3">
-                    <Sparkles size={20} className="shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold mb-1 text-teal dark:text-teal-light">
-                        Prorated Credit Applied!
-                      </p>
-                      <p className="leading-relaxed opacity-90 text-teal dark:text-teal-light">
-                        We've calculated the unused value of your current{" "}
-                        <strong className="capitalize">
-                          {upgradePreview.currentPlan.name}
-                        </strong>{" "}
-                        plan and deducted it from your new subscription.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Calculations Details */}
-                  <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-6 border border-slate-100 dark:border-white/5 space-y-4">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">
-                        New Premium Plan (1 month)
-                      </span>
-                      <span className="font-semibold text-navy dark:text-white">
-                        ₹{upgradePreview.newPlan.price}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center text-sm border-b border-dashed border-slate-200 dark:border-white/10 pb-4">
-                      <span className="text-success-green flex items-center gap-1.5 font-medium">
-                        <Check size={16} /> Prorated Credit (
-                        {upgradePreview.proration.remainingDays} days left)
-                      </span>
-                      <span className="font-bold text-success-green">
-                        -₹{upgradePreview.proration.creditAmount}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-extrabold text-navy dark:text-white">
-                        Amount Payable Today
-                      </span>
-                      <span className="text-3xl font-extrabold text-gold">
-                        ₹{upgradePreview.proration.dueAmount}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Reset Period Note */}
-                  <p className="text-xs text-slate-400 leading-relaxed text-center px-4">
-                    By clicking confirm, your old Pro subscription will end
-                    today, and your 1-month Premium benefits will begin
-                    immediately. Your billing cycle will reset.
-                  </p>
-
-                  {/* CTA Buttons */}
-                  <div className="flex gap-4">
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-14 rounded-2xl border-slate-200 dark:border-white/10 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
-                      onClick={() => setIsUpgradeModalOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="flex-1 h-14 rounded-2xl bg-gold hover:bg-gold/90 text-white font-extrabold shadow-lg shadow-gold/20"
-                      onClick={async () => {
-                        setIsUpgradeModalOpen(false);
-                        await handlePayment("premium");
-                      }}
-                      disabled={isProcessing === "premium"}
-                    >
-                      {isProcessing === "premium" ? (
-                        <Loader2 size={16} className="animate-spin mr-2" />
-                      ) : null}
-                      Confirm & Pay
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-12 text-center text-red-500">
-                  Failed to load upgrade details. Please try again.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* DOWNGRADE / CANCELLATION CONFIRMATION MODAL */}
       {isDowngradeModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
@@ -920,7 +746,7 @@ const Pricing = () => {
                     Downgrade Plan
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Cancel or adjust your premium subscription
+                    Cancel or adjust your Pro subscription
                   </p>
                 </div>
               </div>
@@ -936,7 +762,7 @@ const Pricing = () => {
                     <p className="leading-relaxed opacity-90">
                       You will retain all active benefits of your current{" "}
                       <strong className="capitalize">
-                        {currentSubscription?.plan || "Premium"}
+                        {currentSubscription?.plan || "Pro"}
                       </strong>{" "}
                       plan until the end of your billing cycle on:
                     </p>
@@ -968,7 +794,7 @@ const Pricing = () => {
                     className="flex-1 h-14 rounded-2xl border-slate-200 dark:border-white/10 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                     onClick={() => setIsDowngradeModalOpen(false)}
                   >
-                    Keep Premium
+                    Keep Pro
                   </Button>
                   <Button
                     className="flex-1 h-14 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-extrabold shadow-lg shadow-red-500/20"

@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { PlanContext, UsageSnapshot } from "@/types/feature-gate.types";
 
 export interface Application {
   id: string;
@@ -53,6 +54,10 @@ export interface Application {
     rating?: number;
   };
   conversationId?: string;
+  /** Plan context at the time the application was created (returned by server). */
+  planContext?: PlanContext;
+  /** Updated monthly usage snapshot returned by the server. */
+  usage?: UsageSnapshot;
 }
 
 export interface ApplicationStats {

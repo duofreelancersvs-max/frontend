@@ -91,7 +91,7 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
                 <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-white transition-colors")} />
                 <span className="flex-1">{item.label}</span>
                 {itemBadge && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold bg-primary-foreground text-primary rounded-full">
+                  <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
                     {itemBadge}
                   </span>
                 )}
@@ -110,7 +110,7 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
               <p className="text-sm font-heading font-semibold text-white truncate">
                 {clientName}
               </p>
-              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Client Account</p>
+              <p className="text-xxs font-medium text-slate-500 uppercase tracking-wider">Client Account</p>
             </div>
             <button
               onClick={handleLogout}

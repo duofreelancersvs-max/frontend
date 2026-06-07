@@ -4,22 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import {
-  ChevronRight,
-  Star,
-  MapPin,
-  BadgeCheck,
-  Heart,
-  MessageSquare,
-  Clock,
-  Award,
-  ExternalLink,
-  Play,
-  GraduationCap,
-  Building,
-  ChevronDown,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight, Award, BadgeCheck, Building, ChevronDown, ChevronRight, Clock, ExternalLink, GraduationCap, Heart, MapPin, MessageSquare, Play, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { freelancerService, reviewService } from "@/services";
@@ -139,6 +124,8 @@ const FreelancerProfile = () => {
     successRate: freelancerData.successRate || 100,
     memberSince: new Date(freelancerData.createdAt).getFullYear().toString(),
     verified: freelancerData.isVerified,
+    isPro: freelancerData.isProActive,
+    isFeatured: freelancerData.featuredProfile,
     bio: freelancerData.bio || "No bio provided.",
   };
 
@@ -270,9 +257,31 @@ const FreelancerProfile = () => {
 
             {/* Info */}
             <div className="flex-1 text-white pt-2 md:pt-0 md:pb-2">
-              <h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">
-                {freelancer.name}
-              </h1>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
+                  {freelancer.name}
+                </h1>
+                {freelancer.isFeatured && (
+                  <span
+                    data-testid="featured-ribbon"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-500 text-white text-xxs font-bold uppercase tracking-wide shadow-md"
+                    title="Top of search results"
+                  >
+                    <Zap size={12} className="fill-white" />
+                    Featured
+                  </span>
+                )}
+                {freelancer.isPro && (
+                  <span
+                    data-testid="pro-member-badge"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-teal-300/40 text-teal-100 text-xxs font-bold shadow-md"
+                    title="Pro Member"
+                  >
+                    <Zap size={12} className="fill-teal-300 text-teal-300" />
+                    Pro Member
+                  </span>
+                )}
+              </div>
               <p className="text-teal-light text-lg md:text-xl font-medium mb-4 flex items-center gap-2">
                 {freelancer.title}
               </p>
@@ -461,7 +470,7 @@ const FreelancerProfile = () => {
                       >
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                           <Icon size={32} className="mb-2 opacity-80" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                          <span className="text-xxs font-bold uppercase tracking-wider opacity-60">
                             {item.category}
                           </span>
                         </div>

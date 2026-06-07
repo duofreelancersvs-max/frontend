@@ -152,7 +152,7 @@ const SectionCard = ({
             {/* Divider */}
             <div className="h-px bg-slate-100 dark:bg-white/5 mb-2" />
 
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[15px]">
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
               {section.content}
             </p>
 

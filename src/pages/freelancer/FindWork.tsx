@@ -14,6 +14,11 @@ import {
   AlertCircle,
   Wallet,
   Star,
+  CheckCircle2,
+  XCircle,
+  Hourglass,
+  Sparkles,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatBudget } from "@/lib/utils";
@@ -21,15 +26,131 @@ import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import { TermsModal } from "@/components/modals/TermsModal";
-import { conversationService } from "@/services";
 import { useProjects } from "@/hooks/queries/useProjects";
 import { useCategories } from "@/hooks/queries/useCategories";
 import { useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { TrialBanner } from "@/components/feature-gate";
 
-// We will fetch categories dynamically from the backend
+/**
+ * Application state for a single project card. Drives both the status
+ * badge ("Applied" / "Shortlisted" / etc.) and the behaviour of the
+ * primary CTA ("Apply" vs disabled).
+ */
+type ApplicationVisualState =
+  | "not_applied"
+  | "pending"
+  | "viewed"
+  | "shortlisted"
+  | "hired"
+  | "accepted"
+  | "rejected"
+  | "withdrawn";
+
+const APPLICATION_VISUAL: Record<
+  ApplicationVisualState,
+  {
+    badgeLabel: string;
+    badgeClasses: string;
+    applyLabel: string;
+    applyDisabled: boolean;
+    canMessage: boolean;
+  }
+> = {
+  not_applied: {
+    badgeLabel: "",
+    badgeClasses: "",
+    applyLabel: "Apply",
+    applyDisabled: false,
+    canMessage: false,
+  },
+  pending: {
+    badgeLabel: "Applied",
+    badgeClasses:
+      "bg-success-green/10 text-success-green border border-success-green/30",
+    applyLabel: "Applied",
+    applyDisabled: true,
+    canMessage: false,
+  },
+  viewed: {
+    badgeLabel: "Viewed by client",
+    badgeClasses: "bg-sky-blue/10 text-royal-blue border border-sky-blue/30",
+    applyLabel: "Applied",
+    applyDisabled: true,
+    canMessage: false,
+  },
+  shortlisted: {
+    badgeLabel: "Shortlisted",
+    badgeClasses: "bg-royal-blue/10 text-royal-blue border border-royal-blue/30",
+    applyLabel: "Shortlisted",
+    applyDisabled: true,
+    canMessage: true,
+  },
+  hired: {
+    badgeLabel: "Hired",
+    badgeClasses: "bg-gold/10 text-gold border border-gold/30",
+    applyLabel: "Hired",
+    applyDisabled: true,
+    canMessage: true,
+  },
+  accepted: {
+    badgeLabel: "Accepted",
+    badgeClasses: "bg-teal/10 text-teal border border-teal/30",
+    applyLabel: "Accepted",
+    applyDisabled: true,
+    canMessage: true,
+  },
+  rejected: {
+    badgeLabel: "Not selected",
+    badgeClasses: "bg-red-50 text-red-500 border border-red-200",
+    applyLabel: "Rejected",
+    applyDisabled: true,
+    canMessage: false,
+  },
+  withdrawn: {
+    badgeLabel: "",
+    badgeClasses: "",
+    applyLabel: "Apply again",
+    applyDisabled: false,
+    canMessage: false,
+  },
+};
+
+const ApplicationStatusBadge = ({
+  state,
+}: {
+  state: ApplicationVisualState;
+}) => {
+  const cfg = APPLICATION_VISUAL[state];
+  if (!cfg.badgeLabel) return null;
+
+  const Icon =
+    state === "pending" || state === "viewed" || state === "accepted"
+      ? CheckCircle2
+      : state === "shortlisted"
+        ? Sparkles
+        : state === "hired"
+          ? Crown
+          : state === "rejected"
+            ? XCircle
+            : Hourglass;
+
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xxs font-semibold uppercase tracking-wide",
+        cfg.badgeClasses,
+      )}
+      role="status"
+      aria-label={`Application status: ${cfg.badgeLabel}`}
+    >
+      <Icon size={11} />
+      {cfg.badgeLabel}
+    </div>
+  );
+};
 
 
 const locationTypes = ["All Locations", "Remote", "On-site", "Hybrid"];
@@ -74,7 +195,10 @@ const FindWork = () => {
   const { data: myAppsData } = useMyApplications();
   const myApplications = myAppsData?.applications || [];
   const appStatusByProjectId = new Map(
-    myApplications.map(app => [app.project?.id || app.project?._id || app.projectId, app.status])
+    myApplications.map((app) => [
+      app.project?.id || app.project?._id || app.projectId,
+      app.status as ApplicationVisualState | undefined,
+    ]),
   );
 
   // Filter states
@@ -110,10 +234,21 @@ const FindWork = () => {
         navigate("/login", { state: { from: "/freelancer/projects" } });
         return;
       }
+      // Block re-application when the freelancer already has a live
+      // application for this project. Withdrawn is allowed (re-apply).
+      const projectId = project._id || project.id || "";
+      const status = appStatusByProjectId.get(projectId);
+      if (
+        status &&
+        status !== "withdrawn" &&
+        status !== "rejected"
+      ) {
+        return;
+      }
       setSelectedProject(project);
       setShowTermsForApply(true);
     },
-    [user, navigate],
+    [user, navigate, appStatusByProjectId],
   );
 
   // Handle direct apply from dashboard
@@ -136,25 +271,16 @@ const FindWork = () => {
     setShowApplicationModal(true);
   };
 
-  const handleApplicationSuccess = async () => {
-    if (!selectedProject) return;
-    try {
-      // Create a conversation with the project client
-      const clientId = selectedProject.client?.id || selectedProject.clientId;
-      const projectId = selectedProject._id || selectedProject.id;
-      if (clientId && projectId) {
-        await conversationService.create({
-          participantId: clientId,
-          projectId,
-        });
-      }
-    } catch (err) {
-      console.error("Error creating conversation:", err);
-    }
+  const handleApplicationSuccess = async (convId?: string) => {
     setShowApplicationModal(false);
     setSelectedProject(null);
-    // Redirect to messages inbox
-    navigate("/freelancer/messages");
+    if (convId) {
+      navigate("/freelancer/messages", {
+        state: { conversationId: convId },
+      });
+    } else {
+      navigate("/freelancer/messages");
+    }
   };
 
   const toggleSaveProject = (projectId: string) => {
@@ -236,7 +362,7 @@ const FindWork = () => {
   return (
     <div className="w-full bg-slate-50 dark:bg-background min-h-screen overflow-x-hidden">
       {!user && <PublicNavbar variant="white" />}
-      <div className={cn("w-full", !user && "pt-[72px]")}>
+      <div className={cn("w-full", !user && "pt-20")}>
         {/* Header Bar */}
         {user && (
           <DashboardHeader
@@ -247,6 +373,9 @@ const FindWork = () => {
 
         {/* Main Content Area */}
         <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-4 lg:space-y-6">
+          {/* TRIAL BANNER */}
+          <TrialBanner />
+
           {/* Tabs */}
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-xl w-full md:w-fit overflow-x-auto scrollbar-hide hide-scrollbar mb-6">
             <button
@@ -348,7 +477,7 @@ const FindWork = () => {
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
                         >
                           {categories.map((cat) => (
                             <option key={cat} value={cat}>
@@ -369,14 +498,14 @@ const FindWork = () => {
                             value={budgetMin}
                             onChange={(e) => setBudgetMin(e.target.value)}
                             placeholder="Min"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
                           />
                           <input
                             type="number"
                             value={budgetMax}
                             onChange={(e) => setBudgetMax(e.target.value)}
                             placeholder="Max"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
                           />
                         </div>
                       </div>
@@ -391,7 +520,7 @@ const FindWork = () => {
                         <select
                           value={selectedLocation}
                           onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
                         >
                           {locationTypes.map((loc) => (
                             <option key={loc} value={loc}>
@@ -411,7 +540,7 @@ const FindWork = () => {
                           onChange={(e) =>
                             setSelectedPostedDate(e.target.value)
                           }
-                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-[44px]"
+                          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
                         >
                           {postedDateOptions.map((opt) => (
                             <option key={opt} value={opt}>
@@ -515,11 +644,20 @@ const FindWork = () => {
                       </div>
                       {/* Card Content */}
                       <div className="p-5 flex-1 flex flex-col">
-                        {/* Title & Client */}
+                        {/* Title, status badge & Client */}
                         <div className="mb-4">
-                          <h3 className="text-lg font-semibold text-navy dark:text-white mb-2 line-clamp-2 hover:text-royal-blue dark:hover:text-teal transition-colors min-h-[3.5rem]">
-                            {project.title}
-                          </h3>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h3 className="text-lg font-semibold text-navy dark:text-white line-clamp-2 hover:text-royal-blue dark:hover:text-teal transition-colors min-h-[3.5rem]">
+                              {project.title}
+                            </h3>
+                            <ApplicationStatusBadge
+                              state={
+                                (appStatusByProjectId.get(
+                                  project._id || project.id || "",
+                                ) as ApplicationVisualState) ?? "not_applied"
+                              }
+                            />
+                          </div>
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 text-xs font-bold shrink-0">
                               {project.client?.fullName?.charAt(0) ?? "C"}
@@ -530,7 +668,7 @@ const FindWork = () => {
                               </p>
                               <div className="flex items-center gap-1">
                                 <Star size={10} className="text-gold fill-gold" />
-                                <span className="text-[10px] text-slate-500">4.9 (12 reviews)</span>
+                                <span className="text-xxs text-slate-500">4.9 (12 reviews)</span>
                               </div>
                             </div>
                           </div>
@@ -542,14 +680,14 @@ const FindWork = () => {
                         </p>
 
                         {/* Skills */}
-                        <div className="flex flex-wrap gap-1.5 mb-5 min-h-[2.5rem]">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-5 min-h-[2.5rem]">
                           {project.requiredSkills
                             .slice(0, 3)
                             .map((skill, index) => (
                               <span
                                 key={`${project._id}-${skill}-${index}`}
                                 className={cn(
-                                  "px-2 py-1 rounded-md text-[10px] font-medium",
+                                  "inline-flex items-center justify-center px-2 py-1 rounded-md text-xxs font-medium leading-none",
                                   userSkills.includes(skill)
                                     ? "bg-teal/10 text-teal border border-teal/20"
                                     : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 border border-transparent",
@@ -559,7 +697,7 @@ const FindWork = () => {
                               </span>
                             ))}
                           {project.requiredSkills.length > 3 && (
-                            <span className="px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-[10px] border border-transparent">
+                            <span className="inline-flex items-center justify-center px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-xxs font-medium leading-none border border-transparent">
                               +{project.requiredSkills.length - 3}
                             </span>
                           )}
@@ -573,7 +711,7 @@ const FindWork = () => {
                               <span className="font-bold text-navy dark:text-white text-sm">
                                 {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
                               </span>
-                              <span className="text-[10px] text-slate-400 uppercase">
+                              <span className="text-xxs text-slate-400 uppercase">
                                 ({project.budget.type})
                               </span>
                             </div>
@@ -602,49 +740,70 @@ const FindWork = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <Button
-                              className="flex-1 bg-teal hover:bg-teal-light text-white font-bold py-2 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-                              onClick={() => handleApplyClick(project)}
-                            >
-                              Apply
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="flex-1 border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent py-2 rounded-xl transition-all"
-                              onClick={() => navigate(`/freelancer/project/${project._id || project.id}`)}
-                            >
-                              View Details
-                            </Button>
-                            
-                            {appStatusByProjectId.get(project._id || project.id || "") === "rejected" ? (
-                              <Button
-                                variant="secondary"
-                                disabled
-                                className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-500 py-2 rounded-xl text-[11px]"
-                              >
-                                Rejected
-                              </Button>
-                            ) : (appStatusByProjectId.get(project._id || project.id || "") === "hired" || appStatusByProjectId.get(project._id || project.id || "") === "shortlisted") ? (
-                              <Button
-                                variant="secondary"
-                                className="flex-1 bg-royal-blue hover:bg-royal-blue/90 text-white dark:bg-royal-blue dark:text-white py-2 rounded-xl transition-all shadow-md hover:shadow-lg"
-                                onClick={() => {
-                                  navigate(`/freelancer/messages?projectId=${project._id || project.id}`);
-                                }}
-                              >
-                                Message Now
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="secondary"
-                                disabled
-                                className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-slate-500 py-2 rounded-xl"
-                                title="Available after shortlist or hire"
-                              >
-                                Message Now
-                              </Button>
-                            )}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {(() => {
+                              const projectId = project._id || project.id || "";
+                              const visual = (appStatusByProjectId.get(
+                                projectId,
+                              ) as ApplicationVisualState) ?? "not_applied";
+                              const cfg = APPLICATION_VISUAL[visual];
+                              const isAppliedVisual =
+                                visual === "pending" ||
+                                visual === "viewed" ||
+                                visual === "shortlisted" ||
+                                visual === "hired" ||
+                                visual === "accepted";
+                              return (
+                                <>
+                                  <Button
+                                    className={cn(
+                                      "w-full py-2.5 rounded-xl font-bold transition-all shadow-sm hover:shadow-md active:scale-[0.98]",
+                                      isAppliedVisual
+                                        ? "bg-success-green/10 text-success-green border border-success-green/20 cursor-default shadow-none hover:shadow-none active:scale-100"
+                                        : visual === "rejected"
+                                          ? "bg-slate-100 dark:bg-white/5 text-slate-500 border border-slate-200 dark:border-white/10 cursor-default shadow-none hover:shadow-none active:scale-100"
+                                          : "bg-teal hover:bg-teal-light text-white",
+                                    )}
+                                    onClick={() => handleApplyClick(project)}
+                                    disabled={cfg.applyDisabled}
+                                    aria-disabled={cfg.applyDisabled}
+                                    title={
+                                      cfg.applyDisabled
+                                        ? `You have already applied (${cfg.applyLabel})`
+                                        : undefined
+                                    }
+                                  >
+                                    {isAppliedVisual && (
+                                      <CheckCircle2 size={16} className="mr-1.5" />
+                                    )}
+                                    {visual === "rejected" && (
+                                      <XCircle size={16} className="mr-1.5" />
+                                    )}
+                                    {cfg.applyLabel}
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "w-full border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-teal hover:bg-teal/5 hover:text-teal dark:hover:text-teal py-2.5 rounded-xl transition-all shadow-sm",
+                                      cfg.canMessage ? "sm:col-span-2 order-last" : ""
+                                    )}
+                                    onClick={() => navigate(`/freelancer/project/${projectId}`)}
+                                  >
+                                    View Details
+                                  </Button>
+
+                                  {cfg.canMessage && (
+                                    <Button
+                                      className="w-full bg-royal-blue hover:bg-royal-blue/90 text-white py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+                                      onClick={() => navigate(`/freelancer/messages?projectId=${projectId}`)}
+                                    >
+                                      Message Now
+                                    </Button>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>

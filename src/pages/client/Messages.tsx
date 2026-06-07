@@ -19,6 +19,7 @@ import {
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
+import { useConversations } from "@/hooks/queries/useClientDashboardQueries";
 
 interface ClientMessagesProps {
   isWidget?: boolean;
@@ -47,7 +48,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   // Sync active conversation with unread store
   useEffect(() => {
-    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    const activeId = selectedConversation?.id || selectedConversation?._id;
     setActiveConversation(activeId || null);
     return () => setActiveConversation(null);
   }, [selectedConversation, setActiveConversation]);
@@ -56,10 +57,10 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   const handleNewMessage = useCallback(
     (socketMsg: SocketMessage, _conv: SocketConversation) => {
-      console.log("[Socket] New message received:", (socketMsg as any).id || socketMsg._id);
+      console.log("[Socket] New message received:", socketMsg.id || socketMsg._id);
       
       // Robustly extract senderId – backend may send ObjectId object or string
-      const rawSenderId = (socketMsg as any).senderId;
+      const rawSenderId: any = socketMsg.senderId;
       const senderId = (
         typeof rawSenderId === 'object' && rawSenderId !== null
           ? (rawSenderId._id || rawSenderId.id || rawSenderId).toString()
@@ -67,18 +68,18 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       );
 
       const mapped: Message = {
-        id: (socketMsg._id || (socketMsg as any).id || "").toString(),
+        id: (socketMsg._id || socketMsg.id || "").toString(),
         conversationId: (socketMsg.conversationId || "").toString(),
         senderId,
         content: socketMsg.content,
-        read: socketMsg.isRead ?? (socketMsg as any).read ?? false,
+        read: socketMsg.isRead ?? false,
         createdAt: socketMsg.createdAt || socketMsg.sentAt || new Date().toISOString(),
       };
 
       // Always add to pending messages store (for when user is on another page)
       addPendingMessage(mapped);
 
-      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
+      const selId = (selectedConversation?.id || selectedConversation?._id || "").toString();
       const msgConvId = mapped.conversationId;
       const isCurrentConv = selId && msgConvId === selId;
 
@@ -109,14 +110,14 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
       setConversations((prev) =>
         prev.map((c) => {
-          const cid = (c.id || (c as any)._id || "").toString();
+          const cid = (c.id || c._id || "").toString();
           return cid === mapped.conversationId
             ? {
                 ...c,
                 lastMessage: {
                   ...mapped,
                   createdAt: mapped.createdAt
-                } as any,
+                },
                 unreadCount: cid === selId ? 0 : (c.unreadCount || 0) + 1,
               }
             : c;
@@ -135,7 +136,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       }
 
       const readConvId = data.conversationId.toString();
-      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
+      const selId = (selectedConversation?.id || selectedConversation?._id || "").toString();
       // Update message read status
       if (readConvId === selId) {
         console.log("[Socket] Marking messages as read in UI for conversation", selId);
@@ -148,7 +149,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       // Reset unread count for this conversation
       setConversations((prev) =>
         prev.map((c) => {
-          const cid = (c.id || (c as any)._id || "").toString();
+          const cid = (c.id || c._id || "").toString();
           return cid === readConvId ? { ...c, unreadCount: 0 } : c;
         }),
       );
@@ -162,43 +163,48 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
     sendMessage: socketSendMessage,
     markAsRead,
   } = useSocket({
-    conversationId: selectedConversation?.id || (selectedConversation as any)?._id || null,
+    conversationId: selectedConversation?.id || selectedConversation?._id || null,
     onNewMessage: handleNewMessage,
     onMessageRead: handleMessageRead,
   });
 
   // ─── Data fetching ──────────────────────────────────────────────
+  const { data: convData } = useConversations();
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const data = await conversationService.getAll();
-        let convs = data.conversations || [];
-        
-        // Sort conversations by most recent message (newest first)
-        convs = convs.sort((a, b) => {
-          const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
-          const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        
-        setConversations(convs);
-        
-        // Auto-select the conversation with the most recent message (first after sort)
-        if (convs.length > 0) {
-          setSelectedConversation(convs[0]);
+    if (convData?.conversations) {
+      let convs = [...convData.conversations];
+      
+      // Sort conversations by most recent message (newest first)
+      convs = convs.sort((a, b) => {
+        const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+        const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+      
+      setConversations(prev => {
+        // Only update if we don't have conversations yet or if the data changed
+        // This prevents overwriting optimistic socket updates immediately
+        if (prev.length === 0 || convs.length !== prev.length || convs[0]?.id !== prev[0]?.id) {
+          return convs;
         }
-        
-        setConversationsLoaded(true);
-
-        // Also fetch all client applications for context enrichment
-        const appsRes = await applicationService.getMyClientApplications();
-        setAllClientApplications(appsRes.applications || []);
-      } catch (error) {
-        console.error("Error fetching conversations:", error);
+        return prev;
+      });
+      
+      // Auto-select the conversation with the most recent message (first after sort)
+      if (convs.length > 0 && !selectedConversation && !deepLinkHandled.current) {
+        setSelectedConversation(convs[0]);
       }
-    };
-    fetchConversations();
+      
+      setConversationsLoaded(true);
+    }
+  }, [convData?.conversations, selectedConversation]);
+
+  useEffect(() => {
+    // Fetch all client applications for context enrichment
+    applicationService.getMyClientApplications()
+      .then(appsRes => setAllClientApplications(appsRes.applications || []))
+      .catch(error => console.error("Error fetching applications:", error));
   }, []);
 
   // ── Deep-link: auto-select conversation from navigation state ──
@@ -217,7 +223,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       if (state.conversationId) {
         deepLinkHandled.current = true;
         const target = conversations.find(
-          (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
+          (c) => c.id === state.conversationId || c._id === state.conversationId,
         );
         if (target) {
           setSelectedConversation(target);
@@ -253,7 +259,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+      const activeId = selectedConversation?.id || selectedConversation?._id;
       if (!activeId) return;
       
       // Clear messages from other conversations immediately
@@ -300,7 +306,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
         // Immediately reset unread count in local state
         setConversations((prev) =>
           prev.map((c) =>
-            (c.id === activeId || (c as any)._id === activeId) 
+            (c.id === activeId || c._id === activeId) 
               ? { ...c, unreadCount: 0 } 
               : c,
           ),
@@ -312,7 +318,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       }
     };
     fetchMessages();
-  }, [selectedConversation?.id, (selectedConversation as any)?._id, markAsRead, resetCount]);
+  }, [selectedConversation?.id, selectedConversation?._id, markAsRead, resetCount]);
 
   // ─── Derived data ───────────────────────────────────────────────
 
@@ -326,7 +332,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   // ── Application Fetching ──
   useEffect(() => {
-    const freelancerId = selectedFreelancer?.id || (selectedFreelancer as any)?._id;
+    const freelancerId = selectedFreelancer?.id || selectedFreelancer?._id;
     if (!freelancerId) {
       setCurrentApplication(null);
       return;
@@ -335,9 +341,9 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
     // Find all applications from THIS freelancer
     const freelancerApps = allClientApplications.filter(
       (app) => 
-        (app.freelancer as any)?._id === freelancerId || 
+        app.freelancer?._id === freelancerId || 
         app.freelancer?.id === freelancerId || 
-        (app as any).freelancerId === freelancerId
+        app.freelancerId === freelancerId
     );
 
     if (freelancerApps.length === 0) {
@@ -347,7 +353,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
     // 1. First priority: Try to match the projectId in the conversation if specifically selected
     const projectSpecificApp = freelancerApps.find(
-      (app) => (app.projectId === selectedConversation?.projectId || (app.project as any)?._id === selectedConversation?.projectId)
+      (app) => (app.projectId === selectedConversation?.projectId || app.project?._id === selectedConversation?.projectId)
     );
 
     // 2. Second priority: Pick the MOST RECENT application (by createdAt)
@@ -372,7 +378,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
     // Find matching application for sidebar title enrichment
     const matchingApp = allClientApplications
       .filter(app => {
-        const appFreelancerId = (app.freelancer as any)?._id || app.freelancer?.id || (app as any).freelancerId;
+        const appFreelancerId = app.freelancer?._id || app.freelancer?.id || app.freelancerId;
         return appFreelancerId === freelancerId;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
@@ -392,7 +398,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       }
     }
     return {
-      id: conv.id || (conv as any)._id || "",
+      id: conv.id || conv._id || "",
       participant: {
         userId: freelancer?.id || "",
         name: freelancer?.fullName || "User",
@@ -414,7 +420,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   const chatParticipant: ChatParticipant | null = selectedFreelancer
     ? {
-        id: selectedFreelancer.id || (selectedFreelancer as any)?._id || "",
+        id: selectedFreelancer.id || selectedFreelancer?._id || "",
         name: selectedFreelancer.fullName || "User",
         avatar: selectedFreelancer.avatar,
         verified: true,
@@ -437,7 +443,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
   const chatProject = currentApplication?.project
     ? {
-        id: currentApplication.projectId || (currentApplication.project as any)._id || (currentApplication.project as any).id || "",
+        id: currentApplication.projectId || currentApplication.project._id || currentApplication.project.id || "",
         title: currentApplication.project.title,
       }
     : selectedConversation?.project
@@ -455,11 +461,11 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   const handleHire = async () => {
     if (!currentApplication) return;
     try {
-      const appId = currentApplication.id || (currentApplication as any)._id;
+      const appId = currentApplication.id || currentApplication._id || "";
       await applicationService.updateStatus(appId, "accepted");
       setCurrentApplication({ ...currentApplication, status: "accepted" });
 
-      const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+      const activeId = selectedConversation?.id || selectedConversation?._id;
       if (isConnected && activeId) {
         const contactDetails = `Hi! I have accepted your application. Here are my contact details:\nName: ${user?.fullName || "Not provided"}\nEmail: ${user?.email || "Not provided"}`;
         
@@ -474,7 +480,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
         setMessages((prev) => [...prev, optimisticMsg]);
         setConversations((prev) =>
           prev.map((c) =>
-            (c.id === activeId || (c as any)._id === activeId)
+            (c.id === activeId || c._id === activeId)
               ? { ...c, lastMessage: optimisticMsg }
               : c,
           ),
@@ -489,7 +495,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   const handleReject = async () => {
     if (!currentApplication) return;
     try {
-      const appId = currentApplication.id || (currentApplication as any)._id;
+      const appId = currentApplication.id || currentApplication._id || "";
       await applicationService.updateStatus(appId, "rejected");
       setCurrentApplication({ ...currentApplication, status: "rejected" });
     } catch (err) {
@@ -498,7 +504,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   };
 
   const handleSelectConversation = (id: string) => {
-    const convo = conversations.find((c) => c.id === id || (c as any)._id === id);
+    const convo = conversations.find((c) => c.id === id || c._id === id);
     if (convo) {
       setSelectedConversation(convo);
       setMobileView("chat");
@@ -506,13 +512,13 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   };
 
   const handleAcceptTerms = async () => {
-    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    const activeId = selectedConversation?.id || selectedConversation?._id;
     if (selectedConversation && activeId) {
       try {
         await conversationService.acceptTerms(activeId);
         setConversations((prev) =>
           prev.map((c) =>
-            (c.id === activeId || (c as any)._id === activeId)
+            (c.id === activeId || c._id === activeId)
               ? {
                   ...c,
                   termsAccepted: {
@@ -542,7 +548,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   };
 
   const handleSendMessage = async () => {
-    const activeId = selectedConversation?.id || (selectedConversation as any)?._id;
+    const activeId = selectedConversation?.id || selectedConversation?._id;
     if (!messageInput.trim() || !selectedConversation || !isConnected || !activeId) return;
     const content = messageInput;
     setMessageInput("");
@@ -562,7 +568,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
     // Update conversation's last message in the sidebar promptly
     setConversations((prev) =>
       prev.map((c) =>
-        (c.id === activeId || (c as any)._id === activeId)
+        (c.id === activeId || c._id === activeId)
           ? {
               ...c,
               lastMessage: optimisticMsg,
@@ -632,7 +638,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
           onAcceptTermsClick={() => setShowTermsModal(true)}
           showInfoPanel={showInfoPanel}
           onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
-          applicationId={currentApplication?.id || (currentApplication as any)?._id}
+          applicationId={currentApplication?.id || currentApplication?._id}
           applicationStatus={currentApplication?.status}
           onHire={handleHire}
           onReject={handleReject}

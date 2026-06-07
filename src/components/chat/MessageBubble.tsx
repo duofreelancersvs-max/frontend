@@ -45,7 +45,7 @@ const MessageBubble = ({
               isOwn ? "justify-end" : "justify-start",
             )}
           >
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">{timestamp}</span>
+            <span className="text-xxs text-slate-400 dark:text-slate-500">{timestamp}</span>
             {isOwn &&
               (isRead ? (
                 <CheckCheck size={12} className="text-teal" />

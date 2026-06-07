@@ -16,6 +16,21 @@ export interface User {
   firebaseUid?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** True if the user was registered before the platform launch date (14d trial). */
+  isFounder?: boolean;
+  /** ISO timestamp when the trial started. */
+  trialStartDate?: string;
+  /** ISO timestamp when the trial ends. */
+  trialEndDate?: string;
+  /**
+   * Derived by the server: true if the user is currently in an active
+   * trial window (`trialEndDate > now`). Kept on the user object as a
+   * convenience snapshot — the client can also re-derive it locally
+   * from `trialEndDate`.
+   */
+  isInTrial?: boolean;
+  /** Days of trial granted at registration. */
+  trialDaysGranted?: number;
 }
 
 export interface AuthTokens {

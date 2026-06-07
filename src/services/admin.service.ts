@@ -192,6 +192,14 @@ export interface SubscriptionPlan {
   features: string[];
   isActive: boolean;
   stripePriceId?: string;
+  /** Maximum applications allowed per month. -1 means unlimited. */
+  maxApplications?: number;
+  /** Maximum active projects allowed. -1 means unlimited. */
+  maxProjects?: number;
+  /** Resolved tier identifier (free / pro). */
+  tier?: "free" | "pro" | string;
+  /** True for the default Free plan. */
+  isFree?: boolean;
 }
 
 export interface AuditLogEntry {
@@ -269,6 +277,13 @@ export const adminService = {
 
   featureProject: (projectId: string) =>
     api.post(`/admin/feature-project/${projectId}`, {}),
+
+  // Pro plan override (admin grant / revoke)
+  setProStatus: (userId: string, data: { isProActive: boolean; reason?: string; durationDays?: number }) =>
+    api.post<{ message: string; userId: string; isProActive: boolean; endDate?: string }>(
+      `/admin/users/${userId}/pro-status`,
+      data,
+    ),
 
   // Verifications
   getVerifications: (params?: {

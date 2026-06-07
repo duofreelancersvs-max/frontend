@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, Crown } from "lucide-react";
+import { CheckCircle2, Zap } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface VerificationBadgeProps {
-  type: "basic" | "premium";
+  type: "basic" | "pro";
   className?: string;
 }
 
@@ -27,9 +27,9 @@ export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
               className,
             )}
           >
-            {type === "premium" ? (
-              <div className="bg-gold/10 rounded-full p-1 border border-gold/20">
-                <Crown size={14} className="text-gold fill-gold" />
+            {type === "pro" ? (
+              <div className="bg-teal-500/10 rounded-full p-1 border border-teal-500/30">
+                <Zap size={14} className="text-teal-600 fill-teal-500" />
               </div>
             ) : (
               <CheckCircle2
@@ -41,7 +41,7 @@ export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {type === "premium" ? "Premium Verified" : "Verified Freelancer"}
+            {type === "pro" ? "Pro Member" : "Verified Freelancer"}
           </p>
         </TooltipContent>
       </Tooltip>

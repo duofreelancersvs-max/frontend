@@ -7,12 +7,12 @@ import {
   ArrowRight,
   Users,
   Layout,
+  User,
   Zap,
   Search,
   BadgeCheck,
   Building,
   Check,
-  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -186,27 +186,19 @@ const Home = () => {
       monthlyPrice: 0,
       highlighted: false,
       buttonText: "Get Started",
-      features: ["Create profile", "5 projects/month", "Basic support"],
+      features: ["Create profile", "5 applications/month", "Basic support"],
     },
     {
       name: "Pro",
       description: "For serious freelancers",
-      monthlyPrice: 499,
+      monthlyPrice: 399,
       highlighted: true,
       buttonText: "Subscribe Now",
       features: [
-        "Unlimited projects",
+        "Unlimited applications",
         "Priority support",
         "Analytics dashboard",
       ],
-    },
-    {
-      name: "Premium",
-      description: "For top-tier professionals",
-      monthlyPrice: 999,
-      highlighted: false,
-      buttonText: "Go Premium",
-      features: ["Verified badge", "Top search ranking", "Custom URL"],
     },
   ];
 
@@ -275,7 +267,7 @@ const Home = () => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
             <div className="inline-flex items-center justify-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 mb-4 md:mb-6 animate-fade-in-up">
-              <span className="text-[10px] md:text-xs font-bold text-teal tracking-wider uppercase">
+              <span className="text-xxs md:text-xs font-bold text-teal tracking-wider uppercase">
                 #1 Creative Marketplace in India
               </span>
             </div>
@@ -616,7 +608,7 @@ const Home = () => {
                               key={
                                 typeof skill === "string" ? skill : skill.name
                               }
-                              className="text-[10px] bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
+                              className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
                             >
                               {typeof skill === "string" ? skill : skill.name}
                             </span>
@@ -667,7 +659,7 @@ const Home = () => {
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {plans.map((plan, idx) => (
               <AnimatedSection key={plan.name} delay={idx * 100}>
                 <div
@@ -683,21 +675,15 @@ const Home = () => {
                       "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
                       plan.name === "Pro"
                         ? "bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light"
-                        : plan.name === "Premium"
-                          ? "bg-gold/10 dark:bg-gold/20 text-gold"
-                          : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
+                        : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
                     )}
                   >
-                    {plan.name === "Premium" ? (
-                      <Crown size={24} />
-                    ) : (
-                      <Zap size={24} />
-                    )}
+                    {plan.name === "Pro" ? <Zap size={24} /> : <User size={24} />}
                   </div>
                   <h3 className="text-lg font-bold text-navy dark:text-white mb-0.5">
                     {plan.name}
                   </h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-[10px] mb-3">
+                  <p className="text-slate-500 dark:text-slate-400 text-xxs mb-3">
                     {plan.description}
                   </p>
                   <div className="mb-4">

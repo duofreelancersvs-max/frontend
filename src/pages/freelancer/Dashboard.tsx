@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useOutletContext, useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 import {
   User,
   Briefcase,
@@ -34,6 +34,11 @@ import {
 } from "@/hooks/queries/useFreelancerDashboardQueries";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { getCategoryStyle } from "@/lib/category-styles";
+import { TrialBanner } from "@/components/feature-gate";
+import { TermsModal } from "@/components/modals/TermsModal";
+import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const getStatusBadgeStyle = (status: string) => {
   switch (status) {
@@ -55,9 +60,9 @@ const getStatusBadgeStyle = (status: string) => {
 
 const FreelancerDashboard = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
+  const queryClient = useQueryClient();
 
   const { data: profileData, isLoading: loadingProfile } = useMyFreelancerProfile();
   const { data: appsData, isLoading: loadingApps } = useMyApplications();
@@ -73,9 +78,41 @@ const FreelancerDashboard = () => {
   const subscription = subData || null;
   const conversations = convData?.conversations || [];
   
+  const appStatusByProjectId = new Map(
+    applications.map((app: any) => [
+      app.project?.id || app.project?._id || app.projectId,
+      app.status,
+    ])
+  );
+  
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [showTermsForApply, setShowTermsForApply] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
 
+  const handleApplyClick = useCallback(
+    (project: any) => {
+      // Find original project object if needed, or just pass the fullData if available.
+      // recommendedProjects holds the full projects
+      const fullProject = recommendedProjects.find((p: any) => p._id === project.id || p.id === project.id) || project;
+      setSelectedProject(fullProject);
+      setShowTermsForApply(true);
+    },
+    [recommendedProjects]
+  );
 
+  const handleTermsAccepted = () => {
+    setShowTermsForApply(false);
+    setShowApplicationModal(true);
+  };
+
+  const handleApplicationSuccess = () => {
+    setShowApplicationModal(false);
+    setSelectedProject(null);
+    queryClient.invalidateQueries({ queryKey: ["myApplications"] });
+    toast.success("Application submitted successfully!");
+  };
   const profileCompletion = profile
     ? Math.round(
         (!!profile.title ? 10 : 0) +
@@ -241,6 +278,9 @@ const FreelancerDashboard = () => {
 
         {/* Main Content Area */}
         <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6 lg:space-y-8">
+          {/* TRIAL BANNER */}
+          <TrialBanner />
+
           {/* WELCOME BANNER */}
           <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-6 lg:p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
@@ -439,12 +479,28 @@ const FreelancerDashboard = () => {
                         {project.postedTime}
                       </div>
                     </div>
-                    <Button 
-                      className="w-full bg-royal-blue hover:bg-royal-blue-hover text-white text-sm"
-                      onClick={() => navigate("/freelancer/projects", { state: { applyToProjectId: project.id } })}
-                    >
-                      Apply Now
-                    </Button>
+                    {(() => {
+                      const status = appStatusByProjectId.get(project.id);
+                      const hasApplied = status && status !== "withdrawn" && status !== "rejected";
+                      const applyLabel = hasApplied 
+                        ? (status === "shortlisted" ? "Shortlisted" : status === "hired" ? "Hired" : status === "accepted" ? "Accepted" : "Applied") 
+                        : "Apply Now";
+                      
+                      return (
+                        <Button 
+                          className={cn(
+                            "w-full text-sm",
+                            hasApplied 
+                              ? "bg-slate-100 text-slate-500 hover:bg-slate-100 cursor-not-allowed dark:bg-white/5 dark:text-slate-400" 
+                              : "bg-royal-blue hover:bg-royal-blue-hover text-white"
+                          )}
+                          disabled={!!hasApplied}
+                          onClick={() => !hasApplied && handleApplyClick(project)}
+                        >
+                          {applyLabel}
+                        </Button>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}
@@ -570,11 +626,11 @@ const FreelancerDashboard = () => {
             </div>
           </section>
 
-          {/* ONE COLUMN LAYOUT */}
-          <div className="grid gap-6">
-             {/* RIGHT - MESSAGES */}
-            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm">
-              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/5">
+          {/* BOTTOM TWO COLUMN LAYOUT */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* LEFT COLUMN: MESSAGES */}
+            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm h-full flex flex-col">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/5 shrink-0">
                 <h3 className="text-lg font-bold text-navy dark:text-white">New Messages</h3>
                 <Link
                   to="/freelancer/messages"
@@ -583,12 +639,14 @@ const FreelancerDashboard = () => {
                   Go to Inbox
                 </Link>
               </div>
-              <div className="divide-y divide-slate-100 dark:divide-white/5">
+              <div className="divide-y divide-slate-100 dark:divide-white/5 flex-1 overflow-y-auto min-h-0">
                 {recentMessages.map((msg) => (
-                  <div
+                  <Link
                     key={msg.id}
+                    to="/freelancer/messages"
+                    state={{ conversationId: msg.id }}
                     className={cn(
-                      "p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors",
+                      "block p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors",
                       msg.unread && "bg-teal/5 dark:bg-teal/10",
                     )}
                   >
@@ -611,7 +669,7 @@ const FreelancerDashboard = () => {
                           >
                             {msg.name}
                           </p>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-slate-400 shrink-0 ml-2">
                             {msg.time}
                           </span>
                         </div>
@@ -620,10 +678,10 @@ const FreelancerDashboard = () => {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
-              <div className="p-4">
+              <div className="p-4 shrink-0 border-t border-slate-100 dark:border-white/5 mt-auto">
                 <Link to="/freelancer/messages">
                   <Button
                     variant="outline"
@@ -634,103 +692,106 @@ const FreelancerDashboard = () => {
                 </Link>
               </div>
             </section>
-          </div>
 
-          {/* SUBSCRIPTION STATUS */}
-          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div
-                  className={cn(
-                    "w-14 h-14 rounded-xl flex items-center justify-center",
-                    subscriptionPlan === "free"
-                      ? "bg-slate-100 dark:bg-white/10"
-                      : subscriptionPlan === "pro"
-                        ? "bg-royal-blue/10 dark:bg-royal-blue/20"
-                        : "bg-gold/10 dark:bg-gold/20",
-                  )}
-                >
-                  <Award
-                    size={28}
-                    className={cn(
-                      subscriptionPlan === "free"
-                        ? "text-slate-500"
-                        : subscriptionPlan === "pro"
-                          ? "text-royal-blue"
-                          : "text-gold",
+            {/* RIGHT COLUMN: SUBSCRIPTION & QUICK ACTIONS */}
+            <div className="flex flex-col gap-6">
+              {/* SUBSCRIPTION STATUS */}
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={cn(
+                        "w-14 h-14 rounded-xl flex items-center justify-center shrink-0",
+                        subscriptionPlan === "free"
+                          ? "bg-slate-100 dark:bg-white/10"
+                          : subscriptionPlan === "pro"
+                            ? "bg-royal-blue/10 dark:bg-royal-blue/20"
+                            : "bg-gold/10 dark:bg-gold/20",
+                      )}
+                    >
+                      <Award
+                        size={28}
+                        className={cn(
+                          subscriptionPlan === "free"
+                            ? "text-slate-500"
+                            : subscriptionPlan === "pro"
+                              ? "text-royal-blue"
+                              : "text-gold",
+                        )}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-bold text-navy dark:text-white truncate">
+                        {subscriptionPlan.charAt(0).toUpperCase() +
+                          subscriptionPlan.slice(1)}{" "}
+                        Plan
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                        {subscriptionPlan === "free"
+                          ? "Limited features - Upgrade to unlock more"
+                          : subscription?.endDate
+                            ? `Expires on ${new Date(subscription.endDate).toLocaleDateString()}`
+                            : "Active subscription"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 shrink-0">
+                    {subscriptionPlan === "free" ? (
+                      <Link to="/freelancer/subscription">
+                        <Button className="bg-gradient-to-r from-royal-blue to-teal text-white font-semibold w-full lg:w-auto">
+                          <Zap size={16} className="mr-2" />
+                          Upgrade Now
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link to="/freelancer/subscription">
+                        <Button
+                          variant="outline"
+                          className="border-royal-blue text-royal-blue w-full lg:w-auto"
+                        >
+                          Manage Subscription
+                        </Button>
+                      </Link>
                     )}
-                  />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-navy dark:text-white">
-                    {subscriptionPlan.charAt(0).toUpperCase() +
-                      subscriptionPlan.slice(1)}{" "}
-                    Plan
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {subscriptionPlan === "free"
-                      ? "Limited features - Upgrade to unlock more"
-                      : subscription?.endDate
-                        ? `Expires on ${new Date(subscription.endDate).toLocaleDateString()}`
-                        : "Active subscription"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                {subscriptionPlan === "free" ? (
-                  <Link to="/freelancer/subscription">
-                    <Button className="bg-gradient-to-r from-royal-blue to-teal text-white font-semibold">
-                      <Zap size={16} className="mr-2" />
-                      Upgrade Now
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link to="/freelancer/subscription">
+              </section>
+
+              {/* QUICK ACTIONS */}
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+                <h3 className="text-lg font-bold text-navy dark:text-white mb-4">Quick Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/freelancer/profile" className="w-full sm:w-auto flex-1">
                     <Button
                       variant="outline"
-                      className="border-royal-blue text-royal-blue"
+                      className="w-full border-slate-200 dark:border-white/10 dark:text-white hover:border-royal-blue dark:hover:border-royal-blue hover:text-royal-blue dark:hover:text-royal-blue dark:hover:bg-white/5 justify-start"
                     >
-                      Manage Subscription
+                      <User size={16} className="mr-2 shrink-0" />
+                      Update Profile
                     </Button>
                   </Link>
-                )}
-              </div>
+                  <Link to="/freelancer/portfolio" className="w-full sm:w-auto flex-1">
+                    <Button
+                      variant="outline"
+                      className="w-full border-slate-200 dark:border-white/10 dark:text-white hover:border-teal dark:hover:border-teal hover:text-teal dark:hover:text-teal dark:hover:bg-white/5 justify-start"
+                    >
+                      <Plus size={16} className="mr-2 shrink-0" />
+                      Add Portfolio
+                    </Button>
+                  </Link>
+                  <Link to="/projects" className="w-full sm:w-auto flex-1">
+                    <Button
+                      variant="outline"
+                      className="w-full border-slate-200 dark:border-white/10 dark:text-white hover:border-success-green dark:hover:border-success-green hover:text-success-green dark:hover:text-success-green dark:hover:bg-white/5 justify-start"
+                    >
+                      <Briefcase size={16} className="mr-2 shrink-0" />
+                      Browse Projects
+                    </Button>
+                  </Link>
+                </div>
+              </section>
             </div>
-          </section>
-
-          {/* QUICK ACTIONS */}
-          <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
-            <h3 className="text-lg font-bold text-navy dark:text-white mb-4">Quick Actions</h3>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/freelancer/profile">
-                <Button
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-royal-blue dark:hover:border-royal-blue hover:text-royal-blue dark:hover:text-royal-blue dark:hover:bg-white/5"
-                >
-                  <User size={16} className="mr-2" />
-                  Update Profile
-                </Button>
-              </Link>
-              <Link to="/freelancer/portfolio">
-                <Button
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-teal dark:hover:border-teal hover:text-teal dark:hover:text-teal dark:hover:bg-white/5"
-                >
-                  <Plus size={16} className="mr-2" />
-                  Add Portfolio
-                </Button>
-              </Link>
-              <Link to="/projects">
-                <Button
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/10 dark:text-white hover:border-success-green dark:hover:border-success-green hover:text-success-green dark:hover:text-success-green dark:hover:bg-white/5"
-                >
-                  <Briefcase size={16} className="mr-2" />
-                  Browse Projects
-                </Button>
-              </Link>
-            </div>
-          </section>
+          </div>
         </main>
       </div>
 
@@ -771,7 +832,7 @@ const FreelancerDashboard = () => {
               {/* Application Details Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <p className="text-xxs font-black text-slate-400 uppercase tracking-widest mb-2">
                     Estimated Duration
                   </p>
                   <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
@@ -785,7 +846,7 @@ const FreelancerDashboard = () => {
                 </div>
                 
                 <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <p className="text-xxs font-black text-slate-400 uppercase tracking-widest mb-2">
                     Status
                   </p>
                   <div className="flex items-center gap-2">
@@ -799,7 +860,7 @@ const FreelancerDashboard = () => {
                 </div>
 
                 <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5 sm:col-span-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <p className="text-xxs font-black text-slate-400 uppercase tracking-widest mb-2">
                     Project Budget Range
                   </p>
                   <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
@@ -824,6 +885,39 @@ const FreelancerDashboard = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Terms & Conditions Modal for Apply flow */}
+      <TermsModal
+        isOpen={showTermsForApply}
+        onClose={() => {
+          setShowTermsForApply(false);
+          setSelectedProject(null);
+        }}
+        onAgree={handleTermsAccepted}
+      />
+
+      {/* Project Application Modal */}
+      {selectedProject && (
+        <ProjectApplicationModal
+          isOpen={showApplicationModal}
+          onClose={() => {
+            setShowApplicationModal(false);
+            setSelectedProject(null);
+          }}
+          onSuccess={handleApplicationSuccess}
+          project={{
+            id: selectedProject._id || selectedProject.id || "",
+            title: selectedProject.title,
+            client: {
+              name: selectedProject.client?.fullName ?? "Client",
+              rating: 0,
+              reviews: 0,
+              verified: false,
+            },
+            budget: selectedProject.budget,
+          }}
+        />
       )}
     </div>
   );

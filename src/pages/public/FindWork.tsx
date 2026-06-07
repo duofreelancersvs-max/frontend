@@ -126,7 +126,7 @@ const FindWork = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-10 border-b border-slate-100 dark:border-white/5">
             <div>
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-black text-teal dark:text-teal-light mb-6 uppercase tracking-[0.2em]">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xxs font-black text-teal dark:text-teal-light mb-6 uppercase tracking-[0.2em]">
                 Opportunities
               </span>
               <h1 className="text-5xl md:text-7xl font-black text-navy dark:text-white mb-6 leading-tight">
@@ -148,7 +148,7 @@ const FindWork = () => {
                 <div className="text-2xl font-black text-navy dark:text-white tracking-tighter">
                   {totalCount}
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="text-xxs font-bold text-slate-400 uppercase tracking-widest">
                   Live Projects
                 </div>
               </div>
@@ -200,7 +200,7 @@ const FindWork = () => {
               )}
             </button>
 
-            <div className="h-6 w-[1px] bg-slate-200 dark:bg-white/10 mx-1 shrink-0" />
+            <div className="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1 shrink-0" />
 
             {categories.slice(0, 5).map((cat) => (
               <button
@@ -227,7 +227,7 @@ const FindWork = () => {
             <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-6 animate-in slide-in-from-top-2 duration-200">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                  <label className="text-xxs font-black text-slate-400 uppercase tracking-widest px-1">
                     Category
                   </label>
                   <select
@@ -243,7 +243,7 @@ const FindWork = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                  <label className="text-xxs font-black text-slate-400 uppercase tracking-widest px-1">
                     Experience Level
                   </label>
                   <select
@@ -259,7 +259,7 @@ const FindWork = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                  <label className="text-xxs font-black text-slate-400 uppercase tracking-widest px-1">
                     Location
                   </label>
                   <select
@@ -437,10 +437,10 @@ const ProjectCard = ({
         <div>
           {/* Mobile Status Header */}
           <div className="flex items-center justify-between mb-4">
-            <span className="px-3 py-1 bg-teal/10 text-teal dark:text-teal-light text-[10px] font-black uppercase tracking-widest rounded-full border border-teal/20">
+            <span className="px-3 py-1 bg-teal/10 text-teal dark:text-teal-light text-xxs font-black uppercase tracking-widest rounded-full border border-teal/20">
               {project.category}
             </span>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xxs font-bold text-slate-400 uppercase tracking-wider">
               <Calendar size={12} className="text-slate-300" />
               {new Date(project.createdAt).toLocaleDateString()}
             </div>
@@ -450,7 +450,7 @@ const ProjectCard = ({
             {project.title}
           </h2>
 
-          <div className="flex flex-wrap items-center gap-y-3 gap-x-6 mb-5 text-[13px] sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
+          <div className="flex flex-wrap items-center gap-y-3 gap-x-6 mb-5 text-sm sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-teal/5 flex items-center justify-center text-teal">
                 <Wallet size={14} />
@@ -483,13 +483,13 @@ const ProjectCard = ({
             {project.requiredSkills.slice(0, 6).map((skill: string) => (
               <span
                 key={skill}
-                className="px-4 py-2 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-200 rounded-xl text-[11px] font-bold border border-slate-100 dark:border-white/5 shadow-sm"
+                className="px-4 py-2 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-200 rounded-xl text-xs font-bold border border-slate-100 dark:border-white/5 shadow-sm"
               >
                 {skill}
               </span>
             ))}
             {project.requiredSkills.length > 6 && (
-              <span className="px-3 py-2 text-[11px] text-slate-400 font-black">
+              <span className="px-3 py-2 text-xs text-slate-400 font-black">
                 +{project.requiredSkills.length - 6}
               </span>
             )}
@@ -502,7 +502,7 @@ const ProjectCard = ({
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050B15] bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-slate-400"
+                  className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050B15] bg-slate-100 dark:bg-white/10 flex items-center justify-center text-xxs font-bold text-slate-400"
                 >
                   {String.fromCharCode(64 + i)}
                 </div>
@@ -517,7 +517,7 @@ const ProjectCard = ({
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 text-[10px] font-black uppercase tracking-wider">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 text-xxs font-black uppercase tracking-wider">
               <CheckCircle2 size={12} />
               Payment Verified
             </div>

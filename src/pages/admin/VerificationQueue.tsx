@@ -1,33 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  Clock,
-  CheckCircle,
-  XCircle,
-  FileText,
-  CreditCard,
-  Briefcase,
-  Building2,
-  Filter,
-  LayoutGrid,
-  List,
-  Columns,
-  ChevronDown,
-  Eye,
-  Check,
-  X,
-  ZoomIn,
-  ZoomOut,
-  RotateCw,
-  ChevronLeft,
-  ChevronRight,
-  MapPin,
-  Calendar,
-  AlertTriangle,
-  MessageSquare,
-  Crown,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { AlertTriangle, Briefcase, Building2, Calendar, Check, CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, Columns, CreditCard, Eye, FileText, Filter, LayoutGrid, List, MapPin, MessageSquare, RotateCw, Sparkles, X, XCircle, Zap, ZoomIn, ZoomOut, type LucideIcon } from "lucide-react";
 import { adminService } from "@/services";
 
 // ============ TYPES ============
@@ -38,7 +10,7 @@ interface VerificationItem {
   freelancerInitials: string;
   freelancerEmail: string;
   freelancerLocation: string;
-  isPremiumApplicant: boolean;
+  isProApplicant: boolean;
   documentType: "aadhaar" | "pan" | "portfolio" | "gst";
   documentNumber: string;
   submittedAt: string;
@@ -204,10 +176,10 @@ const VerificationCard = ({
         <div className="vq-avatar">{item.freelancerInitials}</div>
         <div className="vq-freelancer-info">
           <div className="vq-freelancer-name">{item.freelancerName}</div>
-          {item.isPremiumApplicant && (
-            <span className="vq-premium-badge">
-              <Crown size={12} />
-              Premium Applicant
+          {item.isProApplicant && (
+            <span className="vq-pro-badge">
+              <Zap size={12} className="fill-current" />
+              Pro Applicant
             </span>
           )}
         </div>
@@ -427,10 +399,10 @@ const ReviewModal = ({
               <h3>{item.freelancerName}</h3>
               <p>{item.freelancerEmail}</p>
               <div className="vq-panel-badges">
-                {item.isPremiumApplicant && (
-                  <span className="vq-premium-badge">
-                    <Crown size={12} />
-                    Premium Applicant
+                {item.isProApplicant && (
+                  <span className="vq-pro-badge">
+                    <Zap size={12} className="fill-current" />
+                    Pro Applicant
                   </span>
                 )}
                 <span className="vq-location-badge">
@@ -634,8 +606,8 @@ const VerificationQueue = () => {
             freelancerInitials: initials,
             freelancerEmail: v.freelancerId?.email || "",
             freelancerLocation: v.freelancerProfile?.location || "—",
-            isPremiumApplicant:
-              v.freelancerProfile?.verificationBadge === "premium" || false,
+            isProApplicant:
+              v.freelancerProfile?.verificationBadge === "pro" || false,
             documentType: docTypeMap[v.documentType] || "aadhaar",
             documentNumber: v.documentNumber
               ? `****${v.documentNumber.slice(-4)}`

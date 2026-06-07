@@ -21,9 +21,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Zap,
-  Star,
   PieChart,
   Activity,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 
@@ -43,6 +43,10 @@ interface Plan {
   isPopular?: boolean;
   conversionRate?: string;
   color: "gray" | "indigo" | "gold";
+  maxApplications?: number;
+  maxProjects?: number;
+  tier?: string;
+  isFree?: boolean;
 }
 
 interface Transaction {
@@ -68,7 +72,6 @@ const calculateAnalytics = (payments: any[]) => {
     churnRate: 2.4,
     ltv: 3450,
     freeToProConversion: 12,
-    proToPremiumConversion: 8,
     avgTimeToUpgrade: 14,
     mrrGrowth: [
       { month: "Sep", value: 125000 },
@@ -79,12 +82,12 @@ const calculateAnalytics = (payments: any[]) => {
       { month: "Feb", value: mrr },
     ],
     revenueByPlan: [
-      { month: "Sep", free: 0, pro: 95000, premium: 30000 },
-      { month: "Oct", free: 0, pro: 105000, premium: 33000 },
-      { month: "Nov", free: 0, pro: 115000, premium: 37000 },
-      { month: "Dec", free: 0, pro: 120000, premium: 41000 },
-      { month: "Jan", free: 0, pro: 122000, premium: 46000 },
-      { month: "Feb", free: 0, pro: mrr * 0.7, premium: mrr * 0.3 },
+      { month: "Sep", free: 0, pro: 125000 },
+      { month: "Oct", free: 0, pro: 138000 },
+      { month: "Nov", free: 0, pro: 152000 },
+      { month: "Dec", free: 0, pro: 161000 },
+      { month: "Jan", free: 0, pro: 168000 },
+      { month: "Feb", free: 0, pro: mrr },
     ],
   };
 };
@@ -197,6 +200,33 @@ const PlanCard = ({
           {feature.name}
         </div>
       ))}
+      {/* Live plan limits (from SubscriptionPlan.maxApplications / maxProjects) */}
+      {(plan.maxApplications !== undefined || plan.maxProjects !== undefined) && (
+        <div className="mt-2 pt-2 border-t border-slate-200 dark:border-white/10 space-y-1 text-xs text-slate-500 dark:text-slate-400">
+          {plan.maxApplications !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <Zap size={11} className="text-teal" />
+              {plan.maxApplications === -1
+                ? "Unlimited applications / month"
+                : `${plan.maxApplications} applications / month`}
+            </div>
+          )}
+          {plan.maxProjects !== undefined && (
+            <div className="flex items-center gap-1.5">
+              <Briefcase size={11} className="text-teal" />
+              {plan.maxProjects === -1
+                ? "Unlimited active projects"
+                : `${plan.maxProjects} active project${plan.maxProjects === 1 ? "" : "s"}`}
+            </div>
+          )}
+          {plan.tier && (
+            <div className="flex items-center gap-1.5">
+              <Activity size={11} className="text-teal" />
+              Tier: <span className="font-semibold capitalize">{plan.tier}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
 
     <div className="sm-plan-actions">
@@ -314,25 +344,20 @@ const MiniChart = ({
 const StackedBarChart = ({
   data,
 }: {
-  data: { month: string; free: number; pro: number; premium: number }[];
+  data: { month: string; free: number; pro: number }[];
 }) => {
-  const maxTotal = Math.max(...data.map((d) => d.free + d.pro + d.premium));
+  const maxTotal = Math.max(...data.map((d) => d.free + d.pro));
 
   return (
     <div className="sm-stacked-chart">
       <div className="sm-chart-bars">
         {data.map((item, idx) => {
-          const total = item.free + item.pro + item.premium;
+          const total = item.free + item.pro;
           const proHeight = (item.pro / maxTotal) * 100;
-          const premiumHeight = (item.premium / maxTotal) * 100;
 
           return (
             <div key={idx} className="sm-stacked-wrapper">
               <div className="sm-stacked-bar">
-                <div
-                  className="sm-stack premium"
-                  style={{ height: `${premiumHeight}%` }}
-                ></div>
                 <div
                   className="sm-stack pro"
                   style={{ height: `${proHeight}%` }}
@@ -341,7 +366,6 @@ const StackedBarChart = ({
               <span className="sm-chart-label">{item.month}</span>
               <div className="sm-stacked-tooltip">
                 <div>Pro: ₹{item.pro.toLocaleString()}</div>
-                <div>Premium: ₹{item.premium.toLocaleString()}</div>
                 <div>Total: ₹{total.toLocaleString()}</div>
               </div>
             </div>
@@ -352,10 +376,6 @@ const StackedBarChart = ({
         <span className="sm-legend-item pro">
           <span className="sm-legend-dot"></span>
           Pro
-        </span>
-        <span className="sm-legend-item premium">
-          <span className="sm-legend-dot"></span>
-          Premium
         </span>
       </div>
     </div>
@@ -378,16 +398,6 @@ const ConversionFunnel = () => (
       <div className="sm-funnel-bar pro" style={{ width: "70%" }}>
         <span>Pro Users</span>
         <span>250</span>
-      </div>
-    </div>
-    <div className="sm-funnel-arrow">
-      <ArrowDownRight size={16} />
-      <span>8% upgrade</span>
-    </div>
-    <div className="sm-funnel-step">
-      <div className="sm-funnel-bar premium" style={{ width: "40%" }}>
-        <span>Premium Users</span>
-        <span>50</span>
       </div>
     </div>
   </div>
@@ -483,7 +493,6 @@ const PlanEditModal = ({
               <select defaultValue={plan.badge || "none"}>
                 <option value="none">None</option>
                 <option value="pro">Pro Badge</option>
-                <option value="premium">Premium Badge</option>
                 <option value="verified">Verified Badge</option>
               </select>
             </div>
@@ -545,8 +554,12 @@ const SubscriptionManagement = () => {
           yearlyDiscount: 0,
           subscribers: 0, // Should be fetched from backend realistically
           mrr: 0,
-          color: (p.name.toLowerCase() === "premium" ? "gold" : p.name.toLowerCase() === "pro" ? "indigo" : "gray") as any,
+          color: (p.name.toLowerCase() === "pro" ? "indigo" : "gray") as any,
           features: p.features.map(f => ({ name: f, included: true })),
+          maxApplications: p.maxApplications,
+          maxProjects: p.maxProjects,
+          tier: p.tier,
+          isFree: p.isFree,
         }));
         
         const mappedTx = paymentsRes.payments.map((p) => ({
@@ -662,7 +675,6 @@ const SubscriptionManagement = () => {
                 >
                   <option value="all">All Plans</option>
                   <option value="pro">Pro</option>
-                  <option value="premium">Premium</option>
                 </select>
                 <ChevronDown size={14} />
               </div>
@@ -790,17 +802,6 @@ const SubscriptionManagement = () => {
                         {analyticsData.freeToProConversion}%
                       </span>
                       <span className="sm-metric-label">Free → Pro</span>
-                    </div>
-                  </div>
-                  <div className="sm-metric">
-                    <div className="sm-metric-icon gold">
-                      <Star size={18} />
-                    </div>
-                    <div className="sm-metric-info">
-                      <span className="sm-metric-value">
-                        {analyticsData.proToPremiumConversion}%
-                      </span>
-                      <span className="sm-metric-label">Pro → Premium</span>
                     </div>
                   </div>
                   <div className="sm-metric">

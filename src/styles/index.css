@@ -42,8 +42,7 @@
     --teal-primary: 173 80% 32%;
     --teal-light: 171 77% 40%;
     
-    /* PREMIUM SHADOWS */
-    --shadow-premium: 0 10px 40px -10px rgba(5, 11, 21, 0.08);
+    /* BRAND SHADOWS */
     --shadow-teal: 0 10px 40px -10px rgba(13, 148, 136, 0.15);
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -121,10 +120,6 @@
 
   .glass-card {
     @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl;
-  }
-
-  .premium-shadow {
-    box-shadow: var(--shadow-premium);
   }
 
   .text-gradient {

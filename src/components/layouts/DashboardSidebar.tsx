@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
+import { UsageIndicator } from "@/components/feature-gate";
 
 interface NavItem {
   label: string;
@@ -94,6 +95,11 @@ const DashboardSidebar = () => {
         </nav>
       </div>
 
+      {/* Usage Indicator */}
+      <div className={cn("px-4 mb-2 transition-all duration-300", isCollapsed ? "hidden" : "block")}>
+        <UsageIndicator compact={true} hideCta={true} className="w-full" />
+      </div>
+
       {/* User Profile & Collapse */}
       <div className="p-4 mt-auto">
         <div className={cn(
@@ -116,7 +122,7 @@ const DashboardSidebar = () => {
                 <p className="text-sm font-black text-navy dark:text-white truncate uppercase tracking-tight">
                   {user?.fullName?.split(' ')[0] || "User"}
                 </p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{role}</p>
+                <p className="text-xxs font-bold text-slate-400 uppercase tracking-widest">{role}</p>
               </div>
             )}
 

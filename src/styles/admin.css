@@ -1718,6 +1718,135 @@
   color: var(--admin-rose);
 }
 
+.um-actions-dropdown button.pro {
+  color: var(--admin-teal, #14b8a6);
+}
+
+/* Pro badge in the user row */
+.um-pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.375rem;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* Pro override confirmation modal */
+.um-pro-modal {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+  margin: auto;
+  z-index: 51;
+}
+
+.um-pro-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.um-pro-modal-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.um-pro-modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--admin-white);
+}
+
+.um-pro-modal-header p {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: var(--admin-text-muted);
+}
+
+.um-pro-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.um-pro-modal-warning {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-dark-navy);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.um-pro-modal-warning strong {
+  color: var(--admin-white);
+}
+
+.um-pro-modal-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+}
+
+.um-pro-modal-textarea {
+  width: 100%;
+  background-color: var(--admin-dark-navy);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--admin-white);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.um-pro-modal-textarea:focus {
+  border-color: var(--admin-teal, #14b8a6);
+}
+
+.um-pro-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.admin-btn-pro {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.admin-btn-pro:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
 .um-actions-divider {
   height: 1px;
   background-color: var(--admin-border);
@@ -2680,14 +2809,14 @@
   margin-bottom: 0.25rem;
 }
 
-.vq-premium-badge {
+.vq-pro-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0.125rem 0.5rem;
-  background: linear-gradient(135deg, #F59E0B, #D97706);
+  background: linear-gradient(135deg, #14B8A6, #0D9488);
   border-radius: 9999px;
-  color: var(--admin-midnight);
+  color: #ffffff;
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -3883,11 +4012,6 @@
   color: var(--admin-indigo);
 }
 
-.sm-plan-tag.premium {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: var(--admin-amber);
-}
-
 .sm-tx-amount {
   color: var(--admin-white);
   font-weight: 600;
@@ -4214,10 +4338,6 @@
   background: linear-gradient(180deg, var(--admin-indigo) 0%, rgba(99, 102, 241, 0.6) 100%);
 }
 
-.sm-stack.premium {
-  background: linear-gradient(180deg, var(--admin-amber) 0%, rgba(245, 158, 11, 0.6) 100%);
-}
-
 .sm-stacked-wrapper:hover .sm-stacked-tooltip {
   opacity: 1;
 }
@@ -4273,10 +4393,6 @@
   background-color: var(--admin-indigo);
 }
 
-.sm-legend-item.premium .sm-legend-dot {
-  background-color: var(--admin-amber);
-}
-
 /* Conversion Section */
 .sm-conversion-section {
   background-color: var(--admin-dark-navy);
@@ -4325,10 +4441,6 @@
 
 .sm-funnel-bar.pro {
   background: linear-gradient(90deg, var(--admin-indigo), rgba(99, 102, 241, 0.5));
-}
-
-.sm-funnel-bar.premium {
-  background: linear-gradient(90deg, var(--admin-amber), rgba(245, 158, 11, 0.5));
 }
 
 .sm-funnel-arrow {

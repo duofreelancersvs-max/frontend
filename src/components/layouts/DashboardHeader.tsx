@@ -1,8 +1,9 @@
 import { useUnreadStore } from "@/stores/unread.store";
 import { useAuth } from "@/hooks/useAuth";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, MessageSquare, Menu, ChevronDown, X } from "lucide-react";
+import { ChevronDown, Menu, MessageSquare, Search, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
@@ -33,6 +34,8 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
   children,
 }) => {
   const { user, logout } = useAuth();
+  const { context, inTrial } = useFeatureGate(user?.role === "freelancer");
+  const isPro = context?.tier === "pro";
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -132,14 +135,14 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
                 <MessageSquare size={18} />
               </button>
               {totalUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-primary text-primary-foreground text-xxs font-bold rounded-full border-2 border-background flex items-center justify-center">
                   {totalUnreadCount}
                 </span>
               )}
             </Link>
           </div>
 
-          <div className="h-6 w-[1px] bg-border mx-1 hidden sm:block" />
+          <div className="h-6 w-px bg-border mx-1 hidden sm:block" />
 
           {/* Profile Dropdown */}
           <div className="relative">
@@ -164,11 +167,33 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
                 )}
               </div>
               <div className="hidden md:block text-left pr-1">
-                <p className="text-[13px] font-heading font-semibold text-foreground leading-none">
-                  {user?.fullName || user?.email?.split("@")[0] || "Member"}
-                </p>
-                <p className="text-[10px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
-                  {user?.role || "Member"}
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-heading font-semibold text-foreground leading-none">
+                    {user?.fullName || user?.email?.split("@")[0] || "Member"}
+                  </p>
+                  {isPro && !inTrial && (
+                    <span
+                      data-testid="pro-member-badge"
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-700 text-[9px] font-bold uppercase tracking-wider"
+                      title="Pro Member"
+                    >
+                      <Zap size={8} className="fill-teal-500 text-teal-500" />
+                      Pro
+                    </span>
+                  )}
+                  {inTrial && (
+                    <span
+                      data-testid="trial-member-badge"
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-700 text-[9px] font-bold uppercase tracking-wider"
+                      title="Free Trial"
+                    >
+                      <Zap size={8} className="fill-blue-500 text-blue-500" />
+                      Free Trial
+                    </span>
+                  )}
+                </div>
+                <p className="text-xxs font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                  {user?.role || "Member"} &bull; {context?.planName || "Free"}
                 </p>
               </div>
               <ChevronDown
@@ -208,7 +233,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
                     >
                       Settings
                     </Link>
-                    <div className="h-[1px] bg-border my-1.5 mx-2" />
+                    <div className="h-px bg-border my-1.5 mx-2" />
                     <button
                       onClick={() => {
                         setIsProfileOpen(false);
@@ -281,9 +306,9 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
               </div>
 
               {/* Footer hint */}
-              <div className="px-4 py-2 border-t border-border bg-muted/20 flex items-center gap-3 text-[11px] text-muted-foreground">
-                <span><kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-[10px]">↵</kbd> to select</span>
-                <span><kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-[10px]">Esc</kbd> to close</span>
+              <div className="px-4 py-2 border-t border-border bg-muted/20 flex items-center gap-3 text-xs text-muted-foreground">
+                <span><kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-xxs">↵</kbd> to select</span>
+                <span><kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-xxs">Esc</kbd> to close</span>
               </div>
             </div>
           </div>

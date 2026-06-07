@@ -11,6 +11,7 @@ export interface MessageAttachment {
 
 export interface SocketMessage {
   _id: string;
+  id?: string;
   conversationId: string;
   senderId: string;
   content: string;
@@ -24,6 +25,7 @@ export interface SocketMessage {
 
 export interface SocketConversation {
   _id: string;
+  id?: string;
   participants: string[];
   lastMessage?: {
     content: string;

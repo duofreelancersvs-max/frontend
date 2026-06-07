@@ -5,6 +5,7 @@ export interface Project {
   id?: string;
   title: string;
   description: string;
+  contactInfo?: string;
   category: string;
   requiredSkills: string[];
   budget: {
@@ -52,6 +53,7 @@ export interface ProjectStats {
 export interface CreateProjectRequest {
   title: string;
   description: string;
+  contactInfo?: string;
   category: string;
   requiredSkills: string[];
   budget: {

@@ -18,10 +18,10 @@ const ChatAvatar = ({
   const sizeClasses = {
     sm: "w-9 h-9 text-sm", // Used in top header dropdown
     md: "w-10 h-10 text-sm", // Used in ChatArea header
-    lg: "w-11 h-11 text-sm", // Used in ConversationList item
-    xl: "w-16 h-16 text-xl", // Used in ChatInfoPanel
-    "2xl": "w-12 h-12 text-sm", // Used in Freelancer ConversationList
-    "3xl": "w-20 h-20 text-2xl", // Used in Freelancer ChatInfoPanel
+    lg: "w-11 h-11 text-base", // Used in ConversationList item
+    xl: "w-16 h-16 text-2xl", // Used in ChatInfoPanel
+    "2xl": "w-12 h-12 text-lg", // Used in Freelancer ConversationList
+    "3xl": "w-20 h-20 text-3xl", // Used in Freelancer ChatInfoPanel
   };
 
   const indicatorContainerClasses = {
@@ -37,15 +37,15 @@ const ChatAvatar = ({
     sm: "-bottom-0.5 -right-0.5",
     md: "bottom-0 right-0",
     lg: "bottom-0 right-0",
-    xl: "bottom-[2px] right-[2px]",
+    xl: "bottom-0.5 right-[2px]",
     "2xl": "bottom-0 right-0",
-    "3xl": "bottom-[2px] right-[2px]",
+    "3xl": "bottom-0.5 right-[2px]",
   };
 
   return (
     <div className={cn("relative flex-shrink-0 inline-flex", sizeClasses[size], className)}>
       <div
-        className="w-full h-full rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-semibold"
+        className="w-full h-full rounded-full bg-teal flex items-center justify-center text-white font-semibold"
       >
         {name ? name.charAt(0).toUpperCase() : "U"}
       </div>
@@ -57,8 +57,7 @@ const ChatAvatar = ({
             indicatorContainerClasses[size]
           )}
         >
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-full w-full bg-green-500 border-2 border-white"></span>
+          <span className="relative inline-flex rounded-full h-full w-full bg-green-500 border-[2.5px] border-background"></span>
         </span>
       )}
     </div>

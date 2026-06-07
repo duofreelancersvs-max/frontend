@@ -623,10 +623,12 @@ const ClientDashboard = () => {
               </div>
               <div className="divide-y divide-slate-100">
                 {recentMessages.map((msg) => (
-                   <div
+                   <Link
                     key={msg.id}
+                    to="/client/messages"
+                    state={{ conversationId: msg.id }}
                     className={cn(
-                      "p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-white/5 last:border-0",
+                      "block p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-white/5 last:border-0",
                       msg.unread && "bg-teal/5 dark:bg-teal/10",
                     )}
                   >
@@ -658,7 +660,7 @@ const ClientDashboard = () => {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
               <div className="p-4">

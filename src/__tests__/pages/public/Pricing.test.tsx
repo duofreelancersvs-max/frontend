@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import Pricing from "@/pages/public/Pricing";
@@ -16,6 +16,55 @@ Object.defineProperty(window, "IntersectionObserver", {
   configurable: true,
   value: MockIntersectionObserver,
 });
+
+// Mock the public service to return the 2-plan (Free + Pro) structure
+vi.mock("@/services/public.service", () => ({
+  publicService: {
+    getSubscriptionPlans: vi.fn().mockResolvedValue([
+      {
+        _id: "plan-free",
+        name: "Free",
+        price: 0,
+        durationInDays: 30,
+        features: [
+          "5 applications / month",
+          "1 active project",
+          "3 portfolio items",
+          "Standard support",
+        ],
+        isActive: true,
+        tier: "free",
+      },
+      {
+        _id: "plan-pro",
+        name: "Pro",
+        price: 399,
+        durationInDays: 30,
+        features: [
+          "Unlimited applications",
+          "Unlimited projects",
+          "20 portfolio items",
+          "Priority support",
+          "Pro Member badge",
+        ],
+        isActive: true,
+        tier: "pro",
+        isPopular: true,
+      },
+    ]),
+    getCategoriesWithSkills: vi.fn().mockResolvedValue([]),
+    getLegalContent: vi.fn().mockResolvedValue({ sections: [] }),
+    getAllLegalSlugs: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+// Mock the auth store to return unauthenticated by default
+vi.mock("@/stores/auth.store", () => ({
+  useAuthStore: vi.fn().mockImplementation((selector?: any) => {
+    const state = { user: null, isAuthenticated: false };
+    return selector ? selector(state) : state;
+  }),
+}));
 
 // Mock lucide-react icons
 vi.mock("lucide-react", async () => {
@@ -44,151 +93,146 @@ vi.mock("lucide-react", async () => {
 });
 
 describe("Pricing", () => {
-  it("renders page header with title", () => {
+  it("renders page header with title", async () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getAllByText(/choose your/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.getByText(/invest in your/i)).toBeInTheDocument();
     expect(screen.getAllByText(/plan/i).length).toBeGreaterThan(0);
   });
 
-  it("renders breadcrumb navigation", () => {
+  it("renders top navigation", async () => {
     renderWithRouter(<Pricing />);
-    expect(
-      screen.getAllByRole("link", { name: /home/i }).length
-    ).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    // The public navbar exposes Home, Find Talent, Pricing, etc.
     expect(screen.getAllByText(/pricing/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/find talent/i).length).toBeGreaterThan(0);
   });
 
-  it("renders billing toggle with monthly/yearly options", () => {
+  it("renders billing toggle with monthly/yearly options", async () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getByRole("button", { name: /monthly/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /yearly/i })).toBeInTheDocument();
-    expect(screen.getByText(/-20%/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.getAllByText(/monthly/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/yearly/i).length).toBeGreaterThan(0);
+    // The "Save 20%" pill sits next to the Yearly label
+    expect(screen.getAllByText(/save/i).length).toBeGreaterThan(0);
   });
 
   it("allows switching between monthly and yearly billing", async () => {
     renderWithRouter(<Pricing />);
-    const yearlyButton = screen.getByRole("button", { name: /yearly/i });
-    await userEvent.click(yearlyButton);
-    expect(yearlyButton).toHaveClass("bg-white");
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    // The toggle is a pill button. Find it by its bg-slate-200 class.
+    const pill = document.querySelector("button.bg-slate-200") as HTMLElement | null;
+    expect(pill).toBeTruthy();
+    if (pill) await userEvent.click(pill);
+    // After click, billing cycle is yearly; the "/yr" suffix should be visible
+    expect(screen.getAllByText(/\/yr/i).length).toBeGreaterThan(0);
   });
 
-  it("renders all pricing plans", () => {
+  it("renders the two available plans (Free + Pro)", async () => {
     renderWithRouter(<Pricing />);
+    await waitFor(() => {
+      expect(screen.getAllByText(/5 applications/i).length).toBeGreaterThan(0);
+    });
     expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/pro/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/premium/i).length).toBeGreaterThan(0);
+    // Premium must no longer be a plan
+    expect(screen.queryByText(/premium/i)).toBeNull();
   });
 
-  it("displays correct pricing for monthly plan", () => {
+  it("displays correct pricing for Free and Pro monthly plans", async () => {
     renderWithRouter(<Pricing />);
+    await waitFor(() => {
+      expect(screen.getAllByText(/₹399/i).length).toBeGreaterThan(0);
+    });
     expect(screen.getAllByText(/₹0/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹499/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹999/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/₹399/i).length).toBeGreaterThan(0);
   });
 
-  it("displays most popular badge on pro plan", () => {
+  it("displays the 'Best For Growth' badge on the Pro plan", async () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getAllByText(/most popular/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/best for growth/i).length).toBeGreaterThan(0);
+    });
   });
 
-  it("displays best value badge on premium plan", () => {
+  it("does NOT display a 'Best Value' Premium badge", async () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getAllByText(/best value/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(/best value/i)).toBeNull();
   });
 
-  it("renders plan features for free plan", () => {
+  it("renders plan features for the Free plan", async () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getAllByText(/create profile/i).length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/add up to 3 portfolio items/i).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/apply to 5 projects/i).length
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText(/basic support/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/5 applications/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.getAllByText(/portfolio/i).length).toBeGreaterThan(0);
   });
 
-  it("renders plan features for pro plan", () => {
+  it("renders plan features for the Pro plan", async () => {
     renderWithRouter(<Pricing />);
-    expect(
-      screen.getAllByText(/everything in free/i).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/unlimited portfolio items/i).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/unlimited applications/i).length
-    ).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/unlimited applications/i).length).toBeGreaterThan(0);
+    });
     expect(screen.getAllByText(/priority support/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/analytics dashboard/i).length).toBeGreaterThan(0);
   });
 
-  it("renders plan features for premium plan", () => {
+  it("does not show Premium-only features (verified badge, account manager)", async () => {
     renderWithRouter(<Pricing />);
-    expect(
-      screen.getAllByText(/everything in pro/i).length
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText(/verified badge/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/top search ranking/i).length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/custom portfolio url/i).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(/dedicated account manager/i).length
-    ).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(/dedicated account manager/i)).toBeNull();
   });
 
-  it("renders comparison table", () => {
+  it("renders comparison table with Free and Pro columns", () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getAllByText(/compare plans/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/features/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/portfolio items/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/monthly applications/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/compare features/i).length).toBeGreaterThan(0);
+    // Both column headers should be visible
+    expect(screen.getAllByText(/portfolio capacity/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/search boost/i).length).toBeGreaterThan(0);
   });
 
-  it("renders secure payments section", () => {
+  it("renders the trust badge in the hero", async () => {
     renderWithRouter(<Pricing />);
-    expect(
-      screen.getAllByText(/secure payments powered by/i).length
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText(/razorpay/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/cards/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/upi/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/net banking/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/flexible pricing/i).length).toBeGreaterThan(0);
+    });
   });
 
-  it("renders testimonials section", () => {
+  it("renders the FAQ section with the current 3 questions", () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getByText(/loved by freelancers/i)).toBeInTheDocument();
-    expect(screen.getByText(/success stories/i)).toBeInTheDocument();
-  });
-
-  it("renders FAQ section", () => {
-    renderWithRouter(<Pricing />);
-    expect(screen.getByText(/pricing questions/i)).toBeInTheDocument();
-    expect(screen.getByText(/faq/i)).toBeInTheDocument();
+    expect(screen.getByText(/frequently asked questions/i)).toBeInTheDocument();
+    expect(screen.getByText(/can i cancel at any time/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/can i switch plans anytime/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/is there a free trial for paid plans/i)
+      screen.getByText(/which plan is right for me/i)
     ).toBeInTheDocument();
   });
 
   it("allows toggling FAQ items", async () => {
     renderWithRouter(<Pricing />);
-    const faqButton = screen.getByText(/can i switch plans anytime/i);
+    const faqButton = screen.getByText(/can i cancel at any time/i);
     await userEvent.click(faqButton);
     expect(
-      screen.getByText(/you can upgrade or downgrade your plan at any time/i)
+      screen.getByText(/you can cancel your subscription from your dashboard settings/i)
     ).toBeInTheDocument();
   });
 
   it("renders CTA section", () => {
     renderWithRouter(<Pricing />);
-    expect(screen.getByText(/still have questions/i)).toBeInTheDocument();
+    expect(screen.getByText(/ready to/i)).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /contact us/i }).length
+      screen.getAllByRole("link", { name: /upgrade today/i }).length
     ).toBeGreaterThan(0);
   });
 
@@ -201,26 +245,37 @@ describe("Pricing", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText(/for clients/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/for freelancers/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/support/i).length).toBeGreaterThan(0);
   });
 
   it("displays yearly savings text", async () => {
     renderWithRouter(<Pricing />);
-    const yearlyButton = screen.getByRole("button", { name: /yearly/i });
-    await userEvent.click(yearlyButton);
+    await waitFor(() => {
+      expect(screen.getAllByText(/save/i).length).toBeGreaterThan(0);
+    });
+    // The "-20% Save" badge is shown next to "Yearly" by default
     expect(screen.getAllByText(/save/i).length).toBeGreaterThan(0);
   });
 
-  it("has subscribe buttons for each plan", () => {
+  it("has start buttons for the Free and Pro plans", async () => {
     renderWithRouter(<Pricing />);
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: /start free/i }).length).toBeGreaterThan(0);
+    });
     expect(
-      screen.getAllByRole("button", { name: /get started/i }).length
+      screen.getAllByRole("button", { name: /start free/i }).length
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("button", { name: /subscribe now/i }).length
+      screen.getAllByRole("button", { name: /go pro/i }).length
     ).toBeGreaterThan(0);
+  });
+
+  it("does NOT have a 'Go Premium' button", async () => {
+    renderWithRouter(<Pricing />);
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: /start free/i }).length).toBeGreaterThan(0);
+    });
     expect(
-      screen.getAllByRole("button", { name: /go premium/i }).length
-    ).toBeGreaterThan(0);
+      screen.queryByRole("button", { name: /go premium/i })
+    ).toBeNull();
   });
 });

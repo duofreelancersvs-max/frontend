@@ -58,7 +58,7 @@ export function TagsInput({
 
   return (
     <div className={cn("w-full relative", className)}>
-      <div className="flex flex-wrap gap-2 p-2 min-h-[48px] border border-slate-200 rounded-lg bg-white focus-within:ring-2 focus-within:ring-teal focus-within:border-teal transition-all shadow-sm">
+      <div className="flex flex-wrap gap-2 p-2 min-h-12 border border-slate-200 rounded-lg bg-white focus-within:ring-2 focus-within:ring-teal focus-within:border-teal transition-all shadow-sm">
         {tags.map((tag, index) => (
           <span
             key={index}

@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
-import {
-  PlusCircle,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Grid3X3,
-  List,
-  Briefcase,
-  Star,
-  MapPin,
-  Users,
-  X,
-  Filter,
-} from "lucide-react";
+import { Briefcase, ChevronLeft, ChevronRight, Filter, Grid3X3, List, MapPin, PlusCircle, Search, Star, Users, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -42,6 +29,26 @@ const FreelancerCard = ({ freelancer }: { freelancer: FreelancerProfile }) => {
         {freelancer.availability === "available" && (
           <span className="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-xs font-medium">
             Available
+          </span>
+        )}
+        {freelancer.featuredProfile && (
+          <span
+            data-testid="featured-ribbon"
+            className="ml-1 inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500 text-white rounded-full text-xxs font-bold uppercase tracking-wide"
+            title="Top of search results"
+          >
+            <Zap size={10} className="fill-white" />
+            Featured
+          </span>
+        )}
+        {freelancer.isProActive && (
+          <span
+            data-testid="pro-member-badge"
+            className="ml-1 inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-teal-500/30 text-teal-700 rounded-full text-xxs font-bold"
+            title="Pro Member"
+          >
+            <Zap size={10} className="fill-teal-500 text-teal-500" />
+            Pro
           </span>
         )}
       </div>

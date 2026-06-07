@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 export interface Subscription {
   id: string;
   userId: string;
-  plan: "free" | "basic" | "pro" | "premium";
+  plan: "free" | "pro";
   status: "active" | "cancelled" | "expired" | "past_due";
   startDate: string;
   endDate: string;

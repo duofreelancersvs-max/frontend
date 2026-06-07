@@ -29,7 +29,7 @@ describe("ProPlanBadge", () => {
   it("has small text size", () => {
     render(<ProPlanBadge />);
     const badge = screen.getByText("PRO");
-    expect(badge).toHaveClass("text-[10px]");
+    expect(badge).toHaveClass("text-xxs");
   });
 
   it("has font-black weight", () => {

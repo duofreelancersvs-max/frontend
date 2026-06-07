@@ -20,6 +20,7 @@ import { freelancerService, subscriptionService } from "@/services";
 import type { FreelancerProfile, Subscription } from "@/services";
 import { useUnreadStore } from "@/stores/unread.store";
 import Logo from "@/components/shared/Logo";
+import { UsageIndicator } from "@/components/feature-gate";
 
 const sidebarNavItems = [
   {
@@ -156,7 +157,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                 <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-white transition-colors")} />
                 <span className="flex-1">{item.label}</span>
                 {itemBadge && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold bg-primary-foreground text-primary rounded-full">
+                  <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
                     {itemBadge}
                   </span>
                 )}
@@ -171,7 +172,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
           <div className="px-4 py-2 border-t border-border">
             <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
+                <span className="text-xxs uppercase tracking-wider font-bold text-slate-500">
                   Profile Complete
                 </span>
                 <span className="text-sm font-black text-teal-light">
@@ -185,6 +186,11 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Usage Indicator */}
+          <div className="px-4 pb-2">
+            <UsageIndicator compact={true} hideCta={true} className="w-full" />
           </div>
 
           {/* Subscription Badge */}
@@ -211,7 +217,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
               />
               <span
                 className={cn(
-                  "text-[10px] font-bold uppercase tracking-widest",
+                  "text-xxs font-bold uppercase tracking-widest",
                   subscriptionPlan === "free"
                     ? "text-slate-400"
                     : subscriptionPlan === "pro"
@@ -224,7 +230,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
               {subscriptionPlan === "free" && (
                 <Link
                   to="/freelancer/subscription"
-                  className="ml-auto text-[10px] font-black text-teal-light hover:underline uppercase tracking-tighter"
+                  className="ml-auto text-xxs font-black text-teal-light hover:underline uppercase tracking-tighter"
                 >
                   Upgrade
                 </Link>
@@ -242,7 +248,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                 <p className="text-sm font-heading font-semibold text-white truncate">
                   {freelancerName}
                 </p>
-                <p className="text-[10px] font-medium text-slate-500 truncate uppercase tracking-wider">Freelancer</p>
+                <p className="text-xxs font-medium text-slate-500 truncate uppercase tracking-wider">Freelancer</p>
               </div>
               <button
                 onClick={handleLogout}

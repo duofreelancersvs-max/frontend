@@ -1,28 +1,27 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useOutletContext, useLocation, useNavigate, Link } from "react-router-dom";
-import {
-  Search,
-  Star,
-  X,
-  BadgeCheck,
-  Building2,
-  ExternalLink,
-  FileSignature,
-  AlertCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
+import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
 import type { Conversation, Message } from "@/services";
-import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { useAuth } from "@/hooks/useAuth";
+import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { useSocket } from "@/hooks/useSocket";
 import type { SocketMessage, SocketConversation } from "@/lib/socket";
+import {
+  ConversationList,
+  ChatArea,
+  ChatInfoPanel,
+  type ConversationItem,
+  type ChatParticipant,
+  type InfoPanelParticipant,
+} from "@/components/chat";
+import { TermsModal } from "@/components/modals/TermsModal";
 import { useUnreadStore } from "@/stores/unread.store";
-import { ChatAvatar, ChatArea } from "@/components/chat";
-import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
+import { useMyConversations as useConversations } from "@/hooks/queries/useFreelancerDashboardQueries";
 
-const termsText = `
+export const termsText = `
 TERMS AND CONDITIONS FOR FREELANCER MESSAGING
 
 1. PROFESSIONAL COMMUNICATION
@@ -62,25 +61,37 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
   const { user } = useAuth();
   const context = useOutletContext<FreelancerLayoutContext>();
   const setSidebarOpen = context?.setSidebarOpen || (() => {});
-  const { setActiveConversation, addPendingMessage, getPendingMessages, clearPendingMessages, resetCount } = useUnreadStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "unread">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [modalChecked, setModalChecked] = useState(false);
-  const [_loading, _setLoading] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [conversationsLoaded, setConversationsLoaded] = useState(false);
+  const deepLinkHandled = useRef(false);
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
+
+  // ─── Feature Gate: Messaging ────────────────────────────────────
+  const { context: planContext, inTrial } = useFeatureGate(true); // true because this is the freelancer view
+  const canMessage = inTrial || planContext?.tier === "pro";
+
+  // Sync active conversation with unread store
+  useEffect(() => {
+    const activeId = selectedConversation?.id || selectedConversation?._id;
+    setActiveConversation(activeId || null);
+    return () => setActiveConversation(null);
+  }, [selectedConversation, setActiveConversation]);
 
   // ─── Socket.IO integration ──────────────────────────────────────
 
   const handleNewMessage = useCallback(
     (socketMsg: SocketMessage, _conv: SocketConversation) => {
-      // Robustly extract senderId – backend may send ObjectId object or string
-      const rawSenderId = (socketMsg as any).senderId;
+      console.log("[Socket] New message received:", socketMsg.id || socketMsg._id);
+      
+      const rawSenderId: any = socketMsg.senderId;
       const senderId = (
         typeof rawSenderId === 'object' && rawSenderId !== null
           ? (rawSenderId._id || rawSenderId.id || rawSenderId).toString()
@@ -88,48 +99,50 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
       );
 
       const mapped: Message = {
-        id: (socketMsg._id || (socketMsg as any).id || "").toString(),
+        id: (socketMsg._id || socketMsg.id || "").toString(),
         conversationId: (socketMsg.conversationId || "").toString(),
         senderId,
         content: socketMsg.content,
-        read: socketMsg.isRead ?? (socketMsg as any).read ?? false,
-        createdAt: socketMsg.createdAt || (socketMsg as any).sentAt || new Date().toISOString(),
+        read: socketMsg.isRead ?? false,
+        createdAt: socketMsg.createdAt || socketMsg.sentAt || new Date().toISOString(),
       };
 
-      // Always add to pending messages store (for when user is on another page)
       addPendingMessage(mapped);
 
-      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
-      const msgConvId = mapped.conversationId.toString();
+      const selId = (selectedConversation?.id || selectedConversation?._id || "").toString();
+      const msgConvId = mapped.conversationId;
       const isCurrentConv = selId && msgConvId === selId;
 
       const currentUserId = (user?._id || '').toString();
 
       if (isCurrentConv) {
-        // If it's for the current conversation and from the OTHER person, mark as read immediately
         if (mapped.senderId !== currentUserId) {
-          console.log("[Socket] Marking message as read instantly", msgConvId);
-          markAsRead(msgConvId);
+          markAsRead(mapped.conversationId);
         }
 
         setMessages((prev) => {
-          if (prev.some((m) => m.id === mapped.id)) return prev;
-          return [...prev, mapped];
+          const filtered = prev.filter(m => 
+            !(m.id.startsWith("temp-") && m.content === mapped.content && m.senderId === user?._id)
+          );
+          if (filtered.some((m) => (m.id === mapped.id))) return filtered;
+          return [...filtered, mapped];
         });
       }
+
       setConversations((prev) =>
-        prev.map((c) =>
-          c.id === socketMsg.conversationId
+        prev.map((c) => {
+          const cid = (c.id || c._id || "").toString();
+          return cid === mapped.conversationId
             ? {
                 ...c,
-                lastMessage: mapped,
-                unreadCount:
-                  c.id === selectedConversation?.id
-                    ? c.unreadCount
-                    : c.unreadCount + 1,
+                lastMessage: {
+                  ...mapped,
+                  createdAt: mapped.createdAt
+                },
+                unreadCount: cid === selId ? 0 : (c.unreadCount || 0) + 1,
               }
-            : c,
-        ),
+            : c;
+        }),
       );
     },
     [selectedConversation, user, addPendingMessage],
@@ -137,22 +150,25 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
 
   const handleMessageRead = useCallback(
     (data: { conversationId: string; userId: string; readAt: string }) => {
-      console.log("[Socket] Received message:read event", data);
-      if (data.userId === user?._id?.toString()) {
-        console.log("[Socket] Ignored message:read because I triggered it");
-        return; // We triggered this read, ignore it meant for other user's UI
-      }
-      
+      if (data.userId === user?._id?.toString()) return;
+
       const readConvId = data.conversationId.toString();
-      const selId = (selectedConversation?.id || (selectedConversation as any)?._id || "").toString();
+      const selId = (selectedConversation?.id || selectedConversation?._id || "").toString();
+      
       if (readConvId === selId) {
-        console.log("[Socket] Marking messages as read in UI for conversation", selId);
         setMessages((prev) =>
           prev.map((m) =>
             m.senderId?.toString() === user?._id?.toString() ? { ...m, read: true } : m,
           ),
         );
       }
+      
+      setConversations((prev) =>
+        prev.map((c) => {
+          const cid = (c.id || c._id || "").toString();
+          return cid === readConvId ? { ...c, unreadCount: 0 } : c;
+        }),
+      );
     },
     [selectedConversation, user],
   );
@@ -163,531 +179,355 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
     sendMessage: socketSendMessage,
     markAsRead,
   } = useSocket({
-    conversationId: selectedConversation?.id || null,
+    conversationId: selectedConversation?.id || selectedConversation?._id || null,
     onNewMessage: handleNewMessage,
     onMessageRead: handleMessageRead,
   });
 
   // ─── Data fetching ──────────────────────────────────────────────
-
-  // Sync active conversation with unread store
-  useEffect(() => {
-    setActiveConversation(selectedConversation?.id || null);
-    return () => setActiveConversation(null);
-  }, [selectedConversation, setActiveConversation]);
+  const { data: convData } = useConversations();
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        _setLoading(true);
-        const data = await conversationService.getAll();
-        let convs = data.conversations || [];
-        
-        // Sort conversations by most recent message (newest first)
-        convs = convs.sort((a, b) => {
-          const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
-          const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        
-        setConversations(convs);
-        
-        // Auto-select the conversation with the most recent message (first after sort)
-        if (convs.length > 0) {
-          setSelectedConversation(convs[0]);
+    if (convData?.conversations) {
+      let convs = [...convData.conversations];
+      
+      convs = convs.sort((a, b) => {
+        const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+        const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+      
+      setConversations(prev => {
+        if (prev.length === 0 || convs.length !== prev.length || convs[0]?.id !== prev[0]?.id) {
+          return convs;
         }
-      } catch (error) {
-        console.error("Error fetching conversations:", error);
-      } finally {
-        _setLoading(false);
+        return prev;
+      });
+      
+      if (convs.length > 0 && !selectedConversation && !deepLinkHandled.current) {
+        setSelectedConversation(convs[0]);
       }
-    };
-    fetchConversations();
-  }, []);
+      
+      setConversationsLoaded(true);
+    }
+  }, [convData?.conversations, selectedConversation]);
 
   // ── Deep-link: auto-select conversation from navigation state ──
   const location = useLocation();
   const nav = useNavigate();
+
+  useEffect(() => {
+    deepLinkHandled.current = false;
+  }, [location.key]);
+
   useEffect(() => {
     const state = location.state as { conversationId?: string } | null;
-    if (state?.conversationId && conversations.length > 0) {
-      const target = conversations.find(
-        (c) => c.id === state.conversationId || (c as any)._id === state.conversationId,
-      );
-      if (target) {
-        setSelectedConversation(target);
+    
+    const handleDeepLink = async () => {
+      if (!state || !conversationsLoaded || deepLinkHandled.current) return;
+      
+      if (state.conversationId) {
+        deepLinkHandled.current = true;
+        const target = conversations.find(
+          (c) => c.id === state.conversationId || c._id === state.conversationId,
+        );
+        if (target) {
+          setSelectedConversation(target);
+          setMobileView("chat");
+        }
+        nav(location.pathname, { replace: true, state: {} });
       }
-      // Clear state to prevent re-triggering
-      nav(location.pathname, { replace: true, state: {} });
-    }
-  }, [location.state, conversations, nav, location.pathname]);
+    };
+    handleDeepLink();
+  }, [location.state, conversationsLoaded, conversations, nav, location.pathname]);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedConversation) return;
+      const activeId = selectedConversation?.id || selectedConversation?._id;
+      if (!activeId) return;
+      
+      setMessages((prev) => 
+        prev.filter(m => m.conversationId.toString() === activeId.toString())
+      );
 
-      // Get pending messages from store (messages received while on another page)
-      const pendingMsgs = getPendingMessages(selectedConversation.id);
+      const pendingMsgs = getPendingMessages(activeId.toString());
 
       try {
-        const data = await conversationService.getMessages(
-          selectedConversation.id,
-        );
-        
-        // Merge API messages with pending messages
-        const apiMessages = data.messages || [];
-        const apiIds = new Set(apiMessages.map((m: any) => (m.id || m._id).toString()));
-        
-        // Filter out pending messages that are already in API response
-        const uniquePending = pendingMsgs.filter(p => !apiIds.has(p.id.toString()));
-        
-        const combined = [...apiMessages, ...uniquePending];
-        setMessages(combined.sort((a, b) => 
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ));
+        const data = await conversationService.getMessages(activeId);
+        setMessages((prev) => {
+          const apiMessages = data.messages || [];
+          const apiIds = new Set(apiMessages.map((m: any) => (m.id || m._id).toString()));
+          const cid = activeId.toString();
 
-        // Clear pending messages after merging
-        clearPendingMessages(selectedConversation.id);
+          const uniqueLocal = prev.filter(m => 
+            m.conversationId.toString() === cid && 
+            !apiIds.has(m.id.toString())
+          );
 
-        markAsRead(selectedConversation.id);
-        // Also call the REST endpoint to reset server-side unread count
-        conversationService.markAsRead(selectedConversation.id).catch(() => {});
-        // Immediately reset unread count in local state
+          const uniquePending = pendingMsgs.filter(p => !apiIds.has(p.id.toString()));
+          
+          const combined = [...apiMessages, ...uniqueLocal, ...uniquePending];
+          return combined.sort((a, b) => 
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+
+        clearPendingMessages(activeId.toString());
+        markAsRead(activeId);
+        conversationService.markAsRead(activeId).catch(() => {});
+        
         setConversations((prev) =>
           prev.map((c) =>
-            (c.id === selectedConversation.id || (c as any)._id === selectedConversation.id) 
+            (c.id === activeId || c._id === activeId) 
               ? { ...c, unreadCount: 0 } 
               : c,
           ),
         );
-        // Reset unread store for this conversation as well
-        resetCount(selectedConversation.id);
+        resetCount(activeId);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
     fetchMessages();
-  }, [selectedConversation, markAsRead, getPendingMessages, clearPendingMessages]);
+  }, [selectedConversation?.id, selectedConversation?._id, markAsRead, resetCount]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // ─── Derived data ───────────────────────────────────────────────
 
-  const conversationsDataMapped = conversations.map((conv) => {
-    // Find the client participant (role: 'client')
-    const clientParticipant = conv.participants?.find((p) => p.role === 'client') || conv.participants?.[0];
+  const getClientParticipant = (conv: Conversation) =>
+    conv.participants?.find((p) => p.role === "client") ||
+    conv.participants?.[0];
 
+  const selectedClient = selectedConversation
+    ? getClientParticipant(selectedConversation)
+    : null;
+
+  const conversationItems: ConversationItem[] = conversations.map((conv) => {
+    const client = getClientParticipant(conv);
+    
+    const projectTitle = conv.project?.title || "Project";
+    const projectId = conv.projectId || conv.project?.id || "";
+
+    let lastMessageTime = "";
+    if (conv.lastMessage?.createdAt) {
+      const date = new Date(conv.lastMessage.createdAt);
+      if (!isNaN(date.getTime())) {
+        lastMessageTime = date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    }
+    
     return {
-      id: conv.id,
-      client: {
-        userId: clientParticipant?.id || (clientParticipant as any)?._id || "",
-        name: clientParticipant?.fullName || "Unknown",
-        avatar: clientParticipant?.avatar,
+      id: conv.id || conv._id || "",
+      participant: {
+        userId: client?.id || "",
+        name: client?.fullName || "Client",
+        avatar: client?.avatar,
         verified: true,
         rating: 4.5,
         reviews: 10,
-        company: "Company",
-        location: "Location",
       },
       project: {
-        id: conv.projectId || "",
-        title: conv.project?.title || "Project",
+        id: projectId,
+        title: projectTitle,
       },
       lastMessage: conv.lastMessage?.content || "No messages",
-      lastMessageTime: conv.lastMessage
-        ? new Date(conv.lastMessage.createdAt).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
-      unreadCount: conv.unreadCount,
-      isOnline: onlineUsers.has(clientParticipant?.id || ""),
+      lastMessageTime,
+      unread: conv.unreadCount,
       termsAccepted: conv.termsAccepted?.freelancerAccepted ?? false,
     };
   });
 
-  const handleSelectConversation = (
-    conversation: (typeof conversationsDataMapped)[0],
-  ) => {
-    const conv = conversations.find((c) => c.id === conversation.id);
-    if (conv) {
-      setSelectedConversation(conv);
+  const chatParticipant: ChatParticipant | null = selectedClient
+    ? {
+        id: selectedClient.id || selectedClient?._id || "",
+        name: selectedClient.fullName || "Client",
+        avatar: selectedClient.avatar,
+        verified: true,
+        online: onlineUsers.has(selectedClient.id || ""),
+      }
+    : null;
+
+  const infoPanelParticipant: InfoPanelParticipant | null = selectedClient
+    ? {
+        userId: selectedClient.id || "",
+        name: selectedClient.fullName || "Client",
+        avatar: selectedClient.avatar,
+        verified: true,
+        rating: 4.5,
+        reviews: 10,
+        online: onlineUsers.has(selectedClient.id || ""),
+        title: "Client",
+      }
+    : null;
+
+  const chatProject = selectedConversation?.project
+    ? {
+        id: selectedConversation.projectId || selectedConversation.project.id || "",
+        title: selectedConversation.project.title,
+      }
+    : undefined;
+
+  const freelancerTermsAccepted = selectedConversation?.termsAccepted?.freelancerAccepted ?? false;
+
+  // ─── Actions ────────────────────────────────────────────────────
+
+  const handleSelectConversation = (id: string) => {
+    const convo = conversations.find((c) => c.id === id || c._id === id);
+    if (convo) {
+      setSelectedConversation(convo);
+      setMobileView("chat");
     }
   };
 
   const handleAcceptTerms = async () => {
-    if (selectedConversation) {
+    const activeId = selectedConversation?.id || selectedConversation?._id;
+    if (selectedConversation && activeId) {
       try {
-        await conversationService.acceptTerms(selectedConversation.id);
-        
-        // Update both conversations list and selected conversation to reflect accepted terms
-        setConversations(prev => prev.map(c => 
-          c.id === selectedConversation.id 
-            ? { ...c, termsAccepted: { ...c.termsAccepted!, freelancerAccepted: true } }
-            : c
-        ));
-        
-        setSelectedConversation(prev => 
-          prev ? { ...prev, termsAccepted: { ...prev.termsAccepted!, freelancerAccepted: true } } : null
+        await conversationService.acceptTerms(activeId);
+        setConversations((prev) =>
+          prev.map((c) =>
+            (c.id === activeId || c._id === activeId)
+              ? {
+                  ...c,
+                  termsAccepted: {
+                    ...c.termsAccepted!,
+                    freelancerAccepted: true,
+                  },
+                }
+              : c,
+          ),
         );
-        
-        setShowTermsModal(false);
+        setSelectedConversation((prev) =>
+          prev
+            ? {
+                ...prev,
+                termsAccepted: {
+                  ...prev.termsAccepted!,
+                  freelancerAccepted: true,
+                },
+              }
+            : prev,
+        );
       } catch (error) {
         console.error("Error accepting terms:", error);
       }
     }
+    setShowTermsModal(false);
   };
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedConversation || !isConnected) return;
-
+    const activeId = selectedConversation?.id || selectedConversation?._id;
+    if (!messageInput.trim() || !selectedConversation || !isConnected || !activeId) return;
     const content = messageInput;
     setMessageInput("");
-    socketSendMessage(selectedConversation.id, content);
-    // Incoming message arrives via message:new socket event
+
+    // Optimistically update current chat view
+    const optimisticMsg: Message = {
+      id: `temp-${Date.now()}`,
+      conversationId: activeId,
+      senderId: user?._id || "",
+      content,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    
+    setConversations((prev) =>
+      prev.map((c) =>
+        (c.id === activeId || c._id === activeId)
+          ? {
+              ...c,
+              lastMessage: optimisticMsg,
+            }
+          : c,
+      ),
+    );
+
+    socketSendMessage(activeId, content).then((res) => {
+        if (!res.success) {
+            console.error("[Socket] Failed to send message via socket:", res.error);
+        }
+    });
   };
-  // Helper: get mapped data for the currently selected conversation
-  const selectedConvData = selectedConversation
-    ? conversationsDataMapped.find((c) => c.id === selectedConversation.id)
-    : undefined;
 
-  const filteredConversations = conversationsDataMapped.filter(
-    (conv) =>
-      conv.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.project.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+   return (
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-background font-sans overflow-hidden">
+       {/* Header */}
+       {!isWidget && (
+         <DashboardHeader
+           title="Messages"
+           onMenuClick={() => setSidebarOpen(true)}
+         />
+       )}
 
-  return (
-    <div className={cn("w-full flex flex-col bg-slate-50 dark:bg-background overflow-hidden relative", isWidget ? "h-full" : "h-[100dvh]")}>
-      <div className="flex-1 w-full min-w-0 flex flex-col overflow-hidden">
-        {/* Header */}
-        {!isWidget && (
-          <DashboardHeader
-            title="Messages"
-            onMenuClick={() => setSidebarOpen(true)}
+       {/* Chat Container */}
+      <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-background">
+        {/* Conversation List */}
+        <ConversationList
+          conversations={conversationItems}
+          selectedId={selectedConversation?.id || null}
+          onSelect={handleSelectConversation}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filter={filter}
+          onFilterChange={setFilter}
+          onlineUsers={onlineUsers}
+          role="freelancer"
+          className={cn(
+            "flex-shrink-0",
+            isWidget
+              ? (mobileView === "chat" ? "hidden" : "flex w-full")
+              : (mobileView === "chat" ? "hidden md:flex md:w-80 w-full" : "flex md:w-80 w-full")
+          )}
+        />
+
+        {/* Chat Area */}
+        <ChatArea
+          participant={chatParticipant}
+          project={chatProject}
+          messages={messages}
+          messageInput={messageInput}
+          setMessageInput={setMessageInput}
+          onSend={handleSendMessage}
+          onBack={() => setMobileView("list")}
+          isConnected={isConnected}
+          currentUserId={user?._id}
+          role="freelancer"
+          termsAccepted={freelancerTermsAccepted}
+          onAcceptTermsClick={() => setShowTermsModal(true)}
+          showInfoPanel={showInfoPanel}
+          onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
+          disabledMessageInput={!canMessage}
+          disabledMessageReason={!canMessage ? "Upgrade to Pro to send messages." : undefined}
+          className={cn(
+            "flex-1",
+            isWidget
+              ? (mobileView === "list" ? "hidden" : "flex")
+              : (mobileView === "list" ? "hidden md:flex" : "flex")
+          )}
+          isWidget={isWidget}
+        />
+
+        {/* Info Panel */}
+        {showInfoPanel && infoPanelParticipant && (
+          <ChatInfoPanel
+            participant={infoPanelParticipant}
+            project={chatProject}
+            role="freelancer"
+            className="hidden xl:flex w-72"
           />
         )}
-
-        {/* Three Column Content */}
-        <div className="flex-1 flex overflow-hidden relative">
-          {/* COLUMN 1: Conversations List */}
-          <div className={cn(
-            "border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0A121E] flex flex-col flex-shrink-0",
-            isWidget ? "w-full" : "w-full lg:w-80",
-            selectedConversation ? (isWidget ? "hidden" : "hidden lg:flex") : "flex w-full"
-          )}>
-            {/* Search */}
-            <div className="p-4 border-b border-slate-100 dark:border-white/5">
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search conversations..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none text-navy dark:text-white"
-                />
-              </div>
-            </div>
-
-            {/* Conversations List */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredConversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  onClick={() => handleSelectConversation(conv)}
-                  className={cn(
-                    "p-4 border-b border-slate-50 dark:border-white/5 cursor-pointer transition-colors",
-                    selectedConversation?.id === conv.id
-                      ? "bg-teal/5 dark:bg-teal/10 border-l-2 border-l-teal"
-                      : "hover:bg-slate-50 dark:hover:bg-white/5",
-                  )}
-                >
-                  <div className="flex gap-3">
-                    {/* Avatar */}
-                    <ChatAvatar
-                      name={conv.client.name}
-                      size="2xl"
-                      online={conv.isOnline || onlineUsers.has(conv.client.userId || "")}
-                    />
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-navy dark:text-white text-sm truncate">
-                            {conv.client.name}
-                          </span>
-                          {conv.client.verified && (
-                            <BadgeCheck
-                              size={14}
-                              className="text-teal shrink-0"
-                            />
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-400 shrink-0">
-                          {conv.lastMessageTime}
-                        </span>
-                      </div>
-
-                      {/* Project Name */}
-                      <p className="text-xs text-royal-blue font-medium mb-1 truncate">
-                        {conv.project.title}
-                      </p>
-
-                      {/* Client Rating */}
-                      <div className="flex items-center gap-1 mb-1">
-                        <Star size={10} className="text-gold fill-gold" />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {conv.client.rating}
-                        </span>
-                        <span
-                          className={cn(
-                            "ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium",
-                            "bg-teal/10 text-teal",
-                          )}
-                        >
-                          Active
-                        </span>
-                      </div>
-
-                      {/* Last Message */}
-                      <div className="flex items-center justify-between w-full min-w-0">
-                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                          {conv.lastMessage}
-                        </p>
-                        {conv.unreadCount > 0 && (
-                          <span className="ml-2 px-1.5 py-0.5 bg-teal text-white text-xs font-bold rounded-full shrink-0">
-                            {conv.unreadCount}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* COLUMN 2: Chat Area */}
-          <ChatArea
-            className={cn(
-              "flex-1",
-              selectedConversation ? "flex" : (isWidget ? "hidden" : "hidden lg:flex")
-            )}
-            onBack={() => setSelectedConversation(null)}
-            participant={selectedConversation ? {
-              id: selectedConvData?.client.userId || "",
-              name: selectedConvData?.client.name || selectedConversation.participants?.[0]?.fullName || "Unknown",
-              avatar: "",
-              verified: true,
-              online: onlineUsers.has(selectedConvData?.client.userId || "")
-            } : null}
-            project={selectedConversation?.project ? {
-              id: selectedConversation.project.id,
-              title: selectedConversation.project.title,
-            } : undefined}
-            messages={messages}
-            messageInput={messageInput}
-            setMessageInput={setMessageInput}
-            onSend={handleSendMessage}
-            isConnected={isConnected}
-            currentUserId={user?._id}
-            role="freelancer"
-            termsAccepted={selectedConversation?.termsAccepted?.freelancerAccepted ?? false}
-            onAcceptTermsClick={() => {
-              setModalChecked(false); // Reset checkbox for new acceptance
-              setShowTermsModal(true);
-            }}
-            showInfoPanel={showInfoPanel}
-            onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
-            isWidget={isWidget}
-          />
-
-          {/* COLUMN 3: Client Info Panel */}
-          {selectedConversation && (
-            <div className={cn(
-              "absolute inset-y-0 right-0 z-30 bg-white dark:bg-[#0A121E] border-l border-slate-200 dark:border-white/5 overflow-y-auto transition-transform duration-300",
-              !isWidget && "lg:static shadow-xl lg:shadow-none",
-              showInfoPanel 
-                ? (isWidget ? "translate-x-0 flex flex-col w-full" : "translate-x-0 lg:translate-x-0 flex flex-col w-full sm:w-80") 
-                : (isWidget ? "translate-x-full hidden" : "translate-x-full lg:translate-x-0 lg:hidden")
-            )}>
-              {/* Client Header */}
-              <div className="p-6 border-b border-slate-100 dark:border-white/5 text-center">
-                <ChatAvatar
-                  name={selectedConvData?.client.name || "Unknown"}
-                  size="3xl"
-                  showOnlineIndicator={false}
-                  className="mx-auto mb-3"
-                />
-                <h3 className="font-bold text-navy dark:text-white text-lg flex items-center justify-center gap-1">
-                  {selectedConvData?.client.name ||
-                    selectedConversation.participants?.[0]?.fullName ||
-                    "Unknown"}
-                  <BadgeCheck size={16} className="text-teal" />
-                </h3>
-                <div className="flex items-center justify-center gap-1 mt-1">
-                  <Star size={14} className="text-gold fill-gold" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
-                    {selectedConvData?.client.rating || 0} (
-                    {selectedConvData?.client.reviews || 0} reviews)
-                  </span>
-                </div>
-              </div>
-
-              {/* Company Details */}
-              <div className="p-6 border-b border-slate-100 dark:border-white/5">
-                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
-                  Client Details
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Building2 size={16} className="text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Company</p>
-                      <p className="text-sm font-medium text-navy dark:text-white">
-                        {selectedConvData?.client.company || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Building2 size={16} className="text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Location</p>
-                      <p className="text-sm font-medium text-navy dark:text-white">
-                        {selectedConvData?.client.location || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Project Reference */}
-              <div className="p-6 border-b border-slate-100 dark:border-white/5">
-                <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
-                  Project Reference
-                </h4>
-                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4">
-                  <h5 className="font-medium text-navy dark:text-white mb-2">
-                    {selectedConversation.project?.title || "Project"}
-                  </h5>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Status</span>
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal/10 text-teal">
-                        Active
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              {selectedConversation.project?.id && (
-                <div className="p-6">
-                  <h4 className="text-sm font-semibold text-navy dark:text-white mb-4">
-                    Quick Actions
-                  </h4>
-                  <div className="space-y-2">
-                    <Link to={`/freelancer/project/${selectedConversation.project.id}`} className="block">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
-                      >
-                        <ExternalLink size={16} className="mr-2" />
-                        View Project
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* TERMS & CONDITIONS MODAL */}
-      {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-white/10">
-            {/* Modal Header */}
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 dark:border-white/10">
-              <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
-                <FileSignature size={20} className="text-teal" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-navy dark:text-white">
-                  Terms & Conditions
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Please read and accept before chatting
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowTermsModal(false);
-                }}
-                className="ml-auto p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-slate-500 dark:text-slate-400" />
-              </button>
-            </div>
-
-            {/* Terms Content */}
-            <div className="p-5">
-              <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 h-64 overflow-y-auto text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line border border-slate-100 dark:border-white/10">
-                {termsText}
-              </div>
-            </div>
-
-            {/* Checkbox */}
-            <div className="px-5 pb-5">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={modalChecked}
-                  onChange={(e) => setModalChecked(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-white/20 text-teal focus:ring-teal bg-white dark:bg-white/5"
-                />
-                <span className="text-sm text-navy dark:text-white">
-                  I have read and agree to the Terms and Conditions
-                </span>
-              </label>
-
-              <div className="flex items-center gap-2 mt-4 p-3 bg-gold/10 rounded-lg">
-                <AlertCircle size={16} className="text-gold shrink-0" />
-                <p className="text-xs text-gold">
-                  You must accept the terms to communicate with this client.
-                </p>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex gap-3 p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
-              <Button
-                variant="outline"
-                className="flex-1 border-slate-200"
-                onClick={() => {
-                  setShowTermsModal(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-teal hover:bg-teal-light text-white"
-                disabled={!modalChecked}
-                onClick={handleAcceptTerms}
-              >
-                Start Chat
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Terms Modal */}
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAgree={handleAcceptTerms}
+      />
     </div>
   );
 };

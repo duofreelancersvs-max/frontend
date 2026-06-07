@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/auth.store";
 
 export interface Message {
   id: string;
+  _id?: string;
   conversationId: string;
   senderId: string;
   content: string;
@@ -12,9 +13,11 @@ export interface Message {
 
 export interface Conversation {
   id: string;
+  _id?: string;
   participantIds: string[];
   participants: {
     id: string;
+    _id?: string;
     fullName: string;
     avatar?: string;
     role: string;
@@ -24,6 +27,7 @@ export interface Conversation {
   projectId?: string;
   project?: {
     id: string;
+    _id?: string;
     title: string;
   };
   termsAccepted?: {

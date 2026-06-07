@@ -92,7 +92,7 @@ const PublicNavbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-[64px] left-0 w-full bg-white dark:bg-[#050B15] border-b border-slate-100 dark:border-white/10 shadow-lg animate-in slide-in-from-top-5 z-[51]">
+        <div className="md:hidden absolute top-16 left-0 w-full bg-white dark:bg-[#050B15] border-b border-slate-100 dark:border-white/10 shadow-lg animate-in slide-in-from-top-5 z-[51]">
           <div className="flex flex-col p-4 gap-4">
             {navLinks.map((link) => (
               <Link

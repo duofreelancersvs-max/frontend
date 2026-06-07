@@ -12,6 +12,7 @@ export { notificationService } from "./notification.service";
 export { reviewService } from "./review.service";
 export { adminService } from "./admin.service";
 export { publicService } from "./public.service";
+export { featureGateService } from "./feature-gate.service";
 
 export type {
   LoginRequest,
@@ -86,3 +87,12 @@ export type {
 } from "./admin.service";
 
 export type { CategoryWithSkills, Skill } from "./public.service";
+
+export type {
+  PlanContext,
+  UsageSnapshot,
+  FeatureFlag,
+  UsageResponse,
+  PlanErrorMeta,
+  PlanErrorCode,
+} from "@/types/feature-gate.types";

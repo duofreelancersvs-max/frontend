@@ -9,22 +9,20 @@ describe("VerificationBadge", () => {
     expect(badge).toBeInTheDocument();
   });
 
-  it("renders premium verification badge", () => {
-    render(<VerificationBadge type="premium" />);
+  it("renders pro verification badge", () => {
+    render(<VerificationBadge type="pro" />);
     const badge = document.querySelector("svg");
     expect(badge).toBeInTheDocument();
   });
 
   it("displays correct tooltip content for basic type", async () => {
     render(<VerificationBadge type="basic" />);
-    // Tooltip content is rendered by Radix UI
-    // We can check that the component renders
     const badge = document.querySelector("[class*='cursor-help']");
     expect(badge).toBeInTheDocument();
   });
 
-  it("displays correct tooltip content for premium type", async () => {
-    render(<VerificationBadge type="premium" />);
+  it("displays correct tooltip content for pro type", async () => {
+    render(<VerificationBadge type="pro" />);
     const badge = document.querySelector("[class*='cursor-help']");
     expect(badge).toBeInTheDocument();
   });
@@ -35,9 +33,9 @@ describe("VerificationBadge", () => {
     expect(badge).toBeInTheDocument();
   });
 
-  it("applies correct styling for premium badge", () => {
-    render(<VerificationBadge type="premium" />);
-    const badge = document.querySelector(".text-gold");
+  it("applies correct styling for pro badge", () => {
+    render(<VerificationBadge type="pro" />);
+    const badge = document.querySelector(".text-teal-600");
     expect(badge).toBeInTheDocument();
   });
 

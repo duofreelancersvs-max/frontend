@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Star,
-  MapPin,
-  BadgeCheck,
-  MessageSquare,
-  ArrowLeft,
-  Heart,
-} from "lucide-react";
+import { ArrowLeft, BadgeCheck, Heart, MapPin, MessageSquare, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { freelancerService, reviewService } from "@/services";
@@ -94,9 +87,29 @@ const FreelancerProfileView = () => {
                   "F")[0].toUpperCase()}
               </div>
               {freelancer.isVerified && (
-                <div className="absolute -bottom-3 -right-3 bg-yellow-400 text-navy px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-lg border-2 border-white">
+                <div className="absolute -bottom-3 -right-3 bg-yellow-400 text-navy px-2 py-1 rounded-full text-xxs font-bold flex items-center gap-1 shadow-lg border-2 border-white">
                   <BadgeCheck size={12} strokeWidth={3} />
                   VERIFIED
+                </div>
+              )}
+              {freelancer.featuredProfile && (
+                <div
+                  data-testid="featured-ribbon"
+                  className="absolute -bottom-3 left-4 inline-flex items-center gap-1 px-2 py-1 bg-teal-500 text-white rounded-full text-xxs font-bold uppercase tracking-wide shadow-lg border-2 border-white"
+                  title="Top of search results"
+                >
+                  <Zap size={10} className="fill-white" />
+                  Featured
+                </div>
+              )}
+              {freelancer.isProActive && (
+                <div
+                  data-testid="pro-member-badge"
+                  className="absolute -top-3 -left-3 inline-flex items-center gap-1 px-2 py-1 bg-white border border-teal-500/30 text-teal-700 rounded-full text-xxs font-bold shadow-lg border-2 border-white"
+                  title="Pro Member"
+                >
+                  <Zap size={10} className="fill-teal-500 text-teal-500" />
+                  Pro
                 </div>
               )}
             </div>
@@ -195,7 +208,7 @@ const FreelancerProfileView = () => {
                                 )}
                               >
                                 <Icon size={40} className="mb-2 opacity-80" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                                <span className="text-xxs font-bold uppercase tracking-wider opacity-60">
                                   {category}
                                 </span>
                               </div>
@@ -296,7 +309,7 @@ const FreelancerProfileView = () => {
                         {review.comment}
                       </p>
                       {review.project && (
-                        <p className="text-[11px] text-teal font-medium">
+                        <p className="text-xs text-teal font-medium">
                           Project: {review.project.title}
                         </p>
                       )}

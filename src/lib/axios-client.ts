@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/stores/auth.store";
+import { useUpgradeModalStore } from "@/stores/upgrade-modal.store";
+import type { PlanErrorMeta } from "@/types/feature-gate.types";
 import { supabase } from "@/lib/supabase";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
@@ -10,12 +12,20 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
   skipAuth?: boolean;
   _manualAuth?: boolean; // Set when caller provides explicit Authorization header
+  /**
+   * Set to true to opt out of the global 402 → UpgradeModal interceptor.
+   * Use when a caller wants to surface the 402 in its own UI
+   * (e.g. inline pre-flight gate in ProjectApplicationModal).
+   */
+  _skipUpgradeModal?: boolean;
 }
 
 // Typed API error response shape from backend
 interface ApiErrorResponse {
   error?: {
+    code?: string;
     message?: string;
+    meta?: PlanErrorMeta;
     details?: Array<{ field: string; message: string }>;
   };
 }
@@ -58,22 +68,38 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor: handle 401 with Supabase token refresh
+// Response interceptor: handle 401 with Supabase token refresh, and
+// 402 PLAN_LIMIT_EXCEEDED by auto-opening the global UpgradeModal.
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
+    const status = error.response?.status;
+    const errorData = error.response?.data as ApiErrorResponse | undefined;
+    const errorCode = errorData?.error?.code;
+    const errorMeta = errorData?.error?.meta;
+
+    // ─── 402 PLAN_LIMIT_EXCEEDED → global UpgradeModal ────────────────
+    if (status === 402 && errorCode === "PLAN_LIMIT_EXCEEDED" && !originalRequest._skipUpgradeModal) {
+      // 'messaging' / 'prioritySupport' / 'analytics' are feature locks,
+      // not usage counts. Everything else is a quota limit.
+      const reason: "limit" | "feature_locked" =
+        errorMeta?.feature && ["messaging", "prioritySupport", "analytics"].includes(errorMeta.feature)
+          ? "feature_locked"
+          : "limit";
+
+      useUpgradeModalStore.getState().open(reason, errorMeta);
+    }
 
     // If error is 401 and we haven't retried yet, try to refresh token
     // Skip auto-retry for requests with manually-set Authorization
     if (
-      error.response?.status === 401 &&
+      status === 401 &&
       !originalRequest._retry &&
       !originalRequest._manualAuth
     ) {
       // Don't retry if the backend specifically returned a logical error message
       // like "Account already exists" or role mismatch
-      const errorData = error.response?.data as ApiErrorResponse | undefined;
       const errorMessage = errorData?.error?.message ?? "";
       if (
         errorMessage.includes("Account already exists") ||

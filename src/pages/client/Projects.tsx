@@ -438,7 +438,7 @@ const ClientProjects = () => {
                               </span>
                             )}
                         </div>
-                         <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">
+                         <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-4">
                           {project.description}
                         </p>
 
@@ -501,7 +501,7 @@ const ClientProjects = () => {
                       <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
                         <div className="grid grid-cols-3 gap-3 mb-4">
                           <div className="flex flex-col items-center text-center">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                            <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Budget
                             </span>
                             <span className="text-sm font-semibold text-navy dark:text-white">
@@ -512,7 +512,7 @@ const ClientProjects = () => {
                             </span>
                           </div>
                            <div className="flex flex-col items-center text-center border-x border-slate-200/60 dark:border-white/5">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                            <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Applicants
                             </span>
                             <span className="text-sm font-semibold text-navy dark:text-white">
@@ -520,7 +520,7 @@ const ClientProjects = () => {
                             </span>
                           </div>
                           <div className="flex flex-col items-center text-center">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                            <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Deadline
                             </span>
                             <span className="text-sm font-semibold text-navy dark:text-white">

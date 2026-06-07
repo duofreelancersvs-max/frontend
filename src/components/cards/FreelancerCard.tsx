@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, MapPin, CheckCircle2 } from "lucide-react";
+import { Star, MapPin, CheckCircle2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,16 @@ interface FreelancerCardProps {
   imageUrl: string;
   coverUrl?: string;
   isVerified?: boolean;
+  /**
+   * True when the freelancer has an active Pro plan. Renders a teal
+   * "Pro Member" badge in the top-right corner of the cover image.
+   */
+  isPro?: boolean;
+  /**
+   * True when the freelancer is being boosted to the top of search
+   * results. Renders a teal "Featured" ribbon across the cover image.
+   */
+  isFeatured?: boolean;
   onViewProfile?: () => void;
   className?: string;
 }
@@ -29,6 +39,8 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
   imageUrl,
   coverUrl,
   isVerified = false,
+  isPro = false,
+  isFeatured = false,
   onViewProfile,
   className,
 }) => {
@@ -48,13 +60,34 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
             className="w-full h-full object-cover"
           />
         )}
+
+        {isFeatured && (
+          <div
+            data-testid="featured-ribbon"
+            className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-teal-500 text-white text-xxs font-bold uppercase tracking-wide shadow-md"
+          >
+            <Zap size={10} className="fill-white" />
+            Featured
+          </div>
+        )}
+
+        {isPro && (
+          <div
+            data-testid="pro-member-badge"
+            className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-teal-500/30 text-teal-700 text-xxs font-bold shadow-md"
+            title="Pro Member"
+          >
+            <Zap size={10} className="fill-teal-500 text-teal-500" />
+            Pro
+          </div>
+        )}
       </div>
 
       {/* Profile Info */}
-      <div className="px-5 pb-5 pt-0 flex flex-col items-center -mt-[40px] flex-grow relative z-10">
+      <div className="px-5 pb-5 pt-0 flex flex-col items-center -mt-10 flex-grow relative z-10">
         {/* Avatar */}
         <div className="relative mb-3">
-          <div className="w-[80px] h-[80px] rounded-full border-4 border-white shadow-sm overflow-hidden bg-slate-200">
+          <div className="w-20 h-20 rounded-full border-4 border-white shadow-sm overflow-hidden bg-slate-200">
             <img
               src={imageUrl}
               alt={name}
@@ -62,7 +95,7 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
             />
           </div>
           {isVerified && (
-            <div className="absolute bottom-1 right-1 bg-white rounded-full p-[2px] shadow-sm">
+            <div className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-sm">
               <CheckCircle2 className="w-5 h-5 text-success-green fill-success-green/10" />
             </div>
           )}
@@ -98,13 +131,13 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
           {skills.slice(0, 3).map((skill) => (
             <span
               key={skill}
-              className="px-2.5 py-1 bg-page-bg text-text-secondary text-[11px] font-medium rounded-md border border-slate-100"
+              className="px-2.5 py-1 bg-page-bg text-text-secondary text-xs font-medium rounded-md border border-slate-100"
             >
               {skill}
             </span>
           ))}
           {skills.length > 3 && (
-            <span className="px-2 py-1 text-text-secondary text-[10px] font-medium">
+            <span className="px-2 py-1 text-text-secondary text-xxs font-medium">
               + {skills.length - 3}
             </span>
           )}

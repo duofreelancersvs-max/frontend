@@ -221,7 +221,7 @@ const FreelancerPortfolio = () => {
                           style.gradient
                         )}>
                           <Icon size={40} className="mb-2 opacity-80" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                          <span className="text-xxs font-bold uppercase tracking-wider opacity-60">
                             {category}
                           </span>
                         </div>

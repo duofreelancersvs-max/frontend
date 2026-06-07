@@ -4,6 +4,7 @@ import {
   useNavigate,
   useParams,
   useOutletContext,
+  useSearchParams,
 } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,7 +59,8 @@ const PostProject = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const isEditing = Boolean(projectId);
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentStep = parseInt(searchParams.get("step") || "1", 10);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
   const [loadingProject, setLoadingProject] = useState(isEditing);
@@ -71,6 +73,7 @@ const PostProject = () => {
     title: "",
     categories: [] as string[],
     description: "",
+    contactInfo: "",
     // Step 2
     skills: [] as string[],
     duration: "",
@@ -127,6 +130,7 @@ const PostProject = () => {
             title: project.title || "",
             categories: project.category ? [project.category] : [],
             description: project.description || "",
+            contactInfo: project.contactInfo || "",
             skills:
               (project as any).requiredSkills || (project as any).skills || [],
             duration: "",
@@ -237,8 +241,15 @@ const PostProject = () => {
     }));
   };
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+  const nextStep = () => {
+    const next = Math.min(currentStep + 1, 4);
+    setSearchParams({ step: next.toString() });
+  };
+  
+  const prevStep = () => {
+    const prev = Math.max(currentStep - 1, 1);
+    setSearchParams({ step: prev.toString() });
+  };
 
   const handleSubmit = async () => {
     try {
@@ -265,19 +276,30 @@ const PostProject = () => {
 
         const firstMissing = missingFields[0];
         if (["Title", "Category", "Description"].includes(firstMissing)) {
-          setCurrentStep(1);
+          setSearchParams({ step: "1" });
         } else if (
           ["Skills", "Duration", "Location (City & Country)"].includes(
             firstMissing,
           )
         ) {
-          setCurrentStep(2);
+          setSearchParams({ step: "2" });
         } else if (["Budget", "Deadline"].includes(firstMissing)) {
-          setCurrentStep(3);
+          setSearchParams({ step: "3" });
         }
 
         topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
+      }
+
+      if (formData.contactInfo) {
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
+        const isPhone = /^\+?[\d\s-]{10,}$/.test(formData.contactInfo);
+        if (!isEmail && !isPhone) {
+          toast.error("Contact Information must be a valid email or phone number.");
+          setSearchParams({ step: "1" });
+          topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
       }
 
       setIsSubmitting(true);
@@ -286,6 +308,7 @@ const PostProject = () => {
       const projectData = {
         title: formData.title,
         description: formData.description,
+        contactInfo: formData.contactInfo,
         category: formData.categories[0],
         requiredSkills: formData.skills,
         budget: {
@@ -488,6 +511,25 @@ const PostProject = () => {
                         {formData.description.length}/1000
                       </p>
                     </div>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div>
+                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
+                      Contact Email or Phone Number (Optional)
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="e.g., email@example.com or +1 234 567 8900"
+                      value={formData.contactInfo}
+                      onChange={(e) =>
+                        handleInputChange("contactInfo", e.target.value)
+                      }
+                      className="h-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
+                    />
+                    <p className="text-xs text-slate-400 mt-2">
+                      Leave an email or phone number for freelancers to contact you directly.
+                    </p>
                   </div>
                 </div>
 
@@ -873,7 +915,7 @@ const PostProject = () => {
                         Project Details
                       </h3>
                       <button
-                        onClick={() => setCurrentStep(1)}
+                        onClick={() => setSearchParams({ step: "1" })}
                         className="text-teal hover:underline text-sm flex items-center gap-1"
                       >
                         <Edit2 size={14} /> Edit
@@ -928,7 +970,7 @@ const PostProject = () => {
                         Requirements
                       </h3>
                       <button
-                        onClick={() => setCurrentStep(2)}
+                        onClick={() => setSearchParams({ step: "2" })}
                         className="text-teal hover:underline text-sm flex items-center gap-1"
                       >
                         <Edit2 size={14} /> Edit
@@ -997,7 +1039,7 @@ const PostProject = () => {
                         Budget & Timeline
                       </h3>
                       <button
-                        onClick={() => setCurrentStep(3)}
+                        onClick={() => setSearchParams({ step: "3" })}
                         className="text-teal hover:underline text-sm flex items-center gap-1"
                       >
                         <Edit2 size={14} /> Edit
@@ -1047,12 +1089,12 @@ const PostProject = () => {
                       />
                       <span className="text-sm text-slate-600 dark:text-slate-400">
                         I agree to the{" "}
-                        <Link to="/terms" className="text-teal hover:underline">
+                        <Link to="/terms-and-conditions" className="text-teal hover:underline">
                           Terms of Service
                         </Link>{" "}
                         and{" "}
                         <Link
-                          to="/privacy"
+                          to="/privacy-policy"
                           className="text-teal hover:underline"
                         >
                           Privacy Policy

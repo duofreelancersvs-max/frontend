@@ -148,7 +148,7 @@ const Contact = () => {
           <div className="max-w-4xl mx-auto text-center">
             <AnimatedSection>
               <div className="flex justify-center mb-8">
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold text-teal dark:text-teal-light uppercase tracking-[0.2em]">
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xxs font-bold text-teal dark:text-teal-light uppercase tracking-[0.2em]">
                   <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
                   Direct Access
                 </span>
@@ -186,7 +186,7 @@ const Contact = () => {
                             <opt.icon size={24} />
                           </div>
                           <div>
-                            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{opt.title}</div>
+                            <div className="text-xxs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{opt.title}</div>
                             <a href={opt.link} className="text-base md:text-lg font-bold text-navy dark:text-white hover:text-teal transition-colors break-all">
                               {opt.value}
                             </a>
@@ -226,7 +226,7 @@ const Contact = () => {
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Identity</label>
+                            <label className="text-xxs font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Identity</label>
                             <Input
                               name="name"
                               value={formData.name}
@@ -237,7 +237,7 @@ const Contact = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Email Endpoint</label>
+                            <label className="text-xxs font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Email Endpoint</label>
                             <Input
                               name="email"
                               type="email"
@@ -252,7 +252,7 @@ const Contact = () => {
 
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Communication</label>
+                            <label className="text-xxs font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Communication</label>
                             <Input
                               name="phone"
                               value={formData.phone}
@@ -262,7 +262,7 @@ const Contact = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Objective</label>
+                            <label className="text-xxs font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">Objective</label>
                             <div className="relative">
                               <select
                                 name="subject"
@@ -283,7 +283,7 @@ const Contact = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">The Requirements</label>
+                          <label className="text-xxs font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 ml-1">The Requirements</label>
                           <Textarea
                             name="message"
                             value={formData.message}

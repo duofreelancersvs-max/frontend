@@ -146,7 +146,7 @@ const AdminSidebar = () => {
                   <span>{item.name}</span>
                   {item.badge !== undefined && (
                     <span
-                      className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
+                      className={`ml-auto px-2 py-0.5 rounded-full text-xxs font-bold tracking-wide ${
                         item.badgeColor === "indigo"
                           ? "bg-indigo-500/20 text-indigo-400"
                           : item.badgeColor === "rose"

@@ -583,7 +583,7 @@ const SendNotifications = () => {
                 <div className="sn-filter-group">
                   <label>Subscription</label>
                   <div className="sn-filter-options">
-                    {["Free", "Pro", "Premium"].map((sub) => (
+                    {["Free", "Pro"].map((sub) => (
                       <label
                         key={sub}
                         className={

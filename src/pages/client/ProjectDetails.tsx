@@ -536,7 +536,7 @@ const ProjectDetails = () => {
                               {(application.status === "accepted" ||
                                 application.status === "hired" ||
                                 application.status === "shortlisted") && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
+                                <span className="px-2 py-0.5 rounded-full text-xxs font-semibold bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30">
                                    {application.status === "shortlisted"
                                     ? "Shortlisted"
                                     : "Hired"}
@@ -550,7 +550,7 @@ const ProjectDetails = () => {
 
                           {/* Right Side Info & Actions Header */}
                            <div className="flex flex-col sm:items-end text-sm text-slate-500 dark:text-slate-400">
-                            <span className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">
+                            <span className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">
                               Applied
                             </span>
                             <span className="font-medium text-navy dark:text-white">

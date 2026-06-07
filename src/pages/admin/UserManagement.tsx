@@ -25,6 +25,8 @@ import {
   Activity,
   Briefcase,
   Clock,
+  Zap,
+  Check,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +47,8 @@ interface User {
   lastActive: string;
   lastActiveRecent: boolean;
   revenue: string;
+  /** Mirrors FreelancerProfile.isProActive — only meaningful for freelancers. */
+  isProActive?: boolean;
 }
 
 type TabType = "all" | "clients" | "freelancers" | "admins";
@@ -128,16 +132,28 @@ const StatusBadge = ({ status }: { status: User["status"] }) => {
   );
 };
 
+const ProBadge = () => (
+  <span
+    className="um-pro-badge"
+    title="Active Pro subscription"
+  >
+    <Zap size={10} className="fill-current" />
+    Pro
+  </span>
+);
+
 const UserRow = ({
   user,
   isSelected,
   onSelect,
   onViewDetails,
+  onProOverride,
 }: {
   user: User;
   isSelected: boolean;
   onSelect: (id: string) => void;
   onViewDetails: (user: User) => void;
+  onProOverride: (user: User, next: boolean) => void;
 }) => {
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -169,7 +185,10 @@ const UserRow = ({
         <div className="um-user-cell">
           <div className="um-user-avatar">{user.initials}</div>
           <div className="um-user-info">
-            <div className="um-user-name">{user.name}</div>
+            <div className="um-user-name">
+              {user.name}
+              {user.isProActive && <ProBadge />}
+            </div>
             <div className="um-user-email">{user.email}</div>
             <RoleBadge role={user.role} />
           </div>
@@ -218,6 +237,30 @@ const UserRow = ({
                 <MessageSquare size={14} />
                 Send Message
               </button>
+              {user.role === "freelancer" && (
+                <>
+                  <div className="um-actions-divider"></div>
+                  <button
+                    className="pro"
+                    onClick={() => {
+                      setShowActions(false);
+                      onProOverride(user, !user.isProActive);
+                    }}
+                  >
+                    {user.isProActive ? (
+                      <>
+                        <X size={14} />
+                        Revoke Pro
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={14} />
+                        Grant Pro
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
               <div className="um-actions-divider"></div>
               <button className="warning">
                 <AlertTriangle size={14} />
@@ -446,7 +489,41 @@ const UserManagement = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [liveStats, setLiveStats] = useState(statsData);
   const [liveTabs, setLiveTabs] = useState(tabsData);
+  const [proTarget, setProTarget] = useState<{ user: User; next: boolean } | null>(null);
+  const [proReason, setProReason] = useState("");
+  const [proSubmitting, setProSubmitting] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Toast import via existing toastify is not present — log to console.
+  const handleProOverride = (user: User, next: boolean) => {
+    setProTarget({ user, next });
+    setProReason("");
+  };
+
+  const submitProOverride = async () => {
+    if (!proTarget) return;
+    setProSubmitting(true);
+    try {
+      await adminService.setProStatus(proTarget.user.id, {
+        isProActive: proTarget.next,
+        reason: proReason || undefined,
+        durationDays: proTarget.next ? 365 : undefined,
+      });
+      // Optimistic local update so the UI reflects the new state without a refetch
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === proTarget.user.id ? { ...u, isProActive: proTarget.next } : u,
+        ),
+      );
+      setProTarget(null);
+      setProReason("");
+    } catch (err) {
+      console.error("[Admin] Pro override failed", err);
+      // Don't close the modal on failure — let the admin retry
+    } finally {
+      setProSubmitting(false);
+    }
+  };
 
   // Fetch users from API
   const fetchUsers = useCallback(async () => {
@@ -490,6 +567,7 @@ const UserManagement = () => {
           lastActive: lastLogin,
           lastActiveRecent: isRecent,
           revenue: earnings > 0 ? `₹${earnings.toLocaleString("en-IN")}` : "—",
+          isProActive: u.profile?.isProActive === true,
         };
       });
 
@@ -788,6 +866,7 @@ const UserManagement = () => {
                   isSelected={selectedUsers.has(user.id)}
                   onSelect={handleSelectUser}
                   onViewDetails={(u) => setSlideOverUser(u)}
+                  onProOverride={handleProOverride}
                 />
               ))}
             </tbody>
@@ -882,6 +961,97 @@ const UserManagement = () => {
         isOpen={!!slideOverUser}
         onClose={() => setSlideOverUser(null)}
       />
+
+      {/* Pro Override Confirmation */}
+      {proTarget && (
+        <div
+          className="um-slideover-overlay open"
+          onClick={() => !proSubmitting && setProTarget(null)}
+        >
+          <div
+            className="um-pro-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="um-pro-modal-header">
+              <div className="um-pro-modal-icon">
+                {proTarget.next ? (
+                  <Zap size={20} className="fill-current" />
+                ) : (
+                  <X size={20} />
+                )}
+              </div>
+              <div>
+                <h3>
+                  {proTarget.next ? "Grant Pro plan" : "Revoke Pro plan"}
+                </h3>
+                <p>
+                  {proTarget.user.name} · {proTarget.user.email}
+                </p>
+              </div>
+            </div>
+
+            <div className="um-pro-modal-body">
+              {proTarget.next ? (
+                <p className="um-pro-modal-warning">
+                  This will manually set the freelancer to <strong>Pro</strong>{" "}
+                  for <strong>365 days</strong> without a Razorpay payment. The
+                  freelancer will get the Pro Member badge, top search
+                  priority, and the Featured ribbon. Use this for support
+                  comps, beta testers, or VIPs.
+                </p>
+              ) : (
+                <p className="um-pro-modal-warning">
+                  This will cancel any active Pro subscription for this
+                  freelancer and clear the Pro Member badge, search priority,
+                  and Featured ribbon. Use this for support refunds or
+                  reverts.
+                </p>
+              )}
+
+              <label className="um-pro-modal-label">
+                Reason (optional, for the audit log)
+              </label>
+              <textarea
+                value={proReason}
+                onChange={(e) => setProReason(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="e.g. Customer support comp — failed payment #razorpay_xyz"
+                className="um-pro-modal-textarea"
+              />
+            </div>
+
+            <div className="um-pro-modal-footer">
+              <button
+                className="admin-btn admin-btn-outline"
+                onClick={() => setProTarget(null)}
+                disabled={proSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                className={`admin-btn ${proTarget.next ? "admin-btn-pro" : "admin-btn-danger"}`}
+                onClick={submitProOverride}
+                disabled={proSubmitting}
+              >
+                {proSubmitting ? (
+                  "Working..."
+                ) : proTarget.next ? (
+                  <>
+                    <Check size={14} />
+                    Confirm grant
+                  </>
+                ) : (
+                  <>
+                    <X size={14} />
+                    Confirm revoke
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

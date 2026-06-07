@@ -2,18 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import {
-  ChevronRight,
-  ChevronLeft,
-  Search,
-  Star,
-  BadgeCheck,
-  Filter,
-  Grid3X3,
-  List,
-  ArrowRight,
-  Frown,
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Filter, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import freelancerService from "@/services/freelancer.service";
@@ -173,7 +162,7 @@ const FreelancerDirectory = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-3xl">
-              <span className="inline-block px-3 py-1 bg-teal/5 border border-teal/10 rounded-full text-[10px] font-black text-teal uppercase tracking-[0.2em] mb-6">
+              <span className="inline-block px-3 py-1 bg-teal/5 border border-teal/10 rounded-full text-xxs font-black text-teal uppercase tracking-[0.2em] mb-6">
                 Verified Talent Network
               </span>
               <h1 className="text-4xl md:text-7xl font-black mb-6 text-navy dark:text-white leading-[1.1] tracking-tighter">
@@ -213,7 +202,7 @@ const FreelancerDirectory = () => {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-2xl border transition-all shrink-0 font-black text-[10px] uppercase tracking-widest",
+                  "flex items-center gap-2 px-4 py-3 rounded-2xl border transition-all shrink-0 font-black text-xxs uppercase tracking-widest",
                   showFilters
                     ? "bg-navy text-white border-navy"
                     : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-teal hover:text-teal",
@@ -242,7 +231,7 @@ const FreelancerDirectory = () => {
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    "px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
+                    "px-4 py-1.5 rounded-full border text-xxs font-black uppercase tracking-widest whitespace-nowrap transition-all",
                     category === cat
                       ? "bg-teal/10 text-teal border-teal/20"
                       : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:border-teal/30",
@@ -278,7 +267,7 @@ const FreelancerDirectory = () => {
                     },
                   ].map((f, i) => (
                     <div key={i} className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <label className="text-xxs font-black text-slate-400 uppercase tracking-widest">
                         {f.label}
                       </label>
                       <select
@@ -363,7 +352,7 @@ const FreelancerDirectory = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-32 space-y-4">
               <div className="w-12 h-12 border-2 border-teal/20 border-t-teal rounded-full animate-spin" />
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              <div className="text-xxs font-black uppercase tracking-[0.2em] text-slate-500">
                 Querying Database
               </div>
             </div>
@@ -420,13 +409,33 @@ const FreelancerDirectory = () => {
                                 />
                               </div>
                             )}
+                            {f.featuredProfile && (
+                              <div
+                                data-testid="featured-ribbon"
+                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500 text-white rounded-full text-xxs font-bold uppercase tracking-wide shadow-md"
+                                title="Top of search results"
+                              >
+                                <Zap size={10} className="fill-white" />
+                                Featured
+                              </div>
+                            )}
+                            {f.isProActive && (
+                              <div
+                                data-testid="pro-member-badge"
+                                className="absolute -top-2 -left-2 inline-flex items-center gap-1 px-1.5 py-0.5 bg-white border border-teal-500/30 text-teal-700 rounded-full text-[9px] font-bold shadow-md"
+                                title="Pro Member"
+                              >
+                                <Zap size={9} className="fill-teal-500 text-teal-500" />
+                                Pro
+                              </div>
+                            )}
                           </div>
 
                           <div className="min-w-0 flex-1 pt-2">
                             <h3 className="text-xl sm:text-2xl font-black text-navy dark:text-white truncate group-hover:text-teal transition-colors">
                               {name}
                             </h3>
-                            <p className="text-[11px] font-black text-teal uppercase tracking-widest mb-1 truncate">
+                            <p className="text-xs font-black text-teal uppercase tracking-widest mb-1 truncate">
                               {f.category}
                             </p>
                             <div className="flex items-center gap-1.5 mt-2">
@@ -439,7 +448,7 @@ const FreelancerDirectory = () => {
                                   {f.averageRating.toFixed(1)}
                                 </span>
                               </div>
-                              <span className="text-[10px] font-bold text-slate-400 uppercase">
+                              <span className="text-xxs font-bold text-slate-400 uppercase">
                                 ({f.reviewCount})
                               </span>
                             </div>
@@ -461,13 +470,13 @@ const FreelancerDirectory = () => {
                             {f.skills.slice(0, 3).map((skill) => (
                               <span
                                 key={skill.name}
-                                className="px-3 py-1.5 bg-slate-50 dark:bg-white/10 border border-slate-100 dark:border-white/5 rounded-xl text-[10px] font-black uppercase text-slate-500 dark:text-slate-300"
+                                className="px-3 py-1.5 bg-slate-50 dark:bg-white/10 border border-slate-100 dark:border-white/5 rounded-xl text-xxs font-black uppercase text-slate-500 dark:text-slate-300"
                               >
                                 {skill.name}
                               </span>
                             ))}
                             {f.skills.length > 3 && (
-                              <span className="text-[10px] font-bold text-slate-400 self-center">
+                              <span className="text-xxs font-bold text-slate-400 self-center">
                                 + {f.skills.length - 3}
                               </span>
                             )}
@@ -475,7 +484,7 @@ const FreelancerDirectory = () => {
 
                           <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
                             <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
+                              <span className="text-xxs font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
                                 Investment
                               </span>
                               <p className="text-lg font-black text-navy dark:text-white">
@@ -485,7 +494,7 @@ const FreelancerDirectory = () => {
                                 </span>
                               </p>
                             </div>
-                            <div className="h-12 px-6 bg-navy dark:bg-teal text-white rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-navy/10 dark:shadow-teal/20">
+                            <div className="h-12 px-6 bg-navy dark:bg-teal text-white rounded-2xl flex items-center justify-center font-black text-xxs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-navy/10 dark:shadow-teal/20">
                               View Profile
                             </div>
                           </div>
@@ -525,7 +534,7 @@ const FreelancerDirectory = () => {
                 variant="ghost"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 disabled:opacity-20"
+                className="h-12 px-6 rounded-xl font-black text-xxs uppercase tracking-widest text-slate-500 disabled:opacity-20"
               >
                 <ChevronLeft size={16} className="mr-2" />
                 Previous
@@ -556,7 +565,7 @@ const FreelancerDirectory = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 disabled:opacity-20"
+                className="h-12 px-6 rounded-xl font-black text-xxs uppercase tracking-widest text-slate-500 disabled:opacity-20"
               >
                 Next
                 <ChevronRight size={16} className="ml-2" />

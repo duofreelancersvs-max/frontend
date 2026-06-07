@@ -12,6 +12,7 @@ import AdminLayout from "@/components/layouts/AdminLayout";
 import { UnreadListener } from "@/components/chat/UnreadListener";
 import PageLoader from "@/components/shared/PageLoader";
 import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
+import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
@@ -107,6 +108,7 @@ function App() {
     <>
       <ThemeInitializer />
       <UnreadListener />
+      <UpgradeModalHost />
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Public Pages (full-page Suspense is fine here — no persistent layout) */}

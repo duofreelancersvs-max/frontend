@@ -21,6 +21,9 @@ module.exports = {
         heading: ["Outfit", "sans-serif"],
         sans: ["Inter", "sans-serif"],
       },
+      fontSize: {
+        xxs: ["0.625rem", { lineHeight: "1rem" }], // 10px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

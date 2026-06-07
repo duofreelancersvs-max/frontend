@@ -55,6 +55,9 @@ export interface FreelancerProfile {
   reviewCount: number;
   isVerified: boolean;
   verificationBadge: string;
+  isProActive?: boolean;
+  prioritySearch?: boolean;
+  featuredProfile?: boolean;
   portfolio: PortfolioItem[];
   workExperience: WorkExperience[];
   education: Education[];

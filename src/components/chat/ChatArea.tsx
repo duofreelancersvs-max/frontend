@@ -54,6 +54,8 @@ interface ChatAreaProps {
   onHire?: () => void;
   onReject?: () => void;
   isWidget?: boolean;
+  disabledMessageInput?: boolean;
+  disabledMessageReason?: string;
 }
 
 const ChatArea = ({
@@ -77,6 +79,8 @@ const ChatArea = ({
   onHire,
   onReject,
   isWidget,
+  disabledMessageInput,
+  disabledMessageReason,
 }: ChatAreaProps) => {
   const { theme } = useThemeStore();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -306,15 +310,16 @@ const ChatArea = ({
             </div>
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder={disabledMessageReason || "Type a message..."}
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSend()}
-              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white"
+              disabled={disabledMessageInput}
+              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <Button
               onClick={onSend}
-              disabled={!messageInput.trim() || !isConnected}
+              disabled={disabledMessageInput || !messageInput.trim() || !isConnected}
               className="h-10 w-10 p-0 rounded-full bg-teal hover:bg-teal-light text-white disabled:opacity-50"
             >
               <Send size={18} />
