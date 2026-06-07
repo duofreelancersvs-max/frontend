@@ -44,6 +44,7 @@ export interface LoginCredentials {
   email: string;
   password: string;
   role?: UserRole;
+  turnstileToken?: string;
 }
 
 export interface RegisterData {
@@ -55,6 +56,7 @@ export interface RegisterData {
   lastName?: string;
   city?: string;
   state?: string;
+  turnstileToken?: string;
 }
 
 export interface AuthResponse {

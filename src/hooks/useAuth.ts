@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAxiosError } from "axios";
+import { isAxiosError, type AxiosRequestHeaders } from "axios";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
@@ -21,7 +21,7 @@ interface UseAuthReturn {
     provider: "google" | "github",
     role?: string,
   ) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, turnstileToken?: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
@@ -75,6 +75,7 @@ export function useAuth(): UseAuthReturn {
           },
           {
             skipAuth: true,
+            headers: (credentials.turnstileToken ? { "x-turnstile-token": credentials.turnstileToken } : {}) as AxiosRequestHeaders,
           } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
@@ -145,6 +146,7 @@ export function useAuth(): UseAuthReturn {
           },
           {
             skipAuth: true,
+            headers: (data.turnstileToken ? { "x-turnstile-token": data.turnstileToken } : {}) as AxiosRequestHeaders,
           } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
 
@@ -248,21 +250,19 @@ export function useAuth(): UseAuthReturn {
 
   // Reset password
   const resetPassword = useCallback(
-    async (email: string): Promise<void> => {
+    async (email: string, turnstileToken?: string): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
 
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-          email,
+        await axiosClient.post(
+          "/auth/forgot-password",
+          { email },
           {
-            redirectTo: `${window.location.origin}/reset-password`,
-          },
+            skipAuth: true,
+            headers: (turnstileToken ? { "x-turnstile-token": turnstileToken } : {}) as AxiosRequestHeaders,
+          } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
         );
-
-        if (resetError) {
-          throw new Error(resetError.message);
-        }
 
         toast.success("Password reset email sent!");
       } catch (err: unknown) {

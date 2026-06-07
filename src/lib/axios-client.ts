@@ -4,6 +4,25 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useUpgradeModalStore } from "@/stores/upgrade-modal.store";
 import type { PlanErrorMeta } from "@/types/feature-gate.types";
 import { supabase } from "@/lib/supabase";
+import NProgress from "nprogress";
+
+NProgress.configure({ showSpinner: true, speed: 400 });
+
+let pendingRequests = 0;
+
+const startLoading = () => {
+  if (pendingRequests === 0) {
+    NProgress.start();
+  }
+  pendingRequests++;
+};
+
+const stopLoading = () => {
+  pendingRequests = Math.max(0, pendingRequests - 1);
+  if (pendingRequests === 0) {
+    NProgress.done();
+  }
+};
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
@@ -42,6 +61,8 @@ const axiosClient = axios.create({
 // Request interceptor: inject auth token
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    startLoading();
+
     const customConfig = config as CustomAxiosRequestConfig;
 
     // If the caller already set Authorization, mark it as manual
@@ -65,14 +86,22 @@ axiosClient.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    stopLoading();
+    return Promise.reject(error);
+  },
 );
 
 // Response interceptor: handle 401 with Supabase token refresh, and
 // 402 PLAN_LIMIT_EXCEEDED by auto-opening the global UpgradeModal.
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    stopLoading();
+    return response;
+  },
   async (error: AxiosError) => {
+    stopLoading();
+    
     const originalRequest = error.config as CustomAxiosRequestConfig;
     const status = error.response?.status;
     const errorData = error.response?.data as ApiErrorResponse | undefined;

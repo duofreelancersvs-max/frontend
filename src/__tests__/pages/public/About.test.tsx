@@ -45,16 +45,14 @@ vi.mock("lucide-react", async () => {
 describe("About", () => {
   it("renders page header with title", () => {
     renderWithRouter(<About />);
-    expect(
-      screen.getByText(/Building the Future of/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Building the Future of/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Creative Work/i).length).toBeGreaterThan(0);
   });
 
   it("renders breadcrumb navigation", () => {
     renderWithRouter(<About />);
     expect(
-      screen.getAllByRole("link", { name: /Home/i }).length
+      screen.getAllByRole("link", { name: /Home/i }).length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText(/About Us/i).length).toBeGreaterThan(0);
   });
@@ -63,12 +61,10 @@ describe("About", () => {
     renderWithRouter(<About />);
     expect(screen.getByText(/Our Story/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Connecting Creativity with Opportunity/i)
+      screen.getByText(/Connecting Creativity with Opportunity/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        /ConnectMeIndia was born from a simple observation/i
-      )
+      screen.getByText(/ConnectMeIndia was born from a simple observation/i),
     ).toBeInTheDocument();
   });
 
@@ -78,12 +74,10 @@ describe("About", () => {
     expect(screen.getAllByText(/Our Mission/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Our Vision/i).length).toBeGreaterThan(0);
     expect(
-      screen.getByText(
-        /To democratize access to creative opportunities/i
-      )
+      screen.getByText(/To democratize access to creative opportunities/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/To become the leading creative marketplace in India/i)
+      screen.getByText(/To become the leading creative marketplace in India/i),
     ).toBeInTheDocument();
   });
 
@@ -113,7 +107,7 @@ describe("About", () => {
     renderWithRouter(<About />);
     expect(screen.getByText(/Our Team/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Meet the People Behind ConnectMeIndia/i)
+      screen.getByText(/Meet the People Behind ConnectMeIndia/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Vikram Reddy/i)).toBeInTheDocument();
     expect(screen.getByText(/Founder & CEO/i)).toBeInTheDocument();
@@ -139,39 +133,37 @@ describe("About", () => {
   it("renders navigation bar with links", () => {
     renderWithRouter(<About />);
     expect(
-      screen.getAllByRole("link", { name: /Home/i }).length
+      screen.getAllByRole("link", { name: /Home/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("link", { name: /About/i }).length
+      screen.getAllByRole("link", { name: /About/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("link", { name: /Pricing/i }).length
+      screen.getAllByRole("link", { name: /Pricing/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("link", { name: /Contact/i }).length
+      screen.getAllByRole("link", { name: /Contact/i }).length,
     ).toBeGreaterThan(0);
   });
 
   it("renders login and get started buttons", () => {
     renderWithRouter(<About />);
     expect(
-      screen.getAllByRole("button", { name: /Log In/i }).length
+      screen.getAllByRole("button", { name: /Log In/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("button", { name: /Get Started/i }).length
+      screen.getAllByRole("button", { name: /Get Started/i }).length,
     ).toBeGreaterThan(0);
   });
 
   it("renders CTA section", () => {
     renderWithRouter(<About />);
+    expect(screen.getByText(/Join Our Growing Community/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Join Our Growing Community/i)
+      screen.getByRole("button", { name: /Hire Talent/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Hire Talent/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Become a Freelancer/i })
+      screen.getByRole("button", { name: /Become a Freelancer/i }),
     ).toBeInTheDocument();
   });
 
@@ -179,8 +171,8 @@ describe("About", () => {
     renderWithRouter(<About />);
     expect(
       screen.getByText(
-        /The premier marketplace for creative professionals in Telangana and Andhra Pradesh\./i
-      )
+        /The premier marketplace for creative professionals in India\./i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/For Clients/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/For Freelancers/i).length).toBeGreaterThan(0);

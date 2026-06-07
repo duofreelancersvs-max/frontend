@@ -93,13 +93,13 @@ const Categories = () => {
   // Format categories into groups for display
   const displayGroups = [
     {
-      title: "Marketplace Categories",
+      title: "Connect with skilled Indian freelancers across 15+ categories",
       description: "Connect with world-class talent across specialized fields.",
       categories: categories.map((cat) => ({
         name: cat.name,
         icon: getDynamicIcon(cat.icon),
         count: `${cat.skills?.length || 0} Skills`,
-        color: cat.color || "from-teal to-emerald-500",
+        color: (cat.color && cat.color.trim() !== "") ? cat.color : "from-teal to-emerald-500",
         desc: cat.description || "Explore specialized talent in this field.",
       }))
     }
@@ -117,14 +117,14 @@ const Categories = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-left">
           <AnimatedSection>
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xs font-bold text-teal dark:text-teal-light mb-8 uppercase tracking-widest">
-              Explore Talent
+              Connect with skilled Indian freelancers across 15+ categories.
             </span>
             <h1 className="text-5xl md:text-7xl font-bold mb-8 text-navy dark:text-white">
               Every Expertise to <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Build Your Future</span>
             </h1>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mb-12 leading-relaxed">
-              Browse through our curated list of professional categories and find the elite talent your mission-critical projects deserve.
+              Browse 15+ professional categories and connect directly with skilled Indian freelancers. Zero commission. Zero middlemen.
             </p>
           </AnimatedSection>
         </div>
@@ -163,9 +163,10 @@ const Categories = () => {
                         >
                           <div
                             className={cn(
-                              "w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
+                              "w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg bg-teal bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
                               cat.color,
                             )}
+                            style={cat.color && (cat.color.startsWith('#') || cat.color.startsWith('rgb')) ? { background: cat.color } : undefined}
                           >
                             <cat.icon size={32} />
                           </div>

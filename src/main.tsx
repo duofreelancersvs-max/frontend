@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import ScrollToTop from "./components/common/ScrollToTop.tsx";
 import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
+import "nprogress/nprogress.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

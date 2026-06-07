@@ -17,8 +17,7 @@ export const PublicFooter = () => {
               <Logo isDark={true} size="md" />
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
-              The premier marketplace for creative professionals in Telangana
-              and Andhra Pradesh.
+              The premier marketplace for creative professionals in India.
             </p>
             <div className="flex gap-4">
               {[Twitter, Linkedin, Instagram, Youtube].map((Icon, idx) => (
@@ -27,7 +26,10 @@ export const PublicFooter = () => {
                   href="#"
                   className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-teal/50 hover:bg-teal flex items-center justify-center transition-all duration-300 group"
                 >
-                  <Icon size={18} className="text-slate-300 group-hover:text-white group-hover:scale-110 transition-all" />
+                  <Icon
+                    size={18}
+                    className="text-slate-300 group-hover:text-white group-hover:scale-110 transition-all"
+                  />
                 </a>
               ))}
             </div>
@@ -84,18 +86,24 @@ export const PublicFooter = () => {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-500 text-sm">
-            © 2024 ConnectMeIndia. All rights reserved.
+            © 2026 ConnectMeIndia. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-slate-500 text-sm">
-            <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
+            <Link
+              to="/terms-and-conditions"
+              className="hover:text-white transition-colors"
+            >
               Terms & Conditions
             </Link>
-            <Link to="/privacy-policy" className="hover:text-white transition-colors">
+            <Link
+              to="/privacy-policy"
+              className="hover:text-white transition-colors"
+            >
               Privacy Policy
             </Link>
             <div className="flex items-center gap-2">
               <MapPin size={14} />
-              <span>Made with ❤️ in Hyderabad</span>
+              <span>Made with ❤️ in India</span>
             </div>
           </div>
         </div>

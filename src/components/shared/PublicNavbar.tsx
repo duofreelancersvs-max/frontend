@@ -20,6 +20,9 @@ const MegaMenu = ({
   dark,
   categories,
   isJobType = false,
+  isOpen,
+  onOpen,
+  onClose,
 }: {
   label: string;
   href: string;
@@ -28,19 +31,20 @@ const MegaMenu = ({
   dark: boolean;
   categories: CategoryWithSkills[];
   isJobType?: boolean;
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const handleClose = () => {
     menuLastClickTime = Date.now();
-    setIsOpen(false);
+    onClose();
   };
 
   return (
     <div 
       className="static"
-      onMouseEnter={() => { if (Date.now() - menuLastClickTime > 600) setIsOpen(true); }}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={() => { if (Date.now() - menuLastClickTime > 600) onOpen(); }}
+      onMouseLeave={() => onClose()}
     >
       <NavLink
         to={href}
@@ -63,11 +67,11 @@ const MegaMenu = ({
       {/* Full-width Dropdown Content */}
       <div 
         className={cn(
-          "absolute left-0 top-full w-full bg-white dark:bg-[#050B15] shadow-2xl border-t border-slate-100 dark:border-white/5 transition-all duration-300 ease-out z-50",
+          "absolute left-0 top-full w-full bg-white dark:bg-[#050B15] shadow-2xl border-t border-slate-100 dark:border-white/5 transition-all duration-300 ease-out z-[48]",
           isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"
         )}
       >
-        {/* Invisible bridge */}
+        {/* Invisible bridge to prevent gap triggering mouseLeave */}
         <div className="absolute left-0 -top-8 w-full h-8 bg-transparent" />
         
         <div className="container mx-auto px-4 lg:px-8 py-10 max-h-[80vh] overflow-y-auto">
@@ -116,6 +120,7 @@ export const PublicNavbar = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryWithSkills[]>([]);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const { user, isAuthenticated, logout } = useAuth();
@@ -136,7 +141,8 @@ export const PublicNavbar = ({
   }, []);
 
   useEffect(() => {
-    if (mobileMenuOpen) {
+    const isMenuOpen = mobileMenuOpen || openMenu !== null;
+    if (isMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -144,7 +150,7 @@ export const PublicNavbar = ({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, openMenu]);
 
   const isWhite = variant === "white" || isScrolled || mobileMenuOpen;
 
@@ -152,7 +158,7 @@ export const PublicNavbar = ({
     <>
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "fixed top-0 left-0 right-0 z-[50] transition-all duration-500",
         isScrolled
           ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-3"
           : variant === "white"
@@ -177,6 +183,9 @@ export const PublicNavbar = ({
                 dark={dark}
                 categories={categories}
                 isJobType={false}
+                isOpen={openMenu === 'talent'}
+                onOpen={() => setOpenMenu('talent')}
+                onClose={() => setOpenMenu(null)}
               />
               <MegaMenu
                 label="Find Work"
@@ -186,6 +195,9 @@ export const PublicNavbar = ({
                 dark={dark}
                 categories={categories}
                 isJobType={true}
+                isOpen={openMenu === 'work'}
+                onOpen={() => setOpenMenu('work')}
+                onClose={() => setOpenMenu(null)}
               />
               {[
                 { label: "Categories", href: "/categories" },
@@ -361,6 +373,15 @@ export const PublicNavbar = ({
           </div>
         </div>
       </nav>
+
+      {/* Backdrop: covers entire page when mega menu is open — locks scroll interactions and closes on click/mouseenter */}
+      {openMenu !== null && (
+        <div
+          className="fixed inset-0 z-[45]"
+          onMouseEnter={() => setOpenMenu(null)}
+          onClick={() => setOpenMenu(null)}
+        />
+      )}
 
       {/* Mobile Menu Overlay */}
       <div

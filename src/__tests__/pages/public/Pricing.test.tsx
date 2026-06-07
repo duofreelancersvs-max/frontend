@@ -129,7 +129,9 @@ describe("Pricing", () => {
       expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
     });
     // The toggle is a pill button. Find it by its bg-slate-200 class.
-    const pill = document.querySelector("button.bg-slate-200") as HTMLElement | null;
+    const pill = document.querySelector(
+      "button.bg-slate-200",
+    ) as HTMLElement | null;
     expect(pill).toBeTruthy();
     if (pill) await userEvent.click(pill);
     // After click, billing cycle is yearly; the "/yr" suffix should be visible
@@ -182,7 +184,9 @@ describe("Pricing", () => {
   it("renders plan features for the Pro plan", async () => {
     renderWithRouter(<Pricing />);
     await waitFor(() => {
-      expect(screen.getAllByText(/unlimited applications/i).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(/unlimited applications/i).length,
+      ).toBeGreaterThan(0);
     });
     expect(screen.getAllByText(/priority support/i).length).toBeGreaterThan(0);
   });
@@ -199,14 +203,18 @@ describe("Pricing", () => {
     renderWithRouter(<Pricing />);
     expect(screen.getAllByText(/compare features/i).length).toBeGreaterThan(0);
     // Both column headers should be visible
-    expect(screen.getAllByText(/portfolio capacity/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/portfolio capacity/i).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getAllByText(/search boost/i).length).toBeGreaterThan(0);
   });
 
   it("renders the trust badge in the hero", async () => {
     renderWithRouter(<Pricing />);
     await waitFor(() => {
-      expect(screen.getAllByText(/flexible pricing/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/flexible pricing/i).length).toBeGreaterThan(
+        0,
+      );
     });
   });
 
@@ -214,9 +222,7 @@ describe("Pricing", () => {
     renderWithRouter(<Pricing />);
     expect(screen.getByText(/frequently asked questions/i)).toBeInTheDocument();
     expect(screen.getByText(/can i cancel at any time/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/which plan is right for me/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/which plan is right for me/i)).toBeInTheDocument();
   });
 
   it("allows toggling FAQ items", async () => {
@@ -224,7 +230,9 @@ describe("Pricing", () => {
     const faqButton = screen.getByText(/can i cancel at any time/i);
     await userEvent.click(faqButton);
     expect(
-      screen.getByText(/you can cancel your subscription from your dashboard settings/i)
+      screen.getByText(
+        /you can cancel your subscription from your dashboard settings/i,
+      ),
     ).toBeInTheDocument();
   });
 
@@ -232,7 +240,7 @@ describe("Pricing", () => {
     renderWithRouter(<Pricing />);
     expect(screen.getByText(/ready to/i)).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /upgrade today/i }).length
+      screen.getAllByRole("link", { name: /upgrade today/i }).length,
     ).toBeGreaterThan(0);
   });
 
@@ -240,8 +248,8 @@ describe("Pricing", () => {
     renderWithRouter(<Pricing />);
     expect(
       screen.getByText(
-        /the premier marketplace for creative professionals in telangana and andhra pradesh\./i
-      )
+        /The premier marketplace for creative professionals in India\./i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/for clients/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/for freelancers/i).length).toBeGreaterThan(0);
@@ -259,23 +267,25 @@ describe("Pricing", () => {
   it("has start buttons for the Free and Pro plans", async () => {
     renderWithRouter(<Pricing />);
     await waitFor(() => {
-      expect(screen.getAllByRole("button", { name: /start free/i }).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByRole("button", { name: /start free/i }).length,
+      ).toBeGreaterThan(0);
     });
     expect(
-      screen.getAllByRole("button", { name: /start free/i }).length
+      screen.getAllByRole("button", { name: /start free/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("button", { name: /go pro/i }).length
+      screen.getAllByRole("button", { name: /go pro/i }).length,
     ).toBeGreaterThan(0);
   });
 
   it("does NOT have a 'Go Premium' button", async () => {
     renderWithRouter(<Pricing />);
     await waitFor(() => {
-      expect(screen.getAllByRole("button", { name: /start free/i }).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByRole("button", { name: /start free/i }).length,
+      ).toBeGreaterThan(0);
     });
-    expect(
-      screen.queryByRole("button", { name: /go premium/i })
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /go premium/i })).toBeNull();
   });
 });

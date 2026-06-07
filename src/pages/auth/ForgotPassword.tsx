@@ -6,16 +6,23 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { toast } from "react-toastify";
+import { TurnstileWidget } from "@/components/common/TurnstileWidget";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { resetPassword, isLoading, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      toast.error("Please complete the security challenge");
+      return;
+    }
     try {
-      await resetPassword(email);
+      await resetPassword(email, turnstileToken);
       setIsSubmitted(true);
     } catch {
       // Error is handled in the hook
@@ -152,6 +159,13 @@ const ForgotPassword = () => {
                       />
                     </div>
                   </div>
+
+                  <TurnstileWidget
+                    onSuccess={(token) => {
+                      setTurnstileToken(token);
+                    }}
+                    onExpire={() => setTurnstileToken(null)}
+                  />
 
                   {/* Submit Button */}
                   <Button

@@ -127,18 +127,18 @@ const FindWork = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-10 border-b border-slate-100 dark:border-white/5">
             <div>
               <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full text-xxs font-black text-teal dark:text-teal-light mb-6 uppercase tracking-[0.2em]">
-                Opportunities
+                Where Talent Earns
               </span>
-              <h1 className="text-5xl md:text-7xl font-black text-navy dark:text-white mb-6 leading-tight">
-                Find Your <br />
+              <h1 className="text-5xl md:text-7xl font-black text-navy dark:text-white mb-4 leading-tight">
+                Earn Money as a <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">
-                  Next Project
+                  Freelancer
                 </span>
               </h1>
               <p className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed font-medium">
-                Browse thousands of high-quality freelance opportunities across
-                all creative domains.
+                Your Work. Your Money. Always.
               </p>
+
             </div>
             <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none self-start md:self-auto flex items-center gap-4">
               <div className="w-12 h-12 bg-teal/10 rounded-2xl flex items-center justify-center text-teal">

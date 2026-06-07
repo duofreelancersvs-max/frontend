@@ -54,26 +54,30 @@ describe("HowItWorks", () => {
   it("renders breadcrumb navigation", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getAllByRole("link", { name: /home/i }).length
+      screen.getAllByRole("link", { name: /home/i }).length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText(/how it works/i).length).toBeGreaterThan(0);
   });
 
   it("renders role toggle tabs", () => {
     renderWithRouter(<HowItWorks />);
-    expect(screen.getByRole("button", { name: /for clients/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /for freelancers/i })
+      screen.getByRole("button", { name: /for clients/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /for freelancers/i }),
     ).toBeInTheDocument();
   });
 
   it("allows switching between client and freelancer tabs", async () => {
     renderWithRouter(<HowItWorks />);
-    const freelancerTab = screen.getByRole("button", { name: /for freelancers/i });
+    const freelancerTab = screen.getByRole("button", {
+      name: /for freelancers/i,
+    });
     await userEvent.click(freelancerTab);
-    expect(
-      screen.getAllByText(/create your profile/i).length
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText(/create your profile/i).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("renders client steps by default", () => {
@@ -81,19 +85,21 @@ describe("HowItWorks", () => {
     expect(screen.getAllByText(/hire top talent/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/post your project/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/review proposals/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/hire & collaborate/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/hire & collaborate/i).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("displays step descriptions for clients", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getByText(/describe your project requirements/i)
+      screen.getByText(/describe your project requirements/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/receive proposals from verified freelancers/i)
+      screen.getByText(/receive proposals from verified freelancers/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/select your preferred freelancer/i)
+      screen.getByText(/select your preferred freelancer/i),
     ).toBeInTheDocument();
   });
 
@@ -123,24 +129,24 @@ describe("HowItWorks", () => {
     const faqQuestion = screen.getByText(/how do i get started as a client/i);
     await userEvent.click(faqQuestion);
     expect(
-      screen.getByText(/simply create a free account/i)
+      screen.getByText(/simply create a free account/i),
     ).toBeInTheDocument();
   });
 
   it("renders all FAQ questions", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getByText(/is there a fee to post projects/i)
+      screen.getByText(/is there a fee to post projects/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/how are freelancers verified/i)
+      screen.getByText(/how are freelancers verified/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/how do payments work/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/what if i'm not satisfied with the work/i)
+      screen.getByText(/what if i'm not satisfied with the work/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/can freelancers work remotely/i)
+      screen.getByText(/can freelancers work remotely/i),
     ).toBeInTheDocument();
   });
 
@@ -148,33 +154,33 @@ describe("HowItWorks", () => {
     renderWithRouter(<HowItWorks />);
     expect(screen.getByText(/ready to get started/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /hire talent/i })
+      screen.getByRole("button", { name: /hire talent/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /become a freelancer/i })
+      screen.getByRole("button", { name: /become a freelancer/i }),
     ).toBeInTheDocument();
   });
 
   it("renders navigation bar with links", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getAllByRole("link", { name: /home/i }).length
+      screen.getAllByRole("link", { name: /home/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("link", { name: /about/i }).length
+      screen.getAllByRole("link", { name: /about/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("link", { name: /pricing/i }).length
+      screen.getAllByRole("link", { name: /pricing/i }).length,
     ).toBeGreaterThan(0);
   });
 
   it("renders login and get started buttons", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getAllByRole("button", { name: /log in/i }).length
+      screen.getAllByRole("button", { name: /log in/i }).length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByRole("button", { name: /get started/i }).length
+      screen.getAllByRole("button", { name: /get started/i }).length,
     ).toBeGreaterThan(0);
   });
 
@@ -182,8 +188,8 @@ describe("HowItWorks", () => {
     renderWithRouter(<HowItWorks />);
     expect(
       screen.getByText(
-        /the premier marketplace for creative professionals in telangana and andhra pradesh\./i
-      )
+        /The premier marketplace for creative professionals in India\./i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/for clients/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/for freelancers/i).length).toBeGreaterThan(0);
@@ -193,13 +199,15 @@ describe("HowItWorks", () => {
   it("displays contact support link in FAQ", () => {
     renderWithRouter(<HowItWorks />);
     expect(
-      screen.getAllByRole("link", { name: /contact support/i }).length
+      screen.getAllByRole("link", { name: /contact support/i }).length,
     ).toBeGreaterThan(0);
   });
 
   it("shows feature lists for each step", () => {
     renderWithRouter(<HowItWorks />);
-    expect(screen.getByText(/detailed project description/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/detailed project description/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/budget range setting/i)).toBeInTheDocument();
     expect(screen.getByText(/view freelancer portfolios/i)).toBeInTheDocument();
     expect(screen.getByText(/secure contract creation/i)).toBeInTheDocument();

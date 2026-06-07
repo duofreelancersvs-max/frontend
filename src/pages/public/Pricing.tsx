@@ -80,6 +80,8 @@ const Pricing = () => {
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [displayPlans, setDisplayPlans] = useState<any[]>([]);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   // Fetch dynamic public plans
   useEffect(() => {
     const fetchPlans = async () => {
@@ -132,6 +134,8 @@ const Pricing = () => {
         }
       } catch (error) {
         console.error("Error fetching public plans:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPlans();
@@ -168,13 +172,13 @@ const Pricing = () => {
   const getButtonState = (planName: string) => {
     if (!isAuthenticated) {
       return {
-        text: planName === "Free" ? "Start Free" : "Go Pro",
+        text: planName.toLowerCase() === "free" ? "Start Free" : "Go Pro",
         disabled: false,
       };
     }
     if (user?.role !== "freelancer") {
       return {
-        text: planName === "Free" ? "Start Free" : "Go Pro",
+        text: planName.toLowerCase() === "free" ? "Start Free" : "Go Pro",
         disabled: true,
       };
     }
@@ -217,22 +221,51 @@ const Pricing = () => {
     }
   };
 
+  const fallbackPlans = [
+    {
+      name: "Free",
+      description: "Ideal for beginners",
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      badge: null,
+      borderColor: "border-slate-200 dark:border-white/10",
+      highlighted: false,
+      buttonVariant: "outline" as const,
+      buttonClass: "border-navy/20 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10",
+      buttonText: "Start Free",
+      features: ["3 Portfolio Projects", "Global Reach"],
+    },
+    {
+      name: "Pro",
+      description: "For active professionals",
+      monthlyPrice: 999,
+      yearlyPrice: 9990,
+      badge: { text: "Best For Growth", color: "bg-teal text-white" },
+      borderColor: "border-teal/50",
+      highlighted: true,
+      buttonVariant: "default" as const,
+      buttonClass: "bg-teal hover:bg-[#128a7f] text-white shadow-xl shadow-teal/20",
+      buttonText: "Go Pro",
+      features: ["Unlimited Portfolio", "Global Reach", "Project Analytics", "Search Boost", "Custom Profile URL"],
+    }
+  ];
+
   // We will use displayPlans if loaded, otherwise fallback to a loading state or nothing
-  const plans = displayPlans.length > 0 ? displayPlans : [
+  const plans = displayPlans.length > 0 ? displayPlans : (isLoading ? [
     {
       name: "Loading...",
       description: "Fetching plans",
       monthlyPrice: 0,
       yearlyPrice: 0,
       badge: null,
-      borderColor: "border-slate-200",
+      borderColor: "border-slate-200 dark:border-white/10",
       highlighted: false,
       buttonVariant: "outline" as const,
       buttonClass: "opacity-50 cursor-not-allowed",
       buttonText: "Loading",
-      features: [],
+      features: ["Please wait..."],
     }
-  ];
+  ] : fallbackPlans);
 
   const comparisonFeatures = [
     {

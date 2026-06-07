@@ -160,7 +160,7 @@ const About = () => {
     {
       icon: Shield,
       title: "Secure Future",
-      desc: "Escrow-protected payments and secure project collaboration.",
+      desc: "Direct communication and secure project collaboration.",
       color: "from-purple-500 to-pink-500",
     },
     {
@@ -264,7 +264,7 @@ const About = () => {
                     </div>
                     <div>
                       <div className="text-lg font-bold text-navy dark:text-white">100% Secure</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Every project protected by escrow and verification.</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Directly connect with top vetted professionals.</div>
                     </div>
                   </div>
                 </div>

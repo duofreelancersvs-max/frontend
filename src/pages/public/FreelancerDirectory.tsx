@@ -6,6 +6,7 @@ import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Filter, Frown, Grid3
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import freelancerService from "@/services/freelancer.service";
+import { publicService } from "@/services/public.service";
 import type {
   FreelancerProfile,
   FreelancerFilters,
@@ -81,6 +82,21 @@ const FreelancerDirectory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  const [categories, setCategories] = useState<string[]>(["All"]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await publicService.getCategoriesWithSkills();
+        const catNames = data.map((c: any) => c.name);
+        setCategories(["All", ...catNames]);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Sync state with URL params when they change
   useEffect(() => {
@@ -215,15 +231,7 @@ const FreelancerDirectory = () => {
 
             {/* Category Chips Scroll */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-              {[
-                "All",
-                "Video Editing",
-                "VFX",
-                "3D Animation",
-                "Graphic Design",
-                "Illustration",
-                "UI/UX",
-              ].map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => {

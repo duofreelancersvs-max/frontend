@@ -28,9 +28,15 @@ export interface AuthResponse {
 }
 
 export const authService = {
-  login: (data: LoginRequest) => api.post<AuthResponse>("/auth/login", data),
+  login: (data: LoginRequest, turnstileToken?: string) => 
+    api.post<AuthResponse>("/auth/login", data, {
+      headers: turnstileToken ? { "x-turnstile-token": turnstileToken } : {},
+    }),
   
-  register: (data: RegisterRequest) => api.post<AuthResponse>("/auth/register", data),
+  register: (data: RegisterRequest, turnstileToken?: string) => 
+    api.post<AuthResponse>("/auth/register", data, {
+      headers: turnstileToken ? { "x-turnstile-token": turnstileToken } : {},
+    }),
   
   getMe: () => api.get<AuthUser>("/auth/me"),
   
@@ -39,11 +45,15 @@ export const authService = {
   changePassword: (oldPassword: string, newPassword: string) =>
     api.post("/auth/change-password", { oldPassword, newPassword }),
   
-  forgotPassword: (email: string) =>
-    api.post("/auth/forgot-password", { email }),
+  forgotPassword: (email: string, turnstileToken?: string) =>
+    api.post("/auth/forgot-password", { email }, {
+      headers: turnstileToken ? { "x-turnstile-token": turnstileToken } : {},
+    }),
   
-  resetPassword: (token: string, password: string) =>
-    api.post("/auth/reset-password", { token, password }),
+  resetPassword: (token: string, password: string, turnstileToken?: string) =>
+    api.post("/auth/reset-password", { token, password }, {
+      headers: turnstileToken ? { "x-turnstile-token": turnstileToken } : {},
+    }),
   
   refreshToken: (refreshToken: string) =>
     api.post("/auth/refresh", { refreshToken }),

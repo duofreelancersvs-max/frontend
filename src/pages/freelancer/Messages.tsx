@@ -32,7 +32,7 @@ TERMS AND CONDITIONS FOR FREELANCER MESSAGING
 2. PROJECT DISCUSSIONS
 - All project-related discussions should be documented within this platform.
 - Any agreements made through chat are subject to the platform's terms.
-- Payment discussions should follow the platform's escrow system.
+- All payments and negotiations happen directly between you and the client.
 
 3. CONFIDENTIALITY
 - Respect client confidentiality and project details.
