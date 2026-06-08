@@ -23,12 +23,6 @@ export interface Application {
     _id?: string;
     id?: string;
     title: string;
-    budget: {
-      type: string;
-      minAmount: number;
-      maxAmount: number;
-      currency?: string;
-    };
     status: string;
     deadline?: string;
     clientId?: {

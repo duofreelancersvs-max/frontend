@@ -273,16 +273,6 @@ const FreelancerApplications = () => {
                             ? `${application.estimatedDuration} days`
                             : "N/A"}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">
-                          Budget: ₹
-                          {(
-                            application.project?.budget?.minAmount || 0
-                          ).toLocaleString()}{" "}
-                          - ₹
-                          {(
-                            application.project?.budget?.maxAmount || 0
-                          ).toLocaleString()}
-                        </p>
                       </div>
 
                       <div className="flex flex-wrap gap-2 w-full sm:w-auto">

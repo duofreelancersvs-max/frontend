@@ -650,7 +650,6 @@ const AdminDashboard = () => {
                 <tr className="border-b border-white/5 text-slate-400 text-sm">
                   <th className="pb-4 font-medium pl-4">Project</th>
                   <th className="pb-4 font-medium">Client</th>
-                  <th className="pb-4 font-medium">Budget</th>
                   <th className="pb-4 font-medium">Status</th>
                   <th className="pb-4 font-medium pr-4">Date</th>
                 </tr>
@@ -668,9 +667,6 @@ const AdminDashboard = () => {
                     completed: "completed",
                   };
                   const mappedStatus = statusMap[project.status] || "open";
-                  const budgetStr = project.budget?.maxAmount
-                    ? `₹${project.budget.maxAmount.toLocaleString("en-IN")}`
-                    : "—";
                   
                   return (
                     <tr key={project._id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
@@ -678,7 +674,6 @@ const AdminDashboard = () => {
                         <div className="font-semibold text-white group-hover:text-indigo-400 transition-colors">{project.title}</div>
                       </td>
                       <td className="py-4 text-slate-300">{project.clientName || "—"}</td>
-                      <td className="py-4 font-medium text-slate-300">{budgetStr}</td>
                       <td className="py-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                           mappedStatus === 'open' ? 'bg-indigo-500/10 text-indigo-400' :

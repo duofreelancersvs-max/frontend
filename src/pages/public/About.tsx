@@ -75,7 +75,6 @@ const AnimatedSection = ({
 };
 
 const About = () => {
-
   const team = [
     {
       name: "Vikram Reddy",
@@ -248,10 +247,19 @@ const About = () => {
 
                     <div className="text-center relative z-10 px-8">
                       <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-200 dark:border-white/20 shadow-sm">
-                        <Play fill="currentColor" className="text-teal dark:text-white ml-1" size={28} />
+                        <Play
+                          fill="currentColor"
+                          className="text-teal dark:text-white ml-1"
+                          size={28}
+                        />
                       </div>
-                      <h4 className="text-2xl font-bold mb-4 text-navy dark:text-white">Watch Our Journey</h4>
-                      <p className="text-slate-600 dark:text-slate-400">Discover how ConnectMeIndia is transforming lives through creativity.</p>
+                      <h4 className="text-2xl font-bold mb-4 text-navy dark:text-white">
+                        Watch Our Journey
+                      </h4>
+                      <p className="text-slate-600 dark:text-slate-400">
+                        Discover how ConnectMeIndia is transforming lives
+                        through creativity.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -263,8 +271,12 @@ const About = () => {
                       <Shield className="text-teal" size={24} />
                     </div>
                     <div>
-                      <div className="text-lg font-bold text-navy dark:text-white">100% Secure</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Directly connect with top vetted professionals.</div>
+                      <div className="text-lg font-bold text-navy dark:text-white">
+                        100% Secure
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        Directly connect with top vetted professionals.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -275,19 +287,28 @@ const About = () => {
             <AnimatedSection delay={200}>
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <span className="text-teal font-bold uppercase tracking-widest text-sm">Our Genesis</span>
+                  <span className="text-teal font-bold uppercase tracking-widest text-sm">
+                    Our Genesis
+                  </span>
                   <h2 className="text-4xl md:text-6xl font-bold leading-tight text-navy dark:text-white">
                     From Local Roots to <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Global Standards</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">
+                      Global Standards
+                    </span>
                   </h2>
                 </div>
 
                 <div className="space-y-6 text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
                   <p>
-                    Founded in the heart of South India, ConnectMeIndia was born from a simple observation: the region is home to world-class talent, yet lacked a dedicated professional bridge.
+                    Founded in the heart of South India, ConnectMeIndia was born
+                    from a simple observation: the region is home to world-class
+                    talent, yet lacked a dedicated professional bridge.
                   </p>
                   <p>
-                    We didn't just build another platform. We built a curator of excellence. By focusing on verified professionals in Video Production, VFX, and 3D Design, we are raising the bar for the entire creative community in Telangana and Andhra Pradesh.
+                    We didn't just build another platform. We built a curator of
+                    excellence. By focusing on verified professionals in Video
+                    Production, VFX, and 3D Design, we are raising the bar for
+                    the entire creative community in India.
                   </p>
                 </div>
 
@@ -315,9 +336,13 @@ const About = () => {
                 <div className="w-16 h-16 bg-teal/10 dark:bg-teal/20 rounded-2xl flex items-center justify-center text-teal mb-8 border border-teal/20">
                   <Target size={32} />
                 </div>
-                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">Our Mission</h3>
+                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">
+                  Our Mission
+                </h3>
                 <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
-                  To democratize access to elite creative workflows by bridging the gap between exceptional local talent and visionary businesses who value craftsmanship over mass production.
+                  To democratize access to elite creative workflows by bridging
+                  the gap between exceptional local talent and visionary
+                  businesses who value craftsmanship over mass production.
                 </p>
               </div>
             </AnimatedSection>
@@ -327,9 +352,13 @@ const About = () => {
                 <div className="w-16 h-16 bg-royal-blue/10 dark:bg-royal-blue/20 rounded-2xl flex items-center justify-center text-royal-blue mb-8 border border-royal-blue/20">
                   <Eye size={32} />
                 </div>
-                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">Our Vision</h3>
+                <h3 className="text-3xl font-bold mb-6 text-navy dark:text-white">
+                  Our Vision
+                </h3>
                 <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
-                  To establish ConnectMeIndia as the definitive gold standard for creative hiring, fostering a future where professional growth is determined by skill alone, irrespective of location.
+                  To establish ConnectMeIndia as the definitive gold standard
+                  for creative hiring, fostering a future where professional
+                  growth is determined by skill alone, irrespective of location.
                 </p>
               </div>
             </AnimatedSection>
@@ -344,14 +373,20 @@ const About = () => {
             {features.map((feature, idx) => (
               <AnimatedSection key={idx} delay={idx * 100}>
                 <div className="bg-white dark:bg-transparent dark:glass-card p-10 rounded-3xl hover-glow h-full group shadow-md dark:shadow-none border border-slate-100 dark:border-white/10">
-                  <div className={cn(
-                    "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-8 shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-6",
-                    feature.color
-                  )}>
+                  <div
+                    className={cn(
+                      "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-8 shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-6",
+                      feature.color,
+                    )}
+                  >
                     <feature.icon size={26} />
                   </div>
-                  <h3 className="text-xl font-bold mb-4 text-navy dark:text-white">{feature.title}</h3>
-                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">{feature.desc}</p>
+                  <h3 className="text-xl font-bold mb-4 text-navy dark:text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
+                    {feature.desc}
+                  </p>
                 </div>
               </AnimatedSection>
             ))}
@@ -363,8 +398,12 @@ const About = () => {
       <section className="py-32">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-20 space-y-4">
-            <span className="text-royal-blue dark:text-sky-blue font-bold tracking-widest uppercase text-sm">The Architects</span>
-            <h2 className="text-4xl md:text-6xl font-bold text-navy dark:text-white">Behind the Vision</h2>
+            <span className="text-royal-blue dark:text-sky-blue font-bold tracking-widest uppercase text-sm">
+              The Architects
+            </span>
+            <h2 className="text-4xl md:text-6xl font-bold text-navy dark:text-white">
+              Behind the Vision
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -376,15 +415,27 @@ const About = () => {
                       {member.avatar}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-1 text-navy dark:text-white">{member.name}</h3>
-                  <p className="text-teal dark:text-teal-light text-sm font-bold mb-4 uppercase tracking-wider">{member.role}</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">{member.bio}</p>
+                  <h3 className="text-xl font-bold mb-1 text-navy dark:text-white">
+                    {member.name}
+                  </h3>
+                  <p className="text-teal dark:text-teal-light text-sm font-bold mb-4 uppercase tracking-wider">
+                    {member.role}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
+                    {member.bio}
+                  </p>
 
                   <div className="flex gap-3">
-                    <a href={member.linkedin} className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-royal-blue hover:text-white transition-all border border-slate-200 dark:border-none">
+                    <a
+                      href={member.linkedin}
+                      className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-royal-blue hover:text-white transition-all border border-slate-200 dark:border-none"
+                    >
                       <Linkedin size={16} />
                     </a>
-                    <a href={member.twitter} className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-sky-blue hover:text-white transition-all border border-slate-200 dark:border-none">
+                    <a
+                      href={member.twitter}
+                      className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-transparent dark:glass-card flex items-center justify-center hover:bg-sky-blue hover:text-white transition-all border border-slate-200 dark:border-none"
+                    >
                       <Twitter size={16} />
                     </a>
                   </div>
@@ -404,24 +455,32 @@ const About = () => {
 
               {milestones.map((item, idx) => (
                 <AnimatedSection key={idx} delay={idx * 100}>
-                  <div className={cn(
-                    "relative flex items-center w-full",
-                    idx % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                  )}>
+                  <div
+                    className={cn(
+                      "relative flex items-center w-full",
+                      idx % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse",
+                    )}
+                  >
                     <div className="hidden md:block w-1/2" />
 
                     <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-teal shadow-[0_0_15px_rgba(20,184,166,0.6)] z-10" />
 
-                    <div className={cn(
-                      "w-full md:w-1/2 pl-16 md:pl-0",
-                      idx % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16"
-                    )}>
+                    <div
+                      className={cn(
+                        "w-full md:w-1/2 pl-16 md:pl-0",
+                        idx % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16",
+                      )}
+                    >
                       <div className="bg-white dark:bg-transparent dark:glass-card p-8 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-teal/30 hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-default shadow-sm dark:shadow-none">
                         <span className="text-teal font-bold text-xs uppercase tracking-widest mb-2 block">
                           {item.month} {item.year}
                         </span>
-                        <h4 className="text-xl font-bold mb-2 text-navy dark:text-white">{item.title}</h4>
-                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                        <h4 className="text-xl font-bold mb-2 text-navy dark:text-white">
+                          {item.title}
+                        </h4>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                          {item.desc}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -440,25 +499,35 @@ const About = () => {
             <AnimatedSection>
               <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-navy dark:text-white">
                 Be Part of the <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">Evolution</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">
+                  Evolution
+                </span>
               </h2>
             </AnimatedSection>
 
             <AnimatedSection delay={200}>
               <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed px-2">
-                ConnectMeIndia is rapidly expanding. Secure your place in India's premier creative marketplace today.
+                ConnectMeIndia is rapidly expanding. Secure your place in
+                India's premier creative marketplace today.
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={300}>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Link to="/register?role=client">
-                  <Button size="lg" className="h-16 px-12 rounded-2xl bg-teal dark:bg-white text-white dark:text-navy font-bold text-lg hover:bg-teal-light dark:hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-teal/20 dark:shadow-2xl">
+                  <Button
+                    size="lg"
+                    className="h-16 px-12 rounded-2xl bg-teal dark:bg-white text-white dark:text-navy font-bold text-lg hover:bg-teal-light dark:hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-teal/20 dark:shadow-2xl"
+                  >
                     Hire Talent
                   </Button>
                 </Link>
                 <Link to="/register?role=freelancer">
-                  <Button size="lg" variant="outline" className="h-16 px-12 rounded-2xl border-slate-300 dark:border-white/20 text-slate-700 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-16 px-12 rounded-2xl border-slate-300 dark:border-white/20 text-slate-700 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-white/10 transition-all hover:scale-105 active:scale-95"
+                  >
                     Find Work
                   </Button>
                 </Link>

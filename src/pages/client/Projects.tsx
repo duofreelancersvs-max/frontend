@@ -23,12 +23,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
 import { useSocket } from "@/hooks/useSocket";
 import type { Project, ProjectStats } from "@/services";
 import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
+import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { toast } from "react-toastify";
 
 // Helper to format deadline as a clean date string
 const formatDeadline = (deadline: string) => {
@@ -58,6 +60,11 @@ const ClientProjects = () => {
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [projectToReview, setProjectToReview] = useState<Project | null>(null);
+  
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [projectToComplete, setProjectToComplete] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Build tabs dynamically from stats
@@ -113,20 +120,26 @@ const ClientProjects = () => {
     };
   }, [socket]);
 
-  const handleDelete = async (projectId: string) => {
-    if (!window.confirm("Are you sure you want to delete this project?"))
-      return;
+  const handleDeleteClick = (projectId: string) => {
+    setProjectToDelete(projectId);
+    setDeleteModalOpen(true);
+    setOpenMenuId(null);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
     try {
-      setDeletingId(projectId);
-      await projectService.delete(projectId);
-      setProjects(projects.filter((p) => p._id !== projectId));
-      setOpenMenuId(null);
+      setDeletingId(projectToDelete);
+      await projectService.delete(projectToDelete);
+      setProjects(projects.filter((p) => p._id !== projectToDelete));
+      toast.success("Project deleted successfully");
     } catch (error) {
       console.error("Error deleting project:", error);
-      alert("Failed to delete project. Please try again.");
+      toast.error("Failed to delete project. Please try again.");
     } finally {
       setDeletingId(null);
+      setDeleteModalOpen(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -135,25 +148,24 @@ const ClientProjects = () => {
     navigate(`/client/project/${projectId}/edit`);
   };
 
-  const handleComplete = async (projectId: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to mark this project as completed?",
-      )
-    ) {
-      return;
-    }
+  const handleCompleteClick = (projectId: string) => {
+    setProjectToComplete(projectId);
+    setCompleteModalOpen(true);
+    setOpenMenuId(null);
+  };
 
+  const handleConfirmComplete = async () => {
+    if (!projectToComplete) return;
     try {
-      setCompletingId(projectId);
-      await projectService.complete(projectId);
+      setCompletingId(projectToComplete);
+      await projectService.complete(projectToComplete);
 
-      // Update local state instantly
-      setProjects((prev) =>
-        prev.map((p) =>
-          p._id === projectId ? { ...p, status: "completed" } : p,
+      setProjects(
+        projects.map((p) =>
+          p._id === projectToComplete ? { ...p, status: "completed" } : p,
         ),
       );
+      toast.success("Project marked as completed");
 
       if (stats) {
         setStats({
@@ -164,9 +176,11 @@ const ClientProjects = () => {
       }
     } catch (error) {
       console.error("Error completing project:", error);
-      alert("Failed to mark project as completed. Please try again.");
+      toast.error("Failed to complete project. Please try again.");
     } finally {
       setCompletingId(null);
+      setCompleteModalOpen(false);
+      setProjectToComplete(null);
     }
   };
 
@@ -195,10 +209,6 @@ const ClientProjects = () => {
 
   // Sort projects
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === "budget-high")
-      return (b.budget?.maxAmount || 0) - (a.budget?.maxAmount || 0);
-    if (sortBy === "budget-low")
-      return (a.budget?.minAmount || 0) - (b.budget?.minAmount || 0);
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
@@ -208,8 +218,6 @@ const ClientProjects = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-
-  // Format project for display
 
   if (loading) {
     return (
@@ -255,6 +263,22 @@ const ClientProjects = () => {
 
   return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        isLoading={!!deletingId}
+      />
+      <ConfirmationModal
+        isOpen={completeModalOpen}
+        onClose={() => setCompleteModalOpen(false)}
+        onConfirm={handleConfirmComplete}
+        title="Complete Project"
+        description="Are you sure you want to mark this project as completed?"
+        isLoading={!!completingId}
+      />
       {/* MAIN CONTENT */}
       <div>
       <DashboardHeader
@@ -322,9 +346,7 @@ const ClientProjects = () => {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="h-10 px-3 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-white/5 focus:border-teal focus:ring-1 focus:ring-teal"
               >
-                 <option value="recent" className="dark:bg-[#121A2A]">Recent</option>
-                <option value="budget-high" className="dark:bg-[#121A2A]">Budget (High-Low)</option>
-                <option value="budget-low" className="dark:bg-[#121A2A]">Budget (Low-High)</option>
+                <option value="recent" className="dark:bg-[#121A2A]">Recent</option>
               </select>
             </div>
 
@@ -403,7 +425,11 @@ const ClientProjects = () => {
                                   <Edit2 size={14} /> Edit
                                 </button>
                                  <button
-                                  onClick={() => handleDelete(project._id)}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteClick(project._id);
+                                  }}
                                   disabled={deletingId === project._id}
                                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
                                 >
@@ -500,18 +526,8 @@ const ClientProjects = () => {
                       {/* Card Footer */}
                       <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
                         <div className="grid grid-cols-3 gap-3 mb-4">
-                          <div className="flex flex-col items-center text-center">
-                            <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
-                              Budget
-                            </span>
-                            <span className="text-sm font-semibold text-navy dark:text-white">
-                              ₹
-                              {(
-                                project.budget?.maxAmount || 0
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                           <div className="flex flex-col items-center text-center border-x border-slate-200/60 dark:border-white/5">
+
+                           <div className="flex flex-col items-center text-center border-slate-200/60 dark:border-white/5">
                             <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Applicants
                             </span>
@@ -555,7 +571,7 @@ const ClientProjects = () => {
                           ) : project.status === "in-progress" ? (
                             <Button
                               className="flex-1 h-9 text-xs bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm shadow-royal-blue/20"
-                              onClick={() => handleComplete(project._id)}
+                              onClick={() => handleCompleteClick(project._id)}
                               disabled={completingId === project._id}
                             >
                               {completingId === project._id ? (
@@ -606,9 +622,7 @@ const ClientProjects = () => {
                           <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Status
                           </th>
-                          <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
-                            Budget
-                          </th>
+
                           <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                             Applications
                           </th>
@@ -661,11 +675,7 @@ const ClientProjects = () => {
                                 {getStatusLabel(project.status)}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
-                              <p className="text-sm font-medium text-navy dark:text-white">
-                                {formatBudget(project.budget?.minAmount, project.budget?.maxAmount)}
-                              </p>
-                            </td>
+
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400">
                                 <Users size={14} className="text-slate-400 dark:text-slate-500" />
@@ -703,7 +713,11 @@ const ClientProjects = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                  onClick={() => handleDelete(project._id)}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteClick(project._id);
+                                  }}
                                   disabled={deletingId === project._id}
                                 >
                                   <Trash2 size={16} />
@@ -713,7 +727,7 @@ const ClientProjects = () => {
                                     variant="ghost"
                                     size="sm"
                                     className="h-8 px-2 text-royal-blue hover:text-royal-blue/90 hover:bg-royal-blue/10"
-                                    onClick={() => handleComplete(project._id)}
+                                    onClick={() => handleCompleteClick(project._id)}
                                     disabled={completingId === project._id}
                                     title="Mark as Complete"
                                   >

@@ -292,7 +292,7 @@ const Home = () => {
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
-              "ConnectMeIndia: Where Talent Earns and Dreams Unite."
+              "Your Work. Your Money. Always..."
             </p>
 
             {/* Hero CTAs - Mobile-first unified layout */}
@@ -314,13 +314,18 @@ const Home = () => {
                       Go to Dashboard
                     </Button>
                   </Link>
-                  <Link to={user?.role === "client" ? "/freelancers" : "/projects"} className="block">
+                  <Link
+                    to={user?.role === "client" ? "/freelancers" : "/projects"}
+                    className="block"
+                  >
                     <Button
                       size="lg"
                       variant="outline"
                       className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
-                      {user?.role === "client" ? "Find Freelancers" : "Browse Projects"}
+                      {user?.role === "client"
+                        ? "Find Freelancers"
+                        : "Browse Projects"}
                     </Button>
                   </Link>
                 </>
@@ -341,7 +346,7 @@ const Home = () => {
                       variant="outline"
                       className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
-                      I want to find Work
+                      Earn as a Freelancer
                     </Button>
                   </Link>
 
@@ -678,7 +683,11 @@ const Home = () => {
                         : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
                     )}
                   >
-                    {plan.name === "Pro" ? <Zap size={24} /> : <User size={24} />}
+                    {plan.name === "Pro" ? (
+                      <Zap size={24} />
+                    ) : (
+                      <User size={24} />
+                    )}
                   </div>
                   <h3 className="text-lg font-bold text-navy dark:text-white mb-0.5">
                     {plan.name}

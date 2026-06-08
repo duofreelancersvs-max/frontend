@@ -10,10 +10,9 @@ import {
   CheckCircle2,
   Calendar,
   AlertCircle,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import { projectService } from "@/services";
@@ -321,8 +320,7 @@ const FindWork = () => {
             </span>
             <select className="text-sm font-semibold bg-transparent border-none outline-none text-navy dark:text-white cursor-pointer">
               <option>Newest first</option>
-              <option>Highest budget</option>
-              <option>Lowest budget</option>
+
             </select>
           </div>
         </div>
@@ -451,14 +449,7 @@ const ProjectCard = ({
           </h2>
 
           <div className="flex flex-wrap items-center gap-y-3 gap-x-6 mb-5 text-sm sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-teal/5 flex items-center justify-center text-teal">
-                <Wallet size={14} />
-              </div>
-              <span>
-                {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
-              </span>
-            </div>
+
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-royal-blue/5 flex items-center justify-center text-royal-blue">
                 <Briefcase size={14} />

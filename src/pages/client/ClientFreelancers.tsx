@@ -367,7 +367,7 @@ const ClientFreelancers = () => {
           ) : (
             <>
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4 lg:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
                   {freelancers.map((freelancer) => (
                     <FreelancerCard
                       key={freelancer._id || freelancer.id}

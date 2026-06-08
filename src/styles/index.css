@@ -154,3 +154,53 @@
   }
 }
 
+/* Dark mode: native select & option elements */
+.dark select {
+  background-color: #0D1B2E;
+  color: #fff;
+  border-color: rgba(255,255,255,0.1);
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: #0D1B2E;
+  color: #fff;
+}
+
+/* Dark mode: date input - force light color-scheme so picker works, tint background */
+.dark input[type="date"] {
+  color-scheme: light;
+  color: #fff;
+  background-color: #0D1B2E;
+  -webkit-text-fill-color: #fff;
+}
+
+/* Invert the calendar icon in dark mode so it shows on dark backgrounds */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.5);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+/* Remove number input spin buttons for cleaner look */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* react-day-picker resets — prevent default blue highlight bleeding into dark mode */
+.rdp {
+  --rdp-accent-color: theme('colors.teal.500', #14b8a6);
+  --rdp-background-color: transparent;
+  margin: 0;
+}
+.rdp-button:focus-visible:not([disabled]) {
+  outline: none;
+}
+
+
+

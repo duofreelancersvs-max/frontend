@@ -169,20 +169,43 @@ const Login = () => {
               </span>
             </h2>
             <p className="text-slate-300 text-lg max-w-md">
-              Join the leading marketplace for creative professionals in
-              Telangana and Andhra Pradesh.
+              Join the leading marketplace for creative professionals in India.
             </p>
 
             {/* Generic skill category showcase */}
             <div className="mt-10 relative">
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Design", sub: "UI/UX · Graphic", gradient: "from-teal to-teal-light" },
-                  { label: "Dev", sub: "Web · Mobile", gradient: "from-royal-blue to-blue-500" },
-                  { label: "Video", sub: "Edit · VFX", gradient: "from-gold to-orange-500" },
-                  { label: "Write", sub: "Copy · Content", gradient: "from-purple-600 to-pink-500" },
-                  { label: "Market", sub: "SEO · Ads", gradient: "from-green-500 to-teal" },
-                  { label: "More", sub: "50+ skills", gradient: "from-slate-600 to-slate-400" },
+                  {
+                    label: "Design",
+                    sub: "UI/UX · Graphic",
+                    gradient: "from-teal to-teal-light",
+                  },
+                  {
+                    label: "Dev",
+                    sub: "Web · Mobile",
+                    gradient: "from-royal-blue to-blue-500",
+                  },
+                  {
+                    label: "Video",
+                    sub: "Edit · VFX",
+                    gradient: "from-gold to-orange-500",
+                  },
+                  {
+                    label: "Write",
+                    sub: "Copy · Content",
+                    gradient: "from-purple-600 to-pink-500",
+                  },
+                  {
+                    label: "Market",
+                    sub: "SEO · Ads",
+                    gradient: "from-green-500 to-teal",
+                  },
+                  {
+                    label: "More",
+                    sub: "50+ skills",
+                    gradient: "from-slate-600 to-slate-400",
+                  },
                 ].map((item, idx) => (
                   <div
                     key={idx}
@@ -191,8 +214,12 @@ const Login = () => {
                       item.gradient,
                     )}
                   >
-                    <span className="text-base font-extrabold tracking-tight">{item.label}</span>
-                    <span className="text-[10px] font-medium opacity-80 mt-0.5 text-center leading-tight">{item.sub}</span>
+                    <span className="text-base font-extrabold tracking-tight">
+                      {item.label}
+                    </span>
+                    <span className="text-[10px] font-medium opacity-80 mt-0.5 text-center leading-tight">
+                      {item.sub}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -206,7 +233,8 @@ const Login = () => {
               "The right talent, at the right time — right here in India."
             </p>
             <p className="text-white/70 text-sm italic mb-4">
-              ConnectMeIndia transformed how I build creative teams. No middlemen, no delays — just exceptional talent.
+              ConnectMeIndia transformed how I build creative teams. No
+              middlemen, no delays — just exceptional talent.
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-sm">
@@ -214,7 +242,9 @@ const Login = () => {
               </div>
               <div>
                 <div className="text-white font-semibold">Vignan</div>
-                <div className="text-white/60 text-sm">Founder, ConnectMeIndia</div>
+                <div className="text-white/60 text-sm">
+                  Founder, ConnectMeIndia
+                </div>
               </div>
             </div>
           </div>

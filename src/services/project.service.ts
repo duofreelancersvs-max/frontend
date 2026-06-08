@@ -8,12 +8,6 @@ export interface Project {
   contactInfo?: string;
   category: string;
   requiredSkills: string[];
-  budget: {
-    type: string;
-    minAmount: number;
-    maxAmount: number;
-    currency: string;
-  };
   experienceLevel: "Entry" | "Intermediate" | "Expert";
   deadline: string;
   status: "draft" | "open" | "in-progress" | "completed" | "cancelled";
@@ -56,12 +50,6 @@ export interface CreateProjectRequest {
   contactInfo?: string;
   category: string;
   requiredSkills: string[];
-  budget: {
-    type: string;
-    minAmount: number;
-    maxAmount: number;
-    currency?: string;
-  };
   deadline: string;
   location?: {
     type: string;
@@ -69,13 +57,12 @@ export interface CreateProjectRequest {
     country?: string;
     state?: string;
   };
+  idempotencyKey?: string;
 }
 
 export interface ProjectFilters {
   category?: string;
   status?: string;
-  minBudget?: number;
-  maxBudget?: number;
   search?: string;
   skills?: string[];
   page?: number;

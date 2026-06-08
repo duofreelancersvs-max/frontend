@@ -9,7 +9,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { applicationService } from "@/services";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { PlanLimitWarning } from "@/components/feature-gate";
@@ -25,12 +25,6 @@ interface ProjectData {
     rating: number;
     reviews: number;
     verified: boolean;
-  };
-  budget: {
-    type: string;
-    minAmount: number;
-    maxAmount: number;
-    currency?: string;
   };
   deadline?: string;
   questions?: string[];
@@ -232,7 +226,7 @@ const ProjectApplicationModal = ({
                 <h3 className="text-sm font-semibold text-navy dark:text-white mb-3">
                   Project Summary
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">Client</p>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -245,14 +239,6 @@ const ProjectApplicationModal = ({
                           {project.client.rating || 0}
                         </span>
                       </div>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Budget</p>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-navy dark:text-white text-sm">
-                        {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
-                      </span>
                     </div>
                   </div>
                   {project.deadline && (

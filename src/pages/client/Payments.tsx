@@ -32,7 +32,7 @@ const ClientPayments = () => {
             id: p._id || p.id,
             projectTitle: p.title,
             freelancer: p.freelancer?.fullName || "Assigned Freelancer",
-            amount: p.budget.maxAmount || 0,
+            amount: 0,
             status: p.status === "completed" ? "completed" : p.status === "in-progress" ? "pending" : p.status === "cancelled" ? "failed" : "pending",
             date: new Date(p.createdAt).toLocaleDateString("en-US", {
               month: "short",

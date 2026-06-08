@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import type { Application } from "@/services";
 import { useProjects } from "@/hooks/queries/useProjects";
@@ -206,9 +206,6 @@ const FreelancerDashboard = () => {
       year: "numeric",
     }),
     status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
-    budget: app.project
-      ? formatBudget(app.project.budget?.minAmount, app.project.budget?.maxAmount)
-      : "N/A",
     fullData: app,
   }));
 
@@ -216,7 +213,6 @@ const FreelancerDashboard = () => {
     id: project._id || project.id || `project-${index}`,
     title: project.title,
     client: { name: project.client?.fullName || "Unknown Client", rating: 4.5 },
-    budget: formatBudget(project.budget.minAmount, project.budget.maxAmount),
     skillsMatch: 85,
     postedTime: new Date(project.createdAt).toLocaleDateString("en-US", {
       month: "short",
@@ -470,14 +466,9 @@ const FreelancerDashboard = () => {
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 dark:border-white/5">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-navy dark:text-white">
-                        {project.budget}
-                      </span>
-                      <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                        <Clock size={12} />
-                        {project.postedTime}
-                      </div>
+                    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mb-4">
+                      <Clock size={12} />
+                      {project.postedTime}
                     </div>
                     {(() => {
                       const status = appStatusByProjectId.get(project.id);
@@ -530,9 +521,6 @@ const FreelancerDashboard = () => {
                       Client
                     </th>
                     <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
-                      Budget
-                    </th>
-                    <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
                       Applied
                     </th>
                     <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">
@@ -556,9 +544,6 @@ const FreelancerDashboard = () => {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                         {app.client}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-navy dark:text-white">
-                        {app.budget}
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                         {app.appliedDate}
@@ -609,7 +594,6 @@ const FreelancerDashboard = () => {
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50 dark:border-white/5">
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-500 mb-0.5">Applied: {app.appliedDate}</p>
-                      <p className="text-sm font-semibold text-navy dark:text-white">{app.budget}</p>
                     </div>
                     <Button
                       size="sm"
@@ -859,17 +843,6 @@ const FreelancerDashboard = () => {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5 sm:col-span-2">
-                  <p className="text-xxs font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Project Budget Range
-                  </p>
-                  <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
-                    <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
-                      <Zap size={16} />
-                    </div>
-                    ₹{selectedApplication.project?.budget?.minAmount?.toLocaleString() || 0} - ₹{selectedApplication.project?.budget?.maxAmount?.toLocaleString() || 0}
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -915,7 +888,6 @@ const FreelancerDashboard = () => {
               reviews: 0,
               verified: false,
             },
-            budget: selectedProject.budget,
           }}
         />
       )}

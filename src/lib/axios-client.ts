@@ -9,17 +9,24 @@ import NProgress from "nprogress";
 NProgress.configure({ showSpinner: true, speed: 400 });
 
 let pendingRequests = 0;
+let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const startLoading = () => {
-  if (pendingRequests === 0) {
-    NProgress.start();
-  }
   pendingRequests++;
+  if (pendingRequests === 1) {
+    loadingTimeout = setTimeout(() => {
+      NProgress.start();
+    }, 250);
+  }
 };
 
 const stopLoading = () => {
   pendingRequests = Math.max(0, pendingRequests - 1);
   if (pendingRequests === 0) {
+    if (loadingTimeout) {
+      clearTimeout(loadingTimeout);
+      loadingTimeout = null;
+    }
     NProgress.done();
   }
 };

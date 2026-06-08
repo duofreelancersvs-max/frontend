@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +20,7 @@ interface ConfirmationModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   type?: "danger" | "info" | "warning";
+  isLoading?: boolean;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -31,12 +32,13 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   type = "danger",
+  isLoading = false,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
             {type === "info" ? (
               <Info className="h-6 w-6 text-royal-blue" />
             ) : (
@@ -48,8 +50,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               />
             )}
           </div>
-          <DialogTitle className="text-center text-navy">{title}</DialogTitle>
-          <DialogDescription className="text-center text-slate-500 pt-2">
+          <DialogTitle className="text-center text-navy dark:text-white">{title}</DialogTitle>
+          <DialogDescription className="text-center text-slate-500 dark:text-slate-400 pt-2">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -58,6 +60,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             variant="outline"
             onClick={onClose}
             className="w-full sm:w-auto"
+            disabled={isLoading}
           >
             {cancelLabel}
           </Button>
@@ -65,8 +68,10 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             variant={type === "danger" ? "destructive" : "default"}
             onClick={onConfirm}
             className="w-full sm:w-auto"
+            disabled={isLoading}
           >
-            {confirmLabel}
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading ? "Processing..." : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

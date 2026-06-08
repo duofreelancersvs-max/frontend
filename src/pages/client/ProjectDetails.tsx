@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
-  CreditCard,
+
   Edit2,
   Share2,
   XCircle,
@@ -400,18 +400,6 @@ const ProjectDetails = () => {
                 Project Details
               </h2>
               <div className="space-y-6">
-                <div className="flex items-center justify-between w-full min-w-0">
-                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-                    <div className="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg">
-                      <CreditCard size={18} />
-                    </div>
-                    <span className="text-sm font-medium">Budget</span>
-                  </div>
-                  <span className="font-bold text-navy dark:text-white text-right">
-                    ₹{(project.budget?.minAmount || 0).toLocaleString()} - ₹
-                    {(project.budget?.maxAmount || 0).toLocaleString()}
-                  </span>
-                </div>
 
                 <div className="flex items-center justify-between w-full min-w-0">
                   <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">

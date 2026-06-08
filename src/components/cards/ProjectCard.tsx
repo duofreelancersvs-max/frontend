@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal, Clock, Users, IndianRupee } from "lucide-react";
+import { MoreHorizontal, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +7,7 @@ interface ProjectCardProps {
   title: string;
   description: string;
   status: "Open" | "In Progress" | "Completed";
-  budget: string;
+
   applicationCount: number;
   deadline: string;
   skills: string[];
@@ -25,7 +25,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   title,
   description,
   status,
-  budget,
+
   applicationCount,
   deadline,
   skills,
@@ -85,16 +85,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <div className="flex-grow"></div>
 
       {/* Footer Info */}
-      <div className="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 mb-4">
+      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 mb-4">
         <div className="flex flex-col">
-          <span className="text-xs text-text-secondary flex items-center gap-1">
-            <IndianRupee size={10} /> Budget
-          </span>
-          <span className="text-sm font-semibold text-text-primary mt-0.5">
-            {budget}
-          </span>
-        </div>
-        <div className="flex flex-col border-l border-slate-100 pl-3">
           <span className="text-xs text-text-secondary flex items-center gap-1">
             <Users size={10} /> Apps
           </span>

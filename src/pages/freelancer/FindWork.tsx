@@ -12,7 +12,6 @@ import {
   Briefcase,
   SlidersHorizontal,
   AlertCircle,
-  Wallet,
   Star,
   CheckCircle2,
   XCircle,
@@ -21,7 +20,7 @@ import {
   Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
@@ -165,8 +164,6 @@ const postedDateOptions = [
 const sortOptions = [
   { value: "relevance", label: "Relevance" },
   { value: "newest", label: "Newest" },
-  { value: "budget-high", label: "Budget (High-Low)" },
-  { value: "budget-low", label: "Budget (Low-High)" },
 ];
 
 // User's skills for matching
@@ -203,8 +200,6 @@ const FindWork = () => {
 
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [budgetMin, setBudgetMin] = useState("");
-  const [budgetMax, setBudgetMax] = useState("");
 
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [selectedPostedDate, setSelectedPostedDate] = useState("Any Time");
@@ -294,8 +289,6 @@ const FindWork = () => {
   const clearAllFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All Categories");
-    setBudgetMin("");
-    setBudgetMax("");
     setSelectedLocation("All Locations");
     setSelectedPostedDate("Any Time");
     setCurrentPage(1);
@@ -304,8 +297,6 @@ const FindWork = () => {
   const hasActiveFilters =
     searchQuery ||
     selectedCategory !== "All Categories" ||
-    budgetMin ||
-    budgetMax ||
     selectedLocation !== "All Locations" ||
     selectedPostedDate !== "Any Time";
 
@@ -328,9 +319,6 @@ const FindWork = () => {
       }
     }
 
-    if (budgetMin && project.budget.minAmount < Number(budgetMin)) return false;
-    if (budgetMax && project.budget.maxAmount > Number(budgetMax)) return false;
-
     if (
       selectedLocation !== "All Locations" &&
       project.location?.type !== selectedLocation
@@ -343,10 +331,6 @@ const FindWork = () => {
 
   // Sort
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === "budget-high")
-      return (b.budget.maxAmount || 0) - (a.budget.maxAmount || 0);
-    if (sortBy === "budget-low")
-      return (a.budget.minAmount || 0) - (b.budget.minAmount || 0);
     if (sortBy === "newest")
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     return 0; // relevance — default order from API
@@ -485,29 +469,6 @@ const FindWork = () => {
                             </option>
                           ))}
                         </select>
-                      </div>
-
-                      {/* Budget Range */}
-                      <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                          Budget Range (₹)
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="number"
-                            value={budgetMin}
-                            onChange={(e) => setBudgetMin(e.target.value)}
-                            placeholder="Min"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
-                          />
-                          <input
-                            type="number"
-                            value={budgetMax}
-                            onChange={(e) => setBudgetMax(e.target.value)}
-                            placeholder="Max"
-                            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-sm text-navy dark:text-white bg-white dark:bg-[#111827] focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none min-h-11"
-                          />
-                        </div>
                       </div>
 
 
@@ -705,17 +666,6 @@ const FindWork = () => {
 
                         {/* Footer Info Area */}
                         <div className="mt-auto space-y-4">
-                          <div className="flex items-center justify-between py-3 border-t border-slate-50 dark:border-white/5">
-                            <div className="flex items-center gap-1.5">
-                              <Wallet size={14} className="text-teal" />
-                              <span className="font-bold text-navy dark:text-white text-sm">
-                                {formatBudget(project.budget.minAmount, project.budget.maxAmount)}
-                              </span>
-                              <span className="text-xxs text-slate-400 uppercase">
-                                ({project.budget.type})
-                              </span>
-                            </div>
-                          </div>
 
                           <div className="flex items-center justify-between text-xs text-slate-500 pb-2">
                             <div className="flex items-center gap-1.5">
@@ -931,7 +881,6 @@ const FindWork = () => {
               reviews: 0,
               verified: false,
             },
-            budget: selectedProject.budget,
           }}
         />
       )}

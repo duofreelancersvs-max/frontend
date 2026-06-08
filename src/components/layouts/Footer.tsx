@@ -47,8 +47,7 @@ const Footer = () => {
           <div className="space-y-6">
             <Logo isDark size="md" />
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-              The premier marketplace for creative professionals in Telangana
-              and Andhra Pradesh.
+              The premier marketplace for creative professionals in India.
             </p>
             <div className="flex gap-4">
               <a

@@ -53,11 +53,11 @@ const FreelancerEarnings = () => {
   );
 
   const totalEarnings = completedProjectsList.reduce(
-    (acc, p) => acc + (p.budget?.maxAmount || 0),
+    (acc, _p) => acc + 0,
     0,
   );
   const pendingEarnings = pendingProjectsList.reduce(
-    (acc, p) => acc + (p.budget?.maxAmount || 0),
+    (acc, _p) => acc + 0,
     0,
   );
 
@@ -74,7 +74,7 @@ const FreelancerEarnings = () => {
           date.getFullYear() === now.getFullYear()
         );
       })
-      .reduce((acc, p) => acc + (p.budget?.maxAmount || 0), 0),
+      .reduce((acc, _p) => acc + 0, 0),
     pending: pendingEarnings,
     projectsCompleted: completedProjectsList.length,
   };
@@ -104,7 +104,7 @@ const FreelancerEarnings = () => {
           date.getFullYear() === new Date().getFullYear()
         );
       })
-      .reduce((acc, p) => acc + (p.budget?.maxAmount || 0), 0);
+      .reduce((acc, _p) => acc + 0, 0);
     return { month: m, earnings: total };
   });
 
@@ -128,14 +128,14 @@ const FreelancerEarnings = () => {
       }),
       project: p.title,
       client: p.client?.fullName || "Client",
-      amount: p.budget?.maxAmount || 0,
+      amount: 0,
       status: p.status === "completed" ? "completed" : "pending",
     }));
 
   const categoryMap: any = {};
   completedProjectsList.forEach((p) => {
     const cat = p.category || "Other";
-    categoryMap[cat] = (categoryMap[cat] || 0) + (p.budget?.maxAmount || 0);
+    categoryMap[cat] = (categoryMap[cat] || 0) + 0;
   });
 
   const colors = ["#0D9488", "#1E40AF", "#F59E0B", "#10B981"];

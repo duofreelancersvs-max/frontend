@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/Skeleton";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
-import { cn, formatBudget } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProjects } from "@/hooks/queries/useProjects";
 import {
@@ -86,7 +86,6 @@ const ClientDashboard = () => {
             day: "numeric",
           })
         : "No deadline",
-      budget: formatBudget(p.budget?.minAmount, p.budget?.maxAmount),
     }));
 
   const pendingApplications = (applications || []).filter(
@@ -317,28 +316,40 @@ const ClientDashboard = () => {
           </section>
 
           {/* STATS CARDS */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {statsData.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-white dark:bg-white/5 rounded-2xl p-5 lg:p-6 border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-white/5 rounded-xl p-5 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
                   <div
                     className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center text-white",
+                      "w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
                       stat.color,
                     )}
                   >
-                    <stat.icon size={24} />
+                    <stat.icon size={22} />
                   </div>
-                  <TrendingUp size={16} className="text-green-500" />
+                  <div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-1">{stat.label}</p>
+                    <p className="text-2xl font-bold text-navy dark:text-white leading-none">
+                      {stat.value}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-2xl lg:text-3xl font-bold text-navy dark:text-white mb-1">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{stat.change}</p>
+                <div className="text-right flex-shrink-0">
+                  {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
+                    <div className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-md">
+                      <TrendingUp size={14} />
+                      {stat.change}
+                    </div>
+                  ) : (
+                    <span className="inline-block text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
+                      {stat.change}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </section>

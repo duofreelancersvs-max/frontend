@@ -11,10 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   FileText,
   ClipboardList,
-  Wallet,
   Eye,
   Lightbulb,
-  Calendar,
+  CalendarDays,
   MapPin,
   Edit2,
   CheckCircle,
@@ -23,6 +22,8 @@ import {
   X,
   Check,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,9 @@ import {
   type CategoryWithSkills,
 } from "@/services/public.service";
 import { toast } from "react-toastify";
+import { DayPicker } from "react-day-picker";
+import { format, isAfter, startOfDay } from "date-fns";
+import "react-day-picker/dist/style.css";
 
 // Form Options
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -45,12 +49,115 @@ const durations = ["Less than 1 week", "1-4 weeks", "1-3 months", "3+ months"];
 const steps = [
   { id: 1, label: "Project Details", icon: FileText },
   { id: 2, label: "Requirements", icon: ClipboardList },
-  { id: 3, label: "Budget", icon: Wallet },
-  { id: 4, label: "Review", icon: Eye },
+  { id: 3, label: "Review", icon: Eye },
 ];
 
-// OptimizedDateInput removed as it might be causing more perceived lag than helping,
-// and we will use an uncontrolled ref-based approach inline.
+// Custom Date Picker component using react-day-picker
+const CustomDatePicker = ({
+  value,
+  onChange,
+  minDate,
+}: {
+  value: string;
+  onChange: (date: string) => void;
+  minDate?: Date;
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Parse current value
+  const selectedDate = value ? new Date(value + "T00:00:00") : undefined;
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleSelect = (day: Date | undefined) => {
+    if (!day) return;
+    onChange(format(day, "yyyy-MM-dd"));
+    setOpen(false);
+  };
+
+  const today = minDate || startOfDay(new Date());
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={cn(
+          "w-full h-12 px-4 flex items-center gap-3 rounded-lg border text-left transition-all",
+          "border-slate-200 dark:border-white/10 bg-white dark:bg-[#0D1B2E]",
+          "text-navy dark:text-white",
+          open && "border-teal ring-1 ring-teal",
+          !value && "text-slate-400 dark:text-slate-500"
+        )}
+      >
+        <CalendarDays size={18} className="text-slate-400 dark:text-slate-500 shrink-0" />
+        <span className={value ? "text-navy dark:text-white" : "text-slate-400 dark:text-slate-500"}>
+          {value ? format(new Date(value + "T00:00:00"), "dd MMM yyyy") : "Pick a date"}
+        </span>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 top-14 left-0 bg-white dark:bg-[#0D1B2E] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-3 animate-in slide-in-from-top-2 duration-150">
+          <DayPicker
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleSelect}
+            disabled={(date) => !isAfter(date, today) && date.toDateString() !== today.toDateString()}
+            startMonth={today}
+            classNames={{
+              root: "rdp-custom",
+              months: "flex",
+              month: "space-y-3",
+              month_caption: "flex justify-center items-center relative h-9",
+              caption_label: "text-sm font-semibold text-navy dark:text-white",
+              nav: "flex items-center gap-1",
+              button_previous: cn(
+                "h-7 w-7 rounded-lg flex items-center justify-center",
+                "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors",
+                "absolute left-1"
+              ),
+              button_next: cn(
+                "h-7 w-7 rounded-lg flex items-center justify-center",
+                "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors",
+                "absolute right-1"
+              ),
+              month_grid: "w-full border-collapse",
+              weekdays: "flex",
+              weekday: "text-slate-400 dark:text-slate-500 text-xs font-medium w-9 text-center py-1",
+              week: "flex w-full mt-1",
+              day: "w-9 text-center text-sm p-0",
+              day_button: cn(
+                "h-9 w-9 rounded-lg font-medium transition-all text-sm",
+                "text-navy dark:text-white hover:bg-teal/10 dark:hover:bg-teal/20",
+                "focus:outline-none focus:ring-2 focus:ring-teal"
+              ),
+              selected: "!bg-teal !text-white hover:!bg-teal/90 shadow-md shadow-teal/20",
+              today: "text-teal font-bold border border-teal/40",
+              outside: "text-slate-300 dark:text-slate-700 opacity-50",
+              disabled: "text-slate-300 dark:text-slate-700 opacity-40 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent",
+            }}
+            components={{
+              Chevron: (props) => {
+                if (props.orientation === "left") return <ChevronLeft size={16} />;
+                return <ChevronRight size={16} />;
+              },
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const PostProject = () => {
   const navigate = useNavigate();
@@ -66,6 +173,11 @@ const PostProject = () => {
   const [loadingProject, setLoadingProject] = useState(isEditing);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [idempotencyKey] = useState(() => {
+    return typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  });
 
   // Form State
   const [formData, setFormData] = useState({
@@ -81,12 +193,9 @@ const PostProject = () => {
     city: "",
     country: "",
     autoDetectLocation: true,
-    // Step 3
-    budgetType: "fixed",
-    budget: "",
     deadline: "",
     visibility: "public",
-    // Step 4
+    // Step 3 (Review)
     termsAccepted: false,
   });
 
@@ -131,15 +240,12 @@ const PostProject = () => {
             categories: project.category ? [project.category] : [],
             description: project.description || "",
             contactInfo: project.contactInfo || "",
-            skills:
-              (project as any).requiredSkills || (project as any).skills || [],
+            skills: project.requiredSkills || [],
             duration: "",
             location: project.location?.type || "remote",
             city: project.location?.city || "",
             country: project.location?.country || "",
             autoDetectLocation: true,
-            budgetType: project.budget?.type || "fixed",
-            budget: project.budget?.maxAmount?.toString() || "",
             deadline: project.deadline ? project.deadline.split("T")[0] : "",
             visibility: project.visibility || "public",
             termsAccepted: false,
@@ -242,7 +348,29 @@ const PostProject = () => {
   };
 
   const nextStep = () => {
-    const next = Math.min(currentStep + 1, 4);
+    if (currentStep === 1) {
+      if (!formData.title?.trim()) { toast.error("Please enter a project title"); return; }
+      if (formData.categories.length === 0) { toast.error("Please select a project category"); return; }
+      if (!formData.description?.trim()) { toast.error("Please enter a project description"); return; }
+      if (formData.contactInfo) {
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
+        const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
+        if (!isEmail && !isPhone) {
+          toast.error("Contact Information must be a valid email or a 10-digit phone number.");
+          return;
+        }
+      }
+    } else if (currentStep === 2) {
+      if (formData.skills.length === 0) { toast.error("Please select required skills"); return; }
+      if (!formData.duration) { toast.error("Please select a project duration"); return; }
+      if (!formData.deadline) { toast.error("Please select a deadline"); return; }
+      if (formData.location === "onsite" && (!formData.city?.trim() || !formData.country?.trim())) {
+        toast.error("Please provide City and Country for onsite location");
+        return;
+      }
+    }
+
+    const next = Math.min(currentStep + 1, 3);
     setSearchParams({ step: next.toString() });
   };
   
@@ -260,7 +388,6 @@ const PostProject = () => {
       if (!formData.description?.trim()) missingFields.push("Description");
       if (formData.skills.length === 0) missingFields.push("Skills");
       if (!formData.duration) missingFields.push("Duration");
-      if (!formData.budget) missingFields.push("Budget");
       if (!formData.deadline) missingFields.push("Deadline");
       if (
         formData.location === "onsite" &&
@@ -278,13 +405,11 @@ const PostProject = () => {
         if (["Title", "Category", "Description"].includes(firstMissing)) {
           setSearchParams({ step: "1" });
         } else if (
-          ["Skills", "Duration", "Location (City & Country)"].includes(
+          ["Skills", "Duration", "Deadline", "Location (City & Country)"].includes(
             firstMissing,
           )
         ) {
           setSearchParams({ step: "2" });
-        } else if (["Budget", "Deadline"].includes(firstMissing)) {
-          setSearchParams({ step: "3" });
         }
 
         topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
@@ -293,9 +418,9 @@ const PostProject = () => {
 
       if (formData.contactInfo) {
         const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
-        const isPhone = /^\+?[\d\s-]{10,}$/.test(formData.contactInfo);
+        const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
         if (!isEmail && !isPhone) {
-          toast.error("Contact Information must be a valid email or phone number.");
+          toast.error("Contact Information must be a valid email or a 10-digit phone number.");
           setSearchParams({ step: "1" });
           topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
           return;
@@ -304,25 +429,19 @@ const PostProject = () => {
 
       setIsSubmitting(true);
 
-      const budgetAmount = Number(formData.budget) || 0;
       const projectData = {
         title: formData.title,
         description: formData.description,
         contactInfo: formData.contactInfo,
         category: formData.categories[0],
         requiredSkills: formData.skills,
-        budget: {
-          type: formData.budgetType,
-          minAmount: budgetAmount,
-          maxAmount: budgetAmount,
-          currency: "INR",
-        },
         deadline: formData.deadline,
         location: {
           type: formData.location,
           city: formData.city,
           country: formData.country,
         },
+        idempotencyKey,
       };
 
       if (isEditing && projectId) {
@@ -332,14 +451,15 @@ const PostProject = () => {
         await projectService.create(projectData);
         setShowSuccessModal(true);
       }
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
       console.error(
         isEditing ? "Error updating project:" : "Error creating project:",
-        error,
+        err,
       );
       const msg =
-        error?.response?.data?.error?.message ||
-        error?.message ||
+        err?.response?.data?.error?.message ||
+        err?.message ||
         "Something went wrong";
       toast.error(msg);
     } finally {
@@ -393,10 +513,13 @@ const PostProject = () => {
               <div className="flex items-center justify-between w-full min-w-0">
                 {steps.map((step, index) => (
                   <div key={step.id} className="flex items-center flex-1">
-                    <div className="flex flex-col items-center">
+                    <div
+                      className="flex flex-col items-center cursor-pointer"
+                      onClick={() => setSearchParams({ step: step.id.toString() })}
+                    >
                       <div
                         className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all",
+                          "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all hover:scale-105 active:scale-95",
                           currentStep > step.id
                             ? "bg-teal text-white"
                             : currentStep === step.id
@@ -620,11 +743,12 @@ const PostProject = () => {
                       onChange={(e) =>
                         handleInputChange("duration", e.target.value)
                       }
-                      className="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-1 focus:ring-teal text-navy dark:text-white bg-white dark:bg-white/5"
+                      className="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-1 focus:ring-teal text-navy dark:text-white bg-white dark:bg-[#0D1B2E]"
+                      style={{ colorScheme: "dark" }}
                     >
-                      <option value="">Select duration</option>
+                      <option value="" className="bg-white dark:bg-[#0D1B2E] text-navy dark:text-white">Select duration</option>
                       {durations.map((dur) => (
-                        <option key={dur} value={dur}>
+                        <option key={dur} value={dur} className="bg-white dark:bg-[#0D1B2E] text-navy dark:text-white">
                           {dur}
                         </option>
                       ))}
@@ -800,86 +924,27 @@ const PostProject = () => {
                       </p>
                     )}
                   </div>
-                </div>
 
-                {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
-                  <Button
-                    variant="outline"
-                    onClick={prevStep}
-                    className="border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={nextStep}
-                    className="bg-teal hover:bg-teal-light text-white px-8"
-                  >
-                    Next: Budget
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: BUDGET */}
-            {currentStep === 3 && (
-              <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
-                  <Wallet size={20} className="text-royal-blue" />
-                  Budget & Timeline
-                </h2>
-
-                <div className="space-y-6">
-                  {/* Budget */}
-                  <div>
-                    <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
-                      Project Budget (INR){" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg font-medium">
-                        ₹
-                      </span>
-                      <Input
-                        type="number"
-                        placeholder="e.g. 15000"
-                        value={formData.budget}
-                        onChange={(e) =>
-                          handleInputChange("budget", e.target.value)
-                        }
-                        className="h-14 pl-10 text-lg border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-400 mt-2">
-                      Total fixed price for the project
-                    </p>
-                  </div>
-
-                  {/* Deadline */}
+                  {/* Project Deadline */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
                       Project Deadline <span className="text-red-500">*</span>
                     </label>
-                    <div className="relative">
-                      <Calendar
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-                      />
-                      <Input
-                        type="date"
-                        value={formData.deadline}
-                        onChange={(e) =>
-                          handleInputChange("deadline", e.target.value)
-                        }
-                        className="h-12 pl-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
-                        style={{ colorScheme: "light dark" }}
-                      />
-                    </div>
+                    <CustomDatePicker
+                      value={formData.deadline}
+                      onChange={(date) => handleInputChange("deadline", date)}
+                    />
+                    {formData.deadline && (
+                      <p className="text-xs text-teal mt-2 flex items-center gap-1">
+                        <CheckCircle size={12} />
+                        Deadline set to {format(new Date(formData.deadline + "T00:00:00"), "dd MMM yyyy")}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
+                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
                   <Button
                     variant="outline"
                     onClick={prevStep}
@@ -897,13 +962,14 @@ const PostProject = () => {
               </div>
             )}
 
-            {/* STEP 4: REVIEW */}
-            {currentStep === 4 && (
+            {/* STEP 3: REVIEW */}
+            {currentStep === 3 && (
               <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
                 <h2 className="text-xl font-bold text-navy dark:text-white mb-6 flex items-center gap-2">
                   <Eye size={20} className="text-royal-blue" />
                   Review Your Project
                 </h2>
+
 
                 {/* Project Preview */}
                 <div className="space-y-6">
@@ -967,7 +1033,7 @@ const PostProject = () => {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-navy dark:text-white flex items-center gap-2">
                         <ClipboardList size={16} className="text-teal" />
-                        Requirements
+                        Requirements & Timeline
                       </h3>
                       <button
                         onClick={() => setSearchParams({ step: "2" })}
@@ -1015,6 +1081,16 @@ const PostProject = () => {
                             {formData.location}
                           </p>
                         </div>
+                        <div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                            Deadline
+                          </p>
+                          <p className="font-medium text-navy dark:text-white">
+                            {formData.deadline
+                              ? format(new Date(formData.deadline + "T00:00:00"), "dd MMM yyyy")
+                              : "Not specified"}
+                          </p>
+                        </div>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
@@ -1026,51 +1102,6 @@ const PostProject = () => {
                             : formData.city ||
                               formData.country ||
                               "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Budget Section */}
-                  <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent dark:border-white/5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-navy dark:text-white flex items-center gap-2">
-                        <Wallet size={16} className="text-teal" />
-                        Budget & Timeline
-                      </h3>
-                      <button
-                        onClick={() => setSearchParams({ step: "3" })}
-                        className="text-teal hover:underline text-sm flex items-center gap-1"
-                      >
-                        <Edit2 size={14} /> Edit
-                      </button>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
-                          Budget
-                        </p>
-                        <p className="font-medium text-navy dark:text-white">
-                          {formData.budget
-                            ? `₹${parseInt(formData.budget).toLocaleString()}`
-                            : "Not specified"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
-                          Deadline
-                        </p>
-                        <p className="font-medium text-navy dark:text-white">
-                          {formData.deadline
-                            ? new Date(formData.deadline).toLocaleDateString(
-                                "en-IN",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
-                            : "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -1155,7 +1186,7 @@ const PostProject = () => {
                   {[
                     "Write a clear, descriptive title",
                     "Include specific deliverables",
-                    "Set a realistic budget range",
+                    "Set a realistic deadline",
                     "Add reference files or examples",
                     "Mention your timeline clearly",
                     "List required skills accurately",

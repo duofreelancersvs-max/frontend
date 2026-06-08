@@ -31,7 +31,7 @@ interface ProjectRow {
   category?: string;
   clientName?: string;
   clientId: string;
-  budget?: { type?: string; minAmount?: number; maxAmount?: number; currency?: string };
+
   deadline?: string;
   createdAt: string;
   completedAt?: string;
@@ -173,12 +173,7 @@ const ProjectManagement = () => {
     });
   };
 
-  const formatBudget = (budget?: ProjectRow["budget"]) => {
-    if (!budget) return "—";
-    if (budget.maxAmount) return `₹${budget.maxAmount.toLocaleString()}`;
-    if (budget.minAmount) return `₹${budget.minAmount.toLocaleString()}`;
-    return "—";
-  };
+
 
   const tabs: { key: StatusTab; label: string }[] = [
     { key: "all", label: "All Projects" },
@@ -259,7 +254,7 @@ const ProjectManagement = () => {
                     <th>Client</th>
                     <th>Category</th>
                     <th>Status</th>
-                    <th>Budget</th>
+
                     <th>Deadline</th>
                     <th>Created</th>
                     <th style={{ textAlign: "right" }}>Actions</th>
@@ -277,7 +272,7 @@ const ProjectManagement = () => {
                       onDelete={() => handleDelete(project._id)}
                       deleting={deleting === project._id}
                       formatDate={formatDate}
-                      formatBudget={formatBudget}
+
                     />
                   ))}
                 </tbody>
@@ -329,7 +324,7 @@ const ProjectManagement = () => {
             <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem", overflowY: "auto", flex: 1 }}>
               <DetailRow label="Client" value={viewProject.clientName || "Unknown"} />
               <DetailRow label="Category" value={viewProject.category || "—"} />
-              <DetailRow label="Budget" value={formatBudget(viewProject.budget)} />
+
               <DetailRow label="Deadline" value={formatDate(viewProject.deadline)} />
               <DetailRow label="Created" value={formatDate(viewProject.createdAt)} />
               {viewProject.completedAt && <DetailRow label="Completed" value={formatDate(viewProject.completedAt)} />}
@@ -444,7 +439,7 @@ const ProjectTableRow = ({
   onDelete,
   deleting,
   formatDate,
-  formatBudget,
+
 }: {
   project: ProjectRow;
   actionMenuId: string | null;
@@ -454,7 +449,7 @@ const ProjectTableRow = ({
   onDelete: () => void;
   deleting: boolean;
   formatDate: (d?: string) => string;
-  formatBudget: (b?: ProjectRow["budget"]) => string;
+
 }) => {
   const actionsRef = useRef<HTMLDivElement>(null);
 
@@ -487,9 +482,7 @@ const ProjectTableRow = ({
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{project.category || "—"}</span>
       </td>
       <td><StatusBadge status={project.status} /></td>
-      <td>
-        <span style={{ color: "var(--admin-white)", fontWeight: 500, fontSize: "0.875rem" }}>{formatBudget(project.budget)}</span>
-      </td>
+
       <td>
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(project.deadline)}</span>
       </td>

@@ -58,12 +58,6 @@ export interface AdminProject {
   description?: string;
   status: string;
   category?: string;
-  budget?: {
-    type?: string;
-    minAmount?: number;
-    maxAmount?: number;
-    currency?: string;
-  };
   clientId: string;
   clientName?: string;
   hiredFreelancerId?: string;
