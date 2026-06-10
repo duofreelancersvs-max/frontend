@@ -109,7 +109,11 @@ function App() {
       <ThemeInitializer />
       <UnreadListener />
       <UpgradeModalHost />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer 
+        position="top-center" 
+        autoClose={3000} 
+        toastClassName="!rounded-2xl !shadow-xl !mt-4 sm:!mt-0 !mx-4 sm:!mx-0 !w-auto"
+      />
       <Routes>
         {/* Public Pages (full-page Suspense is fine here — no persistent layout) */}
         <Route

@@ -131,132 +131,157 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto min-h-0">
-          {sidebarNavItems.map((item) => {
-            const isActive =
-              location.pathname === item.href ||
-              location.pathname.startsWith(item.href + "/");
-            const itemBadge =
-              item.id === "messages" && unreadCount > 0 ? unreadCount : null;
-
-            return (
-              <Link
-                key={item.label}
-                to={item.href}
-                onClick={() => {
-                  if (window.innerWidth < 1024) onClose();
-                }}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition-all group",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white",
-                )}
-              >
-                <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-white transition-colors")} />
-                <span className="flex-1">{item.label}</span>
-                {itemBadge && (
-                  <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
-                    {itemBadge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Section (Fixed) */}
-        <div className="shrink-0 pt-2 pb-4">
-          {/* Profile Completeness Indicator */}
-          <div className="px-4 py-2 border-t border-border">
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xxs uppercase tracking-wider font-bold text-slate-500">
-                  Profile Complete
-                </span>
-                <span className="text-sm font-black text-teal-light">
-                  {profileCompletion}%
-                </span>
-              </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-primary to-teal-primary rounded-full transition-all duration-1000"
-                  style={{ width: `${profileCompletion}%` }}
-                />
-              </div>
+        {/* User Profile Card (Moved to Top for Mobile) */}
+        <div className="lg:hidden px-4 py-4 border-b border-border shrink-0 bg-white/5">
+          <div className="flex items-center gap-3 p-2 rounded-2xl overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-teal-primary flex items-center justify-center text-white font-heading font-bold text-sm shrink-0 shadow-lg">
+              {avatarInitial}
             </div>
-          </div>
-
-          {/* Usage Indicator */}
-          <div className="px-4 pb-2">
-            <UsageIndicator compact={true} hideCta={true} className="w-full" />
-          </div>
-
-          {/* Subscription Badge */}
-          <div className="px-4 pb-2">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl border border-transparent",
-                subscriptionPlan === "free"
-                  ? "bg-slate-500/10 border-slate-500/20"
-                  : subscriptionPlan === "pro"
-                    ? "bg-primary/10 border-primary/20"
-                    : "bg-gold/10 border-gold/20",
-              )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-heading font-semibold text-white truncate">
+                {freelancerName}
+              </p>
+              <p className="text-xxs font-medium text-slate-400 truncate uppercase tracking-wider">Freelancer</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg active-scale"
+              title="Log Out"
             >
-              <Award
-                size={16}
-                className={cn(
-                  subscriptionPlan === "free"
-                    ? "text-slate-400"
-                    : subscriptionPlan === "pro"
-                      ? "text-primary"
-                      : "text-gold",
-                )}
-              />
-              <span
-                className={cn(
-                  "text-xxs font-bold uppercase tracking-widest",
-                  subscriptionPlan === "free"
-                    ? "text-slate-400"
-                    : subscriptionPlan === "pro"
-                      ? "text-primary"
-                      : "text-gold",
-                )}
-              >
-                {subscriptionPlan} Plan
-              </span>
-              {subscriptionPlan === "free" && (
-                <Link
-                  to="/freelancer/subscription"
-                  className="ml-auto text-xxs font-black text-teal-light hover:underline uppercase tracking-tighter"
-                >
-                  Upgrade
-                </Link>
-              )}
-            </div>
+              <LogOut size={18} />
+            </button>
           </div>
+        </div>
 
-          {/* User Profile Card */}
-          <div className="px-4 pt-2 border-t border-border">
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 overflow-hidden">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-teal-primary flex items-center justify-center text-white font-heading font-bold text-sm shrink-0 shadow-lg">
-                {avatarInitial}
+        {/* Scrollable Content Area */}
+        <div className="flex-1 flex flex-col overflow-y-auto min-h-0">
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-6 space-y-1">
+            {sidebarNavItems.map((item) => {
+              const isActive =
+                location.pathname === item.href ||
+                location.pathname.startsWith(item.href + "/");
+              const itemBadge =
+                item.id === "messages" && unreadCount > 0 ? unreadCount : null;
+
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => {
+                    if (window.innerWidth < 1024) onClose();
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition-all group",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white",
+                  )}
+                >
+                  <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-white transition-colors")} />
+                  <span className="flex-1">{item.label}</span>
+                  {itemBadge && (
+                    <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
+                      {itemBadge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Bottom Section (Fixed to bottom of scroll area) */}
+          <div className="shrink-0 pt-2 pb-4">
+            {/* Profile Completeness Indicator */}
+            <div className="px-4 py-2 border-t border-border">
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xxs uppercase tracking-wider font-bold text-slate-500">
+                    Profile Complete
+                  </span>
+                  <span className="text-sm font-black text-teal-light">
+                    {profileCompletion}%
+                  </span>
+                </div>
+                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-teal-primary rounded-full transition-all duration-1000"
+                    style={{ width: `${profileCompletion}%` }}
+                  />
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-heading font-semibold text-white truncate">
-                  {freelancerName}
-                </p>
-                <p className="text-xxs font-medium text-slate-500 truncate uppercase tracking-wider">Freelancer</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-slate-500 hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg active-scale"
-                title="Log Out"
+            </div>
+
+            {/* Usage Indicator */}
+            <div className="px-4 pb-2">
+              <UsageIndicator compact={true} hideCta={true} className="w-full" />
+            </div>
+
+            {/* Subscription Badge */}
+            <div className="px-4 pb-2">
+              <div
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-xl border border-transparent",
+                  subscriptionPlan === "free"
+                    ? "bg-slate-500/10 border-slate-500/20"
+                    : subscriptionPlan === "pro"
+                      ? "bg-primary/10 border-primary/20"
+                      : "bg-gold/10 border-gold/20",
+                )}
               >
-                <LogOut size={18} />
-              </button>
+                <Award
+                  size={16}
+                  className={cn(
+                    subscriptionPlan === "free"
+                      ? "text-slate-400"
+                      : subscriptionPlan === "pro"
+                        ? "text-primary"
+                        : "text-gold",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-xxs font-bold uppercase tracking-widest",
+                    subscriptionPlan === "free"
+                      ? "text-slate-400"
+                      : subscriptionPlan === "pro"
+                        ? "text-primary"
+                        : "text-gold",
+                  )}
+                >
+                  {subscriptionPlan} Plan
+                </span>
+                {subscriptionPlan === "free" && (
+                  <Link
+                    to="/freelancer/subscription"
+                    className="ml-auto text-xxs font-black text-teal-light hover:underline uppercase tracking-tighter"
+                  >
+                    Upgrade
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* User Profile Card (Desktop Only) */}
+            <div className="hidden lg:block px-4 pt-2 border-t border-border">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 overflow-hidden">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-teal-primary flex items-center justify-center text-white font-heading font-bold text-sm shrink-0 shadow-lg">
+                  {avatarInitial}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-heading font-semibold text-white truncate">
+                    {freelancerName}
+                  </p>
+                  <p className="text-xxs font-medium text-slate-500 truncate uppercase tracking-wider">Freelancer</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="text-slate-500 hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg active-scale"
+                  title="Log Out"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -642,6 +642,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
           applicationStatus={currentApplication?.status}
           onHire={handleHire}
           onReject={handleReject}
+          isVisible={isWidget ? mobileView === "chat" : mobileView === "chat" || window.innerWidth >= 768}
           className={cn(
             "flex-1",
             isWidget

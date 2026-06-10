@@ -316,39 +316,41 @@ const ClientDashboard = () => {
           </section>
 
           {/* STATS CARDS */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
             {statsData.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-white dark:bg-white/5 rounded-xl p-5 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+                className="bg-white dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group"
               >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      "w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
-                      stat.color,
-                    )}
-                  >
-                    <stat.icon size={22} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold text-navy dark:text-white leading-none">
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
+                    stat.color,
+                  )}
+                >
+                  <stat.icon size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 truncate">
+                    {stat.label}
+                  </p>
+                  <div className="flex items-end justify-between gap-2">
+                    <p className="text-xl font-bold text-navy dark:text-white leading-none">
                       {stat.value}
                     </p>
-                  </div>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
-                    <div className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-md">
-                      <TrendingUp size={14} />
-                      {stat.change}
+                    <div className="shrink-0">
+                      {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
+                        <div className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                          <TrendingUp size={10} />
+                          {stat.change}
+                        </div>
+                      ) : (
+                        <span className="inline-block text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                          {stat.change}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <span className="inline-block text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                      {stat.change}
-                    </span>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}

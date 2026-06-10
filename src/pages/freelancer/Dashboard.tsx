@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import {
   User,
   Briefcase,
@@ -60,6 +60,7 @@ const getStatusBadgeStyle = (status: string) => {
 
 const FreelancerDashboard = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const freelancerName = user?.email?.split("@")[0] || "Freelancer";
   const queryClient = useQueryClient();
@@ -107,11 +108,18 @@ const FreelancerDashboard = () => {
     setShowApplicationModal(true);
   };
 
-  const handleApplicationSuccess = () => {
+  const handleApplicationSuccess = (convId?: string) => {
     setShowApplicationModal(false);
     setSelectedProject(null);
     queryClient.invalidateQueries({ queryKey: ["myApplications"] });
     toast.success("Application submitted successfully!");
+    if (convId) {
+      navigate("/freelancer/messages", {
+        state: { conversationId: convId },
+      });
+    } else {
+      navigate("/freelancer/messages");
+    }
   };
   const profileCompletion = profile
     ? Math.round(
@@ -144,12 +152,12 @@ const FreelancerDashboard = () => {
 
   const statsData = [
     {
-      label: "Profile Views",
-      value: String(profile?.totalReviews || 0),
-      icon: Eye,
+      label: "Profile Completion",
+      value: `${profileCompletion}%`,
+      icon: Award,
       color: "bg-royal-blue",
-      change: "+12 this week",
-      trend: "up" as const,
+      change: profileCompletion === 100 ? "All set!" : `${100 - profileCompletion}% remaining`,
+      trend: profileCompletion === 100 ? ("neutral" as const) : ("up" as const),
     },
     {
       label: "Active Applications",
@@ -295,11 +303,20 @@ const FreelancerDashboard = () => {
                   . Complete it to get more project invites!
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto mt-4 lg:mt-0">
                 <Link to="/freelancer/profile" className="w-full sm:w-auto">
                   <Button className="bg-white text-navy hover:bg-slate-100 font-semibold w-full">
                     <User size={18} className="mr-2" />
                     Complete Profile
+                  </Button>
+                </Link>
+                <Link to={`/freelancer/${user?._id}`} className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/20 border-white/40 text-white hover:bg-white/30 hover:border-white/50 transition-all font-semibold backdrop-blur-sm"
+                  >
+                    <Eye size={18} className="mr-2" />
+                    Preview Profile
                   </Button>
                 </Link>
                 <Link to="/freelancer/projects" className="w-full sm:w-auto">

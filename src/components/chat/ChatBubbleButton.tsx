@@ -7,6 +7,7 @@ interface ChatBubbleButtonProps {
   unreadCount: number;
   avatars?: { url?: string; name: string }[];
   className?: string;
+  dragHandlers?: any;
 }
 
 export const ChatBubbleButton = ({
@@ -15,29 +16,33 @@ export const ChatBubbleButton = ({
   unreadCount,
   avatars = [],
   className,
+  dragHandlers,
 }: ChatBubbleButtonProps) => {
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      {...dragHandlers}
       className={cn(
-        "flex items-center gap-4 px-6 h-14 rounded-full shadow-2xl transition-transform active:scale-95",
+        "flex items-center gap-2 md:gap-4 px-4 md:px-6 h-14 rounded-full shadow-2xl cursor-grab active:cursor-grabbing select-none pointer-events-auto",
         "bg-[#1A1E27] hover:bg-[#252A36] border border-white/5 group",
         className
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3 pointer-events-none">
         {isOpen ? (
           <X size={20} className="text-white" />
         ) : (
           <MessageCircle size={22} className="text-white group-hover:text-teal transition-colors" />
         )}
-        <span className="font-medium text-white text-[15px] tracking-wide">
+        <span className="hidden md:inline font-medium text-white text-[15px] tracking-wide">
           {isOpen ? "Close" : "Messages"}
         </span>
       </div>
 
       {!isOpen && avatars.length > 0 && (
-        <div className="flex items-center -space-x-2.5 ml-3">
+        <div className="hidden md:flex items-center -space-x-2.5 ml-3 pointer-events-none">
           {avatars.slice(0, 3).map((avatar, i) => (
             <div
               key={i}
@@ -70,6 +75,6 @@ export const ChatBubbleButton = ({
           {unreadCount > 99 ? "99+" : unreadCount}
         </div>
       )}
-    </button>
+    </div>
   );
 };

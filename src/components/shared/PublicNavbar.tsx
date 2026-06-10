@@ -278,9 +278,17 @@ export const PublicNavbar = ({
                             onClick={() => setProfileDropdownOpen(false)}
                           >
                             <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
-                              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
-                                Logged in as
-                              </p>
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                  Logged in as
+                                </p>
+                                <span className={cn(
+                                  "text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded",
+                                  user?.role === 'client' ? "bg-teal/10 text-teal" : "bg-royal-blue/10 text-royal-blue"
+                                )}>
+                                  {user?.role}
+                                </span>
+                              </div>
                               <p className="font-bold text-navy dark:text-white truncate">
                                 {user?.fullName || user?.email?.split('@')[0]}
                               </p>
@@ -409,8 +417,16 @@ export const PublicNavbar = ({
                     ? user.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
                     : (user?.email?.[0] || "U").toUpperCase()}
                 </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-navy dark:text-white truncate text-lg">{user?.fullName || "User"}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-bold text-navy dark:text-white truncate text-lg">{user?.fullName || "User"}</p>
+                    <span className={cn(
+                      "text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full shrink-0",
+                      user?.role === 'client' ? "bg-teal/10 text-teal dark:bg-teal/20" : "bg-royal-blue/10 text-royal-blue dark:bg-royal-blue/20"
+                    )}>
+                      {user?.role}
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-white/60 truncate">{user?.email}</p>
                 </div>
               </div>

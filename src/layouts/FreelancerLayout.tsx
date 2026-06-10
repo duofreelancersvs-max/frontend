@@ -8,6 +8,7 @@ import { DraggableChatWidget } from "@/components/chat/DraggableChatWidget";
 import { ChatBubbleButton } from "@/components/chat";
 import { useMyConversations } from "@/hooks/queries/useFreelancerDashboardQueries";
 import { useAuthStore } from "@/stores/auth.store";
+import { useDraggable } from "@/hooks/useDraggable";
 
 export type FreelancerLayoutContext = {
   sidebarOpen: boolean;
@@ -23,6 +24,7 @@ const FreelancerLayout = () => {
   const { user } = useAuthStore();
   const currentUserId = user?._id;
   const location = useLocation();
+  const { position, dragHandlers, didDrag, resetPosition } = useDraggable();
 
   const avatars = conversations
     .flatMap((c) => c.participants || [])
@@ -32,6 +34,7 @@ const FreelancerLayout = () => {
 
   useEffect(() => {
     setIsMessagesOpen(false);
+    resetPosition();
   }, [location.pathname]);
 
   return (
@@ -45,25 +48,33 @@ const FreelancerLayout = () => {
         <Outlet context={{ setSidebarOpen, sidebarOpen }} />
 
         {!location.pathname.includes("/messages") && (
-          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
-            <div className="pointer-events-auto">
-              {isMessagesOpen && (
-                <div className="mb-4">
-                  <DraggableChatWidget
-                    isOpen={isMessagesOpen}
-                    onClose={() => setIsMessagesOpen(false)}
-                  >
-                    <FreelancerMessages isWidget={true} onWidgetClose={() => setIsMessagesOpen(false)} />
-                  </DraggableChatWidget>
-                </div>
-              )}
+          <div
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end"
+            style={{
+              transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+            }}
+          >
+            {isMessagesOpen && (
+              <DraggableChatWidget
+                isOpen={isMessagesOpen}
+                onClose={() => setIsMessagesOpen(false)}
+                dragHandlers={dragHandlers}
+              >
+                <FreelancerMessages isWidget={true} onWidgetClose={() => setIsMessagesOpen(false)} />
+              </DraggableChatWidget>
+            )}
+            {!isMessagesOpen && (
               <ChatBubbleButton
                 isOpen={isMessagesOpen}
-                onClick={() => setIsMessagesOpen(!isMessagesOpen)}
+                onClick={() => {
+                  if (!didDrag()) {
+                    setIsMessagesOpen(!isMessagesOpen);
+                  }
+                }}
                 unreadCount={unreadCount}
                 avatars={avatars}
               />
-            </div>
+            )}
           </div>
         )}
       </div>

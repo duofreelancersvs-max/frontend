@@ -56,6 +56,7 @@ interface ChatAreaProps {
   isWidget?: boolean;
   disabledMessageInput?: boolean;
   disabledMessageReason?: string;
+  isVisible?: boolean;
 }
 
 const ChatArea = ({
@@ -81,6 +82,7 @@ const ChatArea = ({
   isWidget,
   disabledMessageInput,
   disabledMessageReason,
+  isVisible = true,
 }: ChatAreaProps) => {
   const { theme } = useThemeStore();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -107,9 +109,29 @@ const ChatArea = ({
   }, [showEmojiPicker]);
   const VerifyIcon = role === "client" ? Verified : BadgeCheck;
 
+  const isInitialMount = useRef(true);
+  const prevParticipantId = useRef(participant?.id);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (isInitialMount.current || prevParticipantId.current !== participant?.id) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+      isInitialMount.current = false;
+      prevParticipantId.current = participant?.id;
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, participant?.id]);
+
+  // Scroll to bottom whenever the chat panel becomes visible (e.g. mobile view switch)
+  useEffect(() => {
+    if (isVisible && messages.length > 0) {
+      // Use a short timeout to allow the DOM to render before scrolling
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
 
   if (!participant) {
     return (

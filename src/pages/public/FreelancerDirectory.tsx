@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Filter, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, Filter, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import freelancerService from "@/services/freelancer.service";
@@ -583,26 +583,7 @@ const FreelancerDirectory = () => {
         </div>
       </section>
 
-      {/* FOOTER CTA */}
-      <section className="py-24 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-transparent dark:bg-gradient-to-t dark:from-teal/10 dark:to-[#050B15]">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <AnimatedSection>
-            <h2 className="text-4xl font-black mb-6 text-navy dark:text-white leading-tight">
-              Are You a Creative Elite?
-            </h2>
-            <p className="text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto font-medium">
-              Join our private network of high-end professionals and get matched
-              with production-level projects.
-            </p>
-            <Link to="/register?role=freelancer">
-              <Button className="h-16 px-12 rounded-2xl bg-teal hover:bg-teal-light text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1">
-                Apply for Roster
-                <ArrowRight size={20} className="ml-2" />
-              </Button>
-            </Link>
-          </AnimatedSection>
-        </div>
-      </section>
+
 
       <PublicFooter />
     </div>

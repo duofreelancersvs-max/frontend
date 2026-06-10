@@ -502,6 +502,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
           onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
           disabledMessageInput={!canMessage}
           disabledMessageReason={!canMessage ? "Upgrade to Pro to send messages." : undefined}
+          isVisible={isWidget ? mobileView === "chat" : mobileView === "chat" || window.innerWidth >= 768}
           className={cn(
             "flex-1",
             isWidget

@@ -635,10 +635,12 @@ const FindWork = () => {
                           </div>
                         </div>
 
-                        {/* Description */}
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4 flex-1">
-                          {project.description}
-                        </p>
+                        {/* Description Wrapper */}
+                        <div className="mb-4 flex-1 min-h-0">
+                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                            {project.description}
+                          </p>
+                        </div>
 
                         {/* Skills */}
                         <div className="flex flex-wrap items-center gap-1.5 mb-5 min-h-[2.5rem]">

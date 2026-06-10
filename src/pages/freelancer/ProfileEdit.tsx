@@ -1317,7 +1317,7 @@ const FreelancerProfileEdit = () => {
               </section>
 
               {/* Preview Link */}
-              <Link to="/freelancer/profile" className="block w-full">
+              <Link to={`/freelancer/${user?._id}`} className="block w-full">
                 <Button
                   variant="outline"
                   className="w-full border-teal text-teal hover:bg-teal hover:text-white"
@@ -1331,7 +1331,7 @@ const FreelancerProfileEdit = () => {
         </main>
         {/* MOBILE STICKY SAVE BAR */}
         <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-white/10 px-4 py-3 flex gap-3 shadow-lg">
-          <Link to="/freelancer/profile" className="flex-1">
+          <Link to={`/freelancer/${user?._id}`} className="flex-1">
             <Button
               variant="outline"
               className="w-full border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300"
