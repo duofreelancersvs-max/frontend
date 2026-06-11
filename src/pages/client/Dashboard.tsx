@@ -2,7 +2,7 @@ import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import type { ClientLayoutContext } from "@/layouts/ClientLayout";
 import {
-  Folder,
+  Briefcase,
   PlusCircle,
   Search,
   Star,
@@ -63,13 +63,13 @@ const ClientDashboard = () => {
   const clientName = getClientName();
 
   const activeProjects = (projects || [])
-    .filter((p) => p.status === "in-progress")
+    .filter((p) => p.status === "in-progress" || p.status === "open")
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3)
     .map((p) => ({
-      id: p._id,
+      id: p._id || p.id,
       name: p.title,
-      status: p.status === "in-progress" ? "In Progress" : p.status,
+      status: p.status === "in-progress" ? "In Progress" : p.status === "open" ? "Open" : p.status,
       freelancer: {
         name: p.freelancer?.fullName || "TBD",
         avatar:
@@ -78,7 +78,7 @@ const ClientDashboard = () => {
             .map((n: string) => n[0])
             .join("") || "?",
       },
-      progress: 50,
+      progress: p.status === "open" ? 0 : 50,
       deadline: p.deadline
         ? new Date(p.deadline).toLocaleDateString("en-US", {
             year: "numeric",
@@ -126,27 +126,27 @@ const ClientDashboard = () => {
   const statsData = [
     {
       label: "Active Projects",
-      value: String(
-        projects.filter((p) => p.status === "in-progress").length,
-      ),
-      icon: Folder,
-      color: "bg-primary",
-      change: "+1 this month",
+      value: activeProjects.length.toString(),
+      icon: Briefcase,
+      color: "bg-teal",
+      change: "Manage projects",
+      link: "/client/projects?tab=in-progress",
     },
     {
       label: "Completed Projects",
-      value: String(completedProjects),
+      value: completedProjects.toString(),
       icon: CheckCircle,
-      color: "bg-teal-primary",
-      change: "+3 this month",
+      color: "bg-royal-blue",
+      change: "View history",
+      link: "/client/projects?tab=completed",
     },
-
     {
-      label: "Pending Reviews",
-      value: String(pendingApplications.length),
+      label: "Pending Applications",
+      value: pendingApplications.length.toString(),
       icon: Star,
       color: "bg-gold",
-      change: "Leave feedback",
+      change: "Review applications",
+      link: "/client/projects?tab=open",
     },
   ];
 
@@ -177,7 +177,7 @@ const ClientDashboard = () => {
 
   const recommendedFreelancers = (freelancers || []).slice(0, 3).map((f: any) => ({
     id: f._id || f.id,
-    name: f.userId,
+    name: f.fullName || f.userId?.fullName || f.userId,
     avatar:
       f.title
         ?.split(" ")
@@ -248,13 +248,13 @@ const ClientDashboard = () => {
             <Skeleton className="h-9 w-[150px]" />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Skeleton className="h-[140px] rounded-2xl" />
           <Skeleton className="h-[140px] rounded-2xl" />
           <Skeleton className="h-[140px] rounded-2xl" />
           <Skeleton className="h-[140px] rounded-2xl" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
           <Skeleton className="col-span-4 h-[400px] rounded-2xl" />
           <Skeleton className="col-span-3 h-[400px] rounded-2xl" />
         </div>
@@ -286,7 +286,7 @@ const ClientDashboard = () => {
                 <p className="text-white/80">
                   You have{" "}
                   <span className="text-teal-light font-semibold">
-                    {projects.filter((p) => p.status === "in-progress").length} active project{projects.filter((p) => p.status === "in-progress").length !== 1 ? 's' : ''}
+                    {projects.filter((p) => p.status === "in-progress" || p.status === "open").length} active project{projects.filter((p) => p.status === "in-progress" || p.status === "open").length !== 1 ? 's' : ''}
                   </span>{" "}
                   and{" "}
                   <span className="text-gold font-semibold">
@@ -317,43 +317,52 @@ const ClientDashboard = () => {
 
           {/* STATS CARDS */}
           <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
-            {statsData.map((stat, idx) => (
-              <div
-                key={idx}
-                className="bg-white dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group"
-              >
+            {statsData.map((stat, idx) => {
+              const CardContent = (
                 <div
-                  className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
-                    stat.color,
-                  )}
+                  className="bg-white dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group cursor-pointer"
                 >
-                  <stat.icon size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 truncate">
-                    {stat.label}
-                  </p>
-                  <div className="flex items-end justify-between gap-2">
-                    <p className="text-xl font-bold text-navy dark:text-white leading-none">
-                      {stat.value}
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
+                      stat.color,
+                    )}
+                  >
+                    <stat.icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 truncate">
+                      {stat.label}
                     </p>
-                    <div className="shrink-0">
-                      {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
-                        <div className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                          <TrendingUp size={10} />
-                          {stat.change}
-                        </div>
-                      ) : (
-                        <span className="inline-block text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[80px]">
-                          {stat.change}
-                        </span>
-                      )}
+                    <div className="flex items-end justify-between gap-2">
+                      <p className="text-xl font-bold text-navy dark:text-white leading-none">
+                        {stat.value}
+                      </p>
+                      <div className="shrink-0">
+                        {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
+                          <div className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            <TrendingUp size={10} />
+                            {stat.change}
+                          </div>
+                        ) : (
+                          <span className="inline-block text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                            {stat.change}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+
+              return stat.link ? (
+                <Link to={stat.link} key={idx} className="block">
+                  {CardContent}
+                </Link>
+              ) : (
+                <div key={idx}>{CardContent}</div>
+              );
+            })}
           </section>
 
           {/* ACTIVE PROJECTS */}
@@ -380,11 +389,9 @@ const ClientDashboard = () => {
                     <span
                       className={cn(
                         "px-2 py-1 rounded-full text-xs font-semibold",
-                        project.status === "In Progress" &&
+                        project.status === "Open" &&
                           "bg-teal/10 text-teal",
-                        project.status === "In Review" &&
-                          "bg-gold/10 text-gold",
-                        project.status === "Just Started" &&
+                        project.status === "In Progress" &&
                           "bg-royal-blue/10 text-royal-blue",
                       )}
                     >
@@ -445,13 +452,14 @@ const ClientDashboard = () => {
                 Recent Applications
               </h3>
               <Link
-                to="/client/applications"
+                to="/client/projects?tab=open"
                 className="text-sm text-teal font-medium hover:underline flex items-center gap-1"
               >
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-white/5 text-left">
@@ -472,7 +480,7 @@ const ClientDashboard = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {recentApplications.map((app) => (
                     <tr
                       key={app.id}
@@ -503,10 +511,10 @@ const ClientDashboard = () => {
                         <span
                           className={cn(
                             "px-2 py-1 rounded-full text-xs font-semibold",
-                            app.rawStatus === "pending" && "bg-slate-100 text-slate-600",
+                            app.rawStatus === "pending" && "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300",
                             app.rawStatus === "shortlisted" && "bg-gold/10 text-gold",
                             (app.rawStatus === "accepted" || app.rawStatus === "hired") && "bg-teal/10 text-teal",
-                            app.rawStatus === "rejected" && "bg-red-50 text-red-600",
+                            app.rawStatus === "rejected" && "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
                           )}
                         >
                           {app.status}
@@ -536,7 +544,7 @@ const ClientDashboard = () => {
                             className={cn(
                               "h-8 px-3 text-xs",
                               (app.rawStatus === "hired" || app.rawStatus === "accepted") 
-                                ? "bg-slate-100 text-slate-500 cursor-not-allowed border-none shadow-none" 
+                                ? "bg-slate-100 text-slate-500 cursor-not-allowed border-none shadow-none dark:bg-white/5 dark:text-slate-400" 
                                 : "bg-teal hover:bg-teal-light text-white"
                             )}
                             onClick={() => (app.rawStatus !== "hired" && app.rawStatus !== "accepted") && handleHireFreelancer(app.id)}
@@ -550,10 +558,87 @@ const ClientDashboard = () => {
                 </tbody>
               </table>
             </div>
+            
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-white/5">
+              {recentApplications.map((app) => (
+                <div key={app.id} className="p-5 space-y-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-sm font-bold">
+                        {app.freelancer.avatar}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-navy dark:text-white text-sm truncate">
+                          {app.freelancer.name}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {app.freelancer.title}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        "shrink-0 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold",
+                        app.rawStatus === "pending" && "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300",
+                        app.rawStatus === "shortlisted" && "bg-gold/10 text-gold",
+                        (app.rawStatus === "accepted" || app.rawStatus === "hired") && "bg-teal/10 text-teal",
+                        app.rawStatus === "rejected" && "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
+                      )}
+                    >
+                      {app.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400 mb-0.5">Project</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-medium truncate block">{app.project}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400 mb-0.5">Applied Date</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-medium">{app.appliedDate}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 h-9 text-xs border-slate-200 dark:border-white/10"
+                      onClick={() => navigate(`/client/project/${app.projectId}`)}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 w-12 shrink-0 border-slate-200 dark:border-white/10 text-teal"
+                      onClick={() => handleMessageFreelancer(app.freelancerId, app.projectId)}
+                    >
+                      <MessageSquare size={16} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={app.rawStatus === "hired" || app.rawStatus === "accepted"}
+                      className={cn(
+                        "flex-1 h-9 text-xs",
+                        (app.rawStatus === "hired" || app.rawStatus === "accepted") 
+                          ? "bg-slate-100 text-slate-500 cursor-not-allowed border-none shadow-none dark:bg-white/5 dark:text-slate-400" 
+                          : "bg-teal hover:bg-teal-light text-white"
+                      )}
+                      onClick={() => (app.rawStatus !== "hired" && app.rawStatus !== "accepted") && handleHireFreelancer(app.id)}
+                    >
+                      {(app.rawStatus === "hired" || app.rawStatus === "accepted") ? "Hired" : "Hire"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* TWO COLUMN LAYOUT */}
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* LEFT - RECOMMENDED FREELANCERS */}
             <section className="lg:col-span-2 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm min-w-0">
               <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/10">
@@ -570,21 +655,21 @@ const ClientDashboard = () => {
                   View All <ArrowRight size={14} />
                 </Link>
               </div>
-              <div className="p-5 lg:p-6 flex gap-4 overflow-x-auto pb-4">
+              <div className="p-5 lg:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {recommendedFreelancers.map((freelancer: any) => (
                    <div
                     key={freelancer.id}
-                    className="min-w-[260px] p-4 rounded-xl border border-slate-100 dark:border-white/10 hover:border-teal/30 hover:shadow-md transition-all flex-shrink-0"
+                    className="p-5 rounded-xl border border-slate-100 dark:border-white/10 hover:border-teal/30 hover:shadow-md transition-all flex flex-col min-w-0"
                   >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold">
+                    <div className="flex items-center gap-3 mb-4 w-full">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold shrink-0">
                         {freelancer.avatar}
                       </div>
-                      <div>
-                         <h4 className="font-semibold text-navy dark:text-white">
+                      <div className="min-w-0 flex-1">
+                         <h4 className="font-semibold text-navy dark:text-white truncate">
                           {freelancer.name}
                         </h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                           {freelancer.title}
                         </p>
                       </div>
@@ -610,14 +695,16 @@ const ClientDashboard = () => {
                         </span>
                       </div>
                     </div>
-                    <Link to={`/freelancer/${freelancer.id}`}>
-                      <Button
-                        variant="outline"
-                        className="w-full mt-4 border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white text-sm"
-                      >
-                        View Profile
-                      </Button>
-                    </Link>
+                    <div className="mt-auto pt-4">
+                      <Link to={`/freelancer/${freelancer.id}`}>
+                        <Button
+                          variant="outline"
+                          className="w-full border-royal-blue text-royal-blue hover:bg-royal-blue hover:text-white text-sm"
+                        >
+                          View Profile
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -645,8 +732,8 @@ const ClientDashboard = () => {
                       msg.unread && "bg-teal/5 dark:bg-teal/10",
                     )}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="relative">
+                    <div className="flex items-start gap-3 w-full">
+                      <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white text-xs font-bold">
                           {msg.avatar}
                         </div>
@@ -655,16 +742,16 @@ const ClientDashboard = () => {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between mb-1 gap-2 w-full">
                           <p
                             className={cn(
-                               "text-sm font-semibold",
+                               "text-sm font-semibold truncate flex-1 min-w-0",
                               msg.unread ? "text-navy dark:text-white" : "text-slate-600 dark:text-slate-400",
                             )}
                           >
                             {msg.name}
                           </p>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
                             {msg.time}
                           </span>
                         </div>
@@ -691,7 +778,7 @@ const ClientDashboard = () => {
           </div>
 
           {/* BOTTOM ROW */}
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* QUICK ACTIONS */}
             <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5 lg:p-6">
               <h3 className="text-lg font-bold text-navy dark:text-white mb-4">

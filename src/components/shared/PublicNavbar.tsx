@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, ArrowRight, ChevronDown } from "lucide-react";
+import { 
+  Menu, X, ArrowRight, ChevronDown, 
+  LayoutDashboard, Briefcase, MessageSquare, Settings, LogOut, PieChart, Wallet, 
+  Home, Folder, PlusCircle, Search, Mail, Star
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
@@ -11,6 +15,25 @@ import type { CategoryWithSkills } from "@/services";
 
 // Module-level timestamp — persists across component remounts caused by navigation
 let menuLastClickTime = 0;
+
+const clientNavItems = [
+  { icon: Home, label: "Dashboard", href: "/client/dashboard" },
+  { icon: Folder, label: "My Projects", href: "/client/projects" },
+  { icon: PlusCircle, label: "Post Project", href: "/client/post-project" },
+  { icon: Search, label: "Find Freelancers", href: "/client/freelancers" },
+  { icon: Mail, label: "Messages", href: "/client/messages", id: "messages" },
+  { icon: Star, label: "Reviews", href: "/client/reviews" },
+  { icon: Settings, label: "Settings", href: "/client/settings" },
+];
+
+const freelancerNavItems = [
+  { label: "Dashboard", icon: LayoutDashboard, href: "/freelancer/dashboard" },
+  { label: "Find Work", icon: Briefcase, href: "/projects" },
+  { label: "Messages", icon: MessageSquare, href: "/freelancer/messages" },
+  { label: "Earnings", icon: Wallet, href: "/freelancer/earnings" },
+  { label: "Subscription", icon: PieChart, href: "/freelancer/subscription" },
+  { label: "Profile", icon: Settings, href: "/freelancer/profile" },
+];
 
 const MegaMenu = ({
   label,
@@ -175,48 +198,68 @@ export const PublicNavbar = ({
 
             {/* Desktop Navigation - Centered */}
             <div className="hidden lg:flex items-center justify-center gap-1">
-              <MegaMenu
-                label="Find Talent"
-                href="/freelancers"
-                isActive={location.pathname.startsWith('/freelancers')}
-                isWhite={isWhite}
-                dark={dark}
-                categories={categories}
-                isJobType={false}
-                isOpen={openMenu === 'talent'}
-                onOpen={() => setOpenMenu('talent')}
-                onClose={() => setOpenMenu(null)}
-              />
-              <MegaMenu
-                label="Find Work"
-                href="/projects"
-                isActive={location.pathname.startsWith('/projects')}
-                isWhite={isWhite}
-                dark={dark}
-                categories={categories}
-                isJobType={true}
-                isOpen={openMenu === 'work'}
-                onOpen={() => setOpenMenu('work')}
-                onClose={() => setOpenMenu(null)}
-              />
-              {[
-                { label: "Categories", href: "/categories" },
-                { label: "How It Works", href: "/how-it-works" },
-                { label: "Pricing", href: "/pricing" },
-              ].map((item) => (
-                <NavLink
-                  key={item.label}
-                  to={item.href}
-                  className={({ isActive }) => cn(
-                    "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate",
-                    isWhite || dark
-                      ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
-                      : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
-                  )}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
+              {isAuthenticated ? (
+                (user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+                  <NavLink
+                    key={item.label}
+                    to={item.href}
+                    className={({ isActive }) => cn(
+                      "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate flex items-center gap-1.5",
+                      isWhite || dark
+                        ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
+                        : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
+                    )}
+                  >
+                    <item.icon size={16} className={cn("hidden xl:block opacity-70")} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                ))
+              ) : (
+                <>
+                  <MegaMenu
+                    label="Find Talent"
+                    href="/freelancers"
+                    isActive={location.pathname.startsWith('/freelancers')}
+                    isWhite={isWhite}
+                    dark={dark}
+                    categories={categories}
+                    isJobType={false}
+                    isOpen={openMenu === 'talent'}
+                    onOpen={() => setOpenMenu('talent')}
+                    onClose={() => setOpenMenu(null)}
+                  />
+                  <MegaMenu
+                    label="Find Work"
+                    href="/projects"
+                    isActive={location.pathname.startsWith('/projects')}
+                    isWhite={isWhite}
+                    dark={dark}
+                    categories={categories}
+                    isJobType={true}
+                    isOpen={openMenu === 'work'}
+                    onOpen={() => setOpenMenu('work')}
+                    onClose={() => setOpenMenu(null)}
+                  />
+                  {[
+                    { label: "Categories", href: "/categories" },
+                    { label: "How It Works", href: "/how-it-works" },
+                    { label: "Pricing", href: "/pricing" },
+                  ].map((item) => (
+                    <NavLink
+                      key={item.label}
+                      to={item.href}
+                      className={({ isActive }) => cn(
+                        "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate",
+                        isWhite || dark
+                          ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
+                          : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
+                      )}
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </>
+              )}
             </div>
 
             {/* Auth & Actions Section - Takes 1/3 space or flex-1 */}
@@ -295,25 +338,18 @@ export const PublicNavbar = ({
                             </div>
                             
                             <div className="p-1.5">
-                              <Link
-                                to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"}
-                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
-                              >
-                                <div className="w-8 h-8 rounded-lg bg-teal/10 flex items-center justify-center text-teal">
-                                  <Menu size={16} />
-                                </div>
-                                Dashboard
-                              </Link>
-
-                              <Link
-                                to={user?.role === "client" ? "/client/settings" : "/freelancer/profile"}
-                                className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
-                              >
-                                <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
-                                  <X size={16} className="rotate-45" />
-                                </div>
-                                Profile Settings
-                              </Link>
+                              {(user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+                                <Link
+                                  key={item.label}
+                                  to={item.href}
+                                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-white/80 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                    <item.icon size={16} />
+                                  </div>
+                                  {item.label}
+                                </Link>
+                              ))}
 
                               <hr className="my-1.5 border-slate-100 dark:border-white/5" />
 
@@ -322,7 +358,7 @@ export const PublicNavbar = ({
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
                               >
                                 <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
-                                  <Menu size={16} className="rotate-90" />
+                                  <LogOut size={16} />
                                 </div>
                                 Sign Out
                               </button>
@@ -410,8 +446,8 @@ export const PublicNavbar = ({
 
         <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
           {isAuthenticated && (
-            <div className="mb-8 p-5 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
-              <div className="flex items-center gap-4 mb-5">
+            <div className="mb-6 p-5 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xl shadow-lg">
                   {user?.fullName
                     ? user.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
@@ -429,24 +465,6 @@ export const PublicNavbar = ({
                   </div>
                   <p className="text-xs text-slate-500 dark:text-white/60 truncate">{user?.email}</p>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Link
-                  to={user?.role === "client" ? "/client/dashboard" : "/freelancer/dashboard"}
-                  className="flex items-center justify-center h-11 text-xs font-bold bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-xl text-navy dark:text-white shadow-sm"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="flex items-center justify-center h-11 text-xs font-bold text-red-500 border border-red-100 dark:border-red-500/20 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 shadow-sm"
-                >
-                  Log Out
-                </button>
               </div>
             </div>
           )}
@@ -466,107 +484,140 @@ export const PublicNavbar = ({
             </div>
           )}
 
-          <div className="space-y-1">
-            {/* Find Talent Mobile Accordion */}
-            <div className="rounded-2xl overflow-hidden mb-1">
-              <button 
-                onClick={() => setExpandedItems(prev => ({ ...prev, talent: !prev.talent }))}
-                className={cn(
-                  "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
-                  expandedItems.talent ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
-                )}
-              >
-                Find Talent
-                <ChevronDown className={cn("transition-transform duration-300", expandedItems.talent && "rotate-180")} size={20} />
-              </button>
-              {expandedItems.talent && (
-                <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
-                  {categories.map(category => (
-                    <div key={category._id} className="space-y-3">
-                      <Link 
-                        to={`/freelancers?category=${encodeURIComponent(category.name)}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
-                      >
-                        {category.name}
-                      </Link>
-                      <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
-                        {category.skills.slice(0, 5).map(skill => (
-                          <Link 
-                            key={skill._id}
-                            to={`/freelancers?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
-                          >
-                            {skill.skillName}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {isAuthenticated ? (
+            <div className="space-y-1">
+              {(user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="flex items-center gap-4 p-4 rounded-2xl text-lg font-bold text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-white dark:group-hover:bg-white/10 group-hover:text-teal transition-all">
+                    <item.icon size={20} />
+                  </div>
+                  {item.label}
+                </Link>
+              ))}
 
-            {/* Find Work Mobile Accordion */}
-            <div className="rounded-2xl overflow-hidden mb-1">
-              <button 
-                onClick={() => setExpandedItems(prev => ({ ...prev, work: !prev.work }))}
-                className={cn(
-                  "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
-                  expandedItems.work ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
-                )}
-              >
-                Find Work
-                <ChevronDown className={cn("transition-transform duration-300", expandedItems.work && "rotate-180")} size={20} />
-              </button>
-              {expandedItems.work && (
-                <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
-                  {categories.map(category => (
-                    <div key={category._id} className="space-y-3">
-                      <Link 
-                        to={`/projects?category=${encodeURIComponent(category.name)}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
-                      >
-                        {category.name} jobs
-                      </Link>
-                      <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
-                        {category.skills.slice(0, 5).map(skill => (
-                          <Link 
-                            key={skill._id}
-                            to={`/projects?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
-                          >
-                            {skill.skillName.replace(/s$/, '')} jobs
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              <hr className="my-4 border-slate-100 dark:border-white/5" />
 
-            {[
-              { label: "Categories", href: "/categories" },
-              { label: "How It Works", href: "/how-it-works" },
-              { label: "Pricing", href: "/pricing" },
-              { label: "About", href: "/about" },
-              { label: "Support & Contact", href: "/contact" },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className="flex items-center justify-between p-4 rounded-2xl text-lg font-bold text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl text-lg font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all group"
               >
-                {item.label}
-                <ArrowRight size={18} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-teal" />
-              </Link>
-            ))}
-          </div>
+                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 group-hover:bg-red-100 dark:group-hover:bg-red-500/20 transition-all">
+                  <LogOut size={20} />
+                </div>
+                Log Out
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {/* Find Talent Mobile Accordion */}
+              <div className="rounded-2xl overflow-hidden mb-1">
+                <button 
+                  onClick={() => setExpandedItems(prev => ({ ...prev, talent: !prev.talent }))}
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
+                    expandedItems.talent ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                  )}
+                >
+                  Find Talent
+                  <ChevronDown className={cn("transition-transform duration-300", expandedItems.talent && "rotate-180")} size={20} />
+                </button>
+                {expandedItems.talent && (
+                  <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
+                    {categories.map(category => (
+                      <div key={category._id} className="space-y-3">
+                        <Link 
+                          to={`/freelancers?category=${encodeURIComponent(category.name)}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
+                        >
+                          {category.name}
+                        </Link>
+                        <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
+                          {category.skills.slice(0, 5).map(skill => (
+                            <Link 
+                              key={skill._id}
+                              to={`/freelancers?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
+                            >
+                              {skill.skillName}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Find Work Mobile Accordion */}
+              <div className="rounded-2xl overflow-hidden mb-1">
+                <button 
+                  onClick={() => setExpandedItems(prev => ({ ...prev, work: !prev.work }))}
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
+                    expandedItems.work ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                  )}
+                >
+                  Find Work
+                  <ChevronDown className={cn("transition-transform duration-300", expandedItems.work && "rotate-180")} size={20} />
+                </button>
+                {expandedItems.work && (
+                  <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
+                    {categories.map(category => (
+                      <div key={category._id} className="space-y-3">
+                        <Link 
+                          to={`/projects?category=${encodeURIComponent(category.name)}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
+                        >
+                          {category.name} jobs
+                        </Link>
+                        <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
+                          {category.skills.slice(0, 5).map(skill => (
+                            <Link 
+                              key={skill._id}
+                              to={`/projects?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
+                            >
+                              {skill.skillName.replace(/s$/, '')} jobs
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {[
+                { label: "Categories", href: "/categories" },
+                { label: "How It Works", href: "/how-it-works" },
+                { label: "Pricing", href: "/pricing" },
+                { label: "About", href: "/about" },
+                { label: "Support & Contact", href: "/contact" },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="flex items-center justify-between p-4 rounded-2xl text-lg font-bold text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                  <ArrowRight size={18} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-teal" />
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/5">
             <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-[1.5rem] border border-slate-100 dark:border-white/10">

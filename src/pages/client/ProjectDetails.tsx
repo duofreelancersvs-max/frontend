@@ -569,10 +569,10 @@ const ProjectDetails = () => {
                               </strong>
                             </span>
                             <span>
-                              Duration:{" "}
+                              Target Date:{" "}
                               <strong className="text-slate-700 dark:text-slate-200 font-semibold">
-                                {application.estimatedDuration
-                                  ? `${application.estimatedDuration} days`
+                                {application.estimatedCompletionDate
+                                  ? new Date(application.estimatedCompletionDate).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })
                                   : "N/A"}
                               </strong>
                             </span>

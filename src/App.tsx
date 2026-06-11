@@ -215,6 +215,10 @@ function App() {
 
         {/* Auth Pages */}
         <Route
+          path="/admin/login"
+          element={<Navigate to="/login?role=admin" replace />}
+        />
+        <Route
           path="/login"
           element={
             <Suspense fallback={<PageLoader />}>

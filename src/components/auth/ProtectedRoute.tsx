@@ -28,9 +28,6 @@ export function ProtectedRoute({
   }
 
   if (!isAuthenticated) {
-    if (returnNotFoundOnDeny) {
-      return <NotFound />;
-    }
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
@@ -74,7 +71,7 @@ export function FreelancerRoute({ children }: { children: React.ReactNode }) {
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   return (
-    <ProtectedRoute allowedRoles={["admin"]} returnNotFoundOnDeny={true}>
+    <ProtectedRoute allowedRoles={["admin"]} returnNotFoundOnDeny={true} redirectTo="/admin/login">
       {children}
     </ProtectedRoute>
   );

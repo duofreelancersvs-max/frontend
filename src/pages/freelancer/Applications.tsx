@@ -267,10 +267,10 @@ const FreelancerApplications = () => {
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0 border-t border-slate-50 pt-4 lg:border-t-0 lg:pt-0">
                       <div className="text-left sm:text-right">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Duration</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Target Date</p>
                         <p className="text-lg font-bold text-navy dark:text-white">
-                          {application.estimatedDuration
-                            ? `${application.estimatedDuration} days`
+                          {application.estimatedCompletionDate
+                            ? new Date(application.estimatedCompletionDate).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })
                             : "N/A"}
                         </p>
                       </div>
@@ -385,12 +385,12 @@ const FreelancerApplications = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4">
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-                    Estimated Duration
+                    Target Date
                   </p>
                   <div className="flex items-center gap-1.5 font-medium text-navy dark:text-white text-sm">
                     <Clock size={14} className="text-slate-400 dark:text-slate-500" />
-                    {selectedApplication.estimatedDuration
-                      ? `${selectedApplication.estimatedDuration} days`
+                    {selectedApplication.estimatedCompletionDate
+                      ? new Date(selectedApplication.estimatedCompletionDate).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })
                       : "Not specified"}
                   </div>
                 </div>

@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { CustomDatePicker } from "@/components/common/CustomDatePicker";
 import { useNavigate } from "react-router-dom";
 import {
   X,
@@ -37,13 +39,7 @@ interface ProjectApplicationModalProps {
   project: ProjectData;
 }
 
-const durationOptions = [
-  { value: "7", label: "Less than 1 week" },
-  { value: "14", label: "1-2 weeks" },
-  { value: "28", label: "2-4 weeks" },
-  { value: "60", label: "1-2 months" },
-  { value: "90", label: "2+ months" },
-];
+
 
 const ProjectApplicationModal = ({
   isOpen,
@@ -55,7 +51,7 @@ const ProjectApplicationModal = ({
   const queryClient = useQueryClient();
   const gate = useFeatureGate();
   const [coverLetter, setCoverLetter] = useState("");
-  const [estimatedDuration, setEstimatedDuration] = useState("");
+  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState("");
   const [proposedRate, setProposedRate] = useState("");
   const [questionAnswers, setQuestionAnswers] = useState<{
     [key: number]: string;
@@ -82,8 +78,8 @@ const ProjectApplicationModal = ({
     }
 
 
-    if (!estimatedDuration) {
-      newErrors.estimatedDuration = "Please select an estimated duration";
+    if (!estimatedCompletionDate) {
+      newErrors.estimatedCompletionDate = "Please select a target completion date";
     }
 
     if (!proposedRate) {
@@ -126,7 +122,7 @@ const ProjectApplicationModal = ({
       const result = await applicationService.apply({
         projectId: String(project.id),
         coverLetter: coverLetter.trim(),
-        estimatedDuration: parseInt(estimatedDuration, 10),
+        estimatedCompletionDate: estimatedCompletionDate,
         proposedRate: Number(proposedRate),
       });
       const convId = (result as any)?.conversationId;
@@ -185,7 +181,7 @@ const ProjectApplicationModal = ({
   const handleClose = () => {
     // Reset form state
     setCoverLetter("");
-    setEstimatedDuration("");
+    setEstimatedCompletionDate("");
     setProposedRate("");
     setQuestionAnswers({});
     setErrors({});
@@ -296,32 +292,20 @@ const ProjectApplicationModal = ({
                   </div>
                 </div>
 
-                  {/* Estimated Duration */}
+                  {/* Estimated Completion Date */}
                   <div>
                     <label className="block text-sm font-medium text-navy dark:text-slate-200 mb-2">
-                      Estimated Duration *
+                      Target Completion Date *
                     </label>
-                    <select
-                      value={estimatedDuration}
-                      onChange={(e) => setEstimatedDuration(e.target.value)}
-                      className={cn(
-                        "w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-navy dark:text-white bg-white dark:bg-[#111827]",
-                        errors.estimatedDuration
-                          ? "border-red-300 dark:border-red-500/50 focus:border-red-400 focus:ring-red-100 dark:focus:ring-red-950/30"
-                          : "border-slate-200 dark:border-white/10 focus:border-teal focus:ring-teal/20",
-                      )}
-                    >
-                      <option value="">Select duration</option>
-                      {durationOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value} className="dark:bg-[#111827]">
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.estimatedDuration && (
+                    <CustomDatePicker
+                      value={estimatedCompletionDate}
+                      onChange={setEstimatedCompletionDate}
+                      minDate={new Date()}
+                    />
+                    {errors.estimatedCompletionDate && (
                       <p className="text-xs text-red-500 flex items-center gap-1 mt-1.5">
                         <AlertCircle size={12} />
-                        {errors.estimatedDuration}
+                        {errors.estimatedCompletionDate}
                       </p>
                     )}
                   </div>

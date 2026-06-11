@@ -834,14 +834,14 @@ const FreelancerDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-5 border border-slate-100 dark:border-white/5">
                   <p className="text-xxs font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Estimated Duration
+                    Target Date
                   </p>
                   <div className="flex items-center gap-2 font-bold text-navy dark:text-white">
                     <div className="w-8 h-8 rounded-lg bg-royal-blue/10 flex items-center justify-center text-royal-blue">
                       <Clock size={16} />
                     </div>
-                    {selectedApplication.estimatedDuration
-                      ? `${selectedApplication.estimatedDuration} days`
+                    {selectedApplication.estimatedCompletionDate
+                      ? new Date(selectedApplication.estimatedCompletionDate).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })
                       : "Not specified"}
                   </div>
                 </div>

@@ -7,7 +7,7 @@ export interface Application {
   projectId: string;
   freelancerId: string;
   coverLetter: string;
-  estimatedDuration: number;
+  estimatedCompletionDate: string;
   proposedRate?: number;
   status:
     | "pending"
@@ -64,7 +64,7 @@ export interface ApplicationStats {
 export interface CreateApplicationRequest {
   projectId: string;
   coverLetter: string;
-  estimatedDuration: number;
+  estimatedCompletionDate: string;
   proposedRate: number;
 }
 
