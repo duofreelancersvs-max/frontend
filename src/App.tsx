@@ -88,6 +88,7 @@ const ApplicationsManagement = lazy(() => import("@/pages/admin/ApplicationsMana
 const ConversationsManagement = lazy(() => import("@/pages/admin/ConversationsManagement"));
 const CategoriesManagement = lazy(() => import("@/pages/admin/CategoriesManagement"));
 const PaymentsManagement = lazy(() => import("@/pages/admin/PaymentsManagement"));
+const ReportsManagement = lazy(() => import("@/pages/admin/ReportsManagement"));
 const AuditLogs = lazy(() => import("@/pages/admin/AuditLogs"));
 
 import { PageSkeleton } from "@/components/shared/Skeleton";
@@ -576,6 +577,14 @@ function App() {
             element={
               <SP>
                 <CategoriesManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <SP>
+                <ReportsManagement />
               </SP>
             }
           />

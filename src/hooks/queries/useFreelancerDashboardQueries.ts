@@ -4,7 +4,7 @@ import { freelancerService, applicationService, subscriptionService, conversatio
 export const useMyFreelancerProfile = () => {
   return useQuery({
     queryKey: ['myFreelancerProfile'],
-    queryFn: () => freelancerService.getMyProfile(),
+    queryFn: () => freelancerService.ensureProfile(),
     staleTime: 1000 * 60 * 10,
   });
 };

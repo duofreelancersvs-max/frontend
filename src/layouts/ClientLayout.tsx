@@ -73,6 +73,7 @@ const ClientLayout = () => {
                 }}
                 unreadCount={unreadCount}
                 avatars={avatars}
+                dragHandlers={dragHandlers}
               />
             )}
           </div>

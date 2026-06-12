@@ -13,6 +13,7 @@ export { reviewService } from "./review.service";
 export { adminService } from "./admin.service";
 export { publicService } from "./public.service";
 export { featureGateService } from "./feature-gate.service";
+export * from "./report.service";
 
 export type {
   LoginRequest,

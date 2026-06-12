@@ -31,6 +31,7 @@ import { projectService, applicationService } from "@/services";
 import type { Project, Application } from "@/services";
 import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { ReportModal } from "@/components/common/ReportModal";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -53,6 +54,7 @@ const ProjectDetails = () => {
   const [completing, setCompleting] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reportedUser, setReportedUser] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -579,6 +581,17 @@ const ProjectDetails = () => {
                           </div>
 
                           <div className="flex items-center gap-4">
+                            <button
+                              onClick={() =>
+                                setReportedUser({
+                                  id: application.freelancerId,
+                                  name: application.freelancer?.fullName || "Freelancer",
+                                })
+                              }
+                              className="flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+                            >
+                              Report
+                            </button>
                             {application.status !== "rejected" && (
                               <button
                                 disabled={
@@ -691,6 +704,15 @@ const ProjectDetails = () => {
           projectTitle={project.title}
           freelancerId={project.freelancer.id || project.freelancerId || ""}
           freelancerName={project.freelancer.fullName || "Freelancer"}
+        />
+      )}
+
+      {reportedUser && (
+        <ReportModal
+          isOpen={true}
+          onClose={() => setReportedUser(null)}
+          reportedUserId={reportedUser.id}
+          reportedUserName={reportedUser.name}
         />
       )}
     </div>

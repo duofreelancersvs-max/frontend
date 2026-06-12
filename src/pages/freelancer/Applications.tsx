@@ -19,6 +19,7 @@ import { applicationService } from "@/services";
 import type { Application } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { ReportModal } from "@/components/common/ReportModal";
 
 const FreelancerApplications = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
@@ -27,6 +28,7 @@ const FreelancerApplications = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const fetchApplications = async () => {
     try {
@@ -405,7 +407,14 @@ const FreelancerApplications = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 lg:p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-end">
+            <div className="p-5 lg:p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                className="text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
+                onClick={() => setIsReportModalOpen(true)}
+              >
+                Report Client
+              </Button>
               <Button
                 variant="outline"
                 className="dark:border-white/10 dark:text-slate-400"
@@ -416,6 +425,15 @@ const FreelancerApplications = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedApplication && selectedApplication.project?.clientId && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          reportedUserId={typeof selectedApplication.project.clientId === 'string' ? selectedApplication.project.clientId : (selectedApplication.project.clientId as any)._id || (selectedApplication.project as any).client?._id}
+          reportedUserName={(selectedApplication.project.clientId as any)?.firstName ? `${(selectedApplication.project.clientId as any).firstName} ${(selectedApplication.project.clientId as any).lastName}` : (selectedApplication.project as any).client?.fullName || 'Client'}
+        />
       )}
     </div>
   );

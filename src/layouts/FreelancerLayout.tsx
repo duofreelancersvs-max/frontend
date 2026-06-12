@@ -73,6 +73,7 @@ const FreelancerLayout = () => {
                 }}
                 unreadCount={unreadCount}
                 avatars={avatars}
+                dragHandlers={dragHandlers}
               />
             )}
           </div>

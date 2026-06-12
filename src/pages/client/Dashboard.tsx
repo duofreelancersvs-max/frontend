@@ -238,29 +238,7 @@ const ClientDashboard = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex-1 space-y-8 p-8 pt-6 min-h-screen bg-background">
-        <div className="flex items-center justify-between space-y-2">
-          <Skeleton className="h-9 w-[200px]" />
-          <div className="flex items-center space-x-2">
-            <Skeleton className="h-9 w-[150px]" />
-            <Skeleton className="h-9 w-[150px]" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="h-[140px] rounded-2xl" />
-          <Skeleton className="h-[140px] rounded-2xl" />
-          <Skeleton className="h-[140px] rounded-2xl" />
-          <Skeleton className="h-[140px] rounded-2xl" />
-        </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
-          <Skeleton className="col-span-4 h-[400px] rounded-2xl" />
-          <Skeleton className="col-span-3 h-[400px] rounded-2xl" />
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-background transition-colors duration-300">
@@ -272,8 +250,29 @@ const ClientDashboard = () => {
         />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6 lg:space-y-8">
-          {/* WELCOME BANNER */}
+        <main className="px-6 lg:px-8 py-6 lg:space-y-8 space-y-6">
+          {loading ? (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between space-y-2">
+                <Skeleton className="h-9 w-[200px]" />
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-9 w-[150px]" />
+                </div>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Skeleton className="h-[140px] rounded-2xl" />
+                <Skeleton className="h-[140px] rounded-2xl" />
+                <Skeleton className="h-[140px] rounded-2xl" />
+                <Skeleton className="h-[140px] rounded-2xl" />
+              </div>
+              <div className="space-y-6">
+                <Skeleton className="h-[200px] rounded-2xl" />
+                <Skeleton className="h-[400px] rounded-2xl" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* WELCOME BANNER */}
           <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-6 lg:p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
             <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-royal-blue/30 rounded-full blur-[60px]" />
@@ -895,6 +894,8 @@ const ClientDashboard = () => {
               </div>
             </section>
           </div>
+            </>
+          )}
         </main>
       </div>
     </div>

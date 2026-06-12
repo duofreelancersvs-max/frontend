@@ -17,7 +17,7 @@ export function DraggableChatWidget({ isOpen, onClose, children, dragHandlers }:
       >
         <div className="bg-white dark:bg-background rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 w-full h-full overflow-hidden flex flex-col transition-shadow duration-200">
           <div 
-            className="bg-navy dark:bg-[#050B15] border-b border-white/10 text-white px-4 py-3 flex justify-between items-center cursor-grab active:cursor-grabbing select-none"
+            className="bg-navy dark:bg-[#050B15] border-b border-white/10 text-white px-4 py-3 flex justify-between items-center cursor-grab active:cursor-grabbing select-none touch-none"
             {...dragHandlers}
           >
             <span className="font-semibold flex items-center gap-2 pointer-events-none">

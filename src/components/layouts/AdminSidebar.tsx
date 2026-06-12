@@ -15,6 +15,7 @@ import {
   History,
   LogOut,
   PlusCircle,
+  Flag,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -109,6 +110,7 @@ const AdminSidebar = () => {
     {
       title: "SYSTEM",
       items: [
+        { name: "Reports", path: "/admin/reports", icon: Flag },
         { name: "Audit Logs", path: "/admin/audit-logs", icon: History },
       ],
     },

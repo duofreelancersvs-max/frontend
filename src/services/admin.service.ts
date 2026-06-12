@@ -207,6 +207,17 @@ export interface AuditLogEntry {
   createdAt: string;
 }
 
+export interface AdminReport {
+  _id: string;
+  reporter: { _id: string; email: string; fullName?: string; avatar?: string };
+  reportedUser: { _id: string; email: string; fullName?: string; avatar?: string };
+  reason: string;
+  description: string;
+  status: "pending" | "reviewed" | "dismissed";
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Service ──────────────────────────────────────────────────
 
 export const adminService = {
@@ -423,6 +434,23 @@ export const adminService = {
     api.get<{ logs: AuditLogEntry[]; pagination: PaginationMeta }>(
       "/admin/audit-logs",
       { params },
+    ),
+
+  // ─── Reports ─────────────────────────────────────────────────
+  getReports: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }) =>
+    api.get<{ reports: AdminReport[]; pagination: PaginationMeta }>(
+      "/admin/reports",
+      { params },
+    ),
+
+  updateReportStatus: (reportId: string, status: "pending" | "reviewed" | "dismissed") =>
+    api.patch<{ message: string; report: AdminReport }>(
+      `/admin/reports/${reportId}/status`,
+      { status },
     ),
 };
 

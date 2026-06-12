@@ -25,7 +25,7 @@ export const ChatBubbleButton = ({
       onClick={onClick}
       {...dragHandlers}
       className={cn(
-        "flex items-center gap-2 md:gap-4 px-4 md:px-6 h-14 rounded-full shadow-2xl cursor-grab active:cursor-grabbing select-none pointer-events-auto",
+        "flex items-center gap-2 md:gap-4 px-4 md:px-6 h-14 rounded-full shadow-2xl cursor-grab active:cursor-grabbing select-none pointer-events-auto touch-none",
         "bg-[#1A1E27] hover:bg-[#252A36] border border-white/5 group",
         className
       )}

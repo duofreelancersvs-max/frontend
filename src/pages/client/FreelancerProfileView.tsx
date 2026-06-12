@@ -7,6 +7,7 @@ import { freelancerService, reviewService } from "@/services";
 import type { FreelancerProfile, Review } from "@/services";
 import { getCategoryStyle } from "@/lib/category-styles";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { ReportModal } from "@/components/common/ReportModal";
 
 const FreelancerProfileView = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ const FreelancerProfileView = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,6 +129,13 @@ const FreelancerProfileView = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    className="text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
+                    onClick={() => setIsReportModalOpen(true)}
+                  >
+                    Report
+                  </Button>
                   <Button 
                     className="bg-teal hover:bg-teal-light text-white font-semibold shadow-sm"
                     onClick={() => navigate(`/client/messages`, { state: { freelancerId: id } })}
@@ -245,7 +254,7 @@ const FreelancerProfileView = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                <div className="text-center py-10 bg-slate-50 dark:bg-white/5 rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10">
                   <p className="text-slate-400">
                     No portfolio projects to display yet.
                   </p>
@@ -403,6 +412,15 @@ const FreelancerProfileView = () => {
           </div>
         </div>
       </div>
+
+      {freelancer && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          reportedUserId={freelancer.userId}
+          reportedUserName={freelancer.displayName || `${freelancer.firstName} ${freelancer.lastName}`}
+        />
+      )}
     </div>
   );
 };

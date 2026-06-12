@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { projectService } from "@/services";
 import type { Project } from "@/services";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { ReportModal } from "@/components/common/ReportModal";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const ProjectDetails = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,6 +150,13 @@ const ProjectDetails = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                variant="outline"
+                className="text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
+                onClick={() => setIsReportModalOpen(true)}
+              >
+                Report Client
+              </Button>
               <Link to="/freelancer/projects">
                 <Button variant="outline" className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 dark:hover:bg-white/5">
                   Back
@@ -241,6 +250,15 @@ const ProjectDetails = () => {
           </div>
         </div>
       </main>
+
+      {project && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          reportedUserId={project.clientId || (project as any).client?._id}
+          reportedUserName={project.client?.fullName || 'Client'}
+        />
+      )}
     </div>
   );
 };

@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { freelancerService } from "@/services/freelancer.service";
+import { useMyFreelancerProfile } from "@/hooks/queries/useFreelancerDashboardQueries";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import type {
   FreelancerProfile,
@@ -100,12 +101,13 @@ const FreelancerProfileEdit = () => {
     setActiveTab(tabId);
     setSearchParams({ tab: tabId });
   };
-  const [loading, setLoading] = useState(true);
+  const { data: profileData, isLoading: loadingProfile } = useMyFreelancerProfile();
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Profile data state
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
+  const loading = loadingProfile || !profile;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -148,20 +150,10 @@ const FreelancerProfileEdit = () => {
 
   // ---------- FETCH PROFILE ----------
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const data = await freelancerService.ensureProfile();
-        applyProfileToState(data);
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-        toast.error("Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (profileData && !profile) {
+      applyProfileToState(profileData);
+    }
+  }, [profileData, profile]);
 
   const applyProfileToState = (data: FreelancerProfile) => {
     setProfile(data);
