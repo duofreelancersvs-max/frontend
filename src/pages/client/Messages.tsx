@@ -42,7 +42,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const deepLinkHandled = useRef(false);
-  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, unreadCounts } = useUnreadStore();
   const [currentApplication, setCurrentApplication] = useState<Application | null>(null);
   const [allClientApplications, setAllClientApplications] = useState<Application[]>([]);
 
@@ -118,7 +118,6 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
                   ...mapped,
                   createdAt: mapped.createdAt
                 },
-                unreadCount: cid === selId ? 0 : (c.unreadCount || 0) + 1,
               }
             : c;
         }),
@@ -146,13 +145,8 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
           ),
         );
       }
-      // Reset unread count for this conversation
-      setConversations((prev) =>
-        prev.map((c) => {
-          const cid = (c.id || c._id || "").toString();
-          return cid === readConvId ? { ...c, unreadCount: 0 } : c;
-        }),
-      );
+      // Unread count is handled by unread.store.ts, no need to update conversations array unreadCount
+      setConversations((prev) => [...prev]);
     },
     [selectedConversation, user],
   );
@@ -193,7 +187,9 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       
       // Auto-select the conversation with the most recent message (first after sort)
       if (convs.length > 0 && !selectedConversation && !deepLinkHandled.current) {
-        setSelectedConversation(convs[0]);
+        if (!isWidget && window.innerWidth >= 768) {
+          setSelectedConversation(convs[0]);
+        }
       }
       
       setConversationsLoaded(true);
@@ -303,14 +299,8 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
         markAsRead(activeId);
         // Also call the REST endpoint to reset server-side unread count
         conversationService.markAsRead(activeId).catch(() => {});
-        // Immediately reset unread count in local state
-        setConversations((prev) =>
-          prev.map((c) =>
-            (c.id === activeId || c._id === activeId) 
-              ? { ...c, unreadCount: 0 } 
-              : c,
-          ),
-        );
+        // Unread store handles the unread count, no need to update conversations array unreadCount
+        setConversations((prev) => [...prev]);
         // Reset unread store for this conversation as well
         resetCount(activeId);
       } catch (error) {
@@ -413,7 +403,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       },
       lastMessage: conv.lastMessage?.content || "No messages",
       lastMessageTime,
-      unread: conv.unreadCount,
+      unread: unreadCounts[conv.id || conv._id || ""] || 0,
       termsAccepted: conv.termsAccepted?.clientAccepted ?? true,
     };
   });

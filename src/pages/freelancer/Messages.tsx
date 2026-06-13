@@ -72,7 +72,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const deepLinkHandled = useRef(false);
-  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages } = useUnreadStore();
+  const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, unreadCounts } = useUnreadStore();
 
   // ─── Feature Gate: Messaging ────────────────────────────────────
   const { context: planContext, inTrial } = useFeatureGate(true); // true because this is the freelancer view
@@ -139,7 +139,6 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
                   ...mapped,
                   createdAt: mapped.createdAt
                 },
-                unreadCount: cid === selId ? 0 : (c.unreadCount || 0) + 1,
               }
             : c;
         }),
@@ -163,12 +162,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
         );
       }
       
-      setConversations((prev) =>
-        prev.map((c) => {
-          const cid = (c.id || c._id || "").toString();
-          return cid === readConvId ? { ...c, unreadCount: 0 } : c;
-        }),
-      );
+      setConversations((prev) => [...prev]);
     },
     [selectedConversation, user],
   );
@@ -205,7 +199,9 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
       });
       
       if (convs.length > 0 && !selectedConversation && !deepLinkHandled.current) {
-        setSelectedConversation(convs[0]);
+        if (!isWidget && window.innerWidth >= 768) {
+          setSelectedConversation(convs[0]);
+        }
       }
       
       setConversationsLoaded(true);
@@ -276,13 +272,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
         markAsRead(activeId);
         conversationService.markAsRead(activeId).catch(() => {});
         
-        setConversations((prev) =>
-          prev.map((c) =>
-            (c.id === activeId || c._id === activeId) 
-              ? { ...c, unreadCount: 0 } 
-              : c,
-          ),
-        );
+        setConversations((prev) => [...prev]);
         resetCount(activeId);
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -334,7 +324,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
       },
       lastMessage: conv.lastMessage?.content || "No messages",
       lastMessageTime,
-      unread: conv.unreadCount,
+      unread: unreadCounts[conv.id || conv._id || ""] || 0,
       termsAccepted: conv.termsAccepted?.freelancerAccepted ?? false,
     };
   });

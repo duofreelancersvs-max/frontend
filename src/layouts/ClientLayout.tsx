@@ -26,11 +26,28 @@ const ClientLayout = () => {
   const location = useLocation();
   const { position, dragHandlers, didDrag, resetPosition } = useDraggable();
 
-  const avatars = conversations
-    .flatMap((c) => c.participants || [])
-    .filter((p) => p.id !== currentUserId)
-    .slice(0, 3)
-    .map((p) => ({ url: p.avatar, name: p.fullName }));
+  const uniqueParticipants: { url?: string; name: string }[] = [];
+  const seenIds = new Set<string>();
+  
+  const sortedConvs = [...conversations].sort((a, b) => {
+    const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+    const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
+
+  for (const conv of sortedConvs) {
+    const participants = conv.participants || [];
+    for (const p of participants) {
+      if (p.id !== currentUserId && !seenIds.has(p.id)) {
+        seenIds.add(p.id);
+        uniqueParticipants.push({ url: p.avatar, name: p.fullName });
+        if (uniqueParticipants.length === 3) break;
+      }
+    }
+    if (uniqueParticipants.length === 3) break;
+  }
+  
+  const avatars = uniqueParticipants;
 
   useEffect(() => {
     setIsMessagesOpen(false);

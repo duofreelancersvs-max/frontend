@@ -3,11 +3,13 @@ import { useSocket } from "@/hooks/useSocket";
 import { useUnreadStore } from "@/stores/unread.store";
 import { useAuthStore } from "@/stores/auth.store";
 import type { Message } from "@/services/conversation.service";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const UnreadListener = () => {
   const { fetchInitialCounts, incrementCount, resetCount, updateCount, activeConversationId, addPendingMessage } = useUnreadStore();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const currentUserId = useAuthStore((s) => s.user?._id);
+  const queryClient = useQueryClient();
 
   // Initial fetch on mount/auth
   useEffect(() => {
@@ -47,6 +49,7 @@ export const UnreadListener = () => {
         } else {
           incrementCount(convId);
         }
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
       }
     },
     onMessageRead: (data) => {

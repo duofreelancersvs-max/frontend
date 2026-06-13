@@ -25,7 +25,7 @@ export const ChatBubbleButton = ({
       onClick={onClick}
       {...dragHandlers}
       className={cn(
-        "flex items-center gap-2 md:gap-4 px-4 md:px-6 h-14 rounded-full shadow-2xl cursor-grab active:cursor-grabbing select-none pointer-events-auto touch-none",
+        "relative flex items-center gap-2 md:gap-4 px-4 md:px-6 h-14 rounded-full shadow-2xl cursor-grab active:cursor-grabbing select-none pointer-events-auto touch-none",
         "bg-[#1A1E27] hover:bg-[#252A36] border border-white/5 group",
         className
       )}
@@ -60,18 +60,12 @@ export const ChatBubbleButton = ({
               )}
             </div>
           ))}
-          {unreadCount > 0 && (
-            <div
-              className="w-9 h-9 rounded-full border-2 border-[#1A1E27] bg-red-500 text-white flex items-center justify-center text-xxs font-bold z-10 relative shadow-sm animate-in zoom-in"
-              style={{ zIndex: 4 }}
-            >
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </div>
-          )}
         </div>
       )}
-      {!isOpen && avatars.length === 0 && unreadCount > 0 && (
-        <div className="w-9 h-9 rounded-full border-2 border-[#1A1E27] bg-red-500 text-white flex items-center justify-center text-xxs font-bold z-10 relative ml-3 shadow-sm animate-in zoom-in">
+
+      {/* Floating Unread Badge */}
+      {!isOpen && unreadCount > 0 && (
+        <div className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold shadow-md border-2 border-[#1A1E27] animate-in zoom-in pointer-events-none z-20">
           {unreadCount > 99 ? "99+" : unreadCount}
         </div>
       )}
