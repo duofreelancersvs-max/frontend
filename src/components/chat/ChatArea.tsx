@@ -88,6 +88,15 @@ const ChatArea = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSend = () => {
+    onSend();
+    // Blur input on mobile devices to hide the keyboard
+    if (window.innerWidth < 768) {
+      inputRef.current?.blur();
+    }
+  };
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -331,16 +340,17 @@ const ChatArea = ({
               )}
             </div>
             <input
+              ref={inputRef}
               type="text"
               placeholder={disabledMessageReason || "Type a message..."}
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && onSend()}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
               disabled={disabledMessageInput}
-              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <Button
-              onClick={onSend}
+              onClick={handleSend}
               disabled={disabledMessageInput || !messageInput.trim() || !isConnected}
               className="h-10 w-10 p-0 rounded-full bg-teal hover:bg-teal-light text-white disabled:opacity-50"
             >

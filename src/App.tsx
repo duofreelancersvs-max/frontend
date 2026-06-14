@@ -16,6 +16,7 @@ import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
+const LaunchPage = lazy(() => import("@/pages/public/Launch"));
 
 const About = lazy(() => import("@/pages/public/About"));
 const HowItWorks = lazy(() => import("@/pages/public/HowItWorks"));
@@ -122,6 +123,14 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <Home />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/launch"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LaunchPage />
             </Suspense>
           }
         />

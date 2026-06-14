@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useOutletContext, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { PullToRefresh } from "@/components/common/PullToRefresh";
 import {
   User,
   Camera,
@@ -83,6 +85,11 @@ const suggestedSkills = [
 const FreelancerProfileEdit = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["myFreelancerProfile"] });
+  };
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "basic");
@@ -522,7 +529,8 @@ const FreelancerProfileEdit = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="p-4 lg:p-8 pb-24 sm:pb-8">
+        <PullToRefresh onRefresh={handleRefresh}>
+          <main className="p-4 lg:p-8 pb-24 sm:pb-8">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* LEFT - Main Form */}
             <div className="flex-1 space-y-6">
@@ -1337,6 +1345,7 @@ const FreelancerProfileEdit = () => {
             </div>
           </div>
         </main>
+        </PullToRefresh>
         {/* MOBILE STICKY SAVE BAR */}
         <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-white/10 px-4 py-3 flex gap-3 shadow-lg">
           <Link to={`/freelancer/${user?._id}`} className="flex-1">
