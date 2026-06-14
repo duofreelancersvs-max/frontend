@@ -59,6 +59,12 @@ export const UnreadListener = () => {
         resetCount(data.conversationId.toString());
       }
     },
+    onConversationCreated: (conversation) => {
+      if (!currentUserId) return;
+      // When a new conversation is created by someone else, we need to refresh the list
+      // so it appears in the sidebar and doesn't say "No conversations found"
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
   });
 
   return null; // This component doesn't Render anything

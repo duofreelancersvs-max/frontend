@@ -65,35 +65,37 @@ const ClientLayout = () => {
         <Outlet context={{ setSidebarOpen, sidebarOpen }} />
 
         {!location.pathname.includes("/messages") && (
-          <div
-            className="fixed bottom-6 right-6 z-50 flex flex-col items-end"
-            style={{
-              transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-            }}
-          >
+          <>
             {isMessagesOpen && (
               <DraggableChatWidget
                 isOpen={isMessagesOpen}
                 onClose={() => setIsMessagesOpen(false)}
-                dragHandlers={dragHandlers}
               >
                 <ClientMessages isWidget={true} onWidgetClose={() => setIsMessagesOpen(false)} />
               </DraggableChatWidget>
             )}
-            {!isMessagesOpen && (
+            <div
+              className="fixed bottom-6 right-6 z-50 flex flex-col items-end"
+              style={{
+                transform: isMessagesOpen
+                  ? 'none'
+                  : `translate3d(${position.x}px, ${position.y}px, 0)`,
+              }}
+            >
               <ChatBubbleButton
                 isOpen={isMessagesOpen}
                 onClick={() => {
                   if (!didDrag()) {
+                    if (!isMessagesOpen) resetPosition();
                     setIsMessagesOpen(!isMessagesOpen);
                   }
                 }}
                 unreadCount={unreadCount}
                 avatars={avatars}
-                dragHandlers={dragHandlers}
+                dragHandlers={isMessagesOpen ? undefined : dragHandlers}
               />
-            )}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -164,7 +164,7 @@ const ChatArea = ({
   }
 
   return (
-    <div className={cn("flex-1 flex flex-col bg-slate-50 dark:bg-[#050B15] min-w-0 border-r border-slate-200 dark:border-white/5", className)}>
+    <div className={cn("flex-1 min-h-0 flex flex-col bg-slate-50 dark:bg-[#050B15] min-w-0 border-r border-slate-200 dark:border-white/5", className)}>
       {/* Chat Header */}
       <div className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ const ChatArea = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 lg:px-6 py-4">
         {messages.map((msg, index) => {
           const msgDate = new Date(msg.createdAt).toLocaleDateString();
           const msgTime = new Date(msg.createdAt).toLocaleTimeString("en-US", {

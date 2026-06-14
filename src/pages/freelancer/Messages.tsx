@@ -444,7 +444,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
   };
 
    return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-background font-sans overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-slate-50 dark:bg-background font-sans overflow-hidden">
        {/* Header */}
        {!isWidget && (
          <DashboardHeader
@@ -454,7 +454,7 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
        )}
 
        {/* Chat Container */}
-      <div className="flex-1 flex overflow-hidden bg-slate-100 dark:bg-background">
+      <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-100 dark:bg-background">
         {/* Conversation List */}
         <ConversationList
           conversations={conversationItems}
