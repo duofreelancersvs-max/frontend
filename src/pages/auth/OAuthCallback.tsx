@@ -99,7 +99,11 @@ export default function OAuthCallback() {
         });
 
         // Redirect to entry route (root page)
-        navigate("/");
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
       } catch (err: unknown) {
         console.error("OAuth Callback Error:", err);
         let message: string;

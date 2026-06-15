@@ -49,6 +49,7 @@ interface User {
   revenue: string;
   /** Mirrors FreelancerProfile.isProActive — only meaningful for freelancers. */
   isProActive?: boolean;
+  createdAt: string;
 }
 
 type TabType = "all" | "clients" | "freelancers" | "admins";
@@ -479,7 +480,21 @@ const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<TabType>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "client"
+  });
+  useEffect(() => {
+  document.body.style.overflow = isAddUserModalOpen ? 'hidden' : '';
+}, [isAddUserModalOpen]);
+
+const [isSubmittingNewUser, setIsSubmittingNewUser] = useState(false);
+const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -522,6 +537,22 @@ const UserManagement = () => {
       // Don't close the modal on failure — let the admin retry
     } finally {
       setProSubmitting(false);
+    }
+  };
+
+  const handleAddUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingNewUser(true);
+    try {
+      await adminService.createUser(newUserData);
+      setIsAddUserModalOpen(false);
+      setNewUserData({ firstName: "", lastName: "", email: "", phone: "", password: "", role: "client" });
+      fetchUsers(); // Refresh the list
+      fetchStats();
+    } catch (err) {
+      console.error("[Admin] Failed to create user", err);
+    } finally {
+      setIsSubmittingNewUser(false);
     }
   };
 
@@ -568,6 +599,7 @@ const UserManagement = () => {
           lastActiveRecent: isRecent,
           revenue: earnings > 0 ? `₹${earnings.toLocaleString("en-IN")}` : "—",
           isProActive: u.profile?.isProActive === true,
+          createdAt: u.createdAt || "",
         };
       });
 
@@ -630,12 +662,14 @@ const UserManagement = () => {
   };
 
   // Filter users based on active tab and filters (client-side for location only)
-  const filteredUsers = users.filter((user) => {
-    // Location filter (client-side since API may not have it)
-    if (locationFilter === "TG" && user.state !== "TG") return false;
-    if (locationFilter === "AP" && user.state !== "AP") return false;
-    return true;
-  });
+  const filteredUsers = users
+    .filter((user) => {
+      // Location filter (client-side since API may not have it)
+      if (locationFilter === "TG" && user.state !== "TG") return false;
+      if (locationFilter === "AP" && user.state !== "AP") return false;
+      return true;
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const paginatedUsers = filteredUsers;
@@ -680,7 +714,7 @@ const UserManagement = () => {
           <p>Manage clients, freelancers, and admins</p>
         </div>
         <div className="um-header-right">
-          <button className="admin-btn admin-btn-primary">
+          <button className="admin-btn admin-btn-primary" onClick={() => setIsAddUserModalOpen(true)}>
             <UserPlus size={18} />
             Add User
           </button>
@@ -1049,6 +1083,124 @@ const UserManagement = () => {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {isAddUserModalOpen && (
+        <div
+          className="um-slideover-overlay open fixed inset-0 overflow-y-hidden flex items-center justify-center"
+          onClick={() => !isSubmittingNewUser && setIsAddUserModalOpen(false)}
+        >
+          <div
+            className="um-pro-modal mx-auto w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+            style={{}}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="um-pro-modal-header flex flex-col items-center text-center">
+              <div className="um-pro-modal-icon">
+                <UserPlus size={20} />
+              </div>
+              <div>
+                <h3>Add New User</h3>
+                <p>Create an active account immediately</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddUserSubmit}>
+              <div className="um-pro-modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="um-pro-modal-label">First Name</label>
+                    <input
+                      required
+                      type="text"
+                      className="um-search-input w-full"
+                      value={newUserData.firstName}
+                      onChange={(e) => setNewUserData({ ...newUserData, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="um-pro-modal-label">Last Name</label>
+                    <input
+                      required
+                      type="text"
+                      className="um-search-input w-full"
+                      value={newUserData.lastName}
+                      onChange={(e) => setNewUserData({ ...newUserData, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="um-pro-modal-label">Email</label>
+                  <input
+                    required
+                    type="email"
+                    className="um-search-input w-full"
+                    value={newUserData.email}
+                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="um-pro-modal-label">Phone</label>
+                  <input
+                    required
+                    type="tel"
+                    className="um-search-input w-full"
+                    placeholder="10 digit number"
+                    pattern="[0-9]{10}"
+                    value={newUserData.phone}
+                    onChange={(e) => setNewUserData({ ...newUserData, phone: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="um-pro-modal-label">Password</label>
+                  <input
+                    required
+                    type="password"
+                    className="um-search-input w-full"
+                    value={newUserData.password}
+                    onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="um-pro-modal-label">Role</label>
+                  <select
+                    className="um-search-input w-full"
+                    value={newUserData.role}
+                    onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                  >
+                    <option value="client">Client</option>
+                    <option value="freelancer">Freelancer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="um-pro-modal-footer flex justify-center gap-4" style={{ marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-outline"
+                  onClick={() => setIsAddUserModalOpen(false)}
+                  disabled={isSubmittingNewUser}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn admin-btn-primary"
+                  disabled={isSubmittingNewUser}
+                >
+                  {isSubmittingNewUser ? "Creating..." : "Create User"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

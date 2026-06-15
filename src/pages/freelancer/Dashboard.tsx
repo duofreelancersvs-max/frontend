@@ -94,6 +94,10 @@ const FreelancerDashboard = () => {
 
   const handleApplyClick = useCallback(
     (project: any) => {
+      if (!profile?.contactInfo) {
+        toast.error("Please add a contact email or phone number to your profile before applying.");
+        return;
+      }
       // Find original project object if needed, or just pass the fullData if available.
       // recommendedProjects holds the full projects
       const fullProject = recommendedProjects.find((p: any) => p._id === project.id || p.id === project.id) || project;
@@ -134,6 +138,15 @@ const FreelancerDashboard = () => {
     : 0;
 
   const subscriptionPlan = subscription?.plan || "free";
+
+  const daysRemaining = (() => {
+    if (!subscription?.endDate || subscriptionPlan === "free") return null;
+    const end = new Date(subscription.endDate).getTime();
+    const now = Date.now();
+    const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 0;
+  })();
+
   const unreadMessages = conversations.reduce(
     (acc, c) => acc + c.unreadCount,
     0,
@@ -734,6 +747,18 @@ const FreelancerDashboard = () => {
                             ? `Expires on ${new Date(subscription.endDate).toLocaleDateString()}`
                             : "Active subscription"}
                       </p>
+                      {daysRemaining !== null && (
+                        <p className={cn(
+                          "text-xs font-semibold mt-1",
+                          daysRemaining <= 3 ? "text-red-500" : daysRemaining <= 7 ? "text-amber-500" : "text-emerald-500",
+                        )}>
+                          {daysRemaining === 0
+                            ? "Expires today!"
+                            : daysRemaining === 1
+                              ? "1 day remaining"
+                              : `${daysRemaining} days remaining`}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3 shrink-0">

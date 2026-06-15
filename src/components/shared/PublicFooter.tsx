@@ -59,7 +59,6 @@ export const PublicFooter = () => {
               title: "Support",
               links: [
                 { label: "Contact Us", href: "/contact" },
-                { label: "Help Center", href: "/contact" },
                 { label: "Privacy Policy", href: "/privacy-policy" },
                 { label: "Terms & Conditions", href: "/terms-and-conditions" },
               ],

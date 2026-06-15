@@ -106,7 +106,11 @@ export function useAuth(): UseAuthReturn {
         });
 
         // Redirect to entry route (root page)
-        navigate("/");
+        if (apiUser.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
       } catch (err: unknown) {
         const message = formatBackendApiError(err, "Invalid email or password");
         setError(message);

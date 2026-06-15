@@ -74,6 +74,7 @@ const FreelancerApplications = lazy(
 const FreelancerReviews = lazy(() => import("@/pages/freelancer/Reviews"));
 const FreelancerSettings = lazy(() => import("@/pages/freelancer/Settings"));
 const FreelancerProjectDetails = lazy(() => import("@/pages/freelancer/ProjectDetails"));
+const ClientProfileView = lazy(() => import("@/pages/freelancer/ClientProfileView"));
 
 // Admin
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
@@ -91,6 +92,7 @@ const CategoriesManagement = lazy(() => import("@/pages/admin/CategoriesManageme
 const PaymentsManagement = lazy(() => import("@/pages/admin/PaymentsManagement"));
 const ReportsManagement = lazy(() => import("@/pages/admin/ReportsManagement"));
 const AuditLogs = lazy(() => import("@/pages/admin/AuditLogs"));
+const MyProjects = lazy(() => import("@/pages/admin/MyProjects"));
 
 import { PageSkeleton } from "@/components/shared/Skeleton";
 
@@ -486,6 +488,14 @@ function App() {
               </SP>
             }
           />
+          <Route
+            path="/freelancer/client/:id"
+            element={
+              <SP>
+                <ClientProfileView />
+              </SP>
+            }
+          />
         </Route>
 
         {/* Admin Dashboard Pages */}
@@ -611,6 +621,14 @@ function App() {
             element={
               <SP>
                 <RazorpaySettings />
+              </SP>
+            }
+          />
+          <Route
+            path="my-projects"
+            element={
+              <SP>
+                <MyProjects />
               </SP>
             }
           />

@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import {
-  ChevronDown,
   Check,
   X,
   CreditCard,
@@ -76,7 +75,6 @@ const Pricing = () => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "monthly",
   );
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [displayPlans, setDisplayPlans] = useState<any[]>([]);
 
@@ -233,20 +231,20 @@ const Pricing = () => {
       buttonVariant: "outline" as const,
       buttonClass: "border-navy/20 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10",
       buttonText: "Start Free",
-      features: ["3 Portfolio Projects", "Global Reach"],
+      features: ["5 Applications/month", "Standard Support"],
     },
     {
       name: "Pro",
       description: "For active professionals",
-      monthlyPrice: 999,
-      yearlyPrice: 9990,
+      monthlyPrice: 399,
+      yearlyPrice: 3990,
       badge: { text: "Best For Growth", color: "bg-teal text-white" },
       borderColor: "border-teal/50",
       highlighted: true,
       buttonVariant: "default" as const,
       buttonClass: "bg-teal hover:bg-[#128a7f] text-white shadow-xl shadow-teal/20",
       buttonText: "Go Pro",
-      features: ["Unlimited Portfolio", "Global Reach", "Project Analytics", "Search Boost", "Custom Profile URL"],
+      features: ["Unlimited Applications", "Priority Support", "Top Priority in Search", "Pro Badge"],
     }
   ];
 
@@ -268,33 +266,11 @@ const Pricing = () => {
   ] : fallbackPlans);
 
   const comparisonFeatures = [
-    {
-      name: "Portfolio Capacity",
-      free: "3",
-      pro: "Unlimited",
-    },
-    { name: "Global Reach", free: true, pro: true },
-    { name: "Project Analytics", free: false, pro: true },
-    { name: "Search Boost", free: false, pro: "Maximum" },
-    { name: "Custom Profile URL", free: false, pro: true },
-  ];
-
-  const faqs = [
-    {
-      question: "Can I cancel at any time?",
-      answer:
-        "Absolutely. You can cancel your subscription from your dashboard settings instantly. You will retain access until the end of your billing cycle.",
-    },
-    {
-      question: "Which plan is right for me?",
-      answer:
-        "If you're just starting, the Free plan is great. However, professionals looking for consistent work usually choose the Pro plan for unlimited bids and better visibility.",
-    },
-    {
-      question: "Do you offer custom enterprise pricing?",
-      answer:
-        "Yes, for agencies or large teams looking for bespoke solutions, please contact our support team for a custom quote.",
-    },
+    { name: "Monthly Applications", free: "5", pro: "Unlimited" },
+    { name: "Search Priority", free: "Standard", pro: "Top Priority" },
+    { name: "Profile Badge", free: "—", pro: "Pro Badge" },
+    { name: "Direct Messaging", free: false, pro: true },
+    { name: "Portfolio Capacity", free: "5", pro: "Unlimited" },
   ];
 
   const handlePayment = async (planId: string) => {
@@ -646,22 +622,6 @@ const Pricing = () => {
                         </span>
                       )}
                     </td>
-                    <td className="p-8 text-center">
-                      {typeof f.pro === "boolean" ? (
-                        f.pro ? (
-                          <Check className="mx-auto text-teal" size={20} />
-                        ) : (
-                          <X
-                            className="mx-auto text-slate-200 dark:text-white/20"
-                            size={20}
-                          />
-                        )
-                      ) : (
-                        <span className="text-sm font-bold text-teal">
-                          {f.pro}
-                        </span>
-                      )}
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -670,55 +630,7 @@ const Pricing = () => {
         </div>
       </section>
 
-      {/* 4. FAQ */}
-      <section className="py-32">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-20 text-navy dark:text-white">
-              <span className="text-teal font-bold uppercase tracking-widest text-xxs md:text-xs mb-4 block">
-                Still Curious?
-              </span>
-              <h2 className="text-4xl font-bold">Frequently Asked Questions</h2>
-            </div>
-            <div className="space-y-4">
-              {faqs.map((faq, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white dark:bg-transparent dark:glass-card shadow-sm dark:shadow-none rounded-2xl overflow-hidden border border-slate-200 dark:border-white/5 transition-all"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                    className="w-full p-8 text-left flex items-center justify-between group"
-                  >
-                    <span className="font-bold text-lg text-navy dark:text-white group-hover:text-teal transition-colors">
-                      {faq.question}
-                    </span>
-                    <ChevronDown
-                      size={20}
-                      className={cn(
-                        "text-slate-400 dark:text-slate-500 transition-all duration-300",
-                        openFaq === idx ? "rotate-180 text-teal" : "",
-                      )}
-                    />
-                  </button>
-                  <div
-                    className={cn(
-                      "overflow-hidden transition-all duration-300",
-                      openFaq === idx
-                        ? "max-h-96 opacity-100"
-                        : "max-h-0 opacity-0",
-                    )}
-                  >
-                    <div className="px-8 pb-8 text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* 5. FINAL CTA */}
       <section className="py-40 relative">
@@ -740,15 +652,7 @@ const Pricing = () => {
                   Upgrade Today
                 </Button>
               </Link>
-              <Link to="/contact">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-16 px-12 rounded-2xl border-slate-300 dark:border-white/20 text-slate-700 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
-                >
-                  Talk to Support
-                </Button>
-              </Link>
+
             </div>
           </AnimatedSection>
         </div>

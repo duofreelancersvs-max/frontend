@@ -5,24 +5,19 @@ import {
   User,
   Lock,
   Shield,
-  Palette,
   Phone,
-  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useThemeStore } from "@/stores/theme.store";
 import { userService, settingsService, clientService } from "@/services";
 import type {
   PrivacySettings,
-  PreferenceSettings,
 } from "@/services/settings.service";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 
 const ClientSettings = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
-  const { theme, setTheme } = useThemeStore();
 
   const [activeSection, setActiveSection] = useState("account");
 
@@ -46,12 +41,6 @@ const ClientSettings = () => {
     allowMessages: true,
     displayEarnings: false,
     showOnlineStatus: true,
-  });
-
-  const [preferencesForm, setPreferencesForm] = useState<PreferenceSettings>({
-    language: "en",
-    timezone: "Asia/Kolkata",
-    currency: "INR",
   });
 
   const [passwordForm, setPasswordForm] = useState({
@@ -81,7 +70,6 @@ const ClientSettings = () => {
 
         if (settingsData.status === "fulfilled" && settingsData.value) {
           setPrivacyForm(settingsData.value.privacy);
-          setPreferencesForm(settingsData.value.preferences);
         }
 
         if (clientData.status === "fulfilled" && clientData.value) {
@@ -146,20 +134,20 @@ const ClientSettings = () => {
     }
   };
 
-  const handlePreferencesSave = async () => {
-    try {
-      setSaving(true);
-      await settingsService.updateSettings({
-        preferences: preferencesForm,
+  const [isGoogleLogin, setIsGoogleLogin] = useState(false);
+
+  useEffect(() => {
+    import("@/lib/supabase").then(({ supabase }) => {
+      supabase.auth.getUser().then(({ data }) => {
+        if (
+          data?.user?.app_metadata?.provider === "google" ||
+          data?.user?.identities?.some((id) => id.provider === "google")
+        ) {
+          setIsGoogleLogin(true);
+        }
       });
-      alert("Preferences saved successfully!");
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-      alert("Failed to save preferences");
-    } finally {
-      setSaving(false);
-    }
-  };
+    });
+  }, []);
 
   const handlePasswordSave = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -200,10 +188,9 @@ const ClientSettings = () => {
 
   const settingsSections = [
     { id: "account", label: "Account", icon: User },
-    { id: "contact", label: "Contact Details", icon: Phone },
+    { id: "contact", label: "Contact Info", icon: Phone },
     { id: "security", label: "Security", icon: Lock },
     { id: "privacy", label: "Privacy", icon: Shield },
-    { id: "preferences", label: "Preferences", icon: Palette },
   ];
 
   if (loading) {
@@ -242,6 +229,81 @@ const ClientSettings = () => {
             </div>
           </div>
           <div className="lg:col-span-3">
+              {activeSection === "security" && (
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
+                    Security Settings
+                  </h2>
+                  <div className="space-y-4">
+                    {isGoogleLogin && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm max-w-md">
+                        You logged in with Google. Password changes are managed by your Google account.
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                        Current Password
+                      </label>
+                      <Input
+                        type="password"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) =>
+                          setPasswordForm((prev) => ({
+                            ...prev,
+                            currentPassword: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter current password"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                        New Password
+                      </label>
+                      <Input
+                        type="password"
+                        value={passwordForm.newPassword}
+                        onChange={(e) =>
+                          setPasswordForm((prev) => ({
+                            ...prev,
+                            newPassword: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter new password"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                        Confirm Password
+                      </label>
+                      <Input
+                        type="password"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) =>
+                          setPasswordForm((prev) => ({
+                            ...prev,
+                            confirmPassword: e.target.value,
+                          }))
+                        }
+                        placeholder="Confirm new password"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    className="bg-teal hover:bg-teal-light text-white disabled:opacity-50"
+                    onClick={handlePasswordSave}
+                    disabled={saving || isGoogleLogin}
+                  >
+                    {saving ? "Updating..." : "Update Password"}
+                  </Button>
+                </div>
+              )}
             {activeSection === "account" && (
                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
                 <h2 className="text-lg font-bold text-navy dark:text-white">
@@ -359,73 +421,7 @@ const ClientSettings = () => {
                 </Button>
               </div>
             )}
-            {activeSection === "security" && (
-               <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
-                <h2 className="text-lg font-bold text-navy dark:text-white">
-                  Security Settings
-                </h2>
-                <div className="space-y-4">
-                   <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Current Password
-                    </label>
-                    <Input
-                      type="password"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) =>
-                        setPasswordForm((prev) => ({
-                          ...prev,
-                          currentPassword: e.target.value,
-                        }))
-                      }
-                       placeholder="Enter current password"
-                      className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
-                    />
-                  </div>
-                   <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      New Password
-                    </label>
-                    <Input
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) =>
-                        setPasswordForm((prev) => ({
-                          ...prev,
-                          newPassword: e.target.value,
-                        }))
-                      }
-                       placeholder="Enter new password"
-                      className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
-                    />
-                  </div>
-                   <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Confirm Password
-                    </label>
-                    <Input
-                      type="password"
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordForm((prev) => ({
-                          ...prev,
-                          confirmPassword: e.target.value,
-                        }))
-                      }
-                       placeholder="Confirm new password"
-                      className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
-                    />
-                  </div>
-                </div>
-                <Button
-                  className="bg-teal hover:bg-teal-light text-white"
-                  onClick={handlePasswordSave}
-                  disabled={saving}
-                >
-                  {saving ? "Updating..." : "Update Password"}
-                </Button>
-              </div>
-            )}
+
             {activeSection === "privacy" && (
                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
                 <h2 className="text-lg font-bold text-navy dark:text-white">
@@ -487,87 +483,6 @@ const ClientSettings = () => {
                   disabled={saving}
                 >
                   {saving ? "Saving..." : "Save Settings"}
-                </Button>
-              </div>
-            )}
-            {activeSection === "preferences" && (
-              <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
-                <h2 className="text-lg font-bold text-navy dark:text-white">Preferences</h2>
-                <div className="grid gap-6">
-                  {/* Dark Mode Toggle */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-2">
-                        <Moon size={16} /> Dark Mode
-                      </label>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">Switch between light and dark theme</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                      className={cn(
-                        "w-12 h-6 rounded-full relative transition-colors",
-                        theme === "dark" ? "bg-teal" : "bg-slate-300 dark:bg-white/10"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                          theme === "dark" ? "right-1" : "left-1"
-                        )}
-                      />
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Language
-                    </label>
-                    <select
-                      value={preferencesForm.language}
-                      onChange={(e) =>
-                        setPreferencesForm((prev) => ({ ...prev, language: e.target.value }))
-                      }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                    >
-                      <option value="en">English</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Timezone
-                    </label>
-                    <select
-                      value={preferencesForm.timezone}
-                      onChange={(e) =>
-                        setPreferencesForm((prev) => ({ ...prev, timezone: e.target.value }))
-                      }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                    >
-                      <option value="Asia/Kolkata">IST (UTC+5:30)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Currency
-                    </label>
-                    <select
-                      value={preferencesForm.currency}
-                      onChange={(e) =>
-                        setPreferencesForm((prev) => ({ ...prev, currency: e.target.value }))
-                      }
-                      className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                    >
-                      <option value="INR">INR (₹)</option>
-                    </select>
-                  </div>
-                </div>
-                <Button
-                  className="bg-teal hover:bg-teal-light text-white"
-                  onClick={handlePreferencesSave}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Preferences"}
                 </Button>
               </div>
             )}

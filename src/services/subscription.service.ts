@@ -12,7 +12,6 @@ export interface Subscription {
     maxProjects: number;
     maxApplications: number;
     prioritySupport: boolean;
-    analytics: boolean;
     featuredProfile: boolean;
   };
 }
@@ -26,7 +25,6 @@ export interface SubscriptionPlan {
     maxProjects: number;
     maxApplications: number;
     prioritySupport: boolean;
-    analytics: boolean;
     featuredProfile: boolean;
   };
 }

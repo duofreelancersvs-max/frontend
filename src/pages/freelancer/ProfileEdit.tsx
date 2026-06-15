@@ -121,6 +121,7 @@ const FreelancerProfileEdit = () => {
     displayName: "",
     headline: "",
     bio: "",
+    contactInfo: "",
 
     availability: "full-time",
     category: "Editing",
@@ -170,6 +171,7 @@ const FreelancerProfileEdit = () => {
       displayName: data.displayName || "",
       headline: data.headline || "",
       bio: data.bio || "",
+      contactInfo: data.contactInfo || "",
 
       availability: data.availability || "full-time",
       category: data.category || "Editing",
@@ -220,6 +222,7 @@ const FreelancerProfileEdit = () => {
         displayName: formData.displayName,
         headline: formData.headline,
         bio: formData.bio,
+        contactInfo: formData.contactInfo,
 
         availability: formData.availability,
         category: formData.category,
@@ -689,6 +692,23 @@ const FreelancerProfileEdit = () => {
                             }
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
                             placeholder="Public display name"
+                          />
+                        </div>
+
+                        {/* Contact Info */}
+                        <div>
+                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
+                            Contact Email or Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.contactInfo}
+                            onChange={(e) =>
+                              handleInputChange("contactInfo", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white"
+                            placeholder="e.g., 9876543210 or mail@example.com"
+                            required
                           />
                         </div>
                       </div>

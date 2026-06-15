@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen, waitFor, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, fireEvent } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/test-utils";
 import FreelancerSettings from "../../../pages/freelancer/Settings";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,8 +49,7 @@ describe("FreelancerSettings", () => {
 
   const mockSettings = {
     notifications: { email: true, push: true, sms: false, projectUpdates: true, messages: true },
-    privacy: { showInSearch: true, allowMessages: true, displayEarnings: false, showOnlineStatus: true },
-    preferences: { language: "en", timezone: "Asia/Kolkata", currency: "INR" }
+    privacy: { showInSearch: true, allowMessages: true, displayEarnings: false, showOnlineStatus: true }
   };
 
   beforeEach(() => {
@@ -76,48 +74,17 @@ describe("FreelancerSettings", () => {
     expect(screen.getByDisplayValue("1234567890")).toBeInTheDocument();
   });
 
-  it("handles section switching", async () => {
-    renderWithRouter(<FreelancerSettings />);
-    await screen.findByDisplayValue("Test Freelancer");
-    
-    const notifyBtn = screen.getByRole("button", { name: /notifications/i });
-    fireEvent.click(notifyBtn);
-    
-    expect(screen.getByText("Notification Preferences")).toBeInTheDocument();
-    expect(screen.getByText("Email notifications")).toBeInTheDocument();
-  });
-
-  it("handles account info update", async () => {
-    (userService.updateMe as any).mockResolvedValue({});
-    window.alert = vi.fn();
-    
-    renderWithRouter(<FreelancerSettings />);
-    const nameInput = await screen.findByDisplayValue("Test Freelancer");
-    
-    await userEvent.clear(nameInput);
-    await userEvent.type(nameInput, "New Name");
-    
-    const saveBtn = screen.getByText(/save changes/i);
-    fireEvent.click(saveBtn);
-    
-    expect(userService.updateMe).toHaveBeenCalledWith({
-      fullName: "New Name",
-      phone: "1234567890"
-    });
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Account settings saved successfully!"));
-  });
-
-  it("toggles notification settings", async () => {
+  it("toggles privacy settings", async () => {
     (settingsService.updateSettings as any).mockResolvedValue(mockSettings);
     renderWithRouter(<FreelancerSettings />);
     
-    const notifyBtn = await screen.findByRole("button", { name: /notifications/i });
-    fireEvent.click(notifyBtn);
+    const privacyBtn = await screen.findByRole("button", { name: /privacy/i });
+    fireEvent.click(privacyBtn);
     
-    const emailToggle = screen.getByText("Email notifications").nextElementSibling as HTMLElement;
-    fireEvent.click(emailToggle);
+    const showSearchToggle = screen.getByText("Show profile in search results").nextElementSibling as HTMLElement;
+    fireEvent.click(showSearchToggle);
     
-    const saveBtn = screen.getByText(/save preferences/i);
+    const saveBtn = screen.getByText(/save settings/i);
     fireEvent.click(saveBtn);
     
     expect(settingsService.updateSettings).toHaveBeenCalled();

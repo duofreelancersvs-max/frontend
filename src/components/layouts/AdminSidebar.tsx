@@ -18,6 +18,7 @@ import {
   Flag,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   name: string;
@@ -108,6 +109,12 @@ const AdminSidebar = () => {
       ],
     },
     {
+      title: "ADMIN PROJECTS",
+      items: [
+        { name: "My Projects", path: "/admin/my-projects", icon: Briefcase },
+      ],
+    },
+    {
       title: "SYSTEM",
       items: [
         { name: "Reports", path: "/admin/reports", icon: Flag },
@@ -138,13 +145,21 @@ const AdminSidebar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all group",
                     isActive
-                      ? "bg-indigo-500/20 text-white shadow-[inset_4px_0_0_0_#6366f1]"
-                      : "text-slate-400 hover:bg-white/5 hover:text-white"
-                  }`}
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                      : "text-white hover:bg-white/5 hover:text-white"
+                  )}
                 >
-                  <Icon size={18} className={`${isActive ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300 transition-colors"}`} />
+                  <Icon 
+                    size={20} 
+                    className={cn(
+                      isActive
+                        ? "text-white"
+                        : "text-white group-hover:text-white transition-colors"
+                    )} 
+                  />
                   <span>{item.name}</span>
                   {item.badge !== undefined && (
                     <span

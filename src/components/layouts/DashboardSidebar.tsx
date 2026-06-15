@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   PieChart,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,7 +26,6 @@ const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/freelancer/dashboard" },
   { label: "Find Work", icon: Briefcase, href: "/projects" },
   { label: "Messages", icon: MessageSquare, href: "/freelancer/messages" },
-  { label: "Earnings", icon: Wallet, href: "/freelancer/earnings" },
   { label: "Subscription", icon: PieChart, href: "/freelancer/subscription" },
   { label: "Profile", icon: Settings, href: "/freelancer/profile" },
 ];
@@ -36,7 +34,7 @@ const DashboardSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
-  const role = user?.role || 'freelancer';
+  const role = user?.role || "freelancer";
 
   return (
     <aside
@@ -46,8 +44,66 @@ const DashboardSidebar = () => {
       )}
     >
       {/* Logo Area */}
-      <div className="h-20 flex items-center px-6 mb-4">
+      <div className="h-20 flex items-center px-6 shrink-0">
         <Logo size="sm" withText={!isCollapsed} />
+      </div>
+
+      {/* User Profile Card */}
+      <div className="px-4 mb-4 mt-2 shrink-0">
+        <div
+          className={cn(
+            "bg-slate-50 dark:bg-white/5 rounded-3xl p-4 transition-all border border-slate-100 dark:border-white/5 group/profile relative",
+            isCollapsed ? "p-2 items-center" : "",
+          )}
+        >
+          <div
+            className={cn(
+              "flex items-center gap-3",
+              isCollapsed ? "flex-col" : "",
+            )}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal to-royal-blue p-0.5 shadow-lg shrink-0">
+              <div className="w-full h-full rounded-[0.85rem] bg-white dark:bg-navy flex items-center justify-center overflow-hidden">
+                <img
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || "User")}&background=0D9488&color=fff`}
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black text-navy dark:text-white truncate uppercase tracking-tight">
+                  {user?.fullName?.split(" ")[0] || "User"}
+                </p>
+                <p className="text-xxs font-bold text-slate-400 uppercase tracking-widest">
+                  {role}
+                </p>
+              </div>
+            )}
+
+            {!isCollapsed && (
+              <button
+                onClick={() => logout()}
+                className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all border border-slate-100 dark:border-white/5 flex items-center justify-center shadow-sm"
+                title="Log Out"
+              >
+                <LogOut size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Usage Indicator */}
+      <div
+        className={cn(
+          "px-4 mb-2 transition-all duration-300",
+          isCollapsed ? "hidden" : "block",
+        )}
+      >
+        <UsageIndicator compact={true} hideCta={true} className="w-full" />
       </div>
 
       {/* Navigation */}
@@ -66,17 +122,21 @@ const DashboardSidebar = () => {
                     : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-navy dark:hover:text-white",
                 )}
               >
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                  isActive 
-                    ? "bg-teal text-white shadow-lg shadow-teal/20" 
-                    : "bg-slate-50 dark:bg-white/5 text-slate-400 group-hover:bg-white dark:group-hover:bg-white/10 group-hover:text-teal"
-                )}>
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+                    isActive
+                      ? "bg-teal text-white shadow-lg shadow-teal/20"
+                      : "bg-slate-50 dark:bg-white/5 text-slate-400 group-hover:bg-white dark:group-hover:bg-white/10 group-hover:text-teal",
+                  )}
+                >
                   <item.icon size={20} />
                 </div>
-                
+
                 {!isCollapsed && (
-                  <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                  <span className="font-bold text-sm tracking-tight">
+                    {item.label}
+                  </span>
                 )}
 
                 {isActive && !isCollapsed && (
@@ -96,47 +156,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Usage Indicator */}
-      <div className={cn("px-4 mb-2 transition-all duration-300", isCollapsed ? "hidden" : "block")}>
-        <UsageIndicator compact={true} hideCta={true} className="w-full" />
-      </div>
-
-      {/* User Profile & Collapse */}
       <div className="p-4 mt-auto">
-        <div className={cn(
-          "bg-slate-50 dark:bg-white/5 rounded-3xl p-4 transition-all border border-slate-100 dark:border-white/5 group/profile relative",
-          isCollapsed ? "p-2 items-center" : ""
-        )}>
-          <div className={cn("flex items-center gap-3", isCollapsed ? "flex-col" : "")}>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal to-royal-blue p-0.5 shadow-lg shrink-0">
-              <div className="w-full h-full rounded-[0.85rem] bg-white dark:bg-navy flex items-center justify-center overflow-hidden">
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=0D9488&color=fff`}
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black text-navy dark:text-white truncate uppercase tracking-tight">
-                  {user?.fullName?.split(' ')[0] || "User"}
-                </p>
-                <p className="text-xxs font-bold text-slate-400 uppercase tracking-widest">{role}</p>
-              </div>
-            )}
-
-            {!isCollapsed && (
-              <button 
-                onClick={() => logout()}
-                className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all border border-slate-100 dark:border-white/5 flex items-center justify-center shadow-sm"
-              >
-                <LogOut size={18} />
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Collapse Toggle */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}

@@ -4,25 +4,20 @@ import {
   User,
   Lock,
   Shield,
-  Palette,
-  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useThemeStore } from "@/stores/theme.store";
 import { userService, settingsService, freelancerService } from "@/services";
 import type { FreelancerProfile } from "@/services/freelancer.service";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import type {
   PrivacySettings,
-  PreferenceSettings,
 } from "@/services/settings.service";
 
 const FreelancerSettings = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  const { theme, setTheme } = useThemeStore();
   const [activeSection, setActiveSection] = useState("account");
 
 
@@ -40,12 +35,6 @@ const FreelancerSettings = () => {
     allowMessages: true,
     displayEarnings: false,
     showOnlineStatus: true,
-  });
-
-  const [preferencesForm, setPreferencesForm] = useState<PreferenceSettings>({
-    language: "en",
-    timezone: "Asia/Kolkata",
-    currency: "INR",
   });
 
   const [passwordForm, setPasswordForm] = useState({
@@ -84,7 +73,6 @@ const FreelancerSettings = () => {
 
         if (settingsData.status === "fulfilled" && settingsData.value) {
           setPrivacyForm(settingsData.value.privacy);
-          setPreferencesForm(settingsData.value.preferences);
         }
       } catch (error) {
         console.error("Error fetching settings data:", error);
@@ -127,21 +115,20 @@ const FreelancerSettings = () => {
     }
   };
 
-  const handlePreferencesSave = async () => {
-    try {
-      setSaving(true);
-      const result = await settingsService.updateSettings({
-        preferences: preferencesForm,
+  const [isGoogleLogin, setIsGoogleLogin] = useState(false);
+
+  useEffect(() => {
+    import("@/lib/supabase").then(({ supabase }) => {
+      supabase.auth.getUser().then(({ data }) => {
+        if (
+          data?.user?.app_metadata?.provider === "google" ||
+          data?.user?.identities?.some((id) => id.provider === "google")
+        ) {
+          setIsGoogleLogin(true);
+        }
       });
-      setPreferencesForm(result.preferences);
-      alert("Preferences saved successfully!");
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-      alert("Failed to save preferences");
-    } finally {
-      setSaving(false);
-    }
-  };
+    });
+  }, []);
 
   const handlePasswordSave = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -177,7 +164,6 @@ const FreelancerSettings = () => {
     { id: "account", label: "Account", icon: User },
     { id: "security", label: "Security", icon: Lock },
     { id: "privacy", label: "Privacy", icon: Shield },
-    { id: "preferences", label: "Preferences", icon: Palette },
   ];
 
   const togglePrivacy = (key: keyof PrivacySettings) => {
@@ -292,6 +278,11 @@ const FreelancerSettings = () => {
                     Security Settings
                   </h2>
                   <div className="space-y-4">
+                    {isGoogleLogin && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm max-w-md">
+                        You logged in with Google. Password changes are managed by your Google account.
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Current Password
@@ -306,7 +297,8 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter current password"
-                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
                       />
                     </div>
                     <div>
@@ -323,7 +315,8 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Enter new password"
-                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
                       />
                     </div>
                     <div>
@@ -340,14 +333,15 @@ const FreelancerSettings = () => {
                           }))
                         }
                         placeholder="Confirm new password"
-                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        disabled={isGoogleLogin}
+                        className="max-w-md dark:bg-white/5 dark:border-white/10 dark:text-white disabled:opacity-50"
                       />
                     </div>
                   </div>
                   <Button
-                    className="bg-teal hover:bg-teal-light text-white"
+                    className="bg-teal hover:bg-teal-light text-white disabled:opacity-50"
                     onClick={handlePasswordSave}
-                    disabled={saving}
+                    disabled={saving || isGoogleLogin}
                   >
                     {saving ? "Updating..." : "Update Password"}
                   </Button>
@@ -411,74 +405,6 @@ const FreelancerSettings = () => {
                     disabled={saving}
                   >
                     {saving ? "Saving..." : "Save Settings"}
-                  </Button>
-                </div>
-              )}
-              {activeSection === "preferences" && (
-                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
-                  <h2 className="text-lg font-bold text-navy dark:text-white">Preferences</h2>
-                  <div className="grid gap-6">
-                    {/* Dark Mode Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-2">
-                          <Moon size={16} /> Dark Mode
-                        </label>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Switch between light and dark theme</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className={cn(
-                          "w-12 h-6 rounded-full relative transition-colors",
-                          theme === "dark" ? "bg-teal" : "bg-slate-300 dark:bg-white/10"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                            theme === "dark" ? "right-1" : "left-1"
-                          )}
-                        />
-                      </button>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Language</label>
-                      <select
-                        value={preferencesForm.language}
-                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, language: e.target.value }))}
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                      >
-                        <option value="en">English</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Timezone</label>
-                      <select
-                        value={preferencesForm.timezone}
-                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, timezone: e.target.value }))}
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                      >
-                        <option value="Asia/Kolkata">IST (UTC+5:30)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Currency</label>
-                      <select
-                        value={preferencesForm.currency}
-                        onChange={(e) => setPreferencesForm((prev) => ({ ...prev, currency: e.target.value }))}
-                        className="w-full max-w-md px-3 py-2 border border-slate-200 dark:border-white/10 rounded-lg dark:bg-white/5 dark:text-white"
-                      >
-                        <option value="INR">INR (₹)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <Button
-                    className="bg-teal hover:bg-teal-light text-white"
-                    onClick={handlePreferencesSave}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save Preferences"}
                   </Button>
                 </div>
               )}

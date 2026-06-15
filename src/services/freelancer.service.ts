@@ -39,6 +39,7 @@ export interface FreelancerProfile {
   userId: string;
   firstName: string;
   lastName: string;
+  contactInfo: string;
   displayName?: string;
   headline?: string;
   bio?: string;

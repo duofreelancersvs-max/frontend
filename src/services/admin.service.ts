@@ -60,6 +60,7 @@ export interface AdminProject {
   category?: string;
   clientId: string;
   clientName?: string;
+  customClientName?: string;
   hiredFreelancerId?: string;
   deadline?: string;
   createdAt: string;
@@ -235,6 +236,9 @@ export const adminService = {
     api.get<{ users: AdminUser[]; pagination: PaginationMeta }>("/admin/users", {
       params,
     }),
+
+  createUser: (data: any) =>
+    api.post<{ message: string; user: AdminUser }>("/admin/users", data),
 
   getUserById: (userId: string) =>
     api.get<{ user: AdminUser; profile: unknown }>(`/admin/users/${userId}`),

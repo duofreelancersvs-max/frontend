@@ -31,19 +31,16 @@ export function DraggableChatWidget({ isOpen, onClose, children }: DraggableChat
         style={{
           position: "fixed",
           zIndex: 9999,
-          /* ── MOBILE: fullscreen ── */
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           /* Grid with 3 rows: widget-header | content | (nothing) */
           display: "grid",
           gridTemplateRows: "auto 1fr",
           overflow: "hidden",
         }}
         className="
+          bottom-0 right-0
+          w-full h-[100dvh]
           bg-white dark:bg-background
-          sm:top-auto sm:left-auto sm:right-6 sm:bottom-6
+          sm:bottom-6 sm:right-6
           sm:w-[450px] sm:h-[650px] sm:max-h-[calc(100dvh-3rem)]
           sm:rounded-2xl sm:border sm:border-slate-200 sm:dark:border-white/10
           sm:shadow-[0_0_40px_rgba(0,0,0,0.3)]

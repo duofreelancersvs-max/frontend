@@ -28,14 +28,13 @@ const planFeatures = {
   free: [
     { feature: "Profile Visibility", included: true },
     { feature: "Browse Projects", included: true },
-    { feature: "5 Applications/month", included: true },
+    { feature: "30 Applications/month", included: true },
     { feature: "Basic Search Filters", included: true },
     { feature: "Standard Support", included: true },
     { feature: "Unlimited Applications", included: false },
     { feature: "Priority in Search", included: false },
     { feature: "Featured Badge", included: false },
     { feature: "Direct Messaging", included: false },
-    { feature: "Analytics Dashboard", included: false },
     { feature: "Early Access to Projects", included: false },
   ],
   pro: [
@@ -47,7 +46,6 @@ const planFeatures = {
     { feature: "Top Priority in Search", included: true },
     { feature: "Pro Badge", included: true },
     { feature: "Direct Messaging", included: true },
-    { feature: "Analytics Dashboard", included: true },
     { feature: "Early Access to Projects", included: true },
   ],
 };
@@ -59,7 +57,7 @@ const comparisonFeatures = [
     free: "Basic",
     pro: "Enhanced",
   },
-  { name: "Monthly Applications", free: "5", pro: "Unlimited" },
+  { name: "Monthly Applications", free: "30", pro: "Unlimited" },
   {
     name: "Search Priority",
     free: "Standard",
@@ -71,12 +69,6 @@ const comparisonFeatures = [
     pro: "Pro Badge",
   },
   { name: "Direct Messaging", free: false, pro: true },
-  { name: "Video Calls", free: false, pro: true },
-  {
-    name: "Analytics Dashboard",
-    free: false,
-    pro: "Advanced",
-  },
   { name: "Early Project Access", free: false, pro: true },
   {
     name: "Featured in Directory",
@@ -94,7 +86,6 @@ const comparisonFeatures = [
     free: "48 hours",
     pro: "4 hours",
   },
-  { name: "Custom Profile URL", free: false, pro: true },
 ];
 
 // FAQ data
@@ -146,7 +137,7 @@ const testimonials = [
     role: "3D Animator",
     plan: "Pro",
     quote:
-      "The analytics dashboard helped me understand what clients are looking for. My profile views doubled!",
+      "Having unlimited applications helped me reach out to more clients. My profile views doubled!",
     rating: 5,
   },
   {

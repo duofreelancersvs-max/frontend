@@ -93,7 +93,7 @@ const UsageIndicator = ({
   const body = (
     <div
       className={cn(
-        compact ? "px-3 py-1.5" : "px-4 py-2.5",
+        compact ? "px-2.5 py-1.5" : "px-4 py-2.5",
         "flex items-center gap-3 rounded-xl border",
         colorClasses.bg,
         colorClasses.border,
@@ -102,10 +102,10 @@ const UsageIndicator = ({
       role="status"
       aria-label={`${used} of ${limit} applications used this month`}
     >
-      <Icon size={compact ? 14 : 16} className={colorClasses.text} />
+      <Icon size={compact ? 12 : 16} className={colorClasses.text} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <p className={cn("text-xs font-semibold", colorClasses.text)}>
+          <p className={cn(compact ? "text-[10px] font-medium" : "text-xs font-semibold", colorClasses.text)}>
             {isAtCap
               ? "Application limit reached"
               : `${remaining} of ${limit} application${limit === 1 ? "" : "s"} left`}

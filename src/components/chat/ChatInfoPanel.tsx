@@ -55,19 +55,25 @@ const ChatInfoPanel = ({
     >
       {/* Profile Header */}
       <div className="p-6 text-center border-b border-slate-100 dark:border-white/5">
-        <ChatAvatar
-          name={participant.name}
-          size="xl"
-          online={false}
-          showOnlineIndicator={false}
-          className="mx-auto mb-3"
-        />
-        <div className="flex items-center justify-center gap-1.5 mb-1">
-          <h3 className="font-bold text-navy dark:text-white">{participant.name}</h3>
-          {participant.verified && (
-            <VerifyIcon size={16} className="text-teal" />
-          )}
-        </div>
+        <Link 
+          to={role === "client" ? `/freelancer/${participant.userId}` : `/freelancer/client/${participant.userId}`}
+          state={{ participant }}
+          className="block hover:opacity-80 transition-opacity"
+        >
+          <ChatAvatar
+            name={participant.name}
+            size="xl"
+            online={false}
+            showOnlineIndicator={false}
+            className="mx-auto mb-3"
+          />
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <h3 className="font-bold text-navy dark:text-white">{participant.name}</h3>
+            {participant.verified && (
+              <VerifyIcon size={16} className="text-teal" />
+            )}
+          </div>
+        </Link>
         {participant.title && (
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{participant.title}</p>
         )}
@@ -140,52 +146,64 @@ const ChatInfoPanel = ({
       )}
 
       {/* Quick Actions */}
-      {(role === "client" || (role === "freelancer" && project)) && (
-        <div className="p-5 space-y-2">
-          <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
-            Quick Actions
-          </h4>
-          {role === "client" ? (
-            <>
-              <Link to={`/freelancer/${participant.userId}`} className="block">
+      <div className="p-5 space-y-2">
+        <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
+          Quick Actions
+        </h4>
+        {role === "client" ? (
+          <>
+            <Link to={`/freelancer/${participant.userId}`} className="block">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start h-9 text-sm border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
+              >
+                <User size={14} className="mr-2" /> View Profile
+              </Button>
+            </Link>
+            <Button
+              size="sm"
+              className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
+            >
+              <CreditCard size={14} className="mr-2" /> Hire Freelancer
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+            >
+              <Ban size={14} className="mr-2" /> Block User
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link 
+              to={`/freelancer/client/${participant.userId}`} 
+              state={{ participant }}
+              className="block"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start h-9 text-sm border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
+              >
+                <User size={14} className="mr-2" /> View Profile
+              </Button>
+            </Link>
+            {project && (
+              <Link to={`/freelancer/project/${project.id}`} className="block">
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start h-9 text-sm border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
                 >
-                  <User size={14} className="mr-2" /> View Profile
+                  <ExternalLink size={14} className="mr-2" /> View Project
                 </Button>
               </Link>
-              <Button
-                size="sm"
-                className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
-              >
-                <CreditCard size={14} className="mr-2" /> Hire Freelancer
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
-              >
-                <Ban size={14} className="mr-2" /> Block User
-              </Button>
-            </>
-          ) : (
-            <>
-              {project && (
-                <Link to={`/freelancer/project/${project.id}`} className="block">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start border-slate-200 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
-                  >
-                    <ExternalLink size={16} className="mr-2" /> View Project
-                  </Button>
-                </Link>
-              )}
-            </>
-          )}
-        </div>
-      )}
+            )}
+          </>
+        )}
+      </div>
 
       {/* Online Status Footer */}
       <div className="mt-auto p-5 border-t border-slate-100">

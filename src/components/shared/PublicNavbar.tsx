@@ -1,9 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { 
-  Menu, X, ArrowRight, ChevronDown, 
-  LayoutDashboard, Briefcase, MessageSquare, Settings, LogOut, PieChart, Wallet, 
-  Home, Folder, PlusCircle, Search, Mail, Star
+import {
+  Menu,
+  X,
+  ArrowRight,
+  ChevronDown,
+  LayoutDashboard,
+  Briefcase,
+  MessageSquare,
+  Settings,
+  LogOut,
+  PieChart,
+  Home,
+  Folder,
+  PlusCircle,
+  Search,
+  Mail,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,7 +43,6 @@ const freelancerNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/freelancer/dashboard" },
   { label: "Find Work", icon: Briefcase, href: "/projects" },
   { label: "Messages", icon: MessageSquare, href: "/freelancer/messages" },
-  { label: "Earnings", icon: Wallet, href: "/freelancer/earnings" },
   { label: "Subscription", icon: PieChart, href: "/freelancer/subscription" },
   { label: "Profile", icon: Settings, href: "/freelancer/profile" },
 ];
@@ -64,9 +76,11 @@ const MegaMenu = ({
   };
 
   return (
-    <div 
+    <div
       className="static"
-      onMouseEnter={() => { if (Date.now() - menuLastClickTime > 600) onOpen(); }}
+      onMouseEnter={() => {
+        if (Date.now() - menuLastClickTime > 600) onOpen();
+      }}
       onMouseLeave={() => onClose()}
     >
       <NavLink
@@ -78,39 +92,50 @@ const MegaMenu = ({
               ? "text-teal dark:text-teal-light font-bold"
               : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white"
             : isActive
-            ? "text-teal-light font-bold"
-            : "text-white/90 hover:text-white"
+              ? "text-teal-light font-bold"
+              : "text-white/90 hover:text-white",
         )}
         onClick={handleClose}
       >
         {label}
-        <ChevronDown size={14} className={cn("transition-transform duration-300", isOpen && "rotate-180")} />
+        <ChevronDown
+          size={14}
+          className={cn(
+            "transition-transform duration-300",
+            isOpen && "rotate-180",
+          )}
+        />
       </NavLink>
 
       {/* Full-width Dropdown Content */}
-      <div 
+      <div
         className={cn(
           "absolute left-0 top-full w-full bg-white dark:bg-[#050B15] shadow-2xl border-t border-slate-100 dark:border-white/5 transition-all duration-300 ease-out z-[48]",
-          isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"
+          isOpen
+            ? "opacity-100 visible translate-y-0"
+            : "opacity-0 invisible translate-y-2",
         )}
       >
         {/* Invisible bridge to prevent gap triggering mouseLeave */}
         <div className="absolute left-0 -top-8 w-full h-8 bg-transparent" />
-        
+
         <div className="container mx-auto px-4 lg:px-8 py-10 max-h-[80vh] overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-12">
             {categories.map((category) => (
               <div key={category._id} className="space-y-4">
-                <Link 
-                  to={`${href}?category=${encodeURIComponent(category.name)}`} 
+                <Link
+                  to={`${href}?category=${encodeURIComponent(category.name)}`}
                   className="block text-navy dark:text-white font-bold mb-3 hover:text-teal dark:hover:text-teal-light transition-colors"
                   onClick={handleClose}
                 >
-                  {category.name}{isJobType ? " jobs" : ""}
+                  {category.name}
+                  {isJobType ? " jobs" : ""}
                 </Link>
                 <ul className="space-y-3">
                   {category.skills.slice(0, 6).map((skill) => {
-                    const displayName = isJobType ? skill.skillName.replace(/s$/, '') + " jobs" : skill.skillName;
+                    const displayName = isJobType
+                      ? skill.skillName.replace(/s$/, "") + " jobs"
+                      : skill.skillName;
                     return (
                       <li key={skill._id}>
                         <Link
@@ -133,19 +158,21 @@ const MegaMenu = ({
   );
 };
 
-export const PublicNavbar = ({ 
+export const PublicNavbar = ({
   variant = "transparent",
-  dark = false
-}: { 
-  variant?: "transparent" | "white",
-  dark?: boolean
+  dark = false,
+}: {
+  variant?: "transparent" | "white";
+  dark?: boolean;
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryWithSkills[]>([]);
-  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+    {},
+  );
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
 
@@ -158,7 +185,8 @@ export const PublicNavbar = ({
   }, []);
 
   useEffect(() => {
-    publicService.getCategoriesWithSkills()
+    publicService
+      .getCategoriesWithSkills()
       .then(setCategories)
       .catch((err) => console.error("Failed to fetch categories", err));
   }, []);
@@ -179,16 +207,16 @@ export const PublicNavbar = ({
 
   return (
     <>
-    <nav
-      className={cn(
-        "fixed top-0 left-0 right-0 z-[50] transition-all duration-500",
-        isScrolled
-          ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-3"
-          : variant === "white"
-            ? "bg-white dark:bg-[#050B15] py-3 dark:shadow-none"
-            : "bg-transparent py-3",
-      )}
-    >
+      <nav
+        className={cn(
+          "fixed top-0 left-0 right-0 z-[50] transition-all duration-500",
+          isScrolled
+            ? "bg-white/80 dark:bg-[#050B15]/80 backdrop-blur-lg shadow-lg shadow-slate-200/20 dark:shadow-none py-3"
+            : variant === "white"
+              ? "bg-white dark:bg-[#050B15] py-3 dark:shadow-none"
+              : "bg-transparent py-3",
+        )}
+      >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center">
             {/* Logo Section - Takes 1/3 space or flex-1 */}
@@ -199,18 +227,30 @@ export const PublicNavbar = ({
             {/* Desktop Navigation - Centered */}
             <div className="hidden lg:flex items-center justify-center gap-1">
               {isAuthenticated ? (
-                (user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+                (user?.role === "client"
+                  ? clientNavItems
+                  : freelancerNavItems
+                ).map((item) => (
                   <NavLink
                     key={item.label}
                     to={item.href}
-                    className={({ isActive }) => cn(
-                      "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate flex items-center gap-1.5",
-                      isWhite || dark
-                        ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
-                        : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
-                    )}
+                    className={({ isActive }) =>
+                      cn(
+                        "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate flex items-center gap-1.5",
+                        isWhite || dark
+                          ? isActive
+                            ? "text-teal dark:text-teal-light font-bold"
+                            : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white"
+                          : isActive
+                            ? "text-teal-light font-bold"
+                            : "text-white/90 hover:text-white",
+                      )
+                    }
                   >
-                    <item.icon size={16} className={cn("hidden xl:block opacity-70")} />
+                    <item.icon
+                      size={16}
+                      className={cn("hidden xl:block opacity-70")}
+                    />
                     <span>{item.label}</span>
                   </NavLink>
                 ))
@@ -219,25 +259,25 @@ export const PublicNavbar = ({
                   <MegaMenu
                     label="Find Talent"
                     href="/freelancers"
-                    isActive={location.pathname.startsWith('/freelancers')}
+                    isActive={location.pathname.startsWith("/freelancers")}
                     isWhite={isWhite}
                     dark={dark}
                     categories={categories}
                     isJobType={false}
-                    isOpen={openMenu === 'talent'}
-                    onOpen={() => setOpenMenu('talent')}
+                    isOpen={openMenu === "talent"}
+                    onOpen={() => setOpenMenu("talent")}
                     onClose={() => setOpenMenu(null)}
                   />
                   <MegaMenu
                     label="Find Work"
                     href="/projects"
-                    isActive={location.pathname.startsWith('/projects')}
+                    isActive={location.pathname.startsWith("/projects")}
                     isWhite={isWhite}
                     dark={dark}
                     categories={categories}
                     isJobType={true}
-                    isOpen={openMenu === 'work'}
-                    onOpen={() => setOpenMenu('work')}
+                    isOpen={openMenu === "work"}
+                    onOpen={() => setOpenMenu("work")}
                     onClose={() => setOpenMenu(null)}
                   />
                   {[
@@ -248,12 +288,18 @@ export const PublicNavbar = ({
                     <NavLink
                       key={item.label}
                       to={item.href}
-                      className={({ isActive }) => cn(
-                        "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate",
-                        isWhite || dark
-                          ? (isActive ? "text-teal dark:text-teal-light font-bold" : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white")
-                          : (isActive ? "text-teal-light font-bold" : "text-white/90 hover:text-white"),
-                      )}
+                      className={({ isActive }) =>
+                        cn(
+                          "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 relative group truncate",
+                          isWhite || dark
+                            ? isActive
+                              ? "text-teal dark:text-teal-light font-bold"
+                              : "text-slate-600 dark:text-white/80 hover:text-navy dark:hover:text-white"
+                            : isActive
+                              ? "text-teal-light font-bold"
+                              : "text-white/90 hover:text-white",
+                        )
+                      }
                     >
                       {item.label}
                     </NavLink>
@@ -289,13 +335,16 @@ export const PublicNavbar = ({
                     </Link>
                     <div className="relative">
                       <button
-                        onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                        onClick={() =>
+                          setProfileDropdownOpen(!profileDropdownOpen)
+                        }
                         className={cn(
                           "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
                           isWhite || dark
                             ? "hover:bg-slate-100"
                             : "hover:bg-white/10",
-                          profileDropdownOpen && "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]"
+                          profileDropdownOpen &&
+                            "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]",
                         )}
                       >
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs shadow-lg">
@@ -305,7 +354,7 @@ export const PublicNavbar = ({
                                 .map((n: string) => n[0])
                                 .join("")
                                 .toUpperCase()
-                                : (user?.email?.[0] || "U").toUpperCase()}
+                            : (user?.email?.[0] || "U").toUpperCase()}
                         </div>
                       </button>
 
@@ -316,7 +365,7 @@ export const PublicNavbar = ({
                             className="fixed inset-0 z-10"
                             onClick={() => setProfileDropdownOpen(false)}
                           />
-                          <div 
+                          <div
                             className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 py-2 z-20 animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden"
                             onClick={() => setProfileDropdownOpen(false)}
                           >
@@ -325,20 +374,27 @@ export const PublicNavbar = ({
                                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                   Logged in as
                                 </p>
-                                <span className={cn(
-                                  "text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded",
-                                  user?.role === 'client' ? "bg-teal/10 text-teal" : "bg-royal-blue/10 text-royal-blue"
-                                )}>
+                                <span
+                                  className={cn(
+                                    "text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded",
+                                    user?.role === "client"
+                                      ? "bg-teal/10 text-teal"
+                                      : "bg-royal-blue/10 text-royal-blue",
+                                  )}
+                                >
                                   {user?.role}
                                 </span>
                               </div>
                               <p className="font-bold text-navy dark:text-white truncate">
-                                {user?.fullName || user?.email?.split('@')[0]}
+                                {user?.fullName || user?.email?.split("@")[0]}
                               </p>
                             </div>
-                            
+
                             <div className="p-1.5">
-                              {(user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+                              {(user?.role === "client"
+                                ? clientNavItems
+                                : freelancerNavItems
+                              ).map((item) => (
                                 <Link
                                   key={item.label}
                                   to={item.href}
@@ -404,7 +460,9 @@ export const PublicNavbar = ({
                 <button
                   className={cn(
                     "p-2 rounded-lg transition-colors",
-                    isWhite || dark ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5" : "text-white hover:bg-white/10",
+                    isWhite || dark
+                      ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                      : "text-white hover:bg-white/10",
                   )}
                   onClick={() => {
                     setMobileMenuOpen(!mobileMenuOpen);
@@ -431,7 +489,9 @@ export const PublicNavbar = ({
       <div
         className={cn(
           "lg:hidden fixed inset-0 z-[100] bg-white dark:bg-[#050B15] flex flex-col transition-all duration-500 ease-in-out transform",
-          mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none",
+          mobileMenuOpen
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-full opacity-0 pointer-events-none",
         )}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-[#050B15]">
@@ -450,20 +510,33 @@ export const PublicNavbar = ({
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xl shadow-lg">
                   {user?.fullName
-                    ? user.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+                    ? user.fullName
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .substring(0, 2)
                     : (user?.email?.[0] || "U").toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-bold text-navy dark:text-white truncate text-lg">{user?.fullName || "User"}</p>
-                    <span className={cn(
-                      "text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full shrink-0",
-                      user?.role === 'client' ? "bg-teal/10 text-teal dark:bg-teal/20" : "bg-royal-blue/10 text-royal-blue dark:bg-royal-blue/20"
-                    )}>
+                    <p className="font-bold text-navy dark:text-white truncate text-lg">
+                      {user?.fullName || "User"}
+                    </p>
+                    <span
+                      className={cn(
+                        "text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full shrink-0",
+                        user?.role === "client"
+                          ? "bg-teal/10 text-teal dark:bg-teal/20"
+                          : "bg-royal-blue/10 text-royal-blue dark:bg-royal-blue/20",
+                      )}
+                    >
                       {user?.role}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-white/60 truncate">{user?.email}</p>
+                  <p className="text-xs text-slate-500 dark:text-white/60 truncate">
+                    {user?.email}
+                  </p>
                 </div>
               </div>
             </div>
@@ -471,12 +544,23 @@ export const PublicNavbar = ({
 
           {!isAuthenticated && (
             <div className="mb-8 grid grid-cols-2 gap-4">
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
-                <Button variant="outline" className="w-full h-14 rounded-2xl border-slate-200 dark:border-white/10 text-navy dark:text-white font-bold text-base">
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-14 rounded-2xl border-slate-200 dark:border-white/10 text-navy dark:text-white font-bold text-base"
+                >
                   Login
                 </Button>
               </Link>
-              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
+              <Link
+                to="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block"
+              >
                 <Button className="w-full h-14 rounded-2xl bg-teal text-white font-bold text-base shadow-xl shadow-teal/20">
                   Create Account
                 </Button>
@@ -486,7 +570,10 @@ export const PublicNavbar = ({
 
           {isAuthenticated ? (
             <div className="space-y-1">
-              {(user?.role === "client" ? clientNavItems : freelancerNavItems).map((item) => (
+              {(user?.role === "client"
+                ? clientNavItems
+                : freelancerNavItems
+              ).map((item) => (
                 <Link
                   key={item.label}
                   to={item.href}
@@ -519,21 +606,34 @@ export const PublicNavbar = ({
             <div className="space-y-1">
               {/* Find Talent Mobile Accordion */}
               <div className="rounded-2xl overflow-hidden mb-1">
-                <button 
-                  onClick={() => setExpandedItems(prev => ({ ...prev, talent: !prev.talent }))}
+                <button
+                  onClick={() =>
+                    setExpandedItems((prev) => ({
+                      ...prev,
+                      talent: !prev.talent,
+                    }))
+                  }
                   className={cn(
                     "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
-                    expandedItems.talent ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                    expandedItems.talent
+                      ? "bg-slate-50 dark:bg-white/5 text-teal"
+                      : "hover:bg-slate-50 dark:hover:bg-white/5",
                   )}
                 >
                   Find Talent
-                  <ChevronDown className={cn("transition-transform duration-300", expandedItems.talent && "rotate-180")} size={20} />
+                  <ChevronDown
+                    className={cn(
+                      "transition-transform duration-300",
+                      expandedItems.talent && "rotate-180",
+                    )}
+                    size={20}
+                  />
                 </button>
                 {expandedItems.talent && (
                   <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <div key={category._id} className="space-y-3">
-                        <Link 
+                        <Link
                           to={`/freelancers?category=${encodeURIComponent(category.name)}`}
                           onClick={() => setMobileMenuOpen(false)}
                           className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
@@ -541,8 +641,8 @@ export const PublicNavbar = ({
                           {category.name}
                         </Link>
                         <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
-                          {category.skills.slice(0, 5).map(skill => (
-                            <Link 
+                          {category.skills.slice(0, 5).map((skill) => (
+                            <Link
                               key={skill._id}
                               to={`/freelancers?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
                               onClick={() => setMobileMenuOpen(false)}
@@ -560,21 +660,31 @@ export const PublicNavbar = ({
 
               {/* Find Work Mobile Accordion */}
               <div className="rounded-2xl overflow-hidden mb-1">
-                <button 
-                  onClick={() => setExpandedItems(prev => ({ ...prev, work: !prev.work }))}
+                <button
+                  onClick={() =>
+                    setExpandedItems((prev) => ({ ...prev, work: !prev.work }))
+                  }
                   className={cn(
                     "w-full flex items-center justify-between p-4 text-lg font-bold text-navy dark:text-white transition-all",
-                    expandedItems.work ? "bg-slate-50 dark:bg-white/5 text-teal" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                    expandedItems.work
+                      ? "bg-slate-50 dark:bg-white/5 text-teal"
+                      : "hover:bg-slate-50 dark:hover:bg-white/5",
                   )}
                 >
                   Find Work
-                  <ChevronDown className={cn("transition-transform duration-300", expandedItems.work && "rotate-180")} size={20} />
+                  <ChevronDown
+                    className={cn(
+                      "transition-transform duration-300",
+                      expandedItems.work && "rotate-180",
+                    )}
+                    size={20}
+                  />
                 </button>
                 {expandedItems.work && (
                   <div className="px-6 py-4 space-y-6 bg-slate-50 dark:bg-white/[0.03] animate-in slide-in-from-top-2 duration-300">
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <div key={category._id} className="space-y-3">
-                        <Link 
+                        <Link
                           to={`/projects?category=${encodeURIComponent(category.name)}`}
                           onClick={() => setMobileMenuOpen(false)}
                           className="text-sm font-bold text-navy dark:text-white hover:text-teal block"
@@ -582,14 +692,14 @@ export const PublicNavbar = ({
                           {category.name} jobs
                         </Link>
                         <div className="grid grid-cols-1 gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
-                          {category.skills.slice(0, 5).map(skill => (
-                            <Link 
+                          {category.skills.slice(0, 5).map((skill) => (
+                            <Link
                               key={skill._id}
                               to={`/projects?category=${encodeURIComponent(category.name)}&skill=${encodeURIComponent(skill.skillName)}`}
                               onClick={() => setMobileMenuOpen(false)}
                               className="text-xs text-slate-500 dark:text-white/60 hover:text-teal"
                             >
-                              {skill.skillName.replace(/s$/, '')} jobs
+                              {skill.skillName.replace(/s$/, "")} jobs
                             </Link>
                           ))}
                         </div>
@@ -613,7 +723,10 @@ export const PublicNavbar = ({
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.label}
-                  <ArrowRight size={18} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-teal" />
+                  <ArrowRight
+                    size={18}
+                    className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-teal"
+                  />
                 </Link>
               ))}
             </div>
@@ -622,8 +735,12 @@ export const PublicNavbar = ({
           <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/5">
             <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-[1.5rem] border border-slate-100 dark:border-white/10">
               <div>
-                <p className="font-bold text-navy dark:text-white">Interface Theme</p>
-                <p className="text-xs text-slate-500 dark:text-slate-500">Switch between light & dark</p>
+                <p className="font-bold text-navy dark:text-white">
+                  Interface Theme
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500">
+                  Switch between light & dark
+                </p>
               </div>
               <ThemeToggle />
             </div>
@@ -635,4 +752,3 @@ export const PublicNavbar = ({
 };
 
 export default PublicNavbar;
-

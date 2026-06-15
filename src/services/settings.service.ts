@@ -15,22 +15,14 @@ export interface PrivacySettings {
   showOnlineStatus: boolean;
 }
 
-export interface PreferenceSettings {
-  language: string;
-  timezone: string;
-  currency: string;
-}
-
 export interface UserSettings {
   notifications: NotificationSettings;
   privacy: PrivacySettings;
-  preferences: PreferenceSettings;
 }
 
 export interface UpdateSettingsRequest {
   notifications?: Partial<NotificationSettings>;
   privacy?: Partial<PrivacySettings>;
-  preferences?: Partial<PreferenceSettings>;
 }
 
 export const settingsService = {

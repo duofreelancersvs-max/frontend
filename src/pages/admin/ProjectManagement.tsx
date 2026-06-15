@@ -15,6 +15,7 @@ import {
   FolderOpen,
   CheckCircle,
   Clock,
+  EyeOff,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
@@ -99,7 +100,10 @@ const ProjectManagement = () => {
       if (activeTab !== "all") params.status = activeTab;
       if (searchQuery.trim()) params.search = searchQuery.trim();
       const data = await adminService.getAllProjects(params);
-      setProjects(data.projects || []);
+      const sorted = (data.projects || []).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setProjects(sorted);
       setPagination(data.pagination || null);
     } catch (err) {
       console.error("Failed to load projects:", err);
@@ -134,6 +138,19 @@ const ProjectManagement = () => {
       toast.error("Failed to delete project");
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleHide = async (projectId: string) => {
+    if (!window.confirm("Are you sure you want to hide this project? It will be set to invite-only visibility.")) return;
+    try {
+      await adminService.updateProject(projectId, { visibility: 'invite-only' });
+      toast.success("Project hidden successfully");
+      setActionMenuId(null);
+      fetchProjects();
+    } catch (err) {
+      console.error("Failed to hide project:", err);
+      toast.error("Failed to hide project");
     }
   };
 
@@ -269,6 +286,7 @@ const ProjectManagement = () => {
                       setActionMenuId={setActionMenuId}
                       onView={() => { setViewProject(project); setActionMenuId(null); }}
                       onEdit={() => handleEditOpen(project)}
+                      onHide={() => handleHide(project._id)}
                       onDelete={() => handleDelete(project._id)}
                       deleting={deleting === project._id}
                       formatDate={formatDate}
@@ -436,6 +454,7 @@ const ProjectTableRow = ({
   setActionMenuId,
   onView,
   onEdit,
+  onHide,
   onDelete,
   deleting,
   formatDate,
@@ -446,6 +465,7 @@ const ProjectTableRow = ({
   setActionMenuId: (id: string | null) => void;
   onView: () => void;
   onEdit: () => void;
+  onHide: () => void;
   onDelete: () => void;
   deleting: boolean;
   formatDate: (d?: string) => string;
@@ -504,6 +524,9 @@ const ProjectTableRow = ({
               </button>
               <button onClick={onEdit}>
                 <Edit size={14} /> Edit Project
+              </button>
+              <button onClick={onHide}>
+                <EyeOff size={14} /> Hide Project
               </button>
               <div className="um-actions-divider"></div>
               <button className="danger" onClick={onDelete} disabled={deleting}>

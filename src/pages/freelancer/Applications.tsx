@@ -20,15 +20,19 @@ import type { Application } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { ReportModal } from "@/components/common/ReportModal";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 
 const FreelancerApplications = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
+  const { refetch: refetchUsage } = useFeatureGate();
 
   const [activeTab, setActiveTab] = useState("all");
   const [applications, setApplications] = useState<Application[]>([]);
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [withdrawAppId, setWithdrawAppId] = useState<string | null>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const fetchApplications = async () => {
     try {
@@ -56,15 +60,19 @@ const FreelancerApplications = () => {
     }
   }, [openAppId, applications]);
 
-  const handleWithdraw = async (id: string) => {
-    if (!window.confirm("Are you sure you want to withdraw this application?"))
-      return;
+  const handleWithdraw = async () => {
+    if (!withdrawAppId) return;
     try {
-      await applicationService.withdraw(id);
+      setIsWithdrawing(true);
+      await applicationService.withdraw(withdrawAppId);
       await fetchApplications(); // Refresh the list
+      refetchUsage(); // Refresh usage limits so the sidebar updates
+      setWithdrawAppId(null);
     } catch (error) {
       console.error("Error withdrawing application:", error);
       alert("Failed to withdraw application. Please try again.");
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -292,9 +300,7 @@ const FreelancerApplications = () => {
                             variant="outline"
                             size="sm"
                             className="border-red-200 text-red-500 hover:bg-red-50 flex-1 sm:flex-none"
-                            onClick={() =>
-                              handleWithdraw(application._id || application.id)
-                            }
+                            onClick={() => setWithdrawAppId(application._id || application.id)}
                           >
                             Withdraw
                           </Button>
@@ -434,6 +440,34 @@ const FreelancerApplications = () => {
           reportedUserId={typeof selectedApplication.project.clientId === 'string' ? selectedApplication.project.clientId : (selectedApplication.project.clientId as any)._id || (selectedApplication.project as any).client?._id}
           reportedUserName={(selectedApplication.project.clientId as any)?.firstName ? `${(selectedApplication.project.clientId as any).firstName} ${(selectedApplication.project.clientId as any).lastName}` : (selectedApplication.project as any).client?.fullName || 'Client'}
         />
+      )}
+
+      {withdrawAppId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6">
+            <h3 className="text-xl font-bold text-navy dark:text-white mb-2">Withdraw Application</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+              Are you sure you want to withdraw your application for this project? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                className="dark:border-white/10 dark:text-slate-400"
+                onClick={() => setWithdrawAppId(null)}
+                disabled={isWithdrawing}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={handleWithdraw}
+                disabled={isWithdrawing}
+              >
+                {isWithdrawing ? "Withdrawing..." : "Withdraw"}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -85,6 +85,13 @@ const Home = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
+  // Redirect admins away from the public home page
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+
   // Debounced API call for Hero Search
   useEffect(() => {
     if (!heroQuery.trim()) {
@@ -107,7 +114,7 @@ const Home = () => {
       } finally {
         setHeroSearching(false);
       }
-    }, 400);
+    }, 700);
     return () => clearTimeout(timer);
   }, [heroQuery]);
 
@@ -197,7 +204,7 @@ const Home = () => {
       features: [
         "Unlimited applications",
         "Priority support",
-        "Analytics dashboard",
+        "Top priority in search",
       ],
     },
   ];
@@ -252,7 +259,7 @@ const Home = () => {
       <PublicNavbar dark />
 
       {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
-      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 overflow-hidden bg-white dark:bg-[#050B15]">
+      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 bg-white dark:bg-[#050B15] z-30">
         {/* Subtle Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Main Gradient Surface */}
@@ -263,15 +270,8 @@ const Home = () => {
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
         </div>
 
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+        <div className="container mx-auto px-4 lg:px-8 relative z-30">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-slate-100 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 mb-4 md:mb-6 animate-fade-in-up">
-              <span className="text-xxs md:text-xs font-bold text-teal tracking-wider uppercase">
-                #1 Creative Marketplace in India
-              </span>
-            </div>
-
             {/* Headline */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
               {isAuthenticated ? (
@@ -346,7 +346,7 @@ const Home = () => {
                       variant="outline"
                       className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
                     >
-                      Earn as a Freelancer
+                      Earn money as a Freelancer
                     </Button>
                   </Link>
 
@@ -421,9 +421,9 @@ const Home = () => {
 
               {/* Search Dropdown */}
               {showDropdown && (
-                <div className="absolute top-full left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 text-left">
+                <div className="absolute top-full left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white dark:bg-[#0f172a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 overflow-hidden z-50 text-left">
                   {heroSearching ? (
-                    <div className="flex items-center gap-3 px-5 py-6 text-slate-500">
+                    <div className="flex items-center gap-3 px-5 py-6 text-slate-500 dark:text-slate-400">
                       <Loader2 className="w-5 h-5 animate-spin text-teal" />
                       Searching...
                     </div>
@@ -433,9 +433,9 @@ const Home = () => {
                         <Link
                           key={f._id}
                           to={`/freelancer/${f._id}`}
-                          className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                         >
-                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-navy shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center font-bold text-navy dark:text-white shrink-0">
                             {f.profilePicture ? (
                               <img
                                 src={f.profilePicture}
@@ -446,10 +446,10 @@ const Home = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-bold text-navy truncate">
+                            <div className="font-bold text-navy dark:text-white truncate">
                               {f.displayName || `${f.firstName} ${f.lastName}`}
                             </div>
-                            <div className="text-xs text-slate-500 truncate">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                               {f.headline || f.category}
                             </div>
                           </div>
@@ -457,7 +457,7 @@ const Home = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="px-5 py-6 text-center text-slate-500">
+                    <div className="px-5 py-6 text-center text-slate-500 dark:text-slate-400">
                       No results found
                     </div>
                   )}

@@ -27,7 +27,8 @@ import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useProjects } from "@/hooks/queries/useProjects";
 import { useCategories } from "@/hooks/queries/useCategories";
-import { useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
+import { useMyApplications, useMyFreelancerProfile } from "@/hooks/queries/useFreelancerDashboardQueries";
+import { toast } from "react-toastify";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -190,6 +191,8 @@ const FindWork = () => {
   const error = projectsError ? "Failed to load projects. Please try again." : null;
 
   const { data: myAppsData } = useMyApplications();
+  const { data: profileData } = useMyFreelancerProfile();
+  const profile = profileData || null;
   const myApplications = myAppsData?.applications || [];
   const appStatusByProjectId = new Map(
     myApplications.map((app) => [
@@ -227,6 +230,10 @@ const FindWork = () => {
     (project: Project) => {
       if (!user) {
         navigate("/login", { state: { from: "/freelancer/projects" } });
+        return;
+      }
+      if (!profile?.contactInfo) {
+        toast.error("Please add a contact email or phone number to your profile before applying.");
         return;
       }
       // Block re-application when the freelancer already has a live

@@ -78,6 +78,7 @@ const PostProject = () => {
     categories: [] as string[],
     description: "",
     contactInfo: "",
+    customClientName: "",
     // Step 2
     skills: [] as string[],
     location: "remote",
@@ -131,6 +132,7 @@ const PostProject = () => {
             categories: project.category ? [project.category] : [],
             description: project.description || "",
             contactInfo: project.contactInfo || "",
+            customClientName: "",
             skills: project.requiredSkills || [],
             location: project.location?.type || "remote",
             city: project.location?.city || "",
@@ -242,13 +244,12 @@ const PostProject = () => {
       if (!formData.title?.trim()) { toast.error("Please enter a project title"); return; }
       if (formData.categories.length === 0) { toast.error("Please select a project category"); return; }
       if (!formData.description?.trim()) { toast.error("Please enter a project description"); return; }
-      if (formData.contactInfo) {
-        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
-        const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
-        if (!isEmail && !isPhone) {
-          toast.error("Contact Information must be a valid email or a 10-digit phone number.");
-          return;
-        }
+      if (!formData.contactInfo?.trim()) { toast.error("Please enter a contact email or phone number"); return; }
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
+      const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
+      if (!isEmail && !isPhone) {
+        toast.error("Contact Information must be a valid email or a 10-digit Indian phone number.");
+        return;
       }
     } else if (currentStep === 2) {
       if (formData.skills.length === 0) { toast.error("Please select required skills"); return; }
@@ -275,6 +276,7 @@ const PostProject = () => {
       if (!formData.title?.trim()) missingFields.push("Title");
       if (formData.categories.length === 0) missingFields.push("Category");
       if (!formData.description?.trim()) missingFields.push("Description");
+      if (!formData.contactInfo?.trim()) missingFields.push("Contact Info");
       if (formData.skills.length === 0) missingFields.push("Skills");
       if (!formData.deadline) missingFields.push("Deadline");
       if (
@@ -290,7 +292,7 @@ const PostProject = () => {
         );
 
         const firstMissing = missingFields[0];
-        if (["Title", "Category", "Description"].includes(firstMissing)) {
+        if (["Title", "Category", "Description", "Contact Info"].includes(firstMissing)) {
           setSearchParams({ step: "1" });
         } else if (
           ["Skills", "Deadline", "Location (City & Country)"].includes(
@@ -304,15 +306,13 @@ const PostProject = () => {
         return;
       }
 
-      if (formData.contactInfo) {
-        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
-        const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
-        if (!isEmail && !isPhone) {
-          toast.error("Contact Information must be a valid email or a 10-digit phone number.");
-          setSearchParams({ step: "1" });
-          topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-          return;
-        }
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactInfo);
+      const isPhone = /^\d{10}$/.test(formData.contactInfo.replace(/[\s\-+]/g, ''));
+      if (!isEmail && !isPhone) {
+        toast.error("Contact Information must be a valid email or a 10-digit Indian phone number.");
+        setSearchParams({ step: "1" });
+        topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        return;
       }
 
       setIsSubmitting(true);
@@ -330,6 +330,7 @@ const PostProject = () => {
           country: formData.country,
         },
         idempotencyKey,
+        ...(isAdmin && formData.customClientName ? { customClientName: formData.customClientName } : {}),
       };
 
       if (isEditing && projectId) {
@@ -452,6 +453,27 @@ const PostProject = () => {
                 </h2>
 
                 <div className="space-y-6">
+                  {/* Custom Client Name (Admin Only) */}
+                  {isAdmin && (
+                    <div className="p-4 bg-teal/5 border border-teal/20 rounded-xl">
+                      <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
+                        Post as Client Name (Optional)
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., Acme Corp"
+                        value={formData.customClientName}
+                        onChange={(e) =>
+                          handleInputChange("customClientName", e.target.value)
+                        }
+                        className="h-12 border-teal/20 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
+                      />
+                      <p className="text-xs text-teal mt-2">
+                        Admin Only: If provided, this name will be shown to users instead of your admin name.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Project Title */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
@@ -527,11 +549,11 @@ const PostProject = () => {
                   {/* Contact Info */}
                   <div>
                     <label className="block text-sm font-semibold text-navy dark:text-white mb-2">
-                      Contact Email or Phone Number (Optional)
+                      Contact Email or Phone Number <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="text"
-                      placeholder="e.g., email@example.com or +1 234 567 8900"
+                      placeholder="e.g., email@example.com or 9876543210"
                       value={formData.contactInfo}
                       onChange={(e) =>
                         handleInputChange("contactInfo", e.target.value)
@@ -539,7 +561,7 @@ const PostProject = () => {
                       className="h-12 border-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white focus:border-teal focus:ring-teal"
                     />
                     <p className="text-xs text-slate-400 mt-2">
-                      Leave an email or phone number for freelancers to contact you directly.
+                      Leave an email or 10-digit phone number for freelancers to contact you directly.
                     </p>
                   </div>
                 </div>

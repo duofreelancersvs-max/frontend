@@ -4,11 +4,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import { ArrowRight, Award, BadgeCheck, Building, ChevronDown, ChevronRight, Clock, ExternalLink, GraduationCap, Heart, MapPin, MessageSquare, Play, Star, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  BadgeCheck,
+  Building,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  ExternalLink,
+  GraduationCap,
+  Heart,
+  MapPin,
+  MessageSquare,
+  Play,
+  Star,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { freelancerService, reviewService } from "@/services";
-import type { FreelancerProfile as FreelancerProfileType, Review } from "@/services";
+import type {
+  FreelancerProfile as FreelancerProfileType,
+  Review,
+} from "@/services";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -70,7 +89,9 @@ const FreelancerProfile = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(3);
   const [loading, setLoading] = useState(true);
-  const [freelancerData, setFreelancerData] = useState<FreelancerProfileType | null>(null);
+  const [freelancerData, setFreelancerData] =
+    useState<FreelancerProfileType | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reviewsData, setReviewsData] = useState<Review[]>([]);
 
   useEffect(() => {
@@ -78,15 +99,21 @@ const FreelancerProfile = () => {
       try {
         if (!id) return;
         setLoading(true);
+        setErrorMsg(null);
         const profile = await freelancerService.getById(id);
         setFreelancerData(profile);
-        
+
         if (profile.userId) {
           const reviews = await reviewService.getForUser(profile.userId);
           setReviewsData(reviews.reviews || []);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching freelancer profile:", error);
+        setErrorMsg(
+          error?.response?.data?.error?.message ||
+            error?.message ||
+            "Unknown error",
+        );
       } finally {
         setLoading(false);
       }
@@ -105,7 +132,10 @@ const FreelancerProfile = () => {
   if (!freelancerData) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-2xl font-bold text-navy mb-4">Freelancer Not Found</h2>
+        <h2 className="text-2xl font-bold text-navy mb-4">
+          Freelancer Not Found
+        </h2>
+        {errorMsg && <p className="text-red-500 mb-4">Error: {errorMsg}</p>}
         <Link to="/freelancers">
           <Button className="bg-teal text-white">Back to Directory</Button>
         </Link>
@@ -114,9 +144,16 @@ const FreelancerProfile = () => {
   }
 
   const freelancer = {
-    name: freelancerData.displayName || `${freelancerData.firstName} ${freelancerData.lastName}`,
-    title: freelancerData.headline || freelancerData.category || "Professional Freelancer",
-    avatar: (freelancerData.displayName || freelancerData.firstName || "F")[0].toUpperCase(),
+    name:
+      freelancerData.displayName ||
+      `${freelancerData.firstName} ${freelancerData.lastName}`,
+    title:
+      freelancerData.headline ||
+      freelancerData.category ||
+      "Professional Freelancer",
+    avatar: (freelancerData.displayName ||
+      freelancerData.firstName ||
+      "F")[0].toUpperCase(),
     location: freelancerData.location || "Hyderabad, India",
     rating: freelancerData.averageRating || 0,
     reviews: freelancerData.reviewCount || 0,
@@ -129,32 +166,41 @@ const FreelancerProfile = () => {
     bio: freelancerData.bio || "No bio provided.",
   };
 
-  const skills = freelancerData.skills?.map(s => ({
-    name: s.name,
-    level: s.proficiency > 80 ? "Expert" : s.proficiency > 50 ? "Advanced" : "Intermediate",
-    percentage: s.proficiency || 80
-  })) || [];
+  const skills =
+    freelancerData.skills?.map((s) => ({
+      name: s.name,
+      level:
+        s.proficiency > 80
+          ? "Expert"
+          : s.proficiency > 50
+            ? "Advanced"
+            : "Intermediate",
+      percentage: s.proficiency || 80,
+    })) || [];
 
-  const portfolio = freelancerData.portfolio?.map((item, idx) => ({
-    id: item._id || idx,
-    title: item.title,
-    category: item.skills?.[0] || "Project",
-    thumbnail: (item.title || "P")[0].toUpperCase(),
-    url: item.projectUrl
-  })) || [];
+  const portfolio =
+    freelancerData.portfolio?.map((item, idx) => ({
+      id: item._id || idx,
+      title: item.title,
+      category: item.skills?.[0] || "Project",
+      thumbnail: (item.title || "P")[0].toUpperCase(),
+      url: item.projectUrl,
+    })) || [];
 
-  const experience = freelancerData.workExperience?.map((exp) => ({
-    company: exp.company,
-    role: exp.title,
-    duration: `${new Date(exp.startDate).getFullYear()} - ${exp.endDate ? new Date(exp.endDate).getFullYear() : 'Present'}`,
-    description: exp.description || "",
-  })) || [];
+  const experience =
+    freelancerData.workExperience?.map((exp) => ({
+      company: exp.company,
+      role: exp.title,
+      duration: `${new Date(exp.startDate).getFullYear()} - ${exp.endDate ? new Date(exp.endDate).getFullYear() : "Present"}`,
+      description: exp.description || "",
+    })) || [];
 
-  const education = freelancerData.education?.map((edu) => ({
-    title: edu.degree || "Education",
-    institution: edu.institution,
-    year: edu.year?.toString() || "",
-  })) || [];
+  const education =
+    freelancerData.education?.map((edu) => ({
+      title: edu.degree || "Education",
+      institution: edu.institution,
+      year: edu.year?.toString() || "",
+    })) || [];
 
   const reviews = reviewsData.map((r) => ({
     id: r.id,
@@ -163,7 +209,10 @@ const FreelancerProfile = () => {
     project: r.project?.title || "Work Project",
     rating: r.rating,
     text: r.comment,
-    date: new Date(r.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
+    date: new Date(r.createdAt).toLocaleDateString("en-IN", {
+      month: "short",
+      day: "numeric",
+    }),
   }));
 
   const similarFreelancers = [
@@ -305,13 +354,17 @@ const FreelancerProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 w-full md:w-auto md:pb-2">
-              <Button 
+              <Button
                 onClick={() => {
                   if (!isAuthenticated) {
-                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                    navigate(`/login?role=client`, {
+                      state: { from: `/freelancer/${id}` },
+                    });
                   } else {
                     // Logic for authenticated contact
-                    navigate(`/client/messages`, { state: { freelancerId: id } });
+                    navigate(`/client/messages`, {
+                      state: { freelancerId: id },
+                    });
                   }
                 }}
                 className="flex-1 md:flex-none bg-teal hover:bg-teal-light text-white font-bold px-8 py-6 rounded-xl shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 text-base border-0"
@@ -327,7 +380,9 @@ const FreelancerProfile = () => {
                 )}
                 onClick={() => {
                   if (!isAuthenticated) {
-                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                    navigate(`/login?role=client`, {
+                      state: { from: `/freelancer/${id}` },
+                    });
                     return;
                   }
                   setIsSaved(!isSaved);
@@ -354,25 +409,33 @@ const FreelancerProfile = () => {
               <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.projectsCompleted}
               </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">Projects Completed</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Projects Completed
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.projectsCompleted}
               </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">Projects Completed</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Projects Completed
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-teal dark:text-teal-light">
                 {freelancer.successRate}%
               </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">Success Rate</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Success Rate
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-navy dark:text-white">
                 {freelancer.memberSince}
               </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">Member Since</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Member Since
+              </div>
             </div>
           </div>
         </div>
@@ -385,7 +448,9 @@ const FreelancerProfile = () => {
             {/* 3. ABOUT SECTION */}
             <AnimatedSection>
               <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-8 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
-                <h2 className="text-xl font-bold text-navy dark:text-white mb-4">About</h2>
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-4">
+                  About
+                </h2>
                 <div
                   className={cn(
                     "text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line transition-all duration-300",
@@ -406,7 +471,9 @@ const FreelancerProfile = () => {
             {/* 4. SKILLS SECTION */}
             <AnimatedSection delay={100}>
               <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-8 border border-slate-100 dark:border-white/5">
-                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">Skills</h2>
+                <h2 className="text-xl font-bold text-navy dark:text-white mb-6">
+                  Skills
+                </h2>
                 <div className="space-y-5">
                   {skills.map((skill, idx) => (
                     <div key={idx}>
@@ -450,7 +517,9 @@ const FreelancerProfile = () => {
             <AnimatedSection delay={200}>
               <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-8 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-navy dark:text-white">Portfolio</h2>
+                  <h2 className="text-xl font-bold text-navy dark:text-white">
+                    Portfolio
+                  </h2>
                   <button className="text-royal-blue font-medium text-sm hover:underline flex items-center gap-1">
                     View All <ExternalLink size={14} />
                   </button>
@@ -465,7 +534,7 @@ const FreelancerProfile = () => {
                         key={item.id}
                         className={cn(
                           "group relative aspect-video rounded-xl overflow-hidden cursor-pointer bg-gradient-to-br transition-all duration-300",
-                          style.gradient
+                          style.gradient,
                         )}
                       >
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
@@ -509,12 +578,17 @@ const FreelancerProfile = () => {
                         <div className="absolute left-4 top-1 w-4 h-4 rounded-full bg-teal border-4 border-slate-50" />
 
                         <div className="flex items-start gap-3 mb-2">
-                          <Building size={18} className="text-slate-400 dark:text-slate-500 mt-1" />
+                          <Building
+                            size={18}
+                            className="text-slate-400 dark:text-slate-500 mt-1"
+                          />
                           <div className="flex-1">
                             <h3 className="font-semibold text-navy dark:text-white">
                               {exp.role}
                             </h3>
-                            <p className="text-teal dark:text-teal-light text-sm">{exp.company}</p>
+                            <p className="text-teal dark:text-teal-light text-sm">
+                              {exp.company}
+                            </p>
                           </div>
                           <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                             <Clock size={14} />
@@ -554,7 +628,9 @@ const FreelancerProfile = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-navy dark:text-white">{edu.title}</h4>
+                        <h4 className="font-semibold text-navy dark:text-white">
+                          {edu.title}
+                        </h4>
                         <p className="text-slate-500 dark:text-slate-400 text-sm">
                           {edu.institution}
                         </p>
@@ -619,7 +695,10 @@ const FreelancerProfile = () => {
                 {/* Review Cards */}
                 <div className="space-y-4">
                   {reviews.slice(0, visibleReviews).map((review) => (
-                    <div key={review.id} className="bg-white dark:bg-white/5 p-6 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div
+                      key={review.id}
+                      className="bg-white dark:bg-white/5 p-6 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm dark:shadow-none"
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
@@ -684,12 +763,16 @@ const FreelancerProfile = () => {
                   </p>
                 </div>
 
-                <Button 
+                <Button
                   onClick={() => {
                     if (!isAuthenticated) {
-                      navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                      navigate(`/login?role=client`, {
+                        state: { from: `/freelancer/${id}` },
+                      });
                     } else {
-                      navigate(`/client/messages`, { state: { freelancerId: id } });
+                      navigate(`/client/messages`, {
+                        state: { freelancerId: id },
+                      });
                     }
                   }}
                   className="w-full bg-teal hover:bg-teal-light text-white font-semibold py-6 mb-3"
@@ -703,7 +786,9 @@ const FreelancerProfile = () => {
                   className="w-full border-slate-200 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 py-6"
                   onClick={() => {
                     if (!isAuthenticated) {
-                      navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                      navigate(`/login?role=client`, {
+                        state: { from: `/freelancer/${id}` },
+                      });
                       return;
                     }
                     setIsSaved(!isSaved);
@@ -744,7 +829,9 @@ const FreelancerProfile = () => {
                             <BadgeCheck size={14} className="text-gold" />
                           )}
                         </div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{fl.title}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {fl.title}
+                        </p>
                         <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                           <Star size={12} className="text-gold fill-gold" />
                           <span>{fl.rating}</span>
@@ -777,10 +864,12 @@ const FreelancerProfile = () => {
               <p className="text-white/90 text-xl mb-8 leading-relaxed">
                 Start a conversation and bring your creative vision to life.
               </p>
-               <Button
+              <Button
                 onClick={() => {
                   if (!isAuthenticated) {
-                    navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                    navigate(`/login?role=client`, {
+                      state: { from: `/freelancer/${id}` },
+                    });
                   } else {
                     // Logic for hiring when authenticated as client
                     navigate(`/client/dashboard`);
@@ -799,14 +888,16 @@ const FreelancerProfile = () => {
 
       {/* 11. FOOTER */}
       <PublicFooter />
-      
+
       {/* MOBILE FIXED CONTACT BAR */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#03070C]/95 backdrop-blur-xl border-t border-slate-100 dark:border-white/10 p-4 animate-in slide-in-from-bottom duration-300">
         <div className="flex items-center gap-3">
-          <Button 
+          <Button
             onClick={() => {
               if (!isAuthenticated) {
-                navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                navigate(`/login?role=client`, {
+                  state: { from: `/freelancer/${id}` },
+                });
               } else {
                 navigate(`/client/messages`, { state: { freelancerId: id } });
               }
@@ -820,11 +911,14 @@ const FreelancerProfile = () => {
             variant="ghost"
             className={cn(
               "bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white px-4 py-6 rounded-xl transition-all active:scale-95",
-              isSaved && "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-900/30 text-pink-500",
+              isSaved &&
+                "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-900/30 text-pink-500",
             )}
             onClick={() => {
               if (!isAuthenticated) {
-                navigate(`/login?role=client`, { state: { from: `/freelancer/${id}` } });
+                navigate(`/login?role=client`, {
+                  state: { from: `/freelancer/${id}` },
+                });
                 return;
               }
               setIsSaved(!isSaved);
@@ -832,10 +926,7 @@ const FreelancerProfile = () => {
           >
             <Heart
               size={24}
-              className={cn(
-                "transition-colors",
-                isSaved && "fill-pink-500",
-              )}
+              className={cn("transition-colors", isSaved && "fill-pink-500")}
             />
           </Button>
         </div>

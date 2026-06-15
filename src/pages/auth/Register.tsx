@@ -596,14 +596,15 @@ const Register = () => {
                     disabled={isLoading}
                   />
                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                    <label htmlFor="terms-checkbox" className="cursor-pointer">I agree to the </label>
-                    <Link to="/terms-and-conditions" className="text-teal hover:underline">
-                      Terms of Service
+                    <label htmlFor="terms-checkbox" className="cursor-pointer">
+                      I have read and agree to the{" "}
+                    </label>
+                    <Link to="/terms-and-conditions" className="text-teal hover:underline" target="_blank">
+                      ConnectMeIndia Terms & Conditions
                     </Link>
-                    {" and "}
-                    <Link to="/privacy-policy" className="text-teal hover:underline">
-                      Privacy Policy
-                    </Link>
+                    <label htmlFor="terms-checkbox" className="cursor-pointer">
+                      {" "}and acknowledge that ConnectMeIndia only connects Clients and Freelancers. All payments, agreements, and project decisions are solely my responsibility.
+                    </label>
                   </span>
                 </div>
 
