@@ -73,7 +73,9 @@ export default function OAuthCallback() {
         const { user, tokens } = response.data.data;
 
         if (storedRole && user.role !== storedRole) {
-          toast.info(`You have already created an account as a ${user.role}. Logging you in as a ${user.role} instead of a ${storedRole}.`);
+          toast.info(
+            `You have already created an account as a ${user.role}. Logging you in as a ${user.role} instead of a ${storedRole}.`,
+          );
           // We don't throw error anymore, just proceed with the actual role
         }
 
