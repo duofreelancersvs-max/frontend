@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Exclude private routes
+Disallow: /admin/
+Disallow: /client/
+Disallow: /freelancer/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /verify-email
+Disallow: /auth/
+
+Sitemap: https://connectmeindia.com/sitemap.xml

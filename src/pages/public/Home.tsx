@@ -1,3 +1,4 @@
+import { SEO } from '@/components/SEO/SEO';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -13,6 +14,7 @@ import {
   BadgeCheck,
   Building,
   Check,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -70,6 +72,7 @@ const AnimatedSection = ({
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
+      <SEO title="ConnectMeIndia | Hire Top Freelancers in India" description="ConnectMeIndia is the premier marketplace for hiring top talent and finding freelance jobs in India. Connect, collaborate, and build your next big project." canonical="/" />
       {children}
     </div>
   );
@@ -469,8 +472,19 @@ const Home = () => {
       </section>
 
       {/* 2. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
-      <section className="py-24 bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
+        
+        {/* Full-width Attached Disclaimer Ticker */}
+        <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group">
+          <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
+            <ShieldAlert size={18} className="inline-block mr-3 text-teal shrink-0" />
+            ConnectMeIndia is a Neutral Marketplace Platform. We connect clients and freelancers directly. All interactions happen between users. <strong className="text-navy dark:text-white mx-1 font-bold">CMI is not responsible for disputes between users.</strong> Be smart. Be safe. Verify before you pay.
+            <ShieldAlert size={18} className="inline-block ml-3 text-teal shrink-0 mr-8" />
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 lg:px-8 py-20 lg:py-24">
+
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
               <div className="max-w-2xl">

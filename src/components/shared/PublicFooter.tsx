@@ -20,10 +20,17 @@ export const PublicFooter = () => {
               The premier marketplace for creative professionals in India.
             </p>
             <div className="flex gap-4">
-              {[Twitter, Linkedin, Instagram, Youtube].map((Icon, idx) => (
+              {[
+                { Icon: Twitter, href: "#" },
+                { Icon: Linkedin, href: "#" },
+                { Icon: Instagram, href: "https://www.instagram.com/connectmeindia" },
+                { Icon: Youtube, href: "https://www.youtube.com/@connectmeindia05" },
+              ].map(({ Icon, href }, idx) => (
                 <a
                   key={idx}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-teal/50 hover:bg-teal flex items-center justify-center transition-all duration-300 group"
                 >
                   <Icon

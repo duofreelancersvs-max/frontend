@@ -9,6 +9,8 @@ import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
 
+import { HelmetProvider } from 'react-helmet-async';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,13 +23,15 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthInitializer>
-          <ScrollToTop />
-          <App />
-        </AuthInitializer>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AuthInitializer>
+            <ScrollToTop />
+            <App />
+          </AuthInitializer>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   </React.StrictMode>,
 );

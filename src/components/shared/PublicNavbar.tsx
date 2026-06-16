@@ -505,6 +505,21 @@ export const PublicNavbar = ({
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
+          {/* Theme Toggle - Moved to top */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-[1.5rem] border border-slate-100 dark:border-white/10">
+              <div>
+                <p className="font-bold text-navy dark:text-white">
+                  Interface Theme
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500">
+                  Switch between light & dark
+                </p>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
+
           {isAuthenticated && (
             <div className="mb-6 p-5 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-4">
@@ -731,20 +746,6 @@ export const PublicNavbar = ({
               ))}
             </div>
           )}
-
-          <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/5">
-            <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-[1.5rem] border border-slate-100 dark:border-white/10">
-              <div>
-                <p className="font-bold text-navy dark:text-white">
-                  Interface Theme
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-500">
-                  Switch between light & dark
-                </p>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
         </div>
       </div>
     </>

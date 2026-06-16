@@ -181,10 +181,14 @@ const FreelancerSubscription = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "Connect Me",
-        description: "Freelancer Subscription",
+        name: "ConnectMeIndia",
+        description: "Pro Plan Subscription",
+        image: `${window.location.origin}/newLogo.png`,
         order_id: order.order_id,
-        theme: { color: "#0d9488" },
+        theme: { 
+          color: "#14b8a6",
+          backdrop_color: "#0f172a" 
+        },
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_order_id: string;

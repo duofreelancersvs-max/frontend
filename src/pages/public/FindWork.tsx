@@ -1,3 +1,4 @@
+import { SEO } from '@/components/SEO/SEO';
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -115,6 +116,7 @@ const FindWork = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15]">
+      <SEO title="Find Freelance Jobs | ConnectMeIndia" description="Search for the latest freelance projects and job opportunities on ConnectMeIndia." canonical="/projects" />
       <PublicNavbar dark />
 
       {/* Hero/Header Section - White Background like Categories/Find Talent */}

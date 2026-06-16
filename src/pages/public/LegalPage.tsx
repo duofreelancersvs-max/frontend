@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { SEO } from '@/components/SEO/SEO';
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import {
@@ -257,8 +258,14 @@ const LegalPage = ({ defaultSlug }: { defaultSlug?: string }) => {
       }).format(new Date(data.lastUpdated))
     : null;
 
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
+      <SEO 
+        title={data?.pageTitle ? `${data.pageTitle} | ConnectMeIndia` : "Legal | ConnectMeIndia"} 
+        description={data?.subtitle || "Read the legal agreements, terms, and policies for ConnectMeIndia."} 
+        canonical={`/legal/${slug}`} 
+      />
       <PublicNavbar dark />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}

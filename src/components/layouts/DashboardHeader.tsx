@@ -114,8 +114,8 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
         <div className="flex items-center gap-3">
           {children}
 
-          <div className="hidden lg:flex items-center gap-1.5 mr-2">
-            <ThemeToggle className="w-10 h-10 rounded-xl" />
+          <div className="flex items-center gap-1.5 mr-1 md:mr-2">
+            <ThemeToggle className="w-9 h-9 md:w-10 md:h-10 rounded-xl" />
           </div>
 
           <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 dark:bg-secondary/20 rounded-2xl border border-border">

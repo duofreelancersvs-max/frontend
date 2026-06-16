@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { SEO } from '@/components/SEO/SEO';
 import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
 import PublicNavbar from "@/components/shared/PublicNavbar";
@@ -250,8 +251,14 @@ const FreelancerProfile = () => {
     { stars: 1, percentage: 1 },
   ];
 
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
+      <SEO 
+        title={`${freelancer.name} - ${freelancer.title} | ConnectMeIndia`} 
+        description={`Hire ${freelancer.name}, a ${freelancer.title} on ConnectMeIndia.`} 
+        canonical={`/freelancer/${id}`} 
+      />
       <PublicNavbar dark />
 
       {/* 1. PROFILE HEADER */}

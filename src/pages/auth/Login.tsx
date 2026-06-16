@@ -45,6 +45,7 @@ const Login = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(
     isValidRole ? initialRole : null,
   );
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login, signInWithOAuth, isLoading, error, clearError } = useAuth();
   const [showSessionBanner, setShowSessionBanner] = useState(sessionExpired);
@@ -420,9 +421,34 @@ const Login = () => {
                   </div>
                 </button>
 
+                {/* Terms and Conditions Checkbox */}
+                <div className="flex items-start mt-6">
+                  <div className="flex items-center h-5">
+                    <input
+                      id="terms"
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal dark:border-white/20 dark:bg-white/5 dark:focus:ring-teal-light"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="terms" className="font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                      I agree with the{" "}
+                      <Link to="/terms-and-conditions" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                        Terms and Conditions
+                      </Link>{" "}
+                      and{" "}
+                      <Link to="/privacy-policy" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                        Privacy Policy
+                      </Link>
+                    </label>
+                  </div>
+                </div>
+
                 <Button
                   onClick={handleContinue}
-                  disabled={!selectedRole}
+                  disabled={!selectedRole || !agreedToTerms}
                   className="w-full h-12 bg-teal hover:bg-teal-light text-white font-bold text-base shadow-lg shadow-teal/25 mt-6"
                 >
                   Continue

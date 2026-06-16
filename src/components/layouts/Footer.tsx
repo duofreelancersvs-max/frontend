@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Twitter, Instagram, Linkedin, Github } from "lucide-react";
+import { Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 
 const Footer = () => {
@@ -63,16 +63,20 @@ const Footer = () => {
                 <Linkedin size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/connectmeindia"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
               >
                 <Instagram size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.youtube.com/@connectmeindia05"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
               >
-                <Github size={18} />
+                <Youtube size={18} />
               </a>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { SEO } from '@/components/SEO/SEO';
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
@@ -69,6 +70,7 @@ const AnimatedSection = ({
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
+      <SEO title="About Us | ConnectMeIndia" description="Learn more about ConnectMeIndia, our mission, and how we connect top freelancers with great clients." canonical="/about" />
       {children}
     </div>
   );

@@ -1,3 +1,4 @@
+import { SEO } from '@/components/SEO/SEO';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -104,11 +105,14 @@ const ParticleField = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.7 }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{ opacity: 0.7 }}
+      />
+      <SEO title="Launching Soon | ConnectMeIndia" description="ConnectMeIndia is launching soon. Get ready to connect with top freelancers and clients." canonical="/launch" />
+    </>
   );
 };
 
