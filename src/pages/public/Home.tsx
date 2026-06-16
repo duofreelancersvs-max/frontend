@@ -269,8 +269,8 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-[#050B15] dark:via-[#0A1628] dark:to-[#112240]" />
 
           {/* Floating Decorative Blobs - Light Mode Accent */}
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[60px] md:blur-[120px] will-change-transform -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[50px] md:blur-[100px] will-change-transform translate-y-1/2 -translate-x-1/4" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-30">
@@ -443,6 +443,10 @@ const Home = () => {
                               <img
                                 src={f.profilePicture}
                                 className="w-full h-full object-cover rounded-full"
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                alt={f.displayName || f.firstName}
                               />
                             ) : (
                               f.firstName[0]
@@ -609,6 +613,9 @@ const Home = () => {
                               src={freelancer.profilePicture}
                               alt={name}
                               className="w-full h-full object-cover"
+                              width={96}
+                              height={96}
+                              loading="lazy"
                             />
                           ) : (
                             initials
