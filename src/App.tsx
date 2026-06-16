@@ -88,6 +88,7 @@ const ProjectManagement = lazy(() => import("@/pages/admin/ProjectManagement"));
 const ReviewsManagement = lazy(() => import("@/pages/admin/ReviewsManagement"));
 const ApplicationsManagement = lazy(() => import("@/pages/admin/ApplicationsManagement"));
 const ConversationsManagement = lazy(() => import("@/pages/admin/ConversationsManagement"));
+const AdminMessages = lazy(() => import("@/pages/admin/AdminMessages"));
 const CategoriesManagement = lazy(() => import("@/pages/admin/CategoriesManagement"));
 const PaymentsManagement = lazy(() => import("@/pages/admin/PaymentsManagement"));
 const ReportsManagement = lazy(() => import("@/pages/admin/ReportsManagement"));
@@ -588,6 +589,14 @@ function App() {
             element={
               <SP>
                 <ConversationsManagement />
+              </SP>
+            }
+          />
+          <Route
+            path="messages"
+            element={
+              <SP>
+                <AdminMessages />
               </SP>
             }
           />

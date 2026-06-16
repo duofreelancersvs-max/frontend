@@ -32,7 +32,7 @@ interface ConversationListProps {
   filter: "all" | "unread";
   onFilterChange: (filter: "all" | "unread") => void;
   onlineUsers: Set<string>;
-  role: "client" | "freelancer";
+  role: "client" | "freelancer" | "admin";
   className?: string;
 }
 
@@ -64,12 +64,14 @@ const ConversationList = ({
   return (
     <div
       className={cn(
-        "bg-white dark:bg-[#050B15] border-r border-slate-200 dark:border-white/5 flex flex-col",
+        role === "admin"
+          ? "bg-[#18181b] border-r border-white/5 flex flex-col"
+          : "bg-white dark:bg-[#050B15] border-r border-slate-200 dark:border-white/5 flex flex-col",
         className,
       )}
     >
       {/* Search */}
-      <div className="p-4 border-b border-slate-100 dark:border-white/5">
+      <div className={cn("p-4 border-b", role === "admin" ? "border-white/5" : "border-slate-100 dark:border-white/5")}>
         <div className="relative mb-3">
           <Search
             size={16}
@@ -79,7 +81,12 @@ const ConversationList = ({
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 h-10 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-sm dark:text-white"
+            className={cn(
+              "pl-9 h-10 text-sm",
+              role === "admin"
+                ? "bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-indigo-500/50"
+                : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 dark:text-white"
+            )}
           />
         </div>
         <div className="flex gap-2">
@@ -87,9 +94,11 @@ const ConversationList = ({
             onClick={() => onFilterChange("all")}
             className={cn(
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-              filter === "all"
-                ? "bg-teal text-white"
-                : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
+                role === "admin" 
+                  ? filter === "all" ? "bg-indigo-600 text-white" : "bg-white/5 text-slate-400 hover:bg-white/10"
+                  : filter === "all"
+                  ? "bg-teal text-white"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
             )}
           >
             All
@@ -98,9 +107,11 @@ const ConversationList = ({
             onClick={() => onFilterChange("unread")}
             className={cn(
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-              filter === "unread"
-                ? "bg-teal text-white"
-                : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
+                role === "admin"
+                  ? filter === "unread" ? "bg-indigo-600 text-white" : "bg-white/5 text-slate-400 hover:bg-white/10"
+                  : filter === "unread"
+                  ? "bg-teal text-white"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10",
             )}
           >
             Unread
@@ -120,10 +131,9 @@ const ConversationList = ({
             key={conv.id}
             onClick={() => onSelect(conv.id)}
             className={cn(
-              "w-full px-4 py-3 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-left border-l-4",
-              selectedId === conv.id
-                ? "bg-teal/5 dark:bg-teal/10 border-l-teal"
-                : "border-l-transparent",
+              role === "admin"
+                ? selectedId === conv.id ? "bg-indigo-600/10 border-l-indigo-500" : "hover:bg-white/5 border-l-transparent"
+                : selectedId === conv.id ? "bg-teal/5 dark:bg-teal/10 border-l-teal hover:bg-slate-50 dark:hover:bg-white/5" : "hover:bg-slate-50 dark:hover:bg-white/5 border-l-transparent",
             )}
           >
             {/* Avatar */}
@@ -137,11 +147,11 @@ const ConversationList = ({
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <div className="flex items-center justify-between mb-0.5">
                 <div className="flex items-center gap-1.5 truncate pr-2">
-                  <span className="font-semibold text-navy dark:text-white text-sm truncate">
+                  <span className={cn("font-semibold text-sm truncate", role === "admin" ? "text-white" : "text-navy dark:text-white")}>
                     {conv.participant.name}
                   </span>
                   {conv.participant.verified && (
-                    <VerifyIcon size={14} className="text-teal flex-shrink-0" />
+                    <VerifyIcon size={14} className={cn("flex-shrink-0", role === "admin" ? "text-indigo-400" : "text-teal")} />
                   )}
                 </div>
                 <span className="text-xs text-slate-400 flex-shrink-0">
@@ -152,7 +162,7 @@ const ConversationList = ({
               {(conv.project || role === "freelancer") && (
                 <div className="flex items-center gap-2 mb-1">
                   {conv.project && (
-                    <span className="text-xs text-teal font-medium truncate">
+                    <span className={cn("text-xs font-medium truncate", role === "admin" ? "text-indigo-400" : "text-teal")}>
                       {conv.project.title}
                     </span>
                   )}
@@ -177,7 +187,7 @@ const ConversationList = ({
 
             {/* Unread badge */}
             {conv.unread > 0 && (
-              <span className="self-center px-2 py-0.5 bg-teal text-white text-xs font-bold rounded-full min-w-5 text-center flex-shrink-0">
+              <span className={cn("self-center px-2 py-0.5 text-white text-xs font-bold rounded-full min-w-5 text-center flex-shrink-0", role === "admin" ? "bg-indigo-600" : "bg-teal")}>
                 {conv.unread}
               </span>
             )}

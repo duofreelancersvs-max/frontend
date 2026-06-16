@@ -105,7 +105,8 @@ const AdminSidebar = () => {
     {
       title: "COMMUNICATION",
       items: [
-        { name: "Conversations", path: "/admin/conversations", icon: MessageSquare },
+        { name: "All Conversations", path: "/admin/conversations", icon: MessageSquare },
+        { name: "Direct Messages", path: "/admin/messages", icon: MessageSquare },
       ],
     },
     {

@@ -34,7 +34,7 @@ export interface InfoPanelProject {
 interface ChatInfoPanelProps {
   participant: InfoPanelParticipant;
   project?: InfoPanelProject | null;
-  role: "client" | "freelancer";
+  role: "client" | "freelancer" | "admin";
   className?: string;
 }
 
@@ -44,17 +44,36 @@ const ChatInfoPanel = ({
   role,
   className,
 }: ChatInfoPanelProps) => {
-  const VerifyIcon = role === "client" ? Verified : BadgeCheck;
+  const VerifyIcon = role === "client" || role === "admin" ? Verified : BadgeCheck;
 
   return (
     <div
       className={cn(
-        "bg-white dark:bg-[#050B15] border-l border-slate-200 dark:border-white/5 flex-col flex-shrink-0 overflow-y-auto",
+        role === "admin"
+          ? "bg-[#18181b] border-l border-white/5 flex-col flex-shrink-0 overflow-y-auto"
+          : "bg-white dark:bg-[#050B15] border-l border-slate-200 dark:border-white/5 flex-col flex-shrink-0 overflow-y-auto",
         className,
       )}
     >
       {/* Profile Header */}
-      <div className="p-6 text-center border-b border-slate-100 dark:border-white/5">
+      <div className={cn("p-6 text-center border-b", role === "admin" ? "border-white/5" : "border-slate-100 dark:border-white/5")}>
+        {role === "admin" ? (
+          <div className="block">
+            <ChatAvatar
+              name={participant.name}
+              size="xl"
+              online={false}
+              showOnlineIndicator={false}
+              className="mx-auto mb-3"
+            />
+            <div className="flex items-center justify-center gap-1.5 mb-1">
+              <h3 className="font-bold text-white">{participant.name}</h3>
+              {participant.verified && (
+                <VerifyIcon size={16} className="text-indigo-400" />
+              )}
+            </div>
+          </div>
+        ) : (
         <Link 
           to={role === "client" ? `/freelancer/${participant.userId}` : `/freelancer/client/${participant.userId}`}
           state={{ participant }}
@@ -74,18 +93,19 @@ const ChatInfoPanel = ({
             )}
           </div>
         </Link>
+        )}
         {participant.title && (
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{participant.title}</p>
+          <p className={cn("text-sm mb-3", role === "admin" ? "text-slate-400" : "text-slate-500 dark:text-slate-400")}>{participant.title}</p>
         )}
         <div className="flex items-center justify-center gap-3 text-sm mb-4">
           <div className="flex items-center gap-1">
-            <Star size={14} className="text-gold fill-gold" />
-            <span className="font-semibold text-navy dark:text-white">
+            <Star size={14} className={cn(role === "admin" ? "text-indigo-400 fill-indigo-400" : "text-gold fill-gold")} />
+            <span className={cn("font-semibold", role === "admin" ? "text-white" : "text-navy dark:text-white")}>
               {participant.rating}
             </span>
           </div>
-          <span className="text-slate-300 dark:text-slate-600">•</span>
-          <span className="text-slate-500 dark:text-slate-400">{participant.reviews} reviews</span>
+          <span className={role === "admin" ? "text-slate-600" : "text-slate-300 dark:text-slate-600"}>•</span>
+          <span className={role === "admin" ? "text-slate-400" : "text-slate-500 dark:text-slate-400"}>{participant.reviews} reviews</span>
         </div>
       </div>
 
@@ -138,7 +158,7 @@ const ChatInfoPanel = ({
             <p className="font-medium text-navy dark:text-white text-sm mb-1">
               {project.title}
             </p>
-            <span className="text-xs text-teal flex items-center gap-1">
+            <span className={cn("text-xs flex items-center gap-1", role === "admin" ? "text-indigo-400" : "text-teal")}>
               <ExternalLink size={12} /> View Project
             </span>
           </Link>
@@ -150,7 +170,11 @@ const ChatInfoPanel = ({
         <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
           Quick Actions
         </h4>
-        {role === "client" ? (
+        {role === "admin" ? (
+          <div className="text-center text-sm text-slate-500 mt-4">
+            Actions managed from Users list.
+          </div>
+        ) : role === "client" ? (
           <>
             <Link to={`/freelancer/${participant.userId}`} className="block">
               <Button
@@ -206,7 +230,7 @@ const ChatInfoPanel = ({
       </div>
 
       {/* Online Status Footer */}
-      <div className="mt-auto p-5 border-t border-slate-100">
+      <div className={cn("mt-auto p-5 border-t", role === "admin" ? "border-white/5" : "border-slate-100 dark:border-white/5")}>
         <div className="flex items-center gap-2">
           <div className="relative flex h-3 w-3">
             {participant.online && (

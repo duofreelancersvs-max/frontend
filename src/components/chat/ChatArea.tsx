@@ -43,7 +43,7 @@ interface ChatAreaProps {
   onBack?: () => void;
   isConnected: boolean;
   currentUserId?: string;
-  role: "client" | "freelancer";
+  role: "client" | "freelancer" | "admin";
   termsAccepted: boolean;
   onAcceptTermsClick: () => void;
   showInfoPanel?: boolean;
@@ -116,7 +116,7 @@ const ChatArea = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showEmojiPicker]);
-  const VerifyIcon = role === "client" ? Verified : BadgeCheck;
+  const VerifyIcon = role === "client" || role === "admin" ? Verified : BadgeCheck;
 
   const isInitialMount = useRef(true);
   const prevParticipantId = useRef(participant?.id);
@@ -146,7 +146,7 @@ const ChatArea = ({
     return (
       <div
         className={cn(
-          "flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50 dark:bg-[#050B15]",
+          role === "admin" ? "bg-[#09090b]" : "bg-slate-50 dark:bg-[#050B15]",
           className,
         )}
       >
@@ -156,7 +156,7 @@ const ChatArea = ({
         <h3 className="text-lg font-semibold text-navy dark:text-white mb-1">
           Select a conversation
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className={cn("text-sm", role === "admin" ? "text-slate-400" : "text-slate-500 dark:text-slate-400")}>
           Choose a conversation to start messaging
         </p>
       </div>
@@ -164,9 +164,9 @@ const ChatArea = ({
   }
 
   return (
-    <div className={cn("flex-1 min-h-0 flex flex-col bg-slate-50 dark:bg-[#050B15] min-w-0 border-r border-slate-200 dark:border-white/5", className)}>
+    <div className={cn("flex-1 min-h-0 flex flex-col min-w-0 border-r", role === "admin" ? "bg-[#09090b] border-white/5" : "bg-slate-50 dark:bg-[#050B15] border-slate-200 dark:border-white/5", className)}>
       {/* Chat Header */}
-      <div className="h-16 bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
+      <div className={cn("h-16 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10 border-b", role === "admin" ? "bg-[#18181b] border-white/5" : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/5")}>
         <div className="flex items-center gap-3">
           {onBack && (
             <button
@@ -264,7 +264,7 @@ const ChatArea = ({
             className={cn(
               "p-2 rounded-lg transition-colors",
               showInfoPanel
-                ? "bg-teal/10 text-teal"
+                ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
             )}
           >
@@ -307,7 +307,7 @@ const ChatArea = ({
       {!termsAccepted ? (
         <ChatTermsOverlay onAcceptClick={onAcceptTermsClick} />
       ) : (
-        <div className="bg-white dark:bg-[#050B15] border-t border-slate-200 dark:border-white/10 p-4 flex-shrink-0 relative">
+        <div className={cn("p-4 flex-shrink-0 relative border-t", role === "admin" ? "bg-[#18181b] border-white/5" : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/10")}>
           <div className="flex items-center gap-2">
             <div className="relative" ref={emojiPickerRef}>
               <button
@@ -316,7 +316,7 @@ const ChatArea = ({
                 className={cn(
                   "p-2 rounded-lg transition-colors",
                   showEmojiPicker
-                    ? "bg-teal/10 text-teal"
+                    ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
                     : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
                 )}
               >
@@ -347,12 +347,12 @@ const ChatArea = ({
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               disabled={disabledMessageInput}
-              className="flex-1 h-10 px-4 rounded-full bg-slate-100 dark:bg-white/5 border-0 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal/30 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn("flex-1 h-10 px-4 rounded-full border-0 text-base sm:text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed", role === "admin" ? "bg-white/5 text-white placeholder-slate-500 focus:ring-indigo-500/30" : "bg-slate-100 dark:bg-white/5 focus:ring-teal/30 dark:text-white")}
             />
             <Button
               onClick={handleSend}
               disabled={disabledMessageInput || !messageInput.trim() || !isConnected}
-              className="h-10 w-10 p-0 rounded-full bg-teal hover:bg-teal-light text-white disabled:opacity-50"
+              className={cn("h-10 w-10 p-0 rounded-full text-white disabled:opacity-50", role === "admin" ? "bg-indigo-600 hover:bg-indigo-500" : "bg-teal hover:bg-teal-light")}
             >
               <Send size={18} />
             </Button>
