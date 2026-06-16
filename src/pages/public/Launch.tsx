@@ -140,56 +140,78 @@ const ConfettiBurst = ({ active }: { active: boolean }) => {
       rotation: number;
       rotationSpeed: number;
       opacity: number;
+      shape: "rect" | "circle";
+      wobbleSpeed: number;
+      wobble: number;
     }[] = [];
 
     const colors = [
-      "#14B8A6", // teal
-      "#3B82F6", // blue
-      "#F59E0B", // gold
-      "#EC4899", // pink
-      "#8B5CF6", // purple
-      "#10B981", // emerald
-      "#FFFFFF", // white
+      "#14B8A6", "#3B82F6", "#F59E0B", "#EC4899", 
+      "#8B5CF6", "#10B981", "#FFFFFF", "#FFD700", "#FF4500"
     ];
 
-    // Create confetti particles bursting from center
-    for (let i = 0; i < 150; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 12 + 4;
-      confetti.push({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 4,
-        size: Math.random() * 8 + 3,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 12,
-        opacity: 1,
-      });
-    }
+    // Create realistic confetti bursting from the bottom
+    const createBurst = (originX: number, originY: number, count: number) => {
+      for (let i = 0; i < count; i++) {
+        // Angles pointing generally upwards
+        const angle = Math.random() * Math.PI + Math.PI; 
+        const speed = Math.random() * 20 + 10;
+        confetti.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 5,
+          vy: Math.sin(angle) * speed - 5,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 15,
+          opacity: 1,
+          shape: Math.random() > 0.5 ? "rect" : "circle",
+          wobbleSpeed: Math.random() * 0.1 + 0.05,
+          wobble: Math.random() * Math.PI * 2,
+        });
+      }
+    };
+
+    // Burst from bottom center
+    createBurst(canvas.width / 2, canvas.height, 400);
 
     let frame = 0;
-    const maxFrames = 180;
+    const maxFrames = 300;
 
     const animate = () => {
       if (frame >= maxFrames) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (const c of confetti) {
-        c.x += c.vx;
+        c.wobble += c.wobbleSpeed;
+        const wobbleX = Math.sin(c.wobble) * 2;
+        
+        c.x += c.vx + wobbleX;
         c.y += c.vy;
-        c.vy += 0.15; // gravity
-        c.vx *= 0.99; // air resistance
+        c.vy += 0.2; // gravity
+        c.vx *= 0.98; // air resistance
         c.rotation += c.rotationSpeed;
-        c.opacity = Math.max(0, 1 - frame / maxFrames);
+        
+        // Fade out in the last 100 frames
+        if (frame > maxFrames - 100) {
+          c.opacity = Math.max(0, (maxFrames - frame) / 100);
+        }
 
         ctx.save();
         ctx.translate(c.x, c.y);
         ctx.rotate((c.rotation * Math.PI) / 180);
         ctx.globalAlpha = c.opacity;
         ctx.fillStyle = c.color;
-        ctx.fillRect(-c.size / 2, -c.size / 4, c.size, c.size / 2);
+        
+        if (c.shape === "rect") {
+          ctx.fillRect(-c.size / 2, -c.size / 4, c.size, c.size / 2);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, c.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
         ctx.restore();
       }
 
@@ -220,7 +242,7 @@ const CurtainOverlay = ({
 }) => {
   useEffect(() => {
     if (isOpening) {
-      const timer = setTimeout(onAnimationEnd, 3500); // 3 seconds duration
+      const timer = setTimeout(onAnimationEnd, 6500); // 6.5 seconds duration
       return () => clearTimeout(timer);
     }
   }, [isOpening, onAnimationEnd]);
@@ -233,7 +255,7 @@ const CurtainOverlay = ({
       x: "-15%", // pull left
       skewX: -5, // slight tilt as it bunches
       transition: {
-        duration: 3.0,
+        duration: 6.0,
         ease: [0.64, 0, 0.13, 1] as [number, number, number, number],
       },
     },
@@ -246,7 +268,7 @@ const CurtainOverlay = ({
       x: "15%", // pull right
       skewX: 5, // slight tilt as it bunches
       transition: {
-        duration: 3.0,
+        duration: 6.0,
         ease: [0.64, 0, 0.13, 1] as [number, number, number, number],
       },
     },
@@ -355,7 +377,7 @@ const CurtainOverlay = ({
         <motion.div
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: [0, 1, 0], scaleX: [0, 5, 20] }}
-          transition={{ duration: 3.0, times: [0, 0.4, 1], ease: "easeOut" }}
+          transition={{ duration: 6.0, times: [0, 0.4, 1], ease: "easeOut" }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
         >
           <div className="w-4 h-full bg-gradient-to-r from-transparent via-red-300 to-transparent blur-[30px]" />
@@ -375,6 +397,7 @@ const LaunchPage = () => {
   const [curtainsOpen, setCurtainsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showLaunchMessage, setShowLaunchMessage] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   
   // Countdown State
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -405,18 +428,19 @@ const LaunchPage = () => {
 
   const handleLaunch = () => {
     // Start countdown
-    setCountdown(3);
+    setCountdown(10);
   };
 
   const handleCurtainAnimationEnd = useCallback(() => {
     // Navigate to home after curtains are fully open
     setTimeout(() => {
-      navigate("/");
+      setIsFadingOut(true);
+      setTimeout(() => navigate("/"), 1000);
     }, 1000);
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#050B15] text-white font-sans overflow-x-hidden relative selection:bg-teal/30 flex items-center justify-center">
+    <div className={`min-h-screen bg-[#050B15] text-white font-sans overflow-x-hidden relative selection:bg-teal/30 flex items-center justify-center transition-opacity duration-1000 ${isFadingOut ? "opacity-0" : "opacity-100"}`}>
       <ParticleField />
 
       {/* Curtain Overlay — only mounts after countdown starts */}

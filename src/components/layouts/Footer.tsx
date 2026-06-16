@@ -51,13 +51,17 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               <a
-                href="#"
+                href="https://x.com/connectmeindia"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
               >
                 <Twitter size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.linkedin.com/in/connectme-india-575362417"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
               >
                 <Linkedin size={18} />

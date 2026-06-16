@@ -21,8 +21,8 @@ export const PublicFooter = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { Icon: Twitter, href: "#" },
-                { Icon: Linkedin, href: "#" },
+                { Icon: Twitter, href: "https://x.com/connectmeindia" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/in/connectme-india-575362417" },
                 { Icon: Instagram, href: "https://www.instagram.com/connectmeindia" },
                 { Icon: Youtube, href: "https://www.youtube.com/@connectmeindia05" },
               ].map(({ Icon, href }, idx) => (
