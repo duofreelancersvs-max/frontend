@@ -1,18 +1,8 @@
-import { SEO } from '@/components/SEO/SEO';
+import { SEO } from "@/components/SEO/SEO";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import {
-  ChevronDown,
-  FileEdit,
-  Search,
-  Play,
-  Shield,
-  Clock,
-  Star,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileEdit, Search, Play, Shield, Clock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Custom hook for intersection observer animations
@@ -62,7 +52,11 @@ const AnimatedSection = ({
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <SEO title="How It Works | ConnectMeIndia" description="Discover how easy it is to hire freelancers or find work on ConnectMeIndia." canonical="/how-it-works" />
+      <SEO
+        title="How It Works | ConnectMeIndia"
+        description="Discover how easy it is to hire freelancers or find work on ConnectMeIndia."
+        canonical="/how-it-works"
+      />
       {children}
     </div>
   );
