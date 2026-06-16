@@ -3,7 +3,6 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import {
   ChevronRight,
-  MapPin,
   Mail,
   Phone,
   Clock,
@@ -124,13 +123,6 @@ const Contact = () => {
       value: "+91 XXXXX XXXXX",
       link: "#",
       color: "text-royal-blue",
-    },
-    {
-      icon: MapPin,
-      title: "Location",
-      value: "Hyderabad, Telangana, India",
-      link: "#",
-      color: "text-sky-blue",
     },
   ];
 
@@ -427,28 +419,6 @@ const Contact = () => {
                 </span>
               </div>
             </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. MAP SECTION */}
-      <section className="relative h-[600px] w-full bg-slate-100 dark:bg-navy border-y border-slate-200 dark:border-white/5 overflow-hidden">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.452664976722!2d78.37582307593256!3d17.43632903326162!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93dc8c5d69df%3A0x19688eb5c58c0276!2sT-Hub!5e0!3m2!1sen!2sin!4v1706600000000!5m2!1sen!2sin"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          className="grayscale opacity-50 dark:opacity-20 dark:invert transition-opacity duration-500 hover:opacity-70 dark:hover:opacity-40"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-slate-50 dark:from-[#050B15] dark:via-transparent dark:to-[#050B15] pointer-events-none" />
-
-        {/* Dynamic Marker */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-teal/20 animate-[ping_3s_infinite] absolute -inset-6" />
-            <div className="w-4 h-4 bg-teal rounded-full border-2 border-white shadow-[0_0_20px_rgba(45,212,191,0.8)]" />
           </div>
         </div>
       </section>

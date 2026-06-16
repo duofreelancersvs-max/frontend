@@ -69,8 +69,6 @@ const AnimatedSection = ({
 };
 
 const HowItWorks = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
   const steps = [
     {
       step: 1,
@@ -114,23 +112,6 @@ const HowItWorks = () => {
         "Job Applications",
         "Indian Payment Standards",
       ],
-    },
-  ];
-
-  const faqs = [
-    {
-      question: "How does the verification process work?",
-      answer:
-        "We manually vet every professional's portfolio, identity, and technical proficiency to ensure they meet our 'Elite' creative standards.",
-    },
-    {
-      question: "How do payments work?",
-      answer: "All payments happen directly between the client and the freelancer. We recommend using secure methods like UPI or Razorpay and verifying the other party before transacting.",
-    },
-    {
-      question: "Can I use the platform for physical production?",
-      answer:
-        "While we specialize in digital post-production (VFX, Editing), many clients hire local talent for on-site shoots through our directory.",
     },
   ];
 
@@ -306,90 +287,6 @@ const HowItWorks = () => {
               </div>
             </AnimatedSection>
           </div>
-        </div>
-      </section>
-
-      {/* 5. FAQ */}
-      <section className="py-32">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl font-bold text-navy dark:text-white">
-                Answers for Success
-              </h2>
-            </div>
-            <div className="space-y-4">
-              {faqs.map((faq, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white dark:bg-transparent dark:glass-card shadow-sm dark:shadow-none rounded-2xl overflow-hidden border border-slate-200 dark:border-white/5"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                    className="w-full p-8 text-left flex items-center justify-between group"
-                  >
-                    <span className="font-bold text-lg text-navy dark:text-white group-hover:text-teal transition-colors">
-                      {faq.question}
-                    </span>
-                    <ChevronDown
-                      size={20}
-                      className={cn(
-                        "text-slate-400 dark:text-slate-500 transition-all duration-300",
-                        openFaq === idx
-                          ? "rotate-180 text-teal dark:text-teal-light"
-                          : "",
-                      )}
-                    />
-                  </button>
-                  <div
-                    className={cn(
-                      "overflow-hidden transition-all duration-300",
-                      openFaq === idx
-                        ? "max-h-96 opacity-100"
-                        : "max-h-0 opacity-0",
-                    )}
-                  >
-                    <div className="px-8 pb-8 text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. FINAL CTA */}
-      <section className="py-40 relative">
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
-          <AnimatedSection>
-            <h2 className="text-5xl md:text-7xl font-bold mb-12 text-navy dark:text-white">
-              Join the{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue dark:from-teal-light dark:to-sky-blue">
-                Evolution
-              </span>
-            </h2>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link to="/register?role=client">
-                <Button
-                  size="lg"
-                  className="h-16 px-12 rounded-2xl bg-teal dark:bg-white text-white dark:text-navy font-bold text-lg hover:bg-teal-light dark:hover:bg-slate-100 transition-all hover:scale-105 shadow-xl shadow-teal/20 dark:shadow-2xl dark:shadow-white/10"
-                >
-                  Hire Elite Talent
-                </Button>
-              </Link>
-              <Link to="/register?role=freelancer">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-16 px-12 rounded-2xl border-slate-300 text-slate-700 dark:border-white/20 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
-                >
-                  Join as a Pro
-                </Button>
-              </Link>
-            </div>
-          </AnimatedSection>
         </div>
       </section>
 
