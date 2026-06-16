@@ -7,6 +7,7 @@ import axiosClient from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 import type { User } from "@/types/auth.types";
 import { formatBackendApiError } from "@/lib/auth-request-errors";
+import { consumeOAuthRole } from "@/lib/oauth";
 import { toast } from "react-toastify";
 
 /**
@@ -44,9 +45,7 @@ export default function OAuthCallback() {
           throw new Error("No authenticated user found");
         }
 
-        // Get role from localStorage (set before redirect)
-        const storedRole = localStorage.getItem("oauth_role");
-        localStorage.removeItem("oauth_role");
+        const storedRole = consumeOAuthRole();
 
         // Build request body
         const requestBody: Record<string, string> = {

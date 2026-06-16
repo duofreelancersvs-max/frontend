@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { hasOAuthHashInUrl } from "@/lib/oauth";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
@@ -71,6 +72,13 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   // ─── main effect ───────────────────────────────────────────────────────────
 
   useEffect(() => {
+    // Supabase may fall back to Site URL (root) when redirectTo is not allow-listed.
+    // Forward OAuth hash tokens to /auth/callback before any session sync runs.
+    if (location.pathname !== "/auth/callback" && hasOAuthHashInUrl()) {
+      window.location.replace(`/auth/callback${window.location.hash}`);
+      return;
+    }
+
     const safetyTimer = setTimeout(() => {
       if (!initializedRef.current) {
         console.warn("[AuthInitializer] Timeout — unblocking spinner.");
@@ -81,6 +89,11 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     // ── initialise: getSession then sync ─────────────────────────────────────
     (async () => {
       try {
+        if (location.pathname === "/auth/callback") {
+          unblock();
+          return;
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error || !session?.user) {

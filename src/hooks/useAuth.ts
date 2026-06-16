@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError, type AxiosRequestHeaders } from "axios";
+import { clearOAuthRole, getOAuthRedirectUrl, setOAuthRole } from "@/lib/oauth";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
@@ -208,18 +209,16 @@ export function useAuth(): UseAuthReturn {
         setLoading(true);
         setError(null);
 
-        // Store role in localStorage for after OAuth redirect
         if (role) {
-          localStorage.setItem("oauth_role", role);
+          setOAuthRole(role);
         } else {
-          localStorage.removeItem("oauth_role");
+          clearOAuthRole();
         }
 
-        // Use Supabase OAuth (redirect-based)
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
+            redirectTo: getOAuthRedirectUrl(),
             queryParams: role ? { role } : undefined,
           },
         });
