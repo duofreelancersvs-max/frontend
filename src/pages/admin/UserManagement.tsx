@@ -50,6 +50,8 @@ interface User {
   /** Mirrors FreelancerProfile.isProActive — only meaningful for freelancers. */
   isProActive?: boolean;
   createdAt: string;
+  projectsCount: number;
+  rating: number;
 }
 
 type TabType = "all" | "clients" | "freelancers" | "admins";
@@ -295,21 +297,6 @@ const UserDetailSlideOver = ({
   if (!user) return null;
 
   const recentActivity = [
-    {
-      action: "Updated profile information",
-      time: "2 hours ago",
-      type: "info",
-    },
-    {
-      action: "Completed project 'Brand Video Edit'",
-      time: "1 day ago",
-      type: "success",
-    },
-    {
-      action: "Submitted verification documents",
-      time: "3 days ago",
-      type: "warning",
-    },
     { action: "Joined the platform", time: user.joinedDate, type: "info" },
   ];
 
@@ -382,11 +369,11 @@ const UserDetailSlideOver = ({
                   </div>
                 </div>
                 <div className="um-slideover-stat">
-                  <div className="value">12</div>
+                  <div className="value">{user.projectsCount || 0}</div>
                   <div className="label">Projects</div>
                 </div>
                 <div className="um-slideover-stat">
-                  <div className="value">4.8</div>
+                  <div className="value">{user.rating > 0 ? user.rating.toFixed(1) : "—"}</div>
                   <div className="label">Rating</div>
                 </div>
               </div>
@@ -433,20 +420,7 @@ const UserDetailSlideOver = ({
             <div className="um-slideover-projects">
               <h4>Recent Projects</h4>
               <div className="um-project-list">
-                <div className="um-project-item">
-                  <Briefcase size={16} />
-                  <div>
-                    <p>Wedding Video Edit</p>
-                    <span>Completed • ₹25,000</span>
-                  </div>
-                </div>
-                <div className="um-project-item">
-                  <Briefcase size={16} />
-                  <div>
-                    <p>Corporate Promo</p>
-                    <span>In Progress • ₹45,000</span>
-                  </div>
-                </div>
+                <p className="text-slate-500 text-sm">No recent projects to display.</p>
               </div>
             </div>
           )}
@@ -584,6 +558,10 @@ const [searchQuery, setSearchQuery] = useState("");
         const isRecent = u.lastLoginAt
           ? (Date.now() - new Date(u.lastLoginAt).getTime()) < 3600000
           : false;
+        
+        const projectsCount = u.profile?.completedProjects ?? u.profile?.totalProjectsPosted ?? 0;
+        const rating = u.profile?.rating ?? 0;
+
         return {
           id: u._id || u.id,
           name,
@@ -600,6 +578,8 @@ const [searchQuery, setSearchQuery] = useState("");
           revenue: earnings > 0 ? `₹${earnings.toLocaleString("en-IN")}` : "—",
           isProActive: u.profile?.isProActive === true,
           createdAt: u.createdAt || "",
+          projectsCount,
+          rating,
         };
       });
 

@@ -146,6 +146,7 @@ const ChatArea = ({
     return (
       <div
         className={cn(
+          "flex-1 flex flex-col items-center justify-center h-full text-center p-6",
           role === "admin" ? "bg-[#09090b]" : "bg-slate-50 dark:bg-[#050B15]",
           className,
         )}
