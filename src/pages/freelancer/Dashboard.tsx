@@ -265,7 +265,7 @@ const FreelancerDashboard = () => {
 
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-background transition-colors duration-300">
+    <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-background transition-colors duration-300">
       <div className="min-h-full">
         <DashboardHeader
           title="Dashboard"
@@ -273,7 +273,7 @@ const FreelancerDashboard = () => {
         />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:space-y-8 space-y-6">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 lg:space-y-8 space-y-6">
           {loading ? (
             <div className="space-y-8">
               <div className="flex items-center justify-between space-y-2">

@@ -8,7 +8,6 @@ import {
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2,
   Calendar,
   AlertCircle,
 } from "lucide-react";
@@ -76,9 +75,9 @@ const FindWork = () => {
             : undefined,
       };
 
-      const result = await projectService.searchPublic(params);
+      const result = await projectService.searchPublic(params) as any;
       setProjects(result.projects || []);
-      setTotalCount(result.total || 0);
+      setTotalCount(result.pagination?.totalItems || 0);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
       setError("Unable to load projects. Please try refreshing.");
@@ -497,10 +496,7 @@ const ProjectCard = ({
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 text-xxs font-black uppercase tracking-wider">
-              <CheckCircle2 size={12} />
-              Payment Verified
-            </div>
+
             <Button
               onClick={onApply}
               className="flex-1 sm:flex-none bg-teal hover:bg-teal-light text-white h-12 px-8 rounded-2xl font-black shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 group"

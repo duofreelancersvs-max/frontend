@@ -71,10 +71,10 @@ export interface ProjectFilters {
 
 export const projectService = {
   search: (params?: ProjectFilters) =>
-    api.get<{ projects: Project[]; total: number }>("/projects", { params }),
+    api.get<{ projects: Project[]; pagination: { totalItems: number; totalPages: number; page: number; limit: number; hasNextPage: boolean; hasPrevPage: boolean; } }>("/projects", { params }),
 
   searchPublic: (params?: ProjectFilters) =>
-    api.get<{ projects: Project[]; total: number }>("/public/projects", { params }),
+    api.get<{ projects: Project[]; pagination: { totalItems: number; totalPages: number; page: number; limit: number; hasNextPage: boolean; hasPrevPage: boolean; } }>("/public/projects", { params }),
 
   getById: (id: string) => api.get<Project>(`/projects/${id}`),
 

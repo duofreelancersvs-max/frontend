@@ -93,7 +93,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
     <>
       <header
         className={cn(
-          "h-20 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 transition-all shadow-sm",
+          "h-20 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 transition-all shadow-sm",
           className,
         )}
       >
@@ -111,7 +111,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {children}
 
           <div className="flex items-center gap-1.5 mr-1 md:mr-2">

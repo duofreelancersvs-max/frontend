@@ -1,6 +1,15 @@
+import { isAxiosError } from "axios";
+import type { Session } from "@supabase/supabase-js";
+import axiosClient from "@/lib/axios-client";
+import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
+import { supabase } from "@/lib/supabase";
+import type { User } from "@/types/auth.types";
+
 const OAUTH_ROLE_STORAGE_KEY = "oauth_role";
 const OAUTH_ROLE_COOKIE = "oauth_role";
 const OAUTH_ROLE_MAX_AGE_SECONDS = 600;
+const OAUTH_SYNC_TIMEOUT_MS = 45_000;
+const OAUTH_SYNC_MAX_ATTEMPTS = 3;
 
 /** Parent domain for cookies so role survives www ↔ apex (e.g. .connectmeindia.com). */
 function getSharedCookieDomain(): string | undefined {
@@ -64,6 +73,18 @@ function eraseCookie(name: string): void {
   document.cookie = parts.join("; ");
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** In-app browsers (WhatsApp, Instagram, etc.) often block cross-origin API calls. */
+export function isInAppBrowser(): boolean {
+  const ua = navigator.userAgent || "";
+  return /FBAN|FBAV|Instagram|Line\/|Twitter|LinkedInApp|WhatsApp|Snapchat|wv\)/i.test(
+    ua,
+  );
+}
+
 /**
  * Persist selected account role before the OAuth redirect.
  * Uses localStorage plus a short-lived shared-domain cookie for www/apex handoff.
@@ -106,8 +127,119 @@ export function getOAuthRedirectUrl(): string {
   return `${window.location.origin}/auth/callback`;
 }
 
-/** True when the URL hash contains Supabase OAuth response tokens. */
-export function hasOAuthHashInUrl(): boolean {
+/** True when the URL contains Supabase OAuth callback params (PKCE code or implicit hash). */
+export function hasOAuthCallbackInUrl(): boolean {
   const hash = window.location.hash;
-  return hash.includes("access_token=") || hash.includes("error=");
+  if (hash.includes("access_token=") || hash.includes("error=")) {
+    return true;
+  }
+
+  return new URLSearchParams(window.location.search).has("code");
+}
+
+/** @deprecated Use hasOAuthCallbackInUrl */
+export function hasOAuthHashInUrl(): boolean {
+  return hasOAuthCallbackInUrl();
+}
+
+/**
+ * Wait for Supabase to finish the OAuth redirect (PKCE code exchange or hash parsing).
+ * Mobile browsers can be slow to process the callback URL — polling avoids race failures.
+ */
+export async function waitForOAuthSession(
+  maxWaitMs = 20_000,
+): Promise<Session> {
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  const oauthError = url.searchParams.get("error_description")
+    || url.searchParams.get("error");
+
+  if (oauthError) {
+    throw new Error(oauthError);
+  }
+
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      throw new Error(error.message);
+    }
+    if (data.session?.user) {
+      return data.session;
+    }
+  }
+
+  const deadline = Date.now() + maxWaitMs;
+  let delayMs = 150;
+
+  while (Date.now() < deadline) {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (session?.user) {
+      return session;
+    }
+
+    await sleep(delayMs);
+    delayMs = Math.min(Math.round(delayMs * 1.4), 1200);
+  }
+
+  throw new Error("No authenticated user found");
+}
+
+function isRetryableOAuthSyncError(err: unknown): boolean {
+  if (!isAxiosError(err)) {
+    return true;
+  }
+
+  if (!err.response) {
+    return true;
+  }
+
+  const status = err.response.status;
+  return status === 429 || status === 502 || status === 503 || status === 504;
+}
+
+export interface OAuthSyncResult {
+  user: User;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
+}
+
+/** POST /auth/oauth/callback with retries for flaky mobile networks and cold starts. */
+export async function syncOAuthWithBackend(
+  requestBody: Record<string, string>,
+): Promise<OAuthSyncResult> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= OAUTH_SYNC_MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await axiosClient.post<{
+        data: OAuthSyncResult;
+      }>("/auth/oauth/callback", requestBody, {
+        skipAuth: true,
+        timeout: OAUTH_SYNC_TIMEOUT_MS,
+      } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
+
+      return response.data.data;
+    } catch (err) {
+      lastError = err;
+
+      if (!isRetryableOAuthSyncError(err) || attempt === OAUTH_SYNC_MAX_ATTEMPTS) {
+        throw err;
+      }
+
+      await sleep(1000 * attempt);
+    }
+  }
+
+  throw lastError;
 }

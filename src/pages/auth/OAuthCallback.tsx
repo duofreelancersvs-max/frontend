@@ -1,153 +1,112 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
-import axiosClient from "@/lib/axios-client";
-import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
-import type { User } from "@/types/auth.types";
 import { formatBackendApiError } from "@/lib/auth-request-errors";
-import { consumeOAuthRole } from "@/lib/oauth";
+import {
+  consumeOAuthRole,
+  isInAppBrowser,
+  syncOAuthWithBackend,
+  waitForOAuthSession,
+} from "@/lib/oauth";
 import { toast } from "react-toastify";
 
-/**
- * OAuth return handler. If users see "Network Error" on mobile only:
- * Safari → Develop → [device] → Web Inspector → Network: inspect failed calls to your API host vs *.supabase.co
- * and compare request `Origin` to Railway CORS_ORIGIN (www vs apex must match).
- */
 export default function OAuthCallback() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
   const { setAuth, setLoading } = useAuthStore();
   const hasRun = useRef(false);
 
-  useEffect(() => {
-    const handleCallback = async () => {
-      // Guard against double-execution (React StrictMode)
-      if (hasRun.current) return;
-      hasRun.current = true;
+  const completeOAuth = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      setLoading(true);
+    try {
+      const session = await waitForOAuthSession();
+      const storedRole = consumeOAuthRole();
 
-      try {
-        // Get the current session from Supabase
-        // This will process the OAuth callback from the URL
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          throw new Error(sessionError.message);
-        }
-
-        if (!session || !session.user) {
-          throw new Error("No authenticated user found");
-        }
-
-        const storedRole = consumeOAuthRole();
-
-        // Build request body
-        const requestBody: Record<string, string> = {
-          accessToken: session.access_token,
-        };
-        if (storedRole) {
-          requestBody.role = storedRole;
-        }
-
-        // Call backend API to sync user
-        const response = await axiosClient.post<{
-          data: {
-            user: User;
-            tokens: {
-              accessToken: string;
-              refreshToken: string;
-              expiresIn: number;
-            };
-          };
-        }>("/auth/oauth/callback", requestBody, {
-          skipAuth: true,
-        } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
-
-        const { user, tokens } = response.data.data;
-
-        if (storedRole && user.role !== storedRole) {
-          toast.info(
-            `You have already created an account as a ${user.role}. Logging you in as a ${user.role} instead of a ${storedRole}.`,
-          );
-          // We don't throw error anymore, just proceed with the actual role
-        }
-
-        // Backend returns the Supabase accessToken verbatim but refreshToken is empty.
-        // Use the Supabase session's refreshToken as fallback since we need it for token refresh.
-        const finalRefreshToken = tokens.refreshToken || session.refresh_token;
-
-        // Keep Supabase client in sync with the tokens we're about to store
-        const { error: setSessionError } = await supabase.auth.setSession({
-          access_token: tokens.accessToken,
-          refresh_token: finalRefreshToken,
-        });
-
-        if (setSessionError) {
-          console.error("Supabase session sync error:", setSessionError);
-        }
-
-        // Set auth state in Zustand store
-        setAuth(user, {
-          accessToken: tokens.accessToken,
-          refreshToken: finalRefreshToken,
-          expiresIn: tokens.expiresIn || 3600,
-        });
-
-        // Redirect to entry route (root page)
-        if (user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/");
-        }
-      } catch (err: unknown) {
-        console.error("OAuth Callback Error:", err);
-        let message: string;
-        if (isAxiosError(err)) {
-          const url =
-            typeof err.config?.url === "string"
-              ? err.config.url
-              : err.config?.baseURL != null
-                ? `${err.config.baseURL}${err.config.url ?? ""}`
-                : "API";
-          message = `${formatBackendApiError(err, "Could not reach the server")} (sync: ${url})`;
-        } else if (err instanceof Error) {
-          message =
-            err.message === "No authenticated user found"
-              ? "Sign-in did not complete. Check Supabase Auth redirect URLs include this site's /auth/callback."
-              : err.message;
-        } else {
-          message = "Authentication failed";
-        }
-
-        setError(message);
-        toast.error(message);
-
-        // If it's a role mismatch, sign out to prevent auto-login loops
-        if (message.includes("Account already exists")) {
-          await supabase.auth.signOut();
-        }
-
-        // Delayed redirect giving time for toast to be seen
-        setTimeout(() => {
-          navigate("/login");
-        }, 3000);
-      } finally {
-        setLoading(false);
+      const requestBody: Record<string, string> = {
+        accessToken: session.access_token,
+      };
+      if (storedRole) {
+        requestBody.role = storedRole;
       }
-    };
 
-    handleCallback();
+      const { user, tokens } = await syncOAuthWithBackend(requestBody);
+
+      if (storedRole && user.role !== storedRole) {
+        toast.info(
+          `You have already created an account as a ${user.role}. Logging you in as a ${user.role} instead of a ${storedRole}.`,
+        );
+      }
+
+      const finalRefreshToken = tokens.refreshToken || session.refresh_token;
+
+      const { error: setSessionError } = await supabase.auth.setSession({
+        access_token: tokens.accessToken,
+        refresh_token: finalRefreshToken,
+      });
+
+      if (setSessionError) {
+        console.error("Supabase session sync error:", setSessionError);
+      }
+
+      setAuth(user, {
+        accessToken: tokens.accessToken,
+        refreshToken: finalRefreshToken,
+        expiresIn: tokens.expiresIn || 3600,
+      });
+
+      if (user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    } catch (err: unknown) {
+      console.error("OAuth Callback Error:", err);
+      let message: string;
+
+      if (isInAppBrowser() && isAxiosError(err) && !err.response) {
+        message = formatBackendApiError(err, "Authentication failed");
+      } else if (isAxiosError(err)) {
+        message = formatBackendApiError(err, "Could not complete sign-in");
+      } else if (err instanceof Error) {
+        message =
+          err.message === "No authenticated user found"
+            ? "Sign-in did not finish. Please try again — if it keeps failing, use Chrome or Safari."
+            : err.message;
+      } else {
+        message = "Authentication failed";
+      }
+
+      setError(message);
+      toast.error(message);
+
+      if (message.includes("Account already exists")) {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      setLoading(false);
+      setIsRetrying(false);
+    }
   }, [navigate, setAuth, setLoading]);
+
+  useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+    void completeOAuth();
+  }, [completeOAuth]);
+
+  const handleRetry = () => {
+    setIsRetrying(true);
+    void completeOAuth();
+  };
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
           <div className="text-red-500 mb-4">
             <svg
@@ -167,8 +126,24 @@ export default function OAuthCallback() {
           <h2 className="text-2xl font-bold text-navy mb-2">
             Authentication Failed
           </h2>
-          <p className="text-slate-600 mb-4">{error}</p>
-          <p className="text-slate-500 text-sm">Redirecting to login...</p>
+          <p className="text-slate-600 mb-6 text-sm leading-relaxed">{error}</p>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="w-full rounded-lg bg-teal px-4 py-3 text-white font-semibold disabled:opacity-60"
+            >
+              {isRetrying ? "Retrying..." : "Try again"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/login", { replace: true })}
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-700 font-medium"
+            >
+              Back to login
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -176,13 +151,13 @@ export default function OAuthCallback() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
+      <div className="text-center px-4">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal mx-auto mb-4"></div>
         <h2 className="text-xl font-semibold text-navy">
           Completing sign in...
         </h2>
-        <p className="text-slate-500 mt-2">
-          Please wait while we authenticate you
+        <p className="text-slate-500 mt-2 text-sm">
+          This can take a few seconds on mobile networks
         </p>
       </div>
     </div>

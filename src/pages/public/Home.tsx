@@ -536,7 +536,7 @@ const Home = () => {
                     {cat.desc}
                   </p>
                   <div className="flex items-center text-teal font-bold text-sm">
-                    {cat.count}+ Pros{" "}
+                    Explore Pros{" "}
                     <ArrowRight
                       size={16}
                       className="ml-2 group-hover:translate-x-1 transition-transform"
