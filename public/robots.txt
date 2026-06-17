@@ -11,4 +11,4 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /auth/
 
-Sitemap: https://connectmeindia.com/sitemap.xml
+Sitemap: https://www.connectmeindia.com/sitemap.xml
