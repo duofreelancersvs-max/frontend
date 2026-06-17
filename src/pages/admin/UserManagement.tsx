@@ -23,7 +23,6 @@ import {
   Calendar,
   MapPin,
   Activity,
-  Briefcase,
   Clock,
   Zap,
   Check,
@@ -136,10 +135,7 @@ const StatusBadge = ({ status }: { status: User["status"] }) => {
 };
 
 const ProBadge = () => (
-  <span
-    className="um-pro-badge"
-    title="Active Pro subscription"
-  >
+  <span className="um-pro-badge" title="Active Pro subscription">
     <Zap size={10} className="fill-current" />
     Pro
   </span>
@@ -373,7 +369,9 @@ const UserDetailSlideOver = ({
                   <div className="label">Projects</div>
                 </div>
                 <div className="um-slideover-stat">
-                  <div className="value">{user.rating > 0 ? user.rating.toFixed(1) : "—"}</div>
+                  <div className="value">
+                    {user.rating > 0 ? user.rating.toFixed(1) : "—"}
+                  </div>
                   <div className="label">Rating</div>
                 </div>
               </div>
@@ -420,7 +418,9 @@ const UserDetailSlideOver = ({
             <div className="um-slideover-projects">
               <h4>Recent Projects</h4>
               <div className="um-project-list">
-                <p className="text-slate-500 text-sm">No recent projects to display.</p>
+                <p className="text-slate-500 text-sm">
+                  No recent projects to display.
+                </p>
               </div>
             </div>
           )}
@@ -461,14 +461,14 @@ const UserManagement = () => {
     email: "",
     phone: "",
     password: "",
-    role: "client"
+    role: "client",
   });
   useEffect(() => {
-  document.body.style.overflow = isAddUserModalOpen ? 'hidden' : '';
-}, [isAddUserModalOpen]);
+    document.body.style.overflow = isAddUserModalOpen ? "hidden" : "";
+  }, [isAddUserModalOpen]);
 
-const [isSubmittingNewUser, setIsSubmittingNewUser] = useState(false);
-const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmittingNewUser, setIsSubmittingNewUser] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -478,7 +478,10 @@ const [searchQuery, setSearchQuery] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [liveStats, setLiveStats] = useState(statsData);
   const [liveTabs, setLiveTabs] = useState(tabsData);
-  const [proTarget, setProTarget] = useState<{ user: User; next: boolean } | null>(null);
+  const [proTarget, setProTarget] = useState<{
+    user: User;
+    next: boolean;
+  } | null>(null);
   const [proReason, setProReason] = useState("");
   const [proSubmitting, setProSubmitting] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -501,7 +504,9 @@ const [searchQuery, setSearchQuery] = useState("");
       // Optimistic local update so the UI reflects the new state without a refetch
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === proTarget.user.id ? { ...u, isProActive: proTarget.next } : u,
+          u.id === proTarget.user.id
+            ? { ...u, isProActive: proTarget.next }
+            : u,
         ),
       );
       setProTarget(null);
@@ -520,7 +525,14 @@ const [searchQuery, setSearchQuery] = useState("");
     try {
       await adminService.createUser(newUserData);
       setIsAddUserModalOpen(false);
-      setNewUserData({ firstName: "", lastName: "", email: "", phone: "", password: "", role: "client" });
+      setNewUserData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "client",
+      });
       fetchUsers(); // Refresh the list
       fetchStats();
     } catch (err) {
@@ -533,11 +545,16 @@ const [searchQuery, setSearchQuery] = useState("");
   // Fetch users from API
   const fetchUsers = useCallback(async () => {
     try {
-      const roleParam = activeTab === "clients" ? "client"
-        : activeTab === "freelancers" ? "freelancer"
-        : activeTab === "admins" ? "admin"
-        : roleFilter !== "all" ? roleFilter
-        : undefined;
+      const roleParam =
+        activeTab === "clients"
+          ? "client"
+          : activeTab === "freelancers"
+            ? "freelancer"
+            : activeTab === "admins"
+              ? "admin"
+              : roleFilter !== "all"
+                ? roleFilter
+                : undefined;
       const statusParam = statusFilter !== "all" ? statusFilter : undefined;
 
       const result = await adminService.getAllUsers({
@@ -550,16 +567,25 @@ const [searchQuery, setSearchQuery] = useState("");
 
       const mapped: User[] = (result.users || []).map((u: any) => {
         const name = u.fullName || u.email?.split("@")[0] || "Unknown";
-        const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+        const initials = name
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
         const city = u.address?.city || u.profile?.location?.city || "";
         const state = u.address?.state || u.profile?.location?.state || "";
-        const earnings = u.profile?.totalEarnings ?? u.profile?.totalProjectsPosted ?? 0;
-        const lastLogin = u.lastLoginAt ? getTimeAgo(new Date(u.lastLoginAt)) : "—";
+        const earnings =
+          u.profile?.totalEarnings ?? u.profile?.totalProjectsPosted ?? 0;
+        const lastLogin = u.lastLoginAt
+          ? getTimeAgo(new Date(u.lastLoginAt))
+          : "—";
         const isRecent = u.lastLoginAt
-          ? (Date.now() - new Date(u.lastLoginAt).getTime()) < 3600000
+          ? Date.now() - new Date(u.lastLoginAt).getTime() < 3600000
           : false;
-        
-        const projectsCount = u.profile?.completedProjects ?? u.profile?.totalProjectsPosted ?? 0;
+
+        const projectsCount =
+          u.profile?.completedProjects ?? u.profile?.totalProjectsPosted ?? 0;
         const rating = u.profile?.rating ?? 0;
 
         return {
@@ -572,7 +598,11 @@ const [searchQuery, setSearchQuery] = useState("");
           status: u.status as User["status"],
           location: city || "—",
           state: state || "—",
-          joinedDate: new Date(u.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }),
+          joinedDate: new Date(u.createdAt).toLocaleDateString("en-IN", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
           lastActive: lastLogin,
           lastActiveRecent: isRecent,
           revenue: earnings > 0 ? `₹${earnings.toLocaleString("en-IN")}` : "—",
@@ -588,22 +618,57 @@ const [searchQuery, setSearchQuery] = useState("");
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  }, [activeTab, searchQuery, roleFilter, statusFilter, currentPage, itemsPerPage]);
+  }, [
+    activeTab,
+    searchQuery,
+    roleFilter,
+    statusFilter,
+    currentPage,
+    itemsPerPage,
+  ]);
 
   // Fetch stats
   const fetchStats = useCallback(async () => {
     try {
       const statsResult = await adminService.getDashboardStats();
       setLiveStats([
-        { label: "Total Users", value: String(statsResult.totalUsers || 0), color: "indigo" as const, icon: Users },
-        { label: "Active", value: String(statsResult.activeUsers || 0), color: "emerald" as const, icon: Activity },
-        { label: "Pending", value: String(statsResult.pendingUsers || 0), color: "amber" as const, icon: Clock },
-        { label: "Suspended", value: String(statsResult.suspendedUsers || 0), color: "rose" as const, icon: Ban },
+        {
+          label: "Total Users",
+          value: String(statsResult.totalUsers || 0),
+          color: "indigo" as const,
+          icon: Users,
+        },
+        {
+          label: "Active",
+          value: String(statsResult.activeUsers || 0),
+          color: "emerald" as const,
+          icon: Activity,
+        },
+        {
+          label: "Pending",
+          value: String(statsResult.pendingUsers || 0),
+          color: "amber" as const,
+          icon: Clock,
+        },
+        {
+          label: "Suspended",
+          value: String(statsResult.suspendedUsers || 0),
+          color: "rose" as const,
+          icon: Ban,
+        },
       ]);
       setLiveTabs([
         { key: "all", label: "All Users", count: statsResult.totalUsers || 0 },
-        { key: "clients", label: "Clients", count: statsResult.totalClients || 0 },
-        { key: "freelancers", label: "Freelancers", count: statsResult.totalFreelancers || 0 },
+        {
+          key: "clients",
+          label: "Clients",
+          count: statsResult.totalClients || 0,
+        },
+        {
+          key: "freelancers",
+          label: "Freelancers",
+          count: statsResult.totalFreelancers || 0,
+        },
         { key: "admins", label: "Admins", count: statsResult.totalAdmins || 0 },
       ]);
     } catch (error) {
@@ -625,7 +690,9 @@ const [searchQuery, setSearchQuery] = useState("");
     searchTimeoutRef.current = setTimeout(() => {
       setCurrentPage(1);
     }, 300);
-    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
   }, [searchQuery]);
 
   const getTimeAgo = (date: Date): string => {
@@ -649,7 +716,10 @@ const [searchQuery, setSearchQuery] = useState("");
       if (locationFilter === "AP" && user.state !== "AP") return false;
       return true;
     })
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const paginatedUsers = filteredUsers;
@@ -694,7 +764,10 @@ const [searchQuery, setSearchQuery] = useState("");
           <p>Manage clients, freelancers, and admins</p>
         </div>
         <div className="um-header-right">
-          <button className="admin-btn admin-btn-primary" onClick={() => setIsAddUserModalOpen(true)}>
+          <button
+            className="admin-btn admin-btn-primary"
+            onClick={() => setIsAddUserModalOpen(true)}
+          >
             <UserPlus size={18} />
             Add User
           </button>
@@ -982,10 +1055,7 @@ const [searchQuery, setSearchQuery] = useState("");
           className="um-slideover-overlay open"
           onClick={() => !proSubmitting && setProTarget(null)}
         >
-          <div
-            className="um-pro-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="um-pro-modal" onClick={(e) => e.stopPropagation()}>
             <div className="um-pro-modal-header">
               <div className="um-pro-modal-icon">
                 {proTarget.next ? (
@@ -995,9 +1065,7 @@ const [searchQuery, setSearchQuery] = useState("");
                 )}
               </div>
               <div>
-                <h3>
-                  {proTarget.next ? "Grant Pro plan" : "Revoke Pro plan"}
-                </h3>
+                <h3>{proTarget.next ? "Grant Pro plan" : "Revoke Pro plan"}</h3>
                 <p>
                   {proTarget.user.name} · {proTarget.user.email}
                 </p>
@@ -1009,16 +1077,15 @@ const [searchQuery, setSearchQuery] = useState("");
                 <p className="um-pro-modal-warning">
                   This will manually set the freelancer to <strong>Pro</strong>{" "}
                   for <strong>365 days</strong> without a Razorpay payment. The
-                  freelancer will get the Pro Member badge, top search
-                  priority, and the Featured ribbon. Use this for support
-                  comps, beta testers, or VIPs.
+                  freelancer will get the Pro Member badge, top search priority,
+                  and the Featured ribbon. Use this for support comps, beta
+                  testers, or VIPs.
                 </p>
               ) : (
                 <p className="um-pro-modal-warning">
                   This will cancel any active Pro subscription for this
                   freelancer and clear the Pro Member badge, search priority,
-                  and Featured ribbon. Use this for support refunds or
-                  reverts.
+                  and Featured ribbon. Use this for support refunds or reverts.
                 </p>
               )}
 
@@ -1089,7 +1156,14 @@ const [searchQuery, setSearchQuery] = useState("");
             </div>
 
             <form onSubmit={handleAddUserSubmit}>
-              <div className="um-pro-modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div
+                className="um-pro-modal-body"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                }}
+              >
                 <div style={{ display: "flex", gap: "1rem" }}>
                   <div style={{ flex: 1 }}>
                     <label className="um-pro-modal-label">First Name</label>
@@ -1098,7 +1172,12 @@ const [searchQuery, setSearchQuery] = useState("");
                       type="text"
                       className="um-search-input w-full"
                       value={newUserData.firstName}
-                      onChange={(e) => setNewUserData({ ...newUserData, firstName: e.target.value })}
+                      onChange={(e) =>
+                        setNewUserData({
+                          ...newUserData,
+                          firstName: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -1108,11 +1187,16 @@ const [searchQuery, setSearchQuery] = useState("");
                       type="text"
                       className="um-search-input w-full"
                       value={newUserData.lastName}
-                      onChange={(e) => setNewUserData({ ...newUserData, lastName: e.target.value })}
+                      onChange={(e) =>
+                        setNewUserData({
+                          ...newUserData,
+                          lastName: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="um-pro-modal-label">Email</label>
                   <input
@@ -1120,7 +1204,9 @@ const [searchQuery, setSearchQuery] = useState("");
                     type="email"
                     className="um-search-input w-full"
                     value={newUserData.email}
-                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                    onChange={(e) =>
+                      setNewUserData({ ...newUserData, email: e.target.value })
+                    }
                   />
                 </div>
 
@@ -1133,7 +1219,9 @@ const [searchQuery, setSearchQuery] = useState("");
                     placeholder="10 digit number"
                     pattern="[0-9]{10}"
                     value={newUserData.phone}
-                    onChange={(e) => setNewUserData({ ...newUserData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setNewUserData({ ...newUserData, phone: e.target.value })
+                    }
                   />
                 </div>
 
@@ -1144,7 +1232,12 @@ const [searchQuery, setSearchQuery] = useState("");
                     type="password"
                     className="um-search-input w-full"
                     value={newUserData.password}
-                    onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                    onChange={(e) =>
+                      setNewUserData({
+                        ...newUserData,
+                        password: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
@@ -1153,8 +1246,17 @@ const [searchQuery, setSearchQuery] = useState("");
                   <select
                     className="um-search-input w-full"
                     value={newUserData.role}
-                    onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                    onChange={(e) =>
+                      setNewUserData({ ...newUserData, role: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      borderRadius: "0.375rem",
+                      border: "1px solid var(--border-color)",
+                      background: "var(--bg-secondary)",
+                      color: "var(--text-primary)",
+                    }}
                   >
                     <option value="client">Client</option>
                     <option value="freelancer">Freelancer</option>
@@ -1163,7 +1265,10 @@ const [searchQuery, setSearchQuery] = useState("");
                 </div>
               </div>
 
-              <div className="um-pro-modal-footer flex justify-center gap-4" style={{ marginTop: "1rem" }}>
+              <div
+                className="um-pro-modal-footer flex justify-center gap-4"
+                style={{ marginTop: "1rem" }}
+              >
                 <button
                   type="button"
                   className="admin-btn admin-btn-outline"
