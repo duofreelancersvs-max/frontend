@@ -16,6 +16,7 @@ import {
   LogOut,
   PlusCircle,
   Flag,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,12 @@ interface NavSection {
   items: NavItem[];
 }
 
-const AdminSidebar = () => {
+interface AdminSidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
   const location = useLocation();
   const { logout } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -125,10 +131,19 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="w-64 min-h-screen bg-[#18181b] border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-all duration-300">
+    <aside className={cn(
+      "w-64 min-h-screen bg-[#18181b] border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-transform duration-300",
+      isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+    )}>
       {/* Logo */}
-      <div className="px-6 py-8 border-b border-white/5">
+      <div className="px-6 py-8 border-b border-white/5 flex items-center justify-between">
         <Logo isDark size="sm" />
+        <button 
+          className="md:hidden text-slate-400 hover:text-white transition-colors"
+          onClick={() => setIsOpen(false)}
+        >
+          <X size={20} />
+        </button>
       </div>
 
       {/* Navigation */}

@@ -141,19 +141,6 @@ const FindWork = () => {
               </p>
 
             </div>
-            <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-4 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none self-start md:self-auto flex items-center gap-4">
-              <div className="w-12 h-12 bg-teal/10 rounded-2xl flex items-center justify-center text-teal">
-                <Briefcase size={24} />
-              </div>
-              <div>
-                <div className="text-2xl font-black text-navy dark:text-white tracking-tighter">
-                  {totalCount}
-                </div>
-                <div className="text-xxs font-bold text-slate-400 uppercase tracking-widest">
-                  Live Projects
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Search Bar integrated into header section */}

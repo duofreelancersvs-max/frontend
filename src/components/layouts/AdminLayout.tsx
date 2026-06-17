@@ -39,15 +39,13 @@ const AdminLayout = () => {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? "open" : ""}`}>
-        <AdminSidebar />
-      </div>
+      <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content */}
       <main className="admin-main">
@@ -56,7 +54,7 @@ const AdminLayout = () => {
           <div className="admin-header-left">
             {/* Mobile Menu Toggle */}
             <button
-              className="admin-header-icon lg:hidden mr-2 text-slate-400 hover:text-white transition-colors"
+              className="admin-header-icon md:hidden mr-2 text-slate-400 hover:text-white transition-colors"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
