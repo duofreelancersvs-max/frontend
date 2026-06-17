@@ -132,7 +132,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
 
   return (
     <aside className={cn(
-      "w-64 min-h-screen bg-[#18181b] border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-transform duration-300",
+      "w-64 h-[100dvh] bg-[#18181b] border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-transform duration-300",
       isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
     )}>
       {/* Logo */}
@@ -147,7 +147,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar pb-6">
         {navSections.map((section) => (
           <div key={section.title} className="flex flex-col gap-1">
             <div className="text-slate-500 text-xs font-bold uppercase tracking-widest px-4 mb-2">

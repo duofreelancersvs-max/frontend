@@ -550,13 +550,13 @@ const FreelancerSubscription = () => {
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-white/10 sticky top-0">
                   <tr>
-                    <th className="text-left text-sm font-semibold text-navy dark:text-white px-6 py-4">
+                    <th className="text-left text-xs sm:text-sm font-semibold text-navy dark:text-white px-3 py-3 sm:px-6 sm:py-4">
                       Feature
                     </th>
-                    <th className="text-center text-sm font-semibold text-navy dark:text-white px-6 py-4">
+                    <th className="text-center text-xs sm:text-sm font-semibold text-navy dark:text-white px-3 py-3 sm:px-6 sm:py-4">
                       Free
                     </th>
-                    <th className="text-center text-sm font-semibold text-teal px-6 py-4">
+                    <th className="text-center text-xs sm:text-sm font-semibold text-teal px-3 py-3 sm:px-6 sm:py-4">
                       Pro
                     </th>
                   </tr>
@@ -567,10 +567,10 @@ const FreelancerSubscription = () => {
                       key={idx}
                       className={idx % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-slate-50/50 dark:bg-white/5"}
                     >
-                      <td className="text-sm text-navy dark:text-white px-6 py-4 font-medium">
+                      <td className="text-xs sm:text-sm text-navy dark:text-white px-3 py-3 sm:px-6 sm:py-4 font-medium">
                         {feature.name}
                       </td>
-                      <td className="text-center px-6 py-4">
+                      <td className="text-center px-3 py-3 sm:px-6 sm:py-4">
                         {typeof feature.free === "boolean" ? (
                           feature.free ? (
                             <Check
@@ -581,12 +581,12 @@ const FreelancerSubscription = () => {
                             <X size={16} className="mx-auto text-slate-300" />
                           )
                         ) : (
-                          <span className="text-sm text-slate-600 dark:text-white/60">
+                          <span className="text-xs sm:text-sm text-slate-600 dark:text-white/60">
                             {feature.free}
                           </span>
                         )}
                       </td>
-                      <td className="text-center px-6 py-4 bg-teal/5">
+                      <td className="text-center px-3 py-3 sm:px-6 sm:py-4 bg-teal/5">
                         {typeof feature.pro === "boolean" ? (
                           feature.pro ? (
                             <Check
@@ -597,7 +597,7 @@ const FreelancerSubscription = () => {
                             <X size={16} className="mx-auto text-slate-300" />
                           )
                         ) : (
-                          <span className="text-sm text-teal font-medium">
+                          <span className="text-xs sm:text-sm text-teal font-medium">
                             {feature.pro}
                           </span>
                         )}

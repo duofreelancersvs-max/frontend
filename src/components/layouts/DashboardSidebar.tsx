@@ -39,7 +39,7 @@ const DashboardSidebar = () => {
   return (
     <aside
       className={cn(
-        "bg-white dark:bg-[#050B15] h-screen fixed left-0 top-0 z-40 flex flex-col transition-all duration-300 ease-in-out border-r border-slate-100 dark:border-white/5",
+        "bg-white dark:bg-[#050B15] h-[100dvh] fixed left-0 top-0 z-40 flex flex-col transition-all duration-300 ease-in-out border-r border-slate-100 dark:border-white/5",
         isCollapsed ? "w-20" : "w-[280px]",
       )}
     >
@@ -107,7 +107,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 px-4 py-2 overflow-y-auto no-scrollbar">
+      <div className="flex-1 px-4 py-2 overflow-y-auto no-scrollbar pb-6">
         <nav className="flex flex-col gap-1.5">
           {navItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href);
