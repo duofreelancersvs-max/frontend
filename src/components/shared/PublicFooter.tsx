@@ -21,17 +21,18 @@ export const PublicFooter = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { Icon: Twitter, href: "https://x.com/connectmeindia" },
-                { Icon: Linkedin, href: "https://www.linkedin.com/in/connectme-india-575362417" },
-                { Icon: Instagram, href: "https://www.instagram.com/connectmeindia" },
-                { Icon: Youtube, href: "https://www.youtube.com/@connectmeindia05" },
-              ].map(({ Icon, href }, idx) => (
+                { Icon: Twitter, href: "https://x.com/connectmeindia", label: "Twitter" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/in/connectme-india-575362417", label: "LinkedIn" },
+                { Icon: Instagram, href: "https://www.instagram.com/connectmeindia", label: "Instagram" },
+                { Icon: Youtube, href: "https://www.youtube.com/@connectmeindia05", label: "YouTube" },
+              ].map(({ Icon, href, label }, idx) => (
                 <a
                   key={idx}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-teal/50 hover:bg-teal flex items-center justify-center transition-all duration-300 group"
+                  aria-label={label}
                 >
                   <Icon
                     size={18}

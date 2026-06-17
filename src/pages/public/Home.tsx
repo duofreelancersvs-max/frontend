@@ -212,22 +212,7 @@ const Home = () => {
     },
   ];
 
-  const testimonials = [
-    {
-      quote:
-        "Found an incredible VFX artist who understood the Telugu film aesthetic perfectly.",
-      author: "Rajesh Kumar",
-      role: "Film Director",
-      avatar: "RK",
-    },
-    {
-      quote:
-        "The quality of video editors here is exceptional. Every project exceeded expectations.",
-      author: "Priya Sharma",
-      role: "YouTube Content Creator",
-      avatar: "PS",
-    },
-  ];
+
 
   const [topFreelancers, setTopFreelancers] = useState<FreelancerProfile[]>([]);
   const [isLoadingFreelancers, setIsLoadingFreelancers] = useState(true);
@@ -816,57 +801,15 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 6. CLIENT REVIEWS - FINAL SECTION */}
+      {/* 6. CTA SECTION */}
       <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
         <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-royal-blue dark:text-teal-light font-bold tracking-widest uppercase text-sm mb-4 block">
-                Satisfaction
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-6">
-                Success Stories
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-10">
+                Ready to start your journey?
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
-                See why thousands of businesses trust us for their
-                mission-critical creative needs.
-              </p>
-            </div>
-          </AnimatedSection>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {testimonials.map((t, idx) => (
-              <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="bg-slate-50 dark:bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-slate-200 dark:border-white/10 h-full flex flex-col transition-all duration-300 hover:bg-white dark:hover:bg-white/10 hover:border-teal/20 dark:hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl dark:hover:shadow-white/5 group shadow-sm dark:shadow-none">
-                  <div className="flex gap-1 mb-6 text-gold group-hover:scale-110 transition-transform origin-left">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} size={16} fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-xl text-slate-700 dark:text-white/90 leading-relaxed mb-10 flex-1 group-hover:text-navy dark:group-hover:text-white transition-colors">
-                    "{t.quote}"
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-lg group-hover:rotate-6 transition-transform shadow-lg">
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <div className="text-navy dark:text-white font-bold text-lg group-hover:text-teal dark:group-hover:text-teal-light transition-colors">
-                        {t.author}
-                      </div>
-                      <div className="text-slate-500 dark:text-slate-500">
-                        {t.role}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-
-          <AnimatedSection delay={300}>
-            <div className="mt-20 text-center">
               <Link to="/register">
                 <Button
                   size="lg"

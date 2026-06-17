@@ -102,6 +102,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
           <button
             onClick={onMenuClick}
             className="lg:hidden w-10 h-10 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-all"
+            aria-label="Open menu"
           >
             <Menu size={24} />
           </button>
@@ -129,10 +130,9 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
             </button>
 
             {/* Messages */}
-            <Link to={`/${role}/messages`} className="relative">
-              <button className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all">
-                <MessageSquare size={18} />
-              </button>
+            <Link to={`/${role}/messages`} className="relative w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all" aria-label="Messages">
+              <MessageSquare size={18} />
+
               {totalUnreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-primary text-primary-foreground text-xxs font-bold rounded-full border-2 border-background flex items-center justify-center">
                   {totalUnreadCount}
@@ -153,6 +153,8 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
                   ? "bg-accent border-border"
                   : "hover:bg-accent hover:border-border"
               )}
+              aria-label="Open profile menu"
+              aria-expanded={isProfileOpen}
             >
               <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border shadow-sm">
                 {user?.avatar ? (
@@ -276,6 +278,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
                 <button
                   onClick={closeSearch}
                   className="text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Close search"
                 >
                   <X size={18} />
                 </button>

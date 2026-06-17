@@ -58,6 +58,8 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
           src="/darkThemeLogo.png"
           alt="ConnectMeIndia"
           className={imageClasses}
+          width={300}
+          height={196}
           onError={handleError}
         />
       )}
@@ -66,6 +68,8 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
           src="/logo.png"
           alt="ConnectMeIndia"
           className={imageClasses}
+          width={300}
+          height={196}
           onError={handleError}
         />
       )}
@@ -75,12 +79,16 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
             src="/logo.png"
             alt="ConnectMeIndia"
             className={cn(imageClasses, "block dark:hidden")}
+            width={300}
+            height={196}
             onError={handleError}
           />
           <img
             src="/darkThemeLogo.png"
             alt="ConnectMeIndia"
             className={cn(imageClasses, "hidden dark:block")}
+            width={300}
+            height={196}
             onError={handleError}
           />
         </>

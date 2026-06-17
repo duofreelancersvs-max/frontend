@@ -174,7 +174,7 @@ const About = () => {
 
   const stats = [
     { value: "500+", label: "Curated Talents", icon: Users },
-    { value: "1.2k+", label: "Success Stories", icon: Briefcase },
+    { value: "1.2k+", label: "Completed Projects", icon: Briefcase },
     { value: "85+", label: "Enterprise Clients", icon: Award },
     { value: "4.9/5", label: "Global Rating", icon: Star },
   ];

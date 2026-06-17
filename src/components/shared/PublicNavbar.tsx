@@ -346,6 +346,8 @@ export const PublicNavbar = ({
                           profileDropdownOpen &&
                             "ring-2 ring-teal ring-offset-2 dark:ring-offset-[#050B15]",
                         )}
+                        aria-label="Open profile menu"
+                        aria-expanded={profileDropdownOpen}
                       >
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-xs shadow-lg">
                           {user?.fullName
@@ -467,6 +469,7 @@ export const PublicNavbar = ({
                   onClick={() => {
                     setMobileMenuOpen(!mobileMenuOpen);
                   }}
+                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 >
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -499,6 +502,7 @@ export const PublicNavbar = ({
           <button
             className="p-2 rounded-lg text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
             onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close menu"
           >
             <X size={24} />
           </button>

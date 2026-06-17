@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import App from "./App.tsx";
 import ScrollToTop from "./components/common/ScrollToTop.tsx";
+import { AnalyticsTracker } from "./components/shared/AnalyticsTracker.tsx";
 import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <BrowserRouter>
           <AuthInitializer>
             <ScrollToTop />
+            <AnalyticsTracker />
             <App />
           </AuthInitializer>
         </BrowserRouter>

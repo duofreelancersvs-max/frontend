@@ -13,7 +13,7 @@ const Footer = () => {
         { label: "Post Project", href: "/post-project" },
         { label: "Enterprise Solutions", href: "/enterprise" },
         { label: "Hire Specialists", href: "/hire" },
-        { label: "Success Stories", href: "/stories" },
+
       ],
     },
     freelancers: {
@@ -55,6 +55,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
+                aria-label="Twitter"
               >
                 <Twitter size={18} />
               </a>
@@ -63,6 +64,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
+                aria-label="LinkedIn"
               >
                 <Linkedin size={18} />
               </a>
@@ -71,6 +73,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
+                aria-label="Instagram"
               >
                 <Instagram size={18} />
               </a>
@@ -79,6 +82,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-teal hover:text-white transition-all duration-300"
+                aria-label="YouTube"
               >
                 <Youtube size={18} />
               </a>
