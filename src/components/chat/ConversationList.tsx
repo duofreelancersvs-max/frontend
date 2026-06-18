@@ -131,6 +131,7 @@ const ConversationList = ({
             key={conv.id}
             onClick={() => onSelect(conv.id)}
             className={cn(
+              "w-full flex items-center gap-3 p-4 border-b border-slate-100 dark:border-white/5 border-l-2 text-left transition-all",
               role === "admin"
                 ? selectedId === conv.id ? "bg-indigo-600/10 border-l-indigo-500" : "hover:bg-white/5 border-l-transparent"
                 : selectedId === conv.id ? "bg-teal/5 dark:bg-teal/10 border-l-teal hover:bg-slate-50 dark:hover:bg-white/5" : "hover:bg-slate-50 dark:hover:bg-white/5 border-l-transparent",
