@@ -22,8 +22,9 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import freelancerService from "@/services/freelancer.service";
 import type { FreelancerProfile } from "@/services/freelancer.service";
-import { Loader2 } from "lucide-react";
+import { Loader2, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import projectService from "@/services/project.service";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -231,6 +232,30 @@ const Home = () => {
     };
     fetchTopFreelancers();
   }, []);
+
+  // For freelancer view: recent projects
+  const isFreelancer = isAuthenticated && user?.role === 'freelancer';
+  const [recentProjects, setRecentProjects] = useState<any[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+
+  useEffect(() => {
+    if (isFreelancer) {
+      const fetchProjects = async () => {
+        try {
+          const response = await projectService.searchPublic({ limit: 4, page: 1, status: 'open' });
+          const data = (response as any).data || response;
+          setRecentProjects(data.projects?.slice(0, 4) || []);
+        } catch (error) {
+          console.error('Failed to fetch projects:', error);
+        } finally {
+          setIsLoadingProjects(false);
+        }
+      };
+      fetchProjects();
+    } else {
+      setIsLoadingProjects(false);
+    }
+  }, [isFreelancer]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
@@ -442,7 +467,7 @@ const Home = () => {
                               {f.displayName || `${f.firstName} ${f.lastName}`}
                             </div>
                             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                              {f.headline || f.category}
+                              {f.headline || f.categories?.[0]}
                             </div>
                           </div>
                         </Link>
@@ -461,80 +486,82 @@ const Home = () => {
       </section>
 
       {/* 2. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
-      <section className="bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
-        
-        {/* Full-width Attached Disclaimer Ticker */}
-        <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group">
-          <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
-            <ShieldAlert size={18} className="inline-block mr-3 text-teal shrink-0" />
-            ConnectMeIndia is a Neutral Marketplace Platform. We connect clients and freelancers directly. All interactions happen between users. <strong className="text-navy dark:text-white mx-1 font-bold">CMI is not responsible for disputes between users.</strong> Be smart. Be safe. Verify before you pay.
-            <ShieldAlert size={18} className="inline-block ml-3 text-teal shrink-0 mr-8" />
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 lg:px-8 py-20 lg:py-24">
-
-          <AnimatedSection>
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-              <div className="max-w-2xl">
-                <span className="text-teal font-bold tracking-widest uppercase text-sm mb-4 block">
-                  Top Skills
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
-                  Browse by Top Category
-                </h2>
-                <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
-                  Find expert professionals across various domains to fuel your
-                  growth.
-                </p>
-              </div>
-              <Link to="/categories">
-                <Button
-                  variant="outline"
-                  className="border-slate-300 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl px-8 h-14 font-bold transition-all shadow-sm"
-                >
-                  Browse All Categories
-                </Button>
-              </Link>
+      {!isAuthenticated && (
+        <section className="bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
+          
+          {/* Full-width Attached Disclaimer Ticker */}
+          <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group">
+            <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
+              <ShieldAlert size={18} className="inline-block mr-3 text-teal shrink-0" />
+              ConnectMeIndia is a Neutral Marketplace Platform. We connect clients and freelancers directly. All interactions happen between users. <strong className="text-navy dark:text-white mx-1 font-bold">CMI is not responsible for disputes between users.</strong> Be smart. Be safe. Verify before you pay.
+              <ShieldAlert size={18} className="inline-block ml-3 text-teal shrink-0 mr-8" />
             </div>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {categories.map((cat, idx) => (
-              <AnimatedSection key={cat.name} delay={idx * 100}>
-                <Link
-                  to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
-                  className="group bg-white dark:bg-white/5 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-teal/20 dark:hover:border-teal/20 hover:bg-slate-50 dark:hover:bg-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full shadow-sm dark:shadow-none"
-                >
-                  <div
-                    className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
-                      cat.color,
-                    )}
-                  >
-                    <cat.icon size={28} />
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-navy dark:text-white mb-2">
-                    {cat.name}
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
-                    {cat.desc}
-                  </p>
-                  <div className="flex items-center text-teal font-bold text-sm">
-                    Explore Pros{" "}
-                    <ArrowRight
-                      size={16}
-                      className="ml-2 group-hover:translate-x-1 transition-transform"
-                    />
-                  </div>
-                </Link>
-              </AnimatedSection>
-            ))}
           </div>
-        </div>
-      </section>
 
-      {/* 3. FEATURED FREELANCERS */}
+          <div className="container mx-auto px-4 lg:px-8 py-20 lg:py-24">
+
+            <AnimatedSection>
+              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+                <div className="max-w-2xl">
+                  <span className="text-teal font-bold tracking-widest uppercase text-sm mb-4 block">
+                    Top Skills
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
+                    Browse by Top Category
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
+                    Find expert professionals across various domains to fuel your
+                    growth.
+                  </p>
+                </div>
+                <Link to="/categories">
+                  <Button
+                    variant="outline"
+                    className="border-slate-300 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl px-8 h-14 font-bold transition-all shadow-sm"
+                  >
+                    Browse All Categories
+                  </Button>
+                </Link>
+              </div>
+            </AnimatedSection>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {categories.map((cat, idx) => (
+                <AnimatedSection key={cat.name} delay={idx * 100}>
+                  <Link
+                    to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
+                    className="group bg-white dark:bg-white/5 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-teal/20 dark:hover:border-teal/20 hover:bg-slate-50 dark:hover:bg-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full shadow-sm dark:shadow-none"
+                  >
+                    <div
+                      className={cn(
+                        "w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
+                        cat.color,
+                      )}
+                    >
+                      <cat.icon size={28} />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-navy dark:text-white mb-2">
+                      {cat.name}
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
+                      {cat.desc}
+                    </p>
+                    <div className="flex items-center text-teal font-bold text-sm">
+                      Explore Pros{" "}
+                      <ArrowRight
+                        size={16}
+                        className="ml-2 group-hover:translate-x-1 transition-transform"
+                      />
+                    </div>
+                  </Link>
+                </AnimatedSection>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 3. FEATURED FREELANCERS / LATEST CLIENT PROJECTS */}
       <section
         className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5"
         id="find-talent"
@@ -543,19 +570,35 @@ const Home = () => {
           <AnimatedSection>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
               <div>
-                <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
-                  Top Talent
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
-                  Featured Professionals
-                </h2>
-                <p className="text-slate-600 dark:text-slate-400 text-lg">
-                  Work with our top-rated creative experts in the region.
-                </p>
+                {isFreelancer ? (
+                  <>
+                    <span className="inline-block px-4 py-2 bg-teal/10 text-teal rounded-full text-sm font-semibold mb-4">
+                      Fresh Opportunities
+                    </span>
+                    <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
+                      Latest Client Projects
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg">
+                      Explore open projects posted by clients right now.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
+                      Top Talent
+                    </span>
+                    <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
+                      Featured Professionals
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg">
+                      Work with our top-rated creative experts in the region.
+                    </p>
+                  </>
+                )}
               </div>
-              <Link to="/freelancers">
+              <Link to={isFreelancer ? "/projects" : "/freelancers"}>
                 <Button className="bg-teal hover:bg-[#128a7f] text-white px-6 group rounded-xl py-6 font-bold transition-all shadow-lg shadow-teal/10 hover:shadow-teal/30">
-                  View All Freelancers
+                  {isFreelancer ? "View All Projects" : "View All Freelancers"}
                   <ArrowRight
                     size={16}
                     className="ml-2 group-hover:translate-x-1 transition-transform"
@@ -566,94 +609,151 @@ const Home = () => {
           </AnimatedSection>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {isLoadingFreelancers ? (
-              <div className="col-span-full flex justify-center py-12">
-                <Loader2 className="w-10 h-10 animate-spin text-teal" />
-              </div>
-            ) : (
-              topFreelancers.map((freelancer, idx) => {
-                const name =
-                  freelancer.displayName ||
-                  `${freelancer.firstName} ${freelancer.lastName}`;
-                const initials = `${freelancer.firstName[0]}${freelancer.lastName[0]}`;
-
-                return (
-                  <AnimatedSection key={freelancer._id} delay={idx * 100}>
-                    <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
-                      {/* Header Gradient */}
-                      <div className="h-24 bg-gradient-to-r from-navy to-royal-blue relative">
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
-                          <Star size={12} className="text-gold fill-gold" />
-                          <span className="text-white text-xs font-semibold">
-                            {freelancer.averageRating.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Profile */}
-                      <div className="px-6 pb-8 -mt-12 relative flex-1 flex flex-col">
-                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-4 group-hover:scale-110 transition-transform overflow-hidden">
-                          {freelancer.profilePicture ? (
-                            <img
-                              src={freelancer.profilePicture}
-                              alt={name}
-                              className="w-full h-full object-cover"
-                              width={96}
-                              height={96}
-                              loading="lazy"
-                            />
-                          ) : (
-                            initials
-                          )}
-                        </div>
-                        <h3 className="font-bold text-navy dark:text-white text-xl mb-1 group-hover:text-teal transition-colors">
-                          {name}
-                        </h3>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-1 h-4">
-                          {freelancer.headline || freelancer.category}
-                        </p>
-
-                        <div className="flex flex-wrap gap-1.5 mb-6">
-                          {freelancer.skills.slice(0, 3).map((skill) => (
-                            <span
-                              key={
-                                typeof skill === "string" ? skill : skill.name
-                              }
-                              className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
-                            >
-                              {typeof skill === "string" ? skill : skill.name}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
-                          <div className="text-lg font-black text-navy dark:text-white">
-                            ₹{freelancer.hourlyRate}
-                            <span className="text-slate-400 dark:text-slate-500 font-normal text-sm">
-                              /hr
+            {isFreelancer ? (
+              isLoadingProjects ? (
+                <div className="col-span-full flex justify-center py-12">
+                  <Loader2 className="w-10 h-10 animate-spin text-teal" />
+                </div>
+              ) : recentProjects.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-slate-500 dark:text-slate-400">
+                  No open projects available at the moment.
+                </div>
+              ) : (
+                recentProjects.map((project, idx) => (
+                  <AnimatedSection key={project._id || idx} delay={idx * 100}>
+                    <Link to={`/freelancer/project/${project._id}`} className="block h-full">
+                      <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
+                        <div className="h-24 bg-gradient-to-r from-teal to-royal-blue relative">
+                          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
+                            <Briefcase size={12} className="text-white" />
+                            <span className="text-white text-xs font-semibold">
+                              {project.status || "Open"}
                             </span>
                           </div>
-                          <Link to={`/freelancer/${freelancer._id}`}>
+                        </div>
+
+                        <div className="px-6 pb-8 pt-4 flex-1 flex flex-col">
+                          <h3 className="font-bold text-navy dark:text-white text-lg mb-2 group-hover:text-teal transition-colors line-clamp-1">
+                            {project.title}
+                          </h3>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 flex-1">
+                            {project.description || "No description provided."}
+                          </p>
+
+                          <div className="flex flex-wrap gap-1.5 mb-6">
+                            {(project.skills || []).slice(0, 3).map((skill: any, i: number) => (
+                              <span
+                                key={i}
+                                className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
+                              >
+                                {typeof skill === "string" ? skill : skill.name || skill}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
                             <Button
                               variant="ghost"
-                              className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4"
+                              className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4 w-full"
                             >
-                              View Profile
+                              View Details
                             </Button>
-                          </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   </AnimatedSection>
-                );
-              })
+                ))
+              )
+            ) : (
+              isLoadingFreelancers ? (
+                <div className="col-span-full flex justify-center py-12">
+                  <Loader2 className="w-10 h-10 animate-spin text-teal" />
+                </div>
+              ) : (
+                topFreelancers.map((freelancer, idx) => {
+                  const name =
+                    freelancer.displayName ||
+                    `${freelancer.firstName} ${freelancer.lastName}`;
+                  const initials = `${freelancer.firstName[0]}${freelancer.lastName[0]}`;
+
+                  return (
+                    <AnimatedSection key={freelancer._id} delay={idx * 100}>
+                      <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
+                        <div className="h-24 bg-gradient-to-r from-navy to-royal-blue relative">
+                          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
+                            <Star size={12} className="text-gold fill-gold" />
+                            <span className="text-white text-xs font-semibold">
+                              {freelancer.averageRating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="px-6 pb-8 -mt-12 relative flex-1 flex flex-col">
+                          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-4 group-hover:scale-110 transition-transform overflow-hidden">
+                            {freelancer.profilePicture ? (
+                              <img
+                                src={freelancer.profilePicture}
+                                alt={name}
+                                className="w-full h-full object-cover"
+                                width={96}
+                                height={96}
+                                loading="lazy"
+                              />
+                            ) : (
+                              initials
+                            )}
+                          </div>
+                          <h3 className="font-bold text-navy dark:text-white text-xl mb-1 group-hover:text-teal transition-colors">
+                            {name}
+                          </h3>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-1 h-4">
+                            {freelancer.headline || freelancer.categories?.[0]}
+                          </p>
+
+                          <div className="flex flex-wrap gap-1.5 mb-6">
+                            {freelancer.skills.slice(0, 3).map((skill) => (
+                              <span
+                                key={
+                                  typeof skill === "string" ? skill : skill.name
+                                }
+                                className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
+                              >
+                                {typeof skill === "string" ? skill : skill.name}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                            <div className="text-lg font-black text-navy dark:text-white">
+                              ₹{freelancer.hourlyRate}
+                              <span className="text-slate-400 dark:text-slate-500 font-normal text-sm">
+                                /hr
+                              </span>
+                            </div>
+                            <Link to={`/freelancer/${freelancer._id}`}>
+                              <Button
+                                variant="ghost"
+                                className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4"
+                              >
+                                View Profile
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </AnimatedSection>
+                  );
+                })
+              )
             )}
           </div>
         </div>
       </section>
 
       {/* 4. PLANS & PRICING PREVIEW */}
-      <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
+      {!isAuthenticated && (
+        <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-4 lg:px-8">
           <AnimatedSection>
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -741,6 +841,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* 5. HOW IT WORKS */}
       <section className="py-24 bg-slate-50 dark:bg-white/5 relative border-b border-slate-200 dark:border-white/5">
@@ -802,27 +903,29 @@ const Home = () => {
       </section>
 
       {/* 6. CTA SECTION */}
-      <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
-        <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <AnimatedSection>
-            <div className="text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-10">
-                Ready to start your journey?
-              </h2>
-              <Link to="/register">
-                <Button
-                  size="lg"
-                  className="bg-teal hover:bg-teal-light text-white px-12 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1"
-                >
-                  Join the Community Today{" "}
-                  <ArrowRight size={20} className="ml-2" />
-                </Button>
-              </Link>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
+      {!isAuthenticated && (
+        <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
+          <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
+          <div className="container mx-auto px-4 lg:px-8 relative z-10">
+            <AnimatedSection>
+              <div className="text-center max-w-3xl mx-auto">
+                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-10">
+                  Ready to start your journey?
+                </h2>
+                <Link to="/register">
+                  <Button
+                    size="lg"
+                    className="bg-teal hover:bg-teal-light text-white px-12 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1"
+                  >
+                    Join the Community Today{" "}
+                    <ArrowRight size={20} className="ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </AnimatedSection>
+          </div>
+        </section>
+      )}
 
       <PublicFooter />
 

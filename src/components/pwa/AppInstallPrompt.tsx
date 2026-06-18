@@ -87,7 +87,7 @@ export const AppInstallPrompt = () => {
         </div>
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
-            Install ProdMatch
+            Install ConnectMeIndia
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
             Install our App on your phone for faster access to jobs, matches and notifications.

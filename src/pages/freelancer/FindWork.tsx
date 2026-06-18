@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
@@ -24,11 +24,11 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
+import ProfileCompletionModal from "@/components/modals/ProfileCompletionModal";
 import { TermsModal } from "@/components/modals/TermsModal";
 import { useProjects } from "@/hooks/queries/useProjects";
 import { useCategories } from "@/hooks/queries/useCategories";
 import { useMyApplications, useMyFreelancerProfile } from "@/hooks/queries/useFreelancerDashboardQueries";
-import { toast } from "react-toastify";
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -218,6 +218,11 @@ const FindWork = () => {
   // Terms & Conditions flow state
   const [showTermsForApply, setShowTermsForApply] = useState(false);
 
+  // Profile completion gate
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalMessage, setProfileModalMessage] = useState("");
+  const pendingApplyRef = useRef<Project | null>(null);
+
   const navigate = useNavigate();
 
   // Categories Query
@@ -232,8 +237,21 @@ const FindWork = () => {
         navigate("/login", { state: { from: "/freelancer/projects" } });
         return;
       }
+      // Gate: profile must be complete before applying
+      const incomplete =
+        !profile?.categories?.length ||
+        !profile?.skills?.length ||
+        !profile?.headline?.trim();
+      if (incomplete) {
+        pendingApplyRef.current = project;
+        setProfileModalMessage("You need to complete your profile before you can apply to projects.");
+        setShowProfileModal(true);
+        return;
+      }
       if (!profile?.contactInfo) {
-        toast.error("Please add a contact email or phone number to your profile before applying.");
+        pendingApplyRef.current = project;
+        setProfileModalMessage("Please add a contact email or phone number to your profile before applying.");
+        setShowProfileModal(true);
         return;
       }
       // Block re-application when the freelancer already has a live
@@ -250,7 +268,7 @@ const FindWork = () => {
       setSelectedProject(project);
       setShowTermsForApply(true);
     },
-    [user, navigate, appStatusByProjectId],
+    [user, navigate, appStatusByProjectId, profile],
   );
 
   // Handle direct apply from dashboard
@@ -893,6 +911,26 @@ const FindWork = () => {
           }}
         />
       )}
+
+      <ProfileCompletionModal
+        isOpen={showProfileModal}
+        message={profileModalMessage}
+        onClose={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          pendingApplyRef.current = null;
+        }}
+        onComplete={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          const project = pendingApplyRef.current;
+          pendingApplyRef.current = null;
+          if (project) {
+            setSelectedProject(project);
+            setShowTermsForApply(true);
+          }
+        }}
+      />
     </div>
   );
 };

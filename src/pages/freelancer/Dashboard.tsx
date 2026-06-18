@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router-dom";
 import {
   User,
@@ -37,6 +37,7 @@ import { getCategoryStyle } from "@/lib/category-styles";
 import { TrialBanner } from "@/components/feature-gate";
 import { TermsModal } from "@/components/modals/TermsModal";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
+import ProfileCompletionModal from "@/components/modals/ProfileCompletionModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -91,11 +92,26 @@ const FreelancerDashboard = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [showTermsForApply, setShowTermsForApply] = useState(false);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalMessage, setProfileModalMessage] = useState("");
+  const pendingApplyRef = useRef<any>(null);
 
   const handleApplyClick = useCallback(
     (project: any) => {
+      const incomplete =
+        !profile?.categories?.length ||
+        !profile?.skills?.length ||
+        !profile?.headline?.trim();
+      if (incomplete) {
+        pendingApplyRef.current = project;
+        setProfileModalMessage("You need to complete your profile before you can apply to projects.");
+        setShowProfileModal(true);
+        return;
+      }
       if (!profile?.contactInfo) {
-        toast.error("Please add a contact email or phone number to your profile before applying.");
+        pendingApplyRef.current = project;
+        setProfileModalMessage("Please add a contact email or phone number to your profile before applying.");
+        setShowProfileModal(true);
         return;
       }
       // Find original project object if needed, or just pass the fullData if available.
@@ -104,7 +120,7 @@ const FreelancerDashboard = () => {
       setSelectedProject(fullProject);
       setShowTermsForApply(true);
     },
-    [recommendedProjects]
+    [recommendedProjects, profile]
   );
 
   const handleTermsAccepted = () => {
@@ -935,6 +951,26 @@ const FreelancerDashboard = () => {
           }}
         />
       )}
+
+      <ProfileCompletionModal
+        isOpen={showProfileModal}
+        message={profileModalMessage}
+        onClose={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          pendingApplyRef.current = null;
+        }}
+        onComplete={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          const project = pendingApplyRef.current;
+          pendingApplyRef.current = null;
+          if (project) {
+            setSelectedProject(project);
+            setShowTermsForApply(true);
+          }
+        }}
+      />
     </div>
   );
 };

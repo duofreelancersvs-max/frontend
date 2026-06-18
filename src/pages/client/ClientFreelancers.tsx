@@ -382,7 +382,7 @@ const ClientFreelancers = () => {
                   <div className="space-y-12">
                     {Array.from(
                       freelancers.reduce((acc, f) => {
-                        const cat = f.category || "Other";
+                        const cat = f.categories?.[0] || "Other";
                         if (!acc.has(cat)) acc.set(cat, []);
                         acc.get(cat)!.push(f);
                         return acc;

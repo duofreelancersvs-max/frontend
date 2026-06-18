@@ -3,15 +3,35 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
-import { BadgeCheck, ChevronLeft, ChevronRight, Filter, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import freelancerService from "@/services/freelancer.service";
-import { publicService } from "@/services/public.service";
 import type {
   FreelancerProfile,
   FreelancerFilters,
 } from "@/services/freelancer.service";
+
+const FREELANCER_CATEGORIES = [
+  "All",
+  "Editing",
+  "VFX",
+  "3D Design",
+  "Motion Graphics",
+  "Admin & support",
+  "Design & creative",
+  "Marketing",
+  "Writing & content",
+  "AI & emerging tech",
+  "Development & tech",
+  "Video, audio & animation",
+  "Finance & Accounting",
+  "Photography",
+  "Videography",
+  "Wedding & Events",
+  "Thumbnail Design",
+  "Education",
+];
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -71,13 +91,8 @@ const FreelancerDirectory = () => {
   
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "All");
-  const [skill, setSkill] = useState(searchParams.get("skill") || "");
-  const [experience, setExperience] = useState("All");
-  const [rateRange, setRateRange] = useState("All");
-  const [location, setLocation] = useState("All");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const itemsPerPage = 8;
 
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
@@ -85,30 +100,13 @@ const FreelancerDirectory = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const [categories, setCategories] = useState<string[]>(["All"]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await publicService.getCategoriesWithSkills();
-        const catNames = data.map((c: any) => c.name);
-        setCategories(["All", ...catNames]);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
-
   // Sync state with URL params when they change
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
     const urlCategory = searchParams.get("category") || "All";
-    const urlSkill = searchParams.get("skill") || "";
     
     setSearchQuery(urlSearch);
     setCategory(urlCategory);
-    setSkill(urlSkill);
   }, [searchParams]);
 
   useEffect(() => {
@@ -120,26 +118,7 @@ const FreelancerDirectory = () => {
           limit: itemsPerPage,
           search: searchQuery || undefined,
           category: category !== "All" ? category : undefined,
-          skills: skill ? [skill] : undefined,
-          experienceLevel:
-            experience !== "All"
-              ? (experience.toLowerCase() as any)
-              : undefined,
         };
-
-        if (rateRange !== "All") {
-          if (rateRange === "0-500") filters.maxRate = 500;
-          else if (rateRange === "500-1000") {
-            filters.minRate = 501;
-            filters.maxRate = 1000;
-          } else if (rateRange === "1000+") {
-            filters.minRate = 1001;
-          }
-        }
-
-        if (location !== "All") {
-          filters.location = location as any;
-        }
 
         const response = await freelancerService.searchPublic(filters);
         const data = (response as any).data || response;
@@ -150,6 +129,7 @@ const FreelancerDirectory = () => {
         console.error("Failed to fetch freelancers:", error);
       } finally {
         setIsLoading(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
 
@@ -158,15 +138,11 @@ const FreelancerDirectory = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, category, skill, experience, rateRange, location, currentPage]);
+  }, [searchQuery, category, currentPage]);
 
   const clearFilters = () => {
     setSearchQuery("");
     setCategory("All");
-    setSkill("");
-    setExperience("All");
-    setRateRange("All");
-    setLocation("All");
     setCurrentPage(1);
     setSearchParams({});
   };
@@ -217,23 +193,11 @@ const FreelancerDirectory = () => {
                   className="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal/10 focus:border-teal transition-all text-sm font-medium"
                 />
               </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-2xl border transition-all shrink-0 font-black text-xxs uppercase tracking-widest",
-                  showFilters
-                    ? "bg-navy text-white border-navy"
-                    : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-teal hover:text-teal",
-                )}
-              >
-                <Filter size={16} />
-                <span className="hidden sm:inline">Refine</span>
-              </button>
             </div>
 
             {/* Category Chips Scroll */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-              {categories.map((cat) => (
+              {FREELANCER_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => {
@@ -251,71 +215,6 @@ const FreelancerDirectory = () => {
                 </button>
               ))}
             </div>
-
-            {/* Expanded Filters Drawer */}
-            {showFilters && (
-              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-top-4 duration-300">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    {
-                      value: experience,
-                      setter: setExperience,
-                      options: ["All", "Entry", "Intermediate", "Expert"],
-                      label: "Tier",
-                    },
-                    {
-                      value: rateRange,
-                      setter: setRateRange,
-                      options: ["All", "0-500", "500-1000", "1000+"],
-                      label: "Investment",
-                    },
-                    {
-                      value: location,
-                      setter: setLocation,
-                      options: ["All", "Remote", "India", "UK", "USA"],
-                      label: "Location",
-                    },
-                  ].map((f, i) => (
-                    <div key={i} className="space-y-2">
-                      <label className="text-xxs font-black text-slate-400 uppercase tracking-widest">
-                        {f.label}
-                      </label>
-                      <select
-                        value={f.value}
-                        onChange={(e) => {
-                          f.setter(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="w-full p-3 bg-slate-100 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl outline-none focus:border-teal text-sm font-semibold"
-                      >
-                        {f.options.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt === "All" ? `All ${f.label}s` : opt}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-white/5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="font-bold text-xs uppercase tracking-widest"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    onClick={() => setShowFilters(false)}
-                    size="sm"
-                    className="bg-teal text-white font-bold text-xs uppercase tracking-widest rounded-xl"
-                  >
-                    Apply Results
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
@@ -446,7 +345,7 @@ const FreelancerDirectory = () => {
                               {name}
                             </h3>
                             <p className="text-xs font-black text-teal uppercase tracking-widest mb-1 truncate">
-                              {f.category}
+                              {f.categories?.[0]}
                             </p>
                             <div className="flex items-center gap-1.5 mt-2">
                               <div className="flex items-center gap-0.5">
@@ -492,18 +391,7 @@ const FreelancerDirectory = () => {
                             )}
                           </div>
 
-                          <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
-                            <div className="flex flex-col">
-                              <span className="text-xxs font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
-                                Investment
-                              </span>
-                              <p className="text-lg font-black text-navy dark:text-white">
-                                ₹{f.hourlyRate}
-                                <span className="text-xs text-slate-400 font-bold ml-1">
-                                  /HR
-                                </span>
-                              </p>
-                            </div>
+                          <div className="mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
                             <div className="h-12 px-6 bg-navy dark:bg-teal text-white rounded-2xl flex items-center justify-center font-black text-xxs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-navy/10 dark:shadow-teal/20">
                               View Profile
                             </div>

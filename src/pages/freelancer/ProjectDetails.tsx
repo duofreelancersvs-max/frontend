@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Link,
   useParams,
   useOutletContext,
+  useNavigate,
 } from "react-router-dom";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import {
@@ -19,15 +20,73 @@ import { projectService } from "@/services";
 import type { Project } from "@/services";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { ReportModal } from "@/components/common/ReportModal";
+import ProfileCompletionModal from "@/components/modals/ProfileCompletionModal";
+import { TermsModal } from "@/components/modals/TermsModal";
+import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
+import { useMyFreelancerProfile, useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
+import { toast } from "react-toastify";
+
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case "open":
+      return "bg-teal/10 text-teal border-teal/20";
+    case "in-progress":
+      return "bg-royal-blue/10 text-royal-blue border-royal-blue/20";
+    case "completed":
+      return "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30";
+    default:
+      return "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10";
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "open":
+      return "Open for Applications";
+    case "in-progress":
+      return "In Progress";
+    case "completed":
+      return "Completed";
+    case "cancelled":
+      return "Cancelled/Closed";
+    default:
+      return status;
+  }
+};
+
+const formatDeadline = (deadline: string) => {
+  try {
+    return new Date(deadline).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return deadline;
+  }
+};
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
-  
+  const navigate = useNavigate();
+
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalMessage, setProfileModalMessage] = useState("");
+  const [showTermsForApply, setShowTermsForApply] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedProjectForApply, setSelectedProjectForApply] = useState<Project | null>(null);
+  const pendingApplyRef = useRef<Project | null>(null);
+
+  const { data: profileData } = useMyFreelancerProfile();
+  const profile = profileData || null;
+
+  const { data: myAppsData } = useMyApplications();
+  const myApplications = myAppsData?.applications || [];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +106,46 @@ const ProjectDetails = () => {
     fetchData();
   }, [id]);
 
+  const handleApplyClick = useCallback(() => {
+    if (!project) return;
+    const incomplete =
+      !profile?.categories?.length ||
+      !profile?.skills?.length ||
+      !profile?.headline?.trim();
+    if (incomplete) {
+      pendingApplyRef.current = project;
+      setProfileModalMessage("You need to complete your profile before you can apply to this project.");
+      setShowProfileModal(true);
+      return;
+    }
+    if (!profile?.contactInfo) {
+      pendingApplyRef.current = project;
+      setProfileModalMessage("Please add a contact email or phone number to your profile before applying.");
+      setShowProfileModal(true);
+      return;
+    }
+    pendingApplyRef.current = project;
+    setShowTermsForApply(true);
+  }, [project, profile]);
+
+  const handleTermsAccepted = () => {
+    setShowTermsForApply(false);
+    setSelectedProjectForApply(pendingApplyRef.current);
+    pendingApplyRef.current = null;
+    setShowApplicationModal(true);
+  };
+
+  const handleApplicationSuccess = (convId?: string) => {
+    setShowApplicationModal(false);
+    setSelectedProjectForApply(null);
+    toast.success("Application submitted successfully!");
+    if (convId) {
+      navigate("/freelancer/messages", {
+        state: { conversationId: convId },
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-80px)] bg-slate-50 dark:bg-background flex items-center justify-center">
@@ -65,46 +164,6 @@ const ProjectDetails = () => {
       </div>
     );
   }
-
-  const getStatusStyles = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-teal/10 text-teal border-teal/20";
-      case "in-progress":
-        return "bg-royal-blue/10 text-royal-blue border-royal-blue/20";
-      case "completed":
-        return "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30";
-      default:
-        return "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "open":
-        return "Open for Applications";
-      case "in-progress":
-        return "In Progress";
-      case "completed":
-        return "Completed";
-      case "cancelled":
-        return "Cancelled/Closed";
-      default:
-        return status;
-    }
-  };
-
-  const formatDeadline = (deadline: string) => {
-    try {
-      return new Date(deadline).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return deadline;
-    }
-  };
 
    return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-background font-sans">
@@ -150,6 +209,34 @@ const ProjectDetails = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
+              {project.status === "open" && (() => {
+                const projectId = project._id || project.id || "";
+                const existingApp = myApplications.find(
+                  (app) => (app.project?.id || app.project?._id || app.projectId) === projectId
+                );
+                if (existingApp && existingApp.status !== "withdrawn" && existingApp.status !== "rejected") {
+                  const statusLabel: Record<string, string> = {
+                    pending: "Applied",
+                    viewed: "Viewed",
+                    shortlisted: "Shortlisted",
+                    hired: "Hired",
+                    accepted: "Accepted",
+                  };
+                  return (
+                    <span className="px-4 py-2 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 rounded-xl text-sm font-semibold border border-slate-200 dark:border-white/10">
+                      {statusLabel[existingApp.status] || existingApp.status}
+                    </span>
+                  );
+                }
+                return (
+                  <Button
+                    onClick={handleApplyClick}
+                    className="bg-teal hover:bg-[#128a7f] text-white font-bold rounded-xl px-6"
+                  >
+                    Apply Now
+                  </Button>
+                );
+              })()}
               <Button
                 variant="outline"
                 className="text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
@@ -257,6 +344,55 @@ const ProjectDetails = () => {
           onClose={() => setIsReportModalOpen(false)}
           reportedUserId={project.clientId || (project as any).client?._id}
           reportedUserName={project.client?.fullName || 'Client'}
+        />
+      )}
+
+      <ProfileCompletionModal
+        isOpen={showProfileModal}
+        message={profileModalMessage}
+        onClose={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          pendingApplyRef.current = null;
+        }}
+        onComplete={() => {
+          setShowProfileModal(false);
+          setProfileModalMessage("");
+          const p = pendingApplyRef.current;
+          pendingApplyRef.current = null;
+          if (p) {
+            setShowTermsForApply(true);
+          }
+        }}
+      />
+
+      <TermsModal
+        isOpen={showTermsForApply}
+        onClose={() => {
+          setShowTermsForApply(false);
+          pendingApplyRef.current = null;
+        }}
+        onAgree={handleTermsAccepted}
+      />
+
+      {selectedProjectForApply && (
+        <ProjectApplicationModal
+          isOpen={showApplicationModal}
+          onClose={() => {
+            setShowApplicationModal(false);
+            setSelectedProjectForApply(null);
+          }}
+          onSuccess={handleApplicationSuccess}
+          project={{
+            id: selectedProjectForApply._id || selectedProjectForApply.id || "",
+            title: selectedProjectForApply.title,
+            client: {
+              name: selectedProjectForApply.client?.fullName ?? "Client",
+              rating: 0,
+              reviews: 0,
+              verified: false,
+            },
+          }}
         />
       )}
     </div>

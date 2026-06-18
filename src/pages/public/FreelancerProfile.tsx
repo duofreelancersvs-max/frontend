@@ -150,7 +150,7 @@ const FreelancerProfile = () => {
       `${freelancerData.firstName} ${freelancerData.lastName}`,
     title:
       freelancerData.headline ||
-      freelancerData.category ||
+      freelancerData.categories?.[0] ||
       "Professional Freelancer",
     avatar: (freelancerData.displayName ||
       freelancerData.firstName ||

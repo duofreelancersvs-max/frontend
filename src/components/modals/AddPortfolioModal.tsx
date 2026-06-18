@@ -20,7 +20,7 @@ interface AddPortfolioModalProps {
     title: string;
     description: string;
     projectUrl: string;
-    category: string;
+    categories: string[];
     thumbnail: string;
   }) => Promise<void>;
   categories: string[];
@@ -68,7 +68,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
         title,
         description,
         projectUrl,
-        category,
+        categories: [category],
         thumbnail: `gradient:${category}`,
       });
       resetForm();

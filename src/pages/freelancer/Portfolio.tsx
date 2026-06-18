@@ -76,7 +76,7 @@ const FreelancerPortfolio = () => {
     title: string;
     description: string;
     projectUrl: string;
-    category: string;
+    categories: string[];
     thumbnail: string;
   }) => {
     try {
@@ -86,7 +86,7 @@ const FreelancerPortfolio = () => {
           title: data.title,
           description: data.description,
           projectUrl: data.projectUrl,
-          skills: [data.category],
+          skills: data.categories,
           thumbnail: data.thumbnail,
         });
         setPortfolioItems(updatedProfile.portfolio || []);
@@ -96,7 +96,7 @@ const FreelancerPortfolio = () => {
           title: data.title,
           description: data.description,
           projectUrl: data.projectUrl,
-          skills: [data.category],
+          skills: data.categories,
           thumbnail: data.thumbnail,
         });
         setPortfolioItems(updatedProfile.portfolio || []);

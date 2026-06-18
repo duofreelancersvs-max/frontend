@@ -46,7 +46,7 @@ export interface FreelancerProfile {
   profilePicture?: string;
   hourlyRate: number;
   availability: string;
-  category: string;
+  categories: string[];
   experienceLevel: string;
   skills: SkillRef[];
   totalEarnings: number;

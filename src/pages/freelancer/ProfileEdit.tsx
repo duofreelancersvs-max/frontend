@@ -124,7 +124,7 @@ const FreelancerProfileEdit = () => {
     contactInfo: "",
 
     availability: "full-time",
-    category: "Editing",
+    categories: ["Editing"],
   });
   const [skills, setSkills] = useState<SkillRef[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
@@ -174,7 +174,7 @@ const FreelancerProfileEdit = () => {
       contactInfo: data.contactInfo || "",
 
       availability: data.availability || "full-time",
-      category: data.category || "Editing",
+      categories: data.categories?.length ? data.categories : ["Editing"],
     });
     setSkills(data.skills || []);
     setPortfolio(data.portfolio || []);
@@ -225,7 +225,7 @@ const FreelancerProfileEdit = () => {
         contactInfo: formData.contactInfo,
 
         availability: formData.availability,
-        category: formData.category,
+        categories: formData.categories,
         skills: skills.map((s) => ({
           ...s,
           skillId:
@@ -330,7 +330,7 @@ const FreelancerProfileEdit = () => {
     title: string;
     description: string;
     projectUrl: string;
-    category: string;
+    categories: string[];
     thumbnail: string;
   }) => {
     try {
@@ -342,7 +342,7 @@ const FreelancerProfileEdit = () => {
             title: data.title,
             description: data.description,
             projectUrl: data.projectUrl,
-            skills: [data.category],
+            skills: data.categories,
             thumbnail: data.thumbnail,
           },
         );
@@ -354,7 +354,7 @@ const FreelancerProfileEdit = () => {
           title: data.title,
           description: data.description,
           projectUrl: data.projectUrl,
-          skills: [data.category],
+          skills: data.categories,
           thumbnail: data.thumbnail,
         });
         applyProfileToState(updatedProfile);
@@ -729,6 +729,43 @@ const FreelancerProfileEdit = () => {
                         />
                       </div>
 
+                      {/* Categories */}
+                      <div>
+                        <label className="block text-sm font-medium text-navy dark:text-white mb-2">
+                          Categories (Select multiple) *
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {categoryOptions.map((cat) => {
+                            const isSelected = formData.categories.includes(cat);
+                            return (
+                              <button
+                                key={cat}
+                                type="button"
+                                onClick={() => {
+                                  let newCats = [...formData.categories];
+                                  if (isSelected) {
+                                    newCats = newCats.filter(c => c !== cat);
+                                  } else {
+                                    newCats.push(cat);
+                                  }
+                                  // Require at least one category
+                                  if (newCats.length > 0) {
+                                    handleInputChange("categories", newCats);
+                                  }
+                                }}
+                                className={`px-4 py-2 rounded-full border text-sm transition-all ${
+                                  isSelected
+                                    ? "bg-teal text-white border-teal"
+                                    : "bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-teal/50"
+                                }`}
+                              >
+                                {cat}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       {/* Bio */}
                       <div>
                         <label className="block text-sm font-medium text-navy dark:text-white mb-2">
@@ -765,26 +802,6 @@ const FreelancerProfileEdit = () => {
                             {availabilityOptions.map((opt) => (
                               <option key={opt.value} value={opt.value}>
                                 {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Category */}
-                        <div>
-                          <label className="block text-sm font-medium text-navy dark:text-white mb-2">
-                            Category
-                          </label>
-                          <select
-                            value={formData.category}
-                            onChange={(e) =>
-                              handleInputChange("category", e.target.value)
-                            }
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 focus:border-teal focus:ring-2 focus:ring-teal/20 outline-none transition-all text-navy dark:text-white bg-white dark:bg-white/5"
-                          >
-                            {categoryOptions.map((cat) => (
-                              <option key={cat} value={cat}>
-                                {cat}
                               </option>
                             ))}
                           </select>

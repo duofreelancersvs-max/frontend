@@ -267,7 +267,7 @@ const FreelancerProfileView = () => {
               <h2 className="text-xl font-bold text-navy dark:text-white mb-4">About</h2>
               <div className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">
                 {freelancer.bio ||
-                  `I'm a dedicated ${freelancer.category} professional with a passion for excellence. I've worked on various projects and always aim to deliver high-quality results for my clients.`}
+                  `I'm a dedicated ${freelancer.categories?.[0] || 'creative'} professional with a passion for excellence. I've worked on various projects and always aim to deliver high-quality results for my clients.`}
               </div>
             </section>
 
