@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {
   ClientRoute,
@@ -13,6 +13,8 @@ import { UnreadListener } from "@/components/chat/UnreadListener";
 import PageLoader from "@/components/shared/PageLoader";
 import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
+import { usePwaStore } from "@/stores/pwa.store";
+import { AppInstallPrompt } from "@/components/pwa/AppInstallPrompt";
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
@@ -109,11 +111,34 @@ function SP({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const setDeferredPrompt = usePwaStore((state) => state.setDeferredPrompt);
+  const setAppInstalled = usePwaStore((state) => state.setAppInstalled);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setAppInstalled(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, [setDeferredPrompt, setAppInstalled]);
+
   return (
     <>
       <ThemeInitializer />
       <UnreadListener />
       <UpgradeModalHost />
+      <AppInstallPrompt />
       <ToastContainer 
         position="top-center" 
         autoClose={3000} 
