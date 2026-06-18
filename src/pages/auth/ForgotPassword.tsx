@@ -51,8 +51,8 @@ const ForgotPassword = () => {
               Forgot Your Password?
             </h2>
             <p className="text-slate-300 text-lg max-w-md">
-              Don&apos;t worry, it happens to the best of us. We&apos;ll help you reset it
-              in no time.
+              Don&apos;t worry, it happens to the best of us. We&apos;ll help
+              you reset it in no time.
             </p>
           </div>
 
@@ -80,13 +80,15 @@ const ForgotPassword = () => {
           <div className="flex items-center gap-4 lg:gap-6">
             <ThemeToggle />
             <Link to="/">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
               >
                 <ArrowLeft size={16} className="mr-2" />
-                <span className="font-bold text-xs uppercase tracking-wider">Home</span>
+                <span className="font-bold text-xs uppercase tracking-wider">
+                  Home
+                </span>
               </Button>
             </Link>
           </div>
@@ -119,8 +121,8 @@ const ForgotPassword = () => {
                     Reset Password
                   </h1>
                   <p className="text-slate-500">
-                    Enter your email address and we&apos;ll send you instructions to
-                    reset your password.
+                    Enter your email address and we&apos;ll send you
+                    instructions to reset your password.
                   </p>
                 </div>
 
@@ -152,7 +154,7 @@ const ForgotPassword = () => {
                           setEmail(e.target.value);
                           if (error) clearError();
                         }}
-                        placeholder="john@example.com"
+                        placeholder="Enter your Email"
                         className="pl-11 h-12 bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal"
                         required
                         disabled={isLoading}
@@ -175,9 +177,25 @@ const ForgotPassword = () => {
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Sending...
                       </span>

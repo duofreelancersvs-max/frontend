@@ -114,8 +114,10 @@ const ClientFreelancers = () => {
     const fetchCategoriesAndSkills = async () => {
       try {
         const data = await publicService.getCategoriesWithSkills();
-        setRawCategoriesData(data);
-        const catNames = data.map((c: any) => c.name);
+        console.log("Categories data:", data);
+        setRawCategoriesData(data || []);
+        const catNames = (data || []).map((c: any) => c.name);
+        console.log("Category names:", catNames);
         setCategories(catNames);
         // Do not set all skills initially, wait for category selection
         setSkillOptions([]);
@@ -367,14 +369,41 @@ const ClientFreelancers = () => {
           ) : (
             <>
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
-                  {freelancers.map((freelancer) => (
-                    <FreelancerCard
-                      key={freelancer._id || freelancer.id}
-                      freelancer={freelancer}
-                    />
-                  ))}
-                </div>
+                hasFilters ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
+                    {freelancers.map((freelancer) => (
+                      <FreelancerCard
+                        key={freelancer._id || freelancer.id}
+                        freelancer={freelancer}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                    {Array.from(
+                      freelancers.reduce((acc, f) => {
+                        const cat = f.category || "Other";
+                        if (!acc.has(cat)) acc.set(cat, []);
+                        acc.get(cat)!.push(f);
+                        return acc;
+                      }, new Map<string, typeof freelancers>())
+                    ).map(([category, catFreelancers]) => (
+                      <div key={category}>
+                        <h2 className="text-xl font-bold text-navy dark:text-white mb-6 border-b border-slate-100 dark:border-white/10 pb-2">
+                          {category}
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
+                          {catFreelancers.map((freelancer) => (
+                            <FreelancerCard
+                              key={freelancer._id || freelancer.id}
+                              freelancer={freelancer}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
                ) : (
                 <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">

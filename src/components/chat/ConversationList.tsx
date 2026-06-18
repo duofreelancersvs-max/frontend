@@ -131,67 +131,69 @@ const ConversationList = ({
             key={conv.id}
             onClick={() => onSelect(conv.id)}
             className={cn(
-              "w-full flex items-center gap-3 p-4 border-b border-slate-100 dark:border-white/5 border-l-2 text-left transition-all",
+              "w-full block p-4 border-b border-slate-100 dark:border-white/5 border-l-2 text-left transition-all",
               role === "admin"
                 ? selectedId === conv.id ? "bg-indigo-600/10 border-l-indigo-500" : "hover:bg-white/5 border-l-transparent"
                 : selectedId === conv.id ? "bg-teal/5 dark:bg-teal/10 border-l-teal hover:bg-slate-50 dark:hover:bg-white/5" : "hover:bg-slate-50 dark:hover:bg-white/5 border-l-transparent",
             )}
           >
-            {/* Avatar */}
-            <ChatAvatar
-              name={conv.participant.name}
-              size="lg"
-              online={onlineUsers.has(conv.participant.userId)}
-            />
+            <div className="flex items-center gap-3 w-full">
+              {/* Avatar */}
+              <ChatAvatar
+                name={conv.participant.name}
+                size="lg"
+                online={onlineUsers.has(conv.participant.userId)}
+              />
 
-            {/* Details */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <div className="flex items-center justify-between mb-0.5">
-                <div className="flex items-center gap-1.5 truncate pr-2">
-                  <span className={cn("font-semibold text-sm truncate", role === "admin" ? "text-white" : "text-navy dark:text-white")}>
-                    {conv.participant.name}
-                  </span>
-                  {conv.participant.verified && (
-                    <VerifyIcon size={14} className={cn("flex-shrink-0", role === "admin" ? "text-indigo-400" : "text-teal")} />
-                  )}
-                </div>
-                <span className="text-xs text-slate-400 flex-shrink-0">
-                  {conv.lastMessageTime}
-                </span>
-              </div>
-              
-              {(conv.project || role === "freelancer") && (
-                <div className="flex items-center gap-2 mb-1">
-                  {conv.project && (
-                    <span className={cn("text-xs font-medium truncate", role === "admin" ? "text-indigo-400" : "text-teal")}>
-                      {conv.project.title}
+              {/* Details */}
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="flex items-center justify-between mb-0.5">
+                  <div className="flex items-center gap-1.5 truncate pr-2">
+                    <span className={cn("font-semibold text-sm truncate", role === "admin" ? "text-white" : "text-navy dark:text-white")}>
+                      {conv.participant.name}
                     </span>
-                  )}
-                  {conv.project && role === "freelancer" && (
-                    <span className="text-slate-300 text-xxs">•</span>
-                  )}
-                  {role === "freelancer" && (
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <Star size={10} className="text-[#F59E0B] fill-[#F59E0B]" />
-                      <span className="text-xs text-slate-400 font-medium">
-                        {conv.participant.rating}
-                      </span>
-                    </div>
-                  )}
+                    {conv.participant.verified && (
+                      <VerifyIcon size={14} className={cn("flex-shrink-0", role === "admin" ? "text-indigo-400" : "text-teal")} />
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-400 flex-shrink-0">
+                    {conv.lastMessageTime}
+                  </span>
                 </div>
-              )}
-              
-              <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                {conv.lastMessage}
-              </p>
-            </div>
+                
+                {(conv.project || role === "freelancer") && (
+                  <div className="flex items-center gap-2 mb-1">
+                    {conv.project && (
+                      <span className={cn("text-xs font-medium truncate", role === "admin" ? "text-indigo-400" : "text-teal")}>
+                        {conv.project.title}
+                      </span>
+                    )}
+                    {conv.project && role === "freelancer" && (
+                      <span className="text-slate-300 text-xxs">•</span>
+                    )}
+                    {role === "freelancer" && (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Star size={10} className="text-[#F59E0B] fill-[#F59E0B]" />
+                        <span className="text-xs text-slate-400 font-medium">
+                          {conv.participant.rating}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  {conv.lastMessage}
+                </p>
+              </div>
 
-            {/* Unread badge */}
-            {conv.unread > 0 && (
-              <span className={cn("self-center px-2 py-0.5 text-white text-xs font-bold rounded-full min-w-5 text-center flex-shrink-0", role === "admin" ? "bg-indigo-600" : "bg-teal")}>
-                {conv.unread}
-              </span>
-            )}
+              {/* Unread badge */}
+              {conv.unread > 0 && (
+                <span className={cn("self-center px-2 py-0.5 text-white text-xs font-bold rounded-full min-w-5 text-center flex-shrink-0", role === "admin" ? "bg-indigo-600" : "bg-teal")}>
+                  {conv.unread}
+                </span>
+              )}
+            </div>
           </button>
         ))}
       </div>

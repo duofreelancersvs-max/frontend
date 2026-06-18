@@ -50,9 +50,10 @@ const Login = () => {
   );
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, signInWithGoogleIdToken, isLoading, error, clearError } = useAuth();
+  const { login, signInWithGoogleIdToken, isLoading, error, clearError } =
+    useAuth();
   const { theme } = useThemeStore();
-  
+
   const [googleBtnWidth, setGoogleBtnWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +61,7 @@ const Login = () => {
     if (step === "form" && containerRef.current) {
       const width = containerRef.current.offsetWidth;
       if (width > 0) setGoogleBtnWidth(width);
-      
+
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const newWidth = (entry.target as HTMLElement).offsetWidth;
@@ -158,8 +159,6 @@ const Login = () => {
       setResending(false);
     }
   };
-
-
 
   return (
     <div className="min-h-screen flex font-sans">
@@ -273,9 +272,13 @@ const Login = () => {
         {isLoading && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white dark:bg-[#121A2A] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-white/10 flex flex-col items-center gap-4">
-               <Loader2 className="w-8 h-8 animate-spin text-teal" />
-               <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">Signing you in...</p>
-               <p className="text-slate-500 dark:text-slate-400 text-sm">Please wait a moment</p>
+              <Loader2 className="w-8 h-8 animate-spin text-teal" />
+              <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">
+                Signing you in...
+              </p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Please wait a moment
+              </p>
             </div>
           </div>
         )}
@@ -458,13 +461,26 @@ const Login = () => {
                     />
                   </div>
                   <div className="ml-3 text-sm">
-                    <label htmlFor="terms" className="font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <label
+                      htmlFor="terms"
+                      className="font-medium text-slate-700 dark:text-slate-300 cursor-pointer"
+                    >
                       I agree with the{" "}
-                      <Link to="/terms-and-conditions" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                      <Link
+                        to="/terms-and-conditions"
+                        className="text-teal hover:underline dark:text-teal-light"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Terms and Conditions
                       </Link>{" "}
                       and{" "}
-                      <Link to="/privacy-policy" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                      <Link
+                        to="/privacy-policy"
+                        className="text-teal hover:underline dark:text-teal-light"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Privacy Policy
                       </Link>
                     </label>
@@ -501,7 +517,10 @@ const Login = () => {
                         onSuccess={async (credentialResponse) => {
                           if (credentialResponse.credential && selectedRole) {
                             try {
-                              await signInWithGoogleIdToken(credentialResponse.credential, selectedRole);
+                              await signInWithGoogleIdToken(
+                                credentialResponse.credential,
+                                selectedRole,
+                              );
                             } catch {
                               // Error is handled in the hook
                             }
@@ -556,7 +575,7 @@ const Login = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com"
+                      placeholder="Enter your email address"
                       className="pl-11 h-12 bg-slate-50 border-slate-200 focus:border-teal focus:ring-teal"
                       required
                       disabled={isLoading}

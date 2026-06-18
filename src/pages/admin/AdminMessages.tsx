@@ -305,6 +305,7 @@ const AdminMessages = () => {
         >
           <ChatArea
             participant={selectedChatParticipant}
+            participants={selectedConversation?.participants}
             project={null}
             messages={messages}
             messageInput={messageInput}

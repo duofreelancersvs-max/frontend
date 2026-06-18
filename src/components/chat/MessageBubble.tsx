@@ -8,6 +8,8 @@ export interface MessageBubbleProps {
   isRead: boolean;
   showDate?: boolean;
   dateLabel?: string;
+  senderName?: string;
+  role?: "client" | "freelancer" | "admin";
 }
 
 const MessageBubble = ({
@@ -17,6 +19,8 @@ const MessageBubble = ({
   isRead,
   showDate,
   dateLabel,
+  senderName,
+  role,
 }: MessageBubbleProps) => {
   return (
     <div>
@@ -29,9 +33,14 @@ const MessageBubble = ({
       )}
       <div className={cn("flex mb-3", isOwn ? "justify-end" : "justify-start")}>
         <div className="max-w-[70%]">
+          {senderName && role === "admin" && (
+            <div className={cn("text-xs text-slate-400 mb-1 px-1 font-medium", isOwn ? "text-right" : "text-left")}>
+              {senderName}
+            </div>
+          )}
           <div
             className={cn(
-              "px-4 py-2.5 rounded-2xl text-sm leading-relaxed",
+              "px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap",
               isOwn
                 ? "bg-teal text-white rounded-br-sm shadow-sm"
                 : "bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-bl-sm shadow-sm border border-slate-100 dark:border-white/10",

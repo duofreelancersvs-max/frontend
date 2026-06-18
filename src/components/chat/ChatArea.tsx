@@ -35,6 +35,7 @@ export interface ChatProject {
 
 interface ChatAreaProps {
   participant: ChatParticipant | null;
+  participants?: any[];
   project?: ChatProject | null;
   messages: Message[];
   messageInput: string;
@@ -61,6 +62,7 @@ interface ChatAreaProps {
 
 const ChatArea = ({
   participant,
+  participants,
   project,
   messages,
   messageInput,
@@ -287,7 +289,16 @@ const ChatArea = ({
               ? new Date(messages[index - 1].createdAt).toLocaleDateString()
               : null;
           const showDate = index === 0 || msgDate !== prevMsgDate;
-          const isOwn = msg.senderId === currentUserId;
+          let isOwn = msg.senderId === currentUserId;
+          let senderName = undefined;
+
+          if (role === "admin" && participants) {
+            const sender = participants.find((p) => (p.id || p._id) === msg.senderId);
+            if (sender) {
+              senderName = sender.fullName || sender.firstName + " " + sender.lastName || "User";
+              isOwn = sender.role === "client"; // Client on right, Freelancer on left
+            }
+          }
 
           return (
             <MessageBubble
@@ -298,6 +309,8 @@ const ChatArea = ({
               isRead={msg.read}
               showDate={showDate}
               dateLabel={msgDate}
+              senderName={senderName}
+              role={role}
             />
           );
         })}

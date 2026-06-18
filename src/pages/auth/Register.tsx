@@ -35,13 +35,21 @@ const Register = () => {
   const isValidRole = initialRole === "client" || initialRole === "freelancer";
 
   const [step, setStep] = useState<Step>(isValidRole ? "form" : "role");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(isValidRole ? initialRole : null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(
+    isValidRole ? initialRole : null,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { register: registerAction, signInWithGoogleIdToken, isLoading, error, clearError } = useAuth();
+  const {
+    register: registerAction,
+    signInWithGoogleIdToken,
+    isLoading,
+    error,
+    clearError,
+  } = useAuth();
   const { theme } = useThemeStore();
-  
+
   const [googleBtnWidth, setGoogleBtnWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +57,7 @@ const Register = () => {
     if (step === "form" && containerRef.current) {
       const width = containerRef.current.offsetWidth;
       if (width > 0) setGoogleBtnWidth(width);
-      
+
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const newWidth = (entry.target as HTMLElement).offsetWidth;
@@ -136,7 +144,10 @@ const Register = () => {
         role: selectedRole,
         phone: formData.phone.replace(/\D/g, "").slice(-10),
         firstName: formData.firstName.trim() || undefined,
-        lastName: selectedRole === "freelancer" ? (formData.lastName.trim() || undefined) : undefined,
+        lastName:
+          selectedRole === "freelancer"
+            ? formData.lastName.trim() || undefined
+            : undefined,
         city: formData.city.trim() || undefined,
         state: (formData.state.trim() as any) || undefined,
         turnstileToken,
@@ -147,8 +158,6 @@ const Register = () => {
       // Error is handled in the hook
     }
   };
-
-
 
   return (
     <div className="min-h-screen flex font-sans">
@@ -215,9 +224,13 @@ const Register = () => {
         {isLoading && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white dark:bg-[#121A2A] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-white/10 flex flex-col items-center gap-4">
-               <Loader2 className="w-8 h-8 animate-spin text-teal" />
-               <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">Creating your account...</p>
-               <p className="text-slate-500 dark:text-slate-400 text-sm">Please wait a moment</p>
+              <Loader2 className="w-8 h-8 animate-spin text-teal" />
+              <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">
+                Creating your account...
+              </p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Please wait a moment
+              </p>
             </div>
           </div>
         )}
@@ -228,13 +241,15 @@ const Register = () => {
           <div className="flex items-center gap-4 lg:gap-6">
             <ThemeToggle />
             <Link to="/">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
               >
                 <ArrowLeft size={16} className="mr-2" />
-                <span className="font-bold text-xs uppercase tracking-wider">Home</span>
+                <span className="font-bold text-xs uppercase tracking-wider">
+                  Home
+                </span>
               </Button>
             </Link>
           </div>
@@ -351,13 +366,26 @@ const Register = () => {
                     />
                   </div>
                   <div className="ml-3 text-sm">
-                    <label htmlFor="terms" className="font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <label
+                      htmlFor="terms"
+                      className="font-medium text-slate-700 dark:text-slate-300 cursor-pointer"
+                    >
                       I agree with the{" "}
-                      <Link to="/terms-and-conditions" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                      <Link
+                        to="/terms-and-conditions"
+                        className="text-teal hover:underline dark:text-teal-light"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Terms and Conditions
                       </Link>{" "}
                       and{" "}
-                      <Link to="/privacy-policy" className="text-teal hover:underline dark:text-teal-light" target="_blank" rel="noopener noreferrer">
+                      <Link
+                        to="/privacy-policy"
+                        className="text-teal hover:underline dark:text-teal-light"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Privacy Policy
                       </Link>
                     </label>
@@ -393,7 +421,10 @@ const Register = () => {
                         onSuccess={async (credentialResponse) => {
                           if (credentialResponse.credential && selectedRole) {
                             try {
-                              await signInWithGoogleIdToken(credentialResponse.credential, selectedRole);
+                              await signInWithGoogleIdToken(
+                                credentialResponse.credential,
+                                selectedRole,
+                              );
                             } catch {
                               // Error is handled in the hook
                             }
@@ -423,7 +454,9 @@ const Register = () => {
                     <div className="w-full border-t border-slate-200 dark:border-white/10" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white dark:bg-[#121A2A] text-slate-500 dark:text-slate-400 rounded-full">OR</span>
+                    <span className="px-4 bg-white dark:bg-[#121A2A] text-slate-500 dark:text-slate-400 rounded-full">
+                      OR
+                    </span>
                   </div>
                 </div>
 
@@ -516,7 +549,7 @@ const Register = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com"
+                      placeholder="Enter Password"
                       className="pl-11 h-12"
                       required
                       disabled={isLoading}
@@ -579,16 +612,45 @@ const Register = () => {
                   {/* Password Feedback */}
                   {formData.password && (
                     <div className="mt-2 space-y-1">
-                      <p className={cn("text-xs flex items-center gap-1.5", formData.password.length >= 8 ? "text-green-600" : "text-slate-400")}>
+                      <p
+                        className={cn(
+                          "text-xs flex items-center gap-1.5",
+                          formData.password.length >= 8
+                            ? "text-green-600"
+                            : "text-slate-400",
+                        )}
+                      >
                         <CheckCircle size={10} /> Length (min 8)
                       </p>
-                      <p className={cn("text-xs flex items-center gap-1.5", /[A-Z]/.test(formData.password) && /[a-z]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                      <p
+                        className={cn(
+                          "text-xs flex items-center gap-1.5",
+                          /[A-Z]/.test(formData.password) &&
+                            /[a-z]/.test(formData.password)
+                            ? "text-green-600"
+                            : "text-slate-400",
+                        )}
+                      >
                         <CheckCircle size={10} /> Mixed Case (Aa)
                       </p>
-                      <p className={cn("text-xs flex items-center gap-1.5", /[0-9]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                      <p
+                        className={cn(
+                          "text-xs flex items-center gap-1.5",
+                          /[0-9]/.test(formData.password)
+                            ? "text-green-600"
+                            : "text-slate-400",
+                        )}
+                      >
                         <CheckCircle size={10} /> Number (0-9)
                       </p>
-                      <p className={cn("text-xs flex items-center gap-1.5", /[^A-Za-z0-9]/.test(formData.password) ? "text-green-600" : "text-slate-400")}>
+                      <p
+                        className={cn(
+                          "text-xs flex items-center gap-1.5",
+                          /[^A-Za-z0-9]/.test(formData.password)
+                            ? "text-green-600"
+                            : "text-slate-400",
+                        )}
+                      >
                         <CheckCircle size={10} /> Special symbol (@$!)
                       </p>
                     </div>
@@ -646,11 +708,18 @@ const Register = () => {
                     <label htmlFor="terms-checkbox" className="cursor-pointer">
                       I have read and agree to the{" "}
                     </label>
-                    <Link to="/terms-and-conditions" className="text-teal hover:underline" target="_blank">
+                    <Link
+                      to="/terms-and-conditions"
+                      className="text-teal hover:underline"
+                      target="_blank"
+                    >
                       ConnectMeIndia Terms & Conditions
                     </Link>
                     <label htmlFor="terms-checkbox" className="cursor-pointer">
-                      {" "}and acknowledge that ConnectMeIndia only connects Clients and Freelancers. All payments, agreements, and project decisions are solely my responsibility.
+                      {" "}
+                      and acknowledge that ConnectMeIndia only connects Clients
+                      and Freelancers. All payments, agreements, and project
+                      decisions are solely my responsibility.
                     </label>
                   </span>
                 </div>

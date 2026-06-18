@@ -1,4 +1,4 @@
-import { SEO } from '@/components/SEO/SEO';
+import { SEO } from "@/components/SEO/SEO";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Calendar,
   AlertCircle,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,6 +20,7 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import { projectService } from "@/services";
 import { publicService } from "@/services/public.service";
 import type { Project } from "@/services";
+import { useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
 
 // We will fetch categories dynamically from the backend
 
@@ -26,7 +29,7 @@ const experienceLevels = ["All Levels", "Entry", "Intermediate", "Expert"];
 const locationTypes = ["All Locations", "Remote", "On-site", "Hybrid"];
 
 const FindWork = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // State
@@ -37,11 +40,28 @@ const FindWork = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
+  const { data: myAppsData } = useMyApplications({
+    enabled: !!isAuthenticated && user?.role === "freelancer",
+  });
+  const myApplications = myAppsData?.applications || [];
+  const appStatusByProjectId = new Map(
+    myApplications.map((app) => [
+      app.project?.id || app.project?._id || app.projectId,
+      app.status,
+    ]),
+  );
+
   // Filter states
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "All Categories");
-  const [selectedSkill, setSelectedSkill] = useState(searchParams.get("skill") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || "",
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") || "All Categories",
+  );
+  const [selectedSkill, setSelectedSkill] = useState(
+    searchParams.get("skill") || "",
+  );
   const [selectedLevel, setSelectedLevel] = useState("All Levels");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +72,7 @@ const FindWork = () => {
     const urlSearch = searchParams.get("search") || "";
     const urlCategory = searchParams.get("category") || "All Categories";
     const urlSkill = searchParams.get("skill") || "";
-    
+
     setSearchQuery(urlSearch);
     setSelectedCategory(urlCategory);
     setSelectedSkill(urlSkill);
@@ -75,7 +95,10 @@ const FindWork = () => {
             : undefined,
       };
 
-      const result = await projectService.searchPublic(params) as any;
+      // Use authenticated endpoint if user is logged in to avoid cached delays
+      const result = isAuthenticated
+        ? ((await projectService.search(params)) as any)
+        : ((await projectService.searchPublic(params)) as any);
       setProjects(result.projects || []);
       setTotalCount(result.pagination?.totalItems || 0);
     } catch (err) {
@@ -84,7 +107,13 @@ const FindWork = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, selectedCategory, selectedSkill, selectedLocation]);
+  }, [
+    currentPage,
+    searchQuery,
+    selectedCategory,
+    selectedSkill,
+    selectedLocation,
+  ]);
 
   const [categories, setCategories] = useState<string[]>(["All Categories"]);
 
@@ -115,7 +144,11 @@ const FindWork = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15]">
-      <SEO title="Find Freelance Jobs | ConnectMeIndia" description="Search for the latest freelance projects and job opportunities on ConnectMeIndia." canonical="/projects" />
+      <SEO
+        title="Find Freelance Jobs | ConnectMeIndia"
+        description="Search for the latest freelance projects and job opportunities on ConnectMeIndia."
+        canonical="/projects"
+      />
       <PublicNavbar dark />
 
       {/* Hero/Header Section - White Background like Categories/Find Talent */}
@@ -138,7 +171,6 @@ const FindWork = () => {
               <p className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed font-medium">
                 Your Work. Your Money. Always.
               </p>
-
             </div>
           </div>
 
@@ -308,7 +340,6 @@ const FindWork = () => {
             </span>
             <select className="text-sm font-semibold bg-transparent border-none outline-none text-navy dark:text-white cursor-pointer">
               <option>Newest first</option>
-
             </select>
           </div>
         </div>
@@ -337,6 +368,11 @@ const FindWork = () => {
               <ProjectCard
                 key={project._id}
                 project={project}
+                applicationStatus={
+                  appStatusByProjectId.get(project._id || project.id || "") as
+                    | string
+                    | undefined
+                }
                 onApply={() => handleApply(project._id)}
               />
             ))
@@ -413,9 +449,11 @@ const FindWork = () => {
 const ProjectCard = ({
   project,
   onApply,
+  applicationStatus,
 }: {
   project: Project;
   onApply: () => void;
+  applicationStatus?: string;
 }) => {
   return (
     <div className="group bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-teal/30 transition-all duration-500 relative">
@@ -437,7 +475,6 @@ const ProjectCard = ({
           </h2>
 
           <div className="flex flex-wrap items-center gap-y-3 gap-x-6 mb-5 text-sm sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
-
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-royal-blue/5 flex items-center justify-center text-royal-blue">
                 <Briefcase size={14} />
@@ -496,16 +533,38 @@ const ProjectCard = ({
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-
             <Button
               onClick={onApply}
-              className="flex-1 sm:flex-none bg-teal hover:bg-teal-light text-white h-12 px-8 rounded-2xl font-black shadow-xl shadow-teal/20 transition-all hover:scale-105 active:scale-95 group"
+              disabled={
+                !!applicationStatus &&
+                applicationStatus !== "withdrawn" &&
+                applicationStatus !== "rejected"
+              }
+              className={cn(
+                "flex-1 sm:flex-none h-12 px-8 rounded-2xl font-black transition-all group",
+                applicationStatus &&
+                  applicationStatus !== "withdrawn" &&
+                  applicationStatus !== "rejected"
+                  ? "bg-success-green/10 text-success-green border border-success-green/20 cursor-default shadow-none hover:shadow-none active:scale-100"
+                  : "bg-teal hover:bg-teal-light text-white shadow-xl shadow-teal/20 hover:scale-105 active:scale-95",
+              )}
             >
-              Apply Now
-              <ArrowRight
-                size={18}
-                className="ml-2 group-hover:translate-x-1 transition-transform"
-              />
+              {applicationStatus &&
+              applicationStatus !== "withdrawn" &&
+              applicationStatus !== "rejected" ? (
+                <>
+                  <CheckCircle2 size={18} className="mr-2 inline" />
+                  Applied
+                </>
+              ) : (
+                <>
+                  Apply Now
+                  <ArrowRight
+                    size={18}
+                    className="ml-2 inline group-hover:translate-x-1 transition-transform"
+                  />
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -513,30 +572,5 @@ const ProjectCard = ({
     </div>
   );
 };
-
-// Internal ArrowRight helper
-const ArrowRight = ({
-  size,
-  className,
-}: {
-  size: number;
-  className?: string;
-}) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M5 12h14" />
-    <path d="m12 5 7 7-7 7" />
-  </svg>
-);
 
 export default FindWork;

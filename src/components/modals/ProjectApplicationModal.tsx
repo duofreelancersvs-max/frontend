@@ -227,7 +227,7 @@ const ProjectApplicationModal = ({
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">Client</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-navy dark:text-white text-sm leading-tight">
-                        {project.client.name}
+                        {project.client.name || "Client"}
                       </span>
                       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gold/10 rounded-lg shrink-0">
                         <Star size={10} className="text-gold fill-gold" />
