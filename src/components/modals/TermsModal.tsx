@@ -34,8 +34,8 @@ export const TermsModal: React.FC<TermsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[620px] w-[calc(100%-2rem)] max-h-[85vh] md:max-h-[80vh] flex flex-col p-5 sm:p-6 overflow-hidden bg-white dark:bg-[#0F172A] border border-slate-100 dark:border-white/5 shadow-2xl rounded-2xl">
-        <DialogHeader className="pb-2">
+      <DialogContent className="sm:max-w-[620px] w-[calc(100%-2rem)] max-h-[80dvh] md:max-h-[75dvh] flex flex-col p-5 sm:p-6 overflow-hidden bg-white dark:bg-[#0F172A] border border-slate-100 dark:border-white/5 shadow-2xl rounded-2xl">
+        <DialogHeader className="pb-2 shrink-0">
           <DialogTitle className="text-xl sm:text-2xl font-bold text-navy dark:text-white">
             Terms & Conditions
           </DialogTitle>
@@ -100,7 +100,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-4 pt-3 mt-1 border-t border-slate-100 dark:border-white/5">
+        <DialogFooter className="flex-col sm:flex-row gap-4 pt-3 mt-1 border-t border-slate-100 dark:border-white/5 shrink-0">
           <div
             className="flex items-start space-x-3 mr-auto cursor-pointer max-w-full sm:max-w-[70%] select-none group"
             onClick={() => setIsChecked(!isChecked)}

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError, type AxiosRequestHeaders } from "axios";
-import { clearOAuthRole, getOAuthRedirectUrl, setOAuthRole } from "@/lib/oauth";
+import { clearOAuthRole, getOAuthRedirectUrl, setOAuthRole, syncOAuthWithBackend } from "@/lib/oauth";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import axiosClient from "@/lib/axios-client";
@@ -26,6 +26,7 @@ interface UseAuthReturn {
   updatePassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
+  signInWithGoogleIdToken: (idToken: string, role?: string) => Promise<void>;
 }
 
 /**
@@ -251,6 +252,84 @@ export function useAuth(): UseAuthReturn {
     [setAuth, setError, setLoading],
   );
 
+  // Google ID Token sign in (Native Google popup)
+  const signInWithGoogleIdToken = useCallback(
+    async (idToken: string, role?: string): Promise<void> => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (role) {
+          setOAuthRole(role);
+        } else {
+          clearOAuthRole();
+        }
+
+        const { data, error: oauthError } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: idToken,
+        });
+
+        if (oauthError) {
+          throw new Error(oauthError.message);
+        }
+
+        const session = data.session;
+        if (!session) {
+          throw new Error("No session established");
+        }
+
+        const requestBody: Record<string, string> = {
+          accessToken: session.access_token,
+        };
+        if (role) {
+          requestBody.role = role;
+        }
+
+        const { user: syncUser, tokens } = await syncOAuthWithBackend(requestBody);
+
+        if (role && syncUser.role !== role) {
+          toast.info(
+            `You have already created an account as a ${syncUser.role}. Logging you in as a ${syncUser.role} instead.`
+          );
+        }
+
+        const finalRefreshToken = tokens.refreshToken || session.refresh_token;
+
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: tokens.accessToken,
+          refresh_token: finalRefreshToken,
+        });
+
+        if (setSessionError) {
+          console.error("Supabase session sync error:", setSessionError);
+        }
+
+        setAuth(syncUser, {
+          accessToken: tokens.accessToken,
+          refreshToken: finalRefreshToken,
+          expiresIn: tokens.expiresIn || 3600,
+        });
+
+        if (syncUser.role === "admin") {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      } catch (err: unknown) {
+        const error = err as { message?: string };
+        const message = error.message || "Google Sign-In failed";
+        
+        setError(message);
+        toast.error(message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate, setAuth, setError, setLoading],
+  );
+
   // Reset password
   const resetPassword = useCallback(
     async (email: string, turnstileToken?: string): Promise<void> => {
@@ -343,5 +422,6 @@ export function useAuth(): UseAuthReturn {
     updatePassword,
     clearError,
     refreshUser,
+    signInWithGoogleIdToken,
   };
 }

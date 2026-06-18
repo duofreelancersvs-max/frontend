@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
 
 import { HelmetProvider } from 'react-helmet-async';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,18 +23,22 @@ const queryClient = new QueryClient({
   },
 });
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AuthInitializer>
-            <ScrollToTop />
-            <AnalyticsTracker />
-            <App />
-          </AuthInitializer>
-        </BrowserRouter>
-      </QueryClientProvider>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AuthInitializer>
+              <ScrollToTop />
+              <AnalyticsTracker />
+              <App />
+            </AuthInitializer>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </GoogleOAuthProvider>
     </HelmetProvider>
   </React.StrictMode>,
 );

@@ -194,9 +194,9 @@ const ProjectApplicationModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 border border-transparent dark:border-white/5">
+      <div className="bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85dvh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 border border-transparent dark:border-white/5">
             {/* HEADER */}
-            <div className="flex items-start justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/5">
+            <div className="flex items-start justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/5 shrink-0">
               <div>
                 <h2 className="text-xl font-bold text-navy dark:text-white">
                   Apply for Project
@@ -377,7 +377,7 @@ const ProjectApplicationModal = ({
             </div>
 
             {/* FOOTER */}
-            <div className="p-4 sm:p-5 lg:p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+            <div className="p-4 sm:p-5 lg:p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 shrink-0">
               {/* Submit Error */}
               {submitError && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-lg mb-4 animate-in fade-in slide-in-from-top-1">
