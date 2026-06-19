@@ -150,7 +150,12 @@ axiosClient.interceptors.response.use(
           toast.error("You have been logged out because your account was accessed from another device.");
         });
         useAuthStore.getState().logout();
-        window.location.replace("/login");
+        
+        // Give the user time to read the toast before redirecting
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 3500);
+        
         return Promise.reject(error);
       }
 
