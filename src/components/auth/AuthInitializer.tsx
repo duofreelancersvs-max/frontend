@@ -166,14 +166,8 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           }
           
           if (event === "SIGNED_IN") {
-            // Register this device's session ID with the backend
-            try {
-              await axiosClient.patch('/users/me/session', {}, {
-                headers: { Authorization: `Bearer ${session.access_token}` }
-              });
-            } catch (err) {
-              console.error("[AuthInitializer] Failed to register session:", err);
-            }
+            // Backend now automatically handles session ID registration
+            // synchronously during login and OAuth callbacks to prevent race conditions.
           }
 
           const synced = await syncSessionWithBackend(session.access_token);
