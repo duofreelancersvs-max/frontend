@@ -733,13 +733,7 @@ const Home = () => {
                             ))}
                           </div>
 
-                          <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
-                            <div className="text-lg font-black text-navy dark:text-white">
-                              ₹{freelancer.hourlyRate}
-                              <span className="text-slate-400 dark:text-slate-500 font-normal text-sm">
-                                /hr
-                              </span>
-                            </div>
+                          <div className="mt-auto flex items-center justify-end pt-4 border-t border-slate-100 dark:border-white/5">
                             <Link to={`/freelancer/${freelancer._id}`}>
                               <Button
                                 variant="ghost"
