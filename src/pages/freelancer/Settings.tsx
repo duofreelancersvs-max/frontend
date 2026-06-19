@@ -182,13 +182,13 @@ const FreelancerSettings = () => {
   }
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-background min-h-screen">
+    <div className="w-full bg-slate-50 dark:bg-background flex-1 h-full overflow-y-auto">
       <div className="w-full">
         <DashboardHeader
           title="Settings"
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="px-6 lg:px-8 py-6 lg:py-8">
+        <main className="dashboard-content">
           <div className="grid lg:grid-cols-4 gap-6">
             <div className="lg:col-span-1">
               <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 p-4 space-y-1">

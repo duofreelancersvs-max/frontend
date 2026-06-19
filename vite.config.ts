@@ -37,10 +37,25 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          ui: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
-          utils: ["axios", "react-helmet-async", "react-toastify"],
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) {
+            if (id.includes("/src/pages/admin/")) return "admin-pages";
+            if (id.includes("/src/components/chat/")) return "chat";
+            return undefined;
+          }
+          if (id.includes("react-dom") || id.includes("react-router")) return "vendor";
+          if (id.includes("@tanstack/react-query")) return "query";
+          if (id.includes("lucide-react")) return "icons";
+          if (id.includes("framer-motion")) return "motion";
+          if (id.includes("emoji-picker-react")) return "emoji";
+          if (id.includes("@react-oauth/google")) return "oauth";
+          if (
+            id.includes("axios") ||
+            id.includes("react-helmet") ||
+            id.includes("react-toastify")
+          ) {
+            return "utils";
+          }
         },
       },
     },

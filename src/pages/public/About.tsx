@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   Target,
   Eye,
@@ -182,9 +183,10 @@ const About = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-28 pb-24 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
+      <section className="relative pt-20 pb-16 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
         {/* Background Effects */}
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
@@ -539,6 +541,7 @@ const About = () => {
         </div>
       </section>
 
+      </PublicMain>
       <PublicFooter />
 
       <style>{`

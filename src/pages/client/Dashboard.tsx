@@ -250,7 +250,7 @@ const ClientDashboard = () => {
         />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:space-y-8 space-y-6">
+        <main className="dashboard-content-loose">
           {loading ? (
             <div className="space-y-8">
               <div className="flex items-center justify-between space-y-2">
@@ -273,13 +273,13 @@ const ClientDashboard = () => {
           ) : (
             <>
               {/* WELCOME BANNER */}
-          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-6 lg:p-8">
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-4 sm:p-6 lg:p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
             <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-royal-blue/30 rounded-full blur-[60px]" />
 
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
-                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">
                   Welcome back, {clientName}! 👋
                 </h2>
                 <p className="text-white/80">
@@ -315,7 +315,7 @@ const ClientDashboard = () => {
           </section>
 
           {/* STATS CARDS */}
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+          <section className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
             {statsData.map((stat, idx) => {
               const CardContent = (
                 <div
@@ -459,7 +459,7 @@ const ClientDashboard = () => {
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full min-w-[700px]">
+              <table className="w-full mobile-table">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-white/5 text-left">
                     <th className="px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">

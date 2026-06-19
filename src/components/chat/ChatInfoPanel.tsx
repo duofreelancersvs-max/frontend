@@ -36,6 +36,7 @@ interface ChatInfoPanelProps {
   project?: InfoPanelProject | null;
   role: "client" | "freelancer" | "admin";
   className?: string;
+  isHired?: boolean;
 }
 
 const ChatInfoPanel = ({
@@ -43,6 +44,7 @@ const ChatInfoPanel = ({
   project,
   role,
   className,
+  isHired,
 }: ChatInfoPanelProps) => {
   const VerifyIcon = role === "client" || role === "admin" ? Verified : BadgeCheck;
 
@@ -185,16 +187,19 @@ const ChatInfoPanel = ({
                 <User size={14} className="mr-2" /> View Profile
               </Button>
             </Link>
-            <Button
-              size="sm"
-              className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
-            >
-              <CreditCard size={14} className="mr-2" /> Hire Freelancer
-            </Button>
+            {!isHired && (
+              <Button
+                size="sm"
+                className="w-full justify-start h-9 text-sm bg-teal hover:bg-teal-light text-white shadow-sm"
+              >
+                <CreditCard size={14} className="mr-2" /> Hire Freelancer
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
               className="w-full justify-start h-9 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+              disabled
             >
               <Ban size={14} className="mr-2" /> Block User
             </Button>

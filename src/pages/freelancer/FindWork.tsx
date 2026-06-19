@@ -286,6 +286,24 @@ const FindWork = () => {
     }
   }, [location.state, projects, navigate, location.pathname, handleApplyClick]);
 
+  // Proceed with application once profile query updates and is complete
+  useEffect(() => {
+    if (pendingApplyRef.current && profile) {
+      const isComplete =
+        profile.categories?.length &&
+        profile.skills?.length &&
+        profile.headline?.trim() &&
+        profile.contactInfo;
+
+      if (isComplete) {
+        const project = pendingApplyRef.current;
+        pendingApplyRef.current = null;
+        setSelectedProject(project);
+        setShowTermsForApply(true);
+      }
+    }
+  }, [profile]);
+
   const handleTermsAccepted = () => {
     setShowTermsForApply(false);
     setShowApplicationModal(true);
@@ -369,7 +387,7 @@ const FindWork = () => {
   );
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-background min-h-screen overflow-x-hidden">
+    <div className="w-full bg-slate-50 dark:bg-background flex-1 h-full overflow-x-hidden overflow-y-auto">
       {!user && <PublicNavbar variant="white" />}
       <div className={cn("w-full", !user && "pt-20")}>
         {/* Header Bar */}
@@ -381,7 +399,7 @@ const FindWork = () => {
         )}
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-4 lg:space-y-6">
+        <main className="dashboard-content">
           {/* TRIAL BANNER */}
           <TrialBanner />
 
@@ -923,12 +941,6 @@ const FindWork = () => {
         onComplete={() => {
           setShowProfileModal(false);
           setProfileModalMessage("");
-          const project = pendingApplyRef.current;
-          pendingApplyRef.current = null;
-          if (project) {
-            setSelectedProject(project);
-            setShowTermsForApply(true);
-          }
         }}
       />
     </div>

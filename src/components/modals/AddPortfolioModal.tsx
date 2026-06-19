@@ -145,7 +145,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Thumbnail Preview</Label>
               <div className={cn(
-                "aspect-square rounded-xl flex flex-col items-center justify-center text-white shadow-inner transition-all duration-500 bg-gradient-to-br",
+                "aspect-video md:aspect-square rounded-xl flex flex-col items-center justify-center text-white shadow-inner bg-gradient-to-br",
                 Style.gradient
               )}>
                 <Icon size={48} className="mb-2 opacity-90" />

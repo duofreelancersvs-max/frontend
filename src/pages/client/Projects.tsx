@@ -31,6 +31,7 @@ import ReviewProjectModal from "@/components/modals/ReviewProjectModal";
 import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { toast } from "react-toastify";
+import { useIsMdUp } from "@/hooks/useMediaQuery";
 
 // Helper to format deadline as a clean date string
 const formatDeadline = (deadline: string) => {
@@ -80,6 +81,13 @@ const ClientProjects = () => {
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [projectToComplete, setProjectToComplete] = useState<string | null>(null);
   const navigate = useNavigate();
+  const isMdUp = useIsMdUp();
+
+  useEffect(() => {
+    if (!isMdUp && viewMode === "list") {
+      setViewMode("grid");
+    }
+  }, [isMdUp, viewMode]);
 
   // Build tabs dynamically from stats
   const tabs = [
@@ -301,7 +309,7 @@ const ClientProjects = () => {
       />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+        <main className="dashboard-content">
            {/* TABS */}
           <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm">
             <div className="flex overflow-x-auto scrollbar-hide">
@@ -361,27 +369,29 @@ const ClientProjects = () => {
               </select>
             </div>
 
-             {/* View Toggle */}
-            <div className="flex bg-slate-100 dark:bg-white/5 rounded-lg p-1">
+             {/* View Toggle — list view desktop only */}
+            <div className="hidden md:flex bg-slate-100 dark:bg-white/5 rounded-lg p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "p-2 rounded-md transition-all",
+                  "p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all",
                   viewMode === "grid"
                     ? "bg-white dark:bg-[#121A2A] text-navy dark:text-white shadow-sm"
                     : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
+                aria-label="Grid view"
               >
                 <Grid3X3 size={18} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "p-2 rounded-md transition-all",
+                  "p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all",
                   viewMode === "list"
                     ? "bg-white dark:bg-[#121A2A] text-navy dark:text-white shadow-sm"
                     : "text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white",
                 )}
+                aria-label="List view"
               >
                 <List size={18} />
               </button>
@@ -620,11 +630,11 @@ const ClientProjects = () => {
                 </div>
               )}
 
-              {/* LIST VIEW */}
+              {/* LIST VIEW — desktop only */}
               {viewMode === "list" && (
-                <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+                <div className="hidden md:block bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[800px]">
+                    <table className="w-full">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-white/5 text-left">
                           <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">

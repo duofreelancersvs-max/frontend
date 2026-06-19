@@ -2,6 +2,7 @@ import { SEO } from "@/components/SEO/SEO";
 import { useState, useRef, useEffect } from "react";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import { FileEdit, Search, Play, Shield, Clock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -118,9 +119,10 @@ const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-28 pb-20 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
+      <section className="relative pt-20 pb-14 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-left">
@@ -284,6 +286,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
+      </PublicMain>
       <PublicFooter />
 
       <style>{`

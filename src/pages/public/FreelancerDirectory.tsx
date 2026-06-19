@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import { BadgeCheck, ChevronLeft, ChevronRight, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -150,9 +151,10 @@ const FreelancerDirectory = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050B15] font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-28 pb-12 md:pt-32 md:pb-20 overflow-hidden bg-white dark:bg-[#050B15]">
+      <section className="relative pt-20 pb-10 md:pt-32 md:pb-20 overflow-hidden bg-white dark:bg-[#050B15]">
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <AnimatedSection>
             <div className="max-w-3xl">
@@ -475,6 +477,7 @@ const FreelancerDirectory = () => {
 
 
 
+      </PublicMain>
       <PublicFooter />
     </div>
   );

@@ -393,7 +393,7 @@ const PostProject = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="px-6 lg:px-8 py-6 lg:py-8">
+      <main className="dashboard-content">
         <div className="grid lg:grid-cols-4 gap-6">
           {/* LEFT CONTENT */}
           <div className="lg:col-span-3 space-y-6">
@@ -877,12 +877,12 @@ const PostProject = () => {
                         <Edit2 size={14} /> Edit
                       </button>
                     </div>
-                    <div className="grid gap-3">
-                      <div>
+                    <div className="grid gap-3 min-w-0">
+                      <div className="min-w-0">
                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Title
                         </p>
-                        <p className="font-medium text-navy dark:text-white">
+                        <p className="font-medium text-navy dark:text-white break-all">
                           {formData.title || "Not specified"}
                         </p>
                       </div>
@@ -907,11 +907,11 @@ const PostProject = () => {
                           )}
                         </div>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">
                           Description
                         </p>
-                        <p className="text-slate-600 dark:text-slate-400 text-sm">
+                        <p className="text-slate-600 dark:text-slate-400 text-sm break-all whitespace-pre-wrap">
                           {formData.description || "Not specified"}
                         </p>
                       </div>

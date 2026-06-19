@@ -47,7 +47,7 @@ const FreelancerCard: React.FC<FreelancerCardProps> = ({
   return (
     <div
       className={cn(
-        "w-[280px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group",
+        "w-full max-w-[280px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group",
         className,
       )}
     >

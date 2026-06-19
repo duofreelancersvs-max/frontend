@@ -1,14 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import type { Conversation } from "@/services/conversation.service";
 import FreelancerSidebar from "@/components/layout/FreelancerSidebar";
-import FreelancerMessages from "@/pages/freelancer/Messages";
+import BottomNav from "@/components/layout/BottomNav";
+import { freelancerBottomNavItems } from "@/config/navigation";
 import { useUnreadStore } from "@/stores/unread.store";
 import { DraggableChatWidget } from "@/components/chat/DraggableChatWidget";
 import { ChatBubbleButton } from "@/components/chat";
 import { useMyConversations } from "@/hooks/queries/useFreelancerDashboardQueries";
 import { useAuthStore } from "@/stores/auth.store";
 import { useDraggable } from "@/hooks/useDraggable";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
+import { PageSkeleton } from "@/components/shared/Skeleton";
+
+const FreelancerMessages = lazy(() => import("@/pages/freelancer/Messages"));
 
 export type FreelancerLayoutContext = {
   sidebarOpen: boolean;
@@ -25,6 +30,7 @@ const FreelancerLayout = () => {
   const currentUserId = user?._id;
   const location = useLocation();
   const { position, dragHandlers, didDrag, resetPosition } = useDraggable();
+  const { hidden: navHidden, onScroll: onNavScroll, reset: resetNavScroll } = useHideOnScroll();
 
   const uniqueParticipants: { url?: string; name: string }[] = [];
   const seenIds = new Set<string>();
@@ -52,7 +58,16 @@ const FreelancerLayout = () => {
   useEffect(() => {
     setIsMessagesOpen(false);
     resetPosition();
-  }, [location.pathname]);
+    resetNavScroll();
+  }, [location.pathname, resetPosition, resetNavScroll]);
+
+  useEffect(() => {
+    const mainEl = document.getElementById("main-content");
+    if (!mainEl) return;
+    const handleScroll = (e: Event) => onNavScroll(e as any);
+    mainEl.addEventListener("scroll", handleScroll, true);
+    return () => mainEl.removeEventListener("scroll", handleScroll, true);
+  }, [onNavScroll]);
 
   return (
     <div className="flex h-[100dvh] bg-background font-sans transition-colors duration-300 overflow-hidden">
@@ -61,8 +76,16 @@ const FreelancerLayout = () => {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col h-[100dvh] lg:ml-64 transition-all duration-300 relative w-full overflow-y-auto overflow-x-hidden">
-        <Outlet context={{ setSidebarOpen, sidebarOpen }} />
+      <div
+        className="flex-1 flex flex-col h-[100dvh] lg:ml-64 transition-all duration-300 relative w-full overflow-y-auto overflow-x-hidden pb-[var(--mobile-nav-pb)] md:!pb-0 lg:!pb-0"
+        style={{ '--mobile-nav-pb': navHidden ? 'env(safe-area-inset-bottom, 0px)' : 'calc(4rem + env(safe-area-inset-bottom, 0px))' } as React.CSSProperties}
+        onScroll={onNavScroll}
+      >
+        <main id="main-content" className="flex-1 min-w-0 min-h-0 flex flex-col">
+          <Outlet context={{ setSidebarOpen, sidebarOpen }} />
+        </main>
+
+        <BottomNav items={freelancerBottomNavItems} hidden={navHidden} />
 
         {!location.pathname.includes("/messages") && (
           <>
@@ -71,11 +94,13 @@ const FreelancerLayout = () => {
                 isOpen={isMessagesOpen}
                 onClose={() => setIsMessagesOpen(false)}
               >
-                <FreelancerMessages isWidget={true} onWidgetClose={() => setIsMessagesOpen(false)} />
+                <Suspense fallback={<PageSkeleton />}>
+                  <FreelancerMessages isWidget={true} onWidgetClose={() => setIsMessagesOpen(false)} />
+                </Suspense>
               </DraggableChatWidget>
             )}
             <div
-              className="fixed bottom-12 right-6 z-50 flex flex-col items-end"
+              className="hidden lg:flex fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-12 right-4 lg:right-6 z-50 flex-col items-end"
               style={{
                 transform: isMessagesOpen
                   ? 'none'

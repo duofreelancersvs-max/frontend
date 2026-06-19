@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { toast } from "react-toastify";
 import { TurnstileWidget } from "@/components/common/TurnstileWidget";
+import { SEO } from "@/components/SEO/SEO";
+import AuthFormPanel from "@/components/auth/AuthFormPanel";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -31,6 +32,11 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex font-sans">
+      <SEO
+        title="Reset Password | ConnectMeIndia"
+        description="Reset your ConnectMeIndia account password. We'll send you a secure link to create a new password."
+        canonical="/forgot-password"
+      />
       {/* LEFT SIDE - Branding */}
       <div className="hidden md:flex md:w-[40%] lg:w-[45%] relative bg-navy overflow-hidden">
         {/* Background */}
@@ -71,41 +77,14 @@ const ForgotPassword = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE - Form */}
-      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-slate-50 dark:bg-background relative py-20 lg:py-24 overflow-y-auto">
-        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between md:justify-end lg:p-10 lg:gap-6 z-30">
-          <div className="md:hidden">
-            <Logo size="sm" />
-          </div>
-          <div className="flex items-center gap-4 lg:gap-6">
-            <ThemeToggle />
-            <Link to="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
-              >
-                <ArrowLeft size={16} className="mr-2" />
-                <span className="font-bold text-xs uppercase tracking-wider">
-                  Home
-                </span>
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="w-full max-w-md px-4 sm:px-0">
-          {/* Mobile Logo */}
-          <div className="md:hidden flex justify-center mb-8">
-            <Logo size="md" />
-          </div>
-
+      {/* RIGHT SIDE - Form (mobile-first) */}
+      <AuthFormPanel>
           {/* Form Card */}
-          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100 dark:border-white/10">
+          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-5 sm:p-8 border border-slate-100 dark:border-white/10">
             {/* Back Button */}
             <Link
               to="/login"
-              className="flex items-center gap-2 text-slate-500 hover:text-navy mb-6 transition-colors"
+              className="flex items-center gap-2 text-slate-500 hover:text-navy mb-6 transition-colors min-h-[44px]"
             >
               <ArrowLeft size={18} />
               <span className="text-sm font-medium">Back to Login</span>
@@ -250,8 +229,7 @@ const ForgotPassword = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
+      </AuthFormPanel>
     </div>
   );
 };

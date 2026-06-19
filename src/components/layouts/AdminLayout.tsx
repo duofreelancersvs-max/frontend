@@ -48,14 +48,16 @@ const AdminLayout = () => {
       <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content */}
-      <main className="admin-main">
+      <main id="main-content" className="admin-main">
         {/* Header */}
         <header className="admin-header bg-[#18181b]/80 backdrop-blur-md border-b border-white/5">
           <div className="admin-header-left">
             {/* Mobile Menu Toggle */}
             <button
-              className="admin-header-icon md:hidden mr-2 text-slate-400 hover:text-white transition-colors"
+              className="admin-header-icon md:hidden mr-2 text-slate-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isSidebarOpen}
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -127,7 +129,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Content */}
-        <div className="admin-content p-6 max-w-[1600px] mx-auto w-full">
+        <div className="admin-content p-4 md:p-6 max-w-[1600px] mx-auto w-full">
           <Outlet context={{ setSidebarOpen: setIsSidebarOpen }} />
         </div>
       </main>

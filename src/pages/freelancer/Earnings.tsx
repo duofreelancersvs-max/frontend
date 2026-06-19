@@ -150,7 +150,7 @@ const FreelancerEarnings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-background flex items-center justify-center">
+      <div className="min-h-[50vh] flex-1 flex items-center justify-center bg-slate-50 dark:bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
@@ -183,7 +183,7 @@ const FreelancerEarnings = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+        <main className="dashboard-content">
           {/* STATS CARDS */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {/* Total Earnings */}
@@ -364,7 +364,7 @@ const FreelancerEarnings = () => {
 
           {/* RECENT TRANSACTIONS */}
           <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/5">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-100 dark:border-white/5">
               <h2 className="text-lg font-bold text-navy dark:text-white">
                 Recent Transactions
               </h2>
@@ -374,7 +374,7 @@ const FreelancerEarnings = () => {
               </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-white/5">
                   <tr>
@@ -435,6 +435,41 @@ const FreelancerEarnings = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-white/5">
+              {recentTransactionsData.map((tx) => (
+                <div key={tx.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-navy dark:text-white truncate">
+                        {tx.project}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {tx.client} · {tx.date}
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold text-navy dark:text-white shrink-0">
+                      ₹{tx.amount.toLocaleString()}
+                    </span>
+                  </div>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
+                      tx.status === "completed"
+                        ? "bg-success-green/10 text-success-green"
+                        : "bg-gold/10 text-gold",
+                    )}
+                  >
+                    {tx.status === "completed" ? (
+                      <CheckCircle size={12} />
+                    ) : (
+                      <Clock size={12} />
+                    )}
+                    {tx.status === "completed" ? "Completed" : "Pending"}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </main>

@@ -222,20 +222,20 @@
 /* ===== MAIN CONTENT AREA ===== */
 .admin-main {
   flex: 1;
-  margin-left: 260px;
+  margin-left: 0;
   min-height: 100vh;
   background-color: var(--admin-midnight);
 }
 
 /* ===== ADMIN HEADER ===== */
 .admin-header {
-  height: 64px;
+  height: 56px;
   background-color: var(--admin-deep-slate);
   border-bottom: 1px solid var(--admin-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -339,8 +339,8 @@
 
 /* ===== ADMIN CONTENT ===== */
 .admin-content {
-  padding: 1.5rem;
-  max-width: 1600px;
+  padding: 1rem;
+  max-width: 100%;
 }
 
 /* ===== WELCOME BANNER ===== */
@@ -462,9 +462,9 @@
 /* ===== METRICS GRID ===== */
 .admin-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 /* ===== ADMIN CARD ===== */
@@ -7349,11 +7349,171 @@
 /* Grid mode for categories */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 768px) {
   .categories-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ===== MOBILE-FIRST PROGRESSIVE ENHANCEMENT (overrides legacy max-width defaults) ===== */
+@media (min-width: 768px) {
+  .admin-main {
+    margin-left: 16rem;
+  }
+
+  .admin-content {
+    padding: 1.5rem;
+  }
+
+  .admin-header {
+    height: 64px;
+    padding: 0 1.5rem;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-main {
+    margin-left: 16rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .admin-content {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+}
+
+/* ===== FINAL MOBILE-FIRST OVERRIDES ===== */
+/* Neutralize legacy max-width rules that conflict with Tailwind admin sidebar */
+@media (max-width: 767px) {
+  .admin-main {
+    margin-left: 0 !important;
+  }
+
+  .admin-metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-charts-grid,
+  .admin-secondary-charts,
+  .admin-tables-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-welcome-banner {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .admin-welcome-buttons {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  .admin-card {
+    padding: 1rem !important;
+  }
+
+  .um-page-header,
+  .sm-page-header,
+  .vq-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .admin-header-title {
+    font-size: 1rem !important;
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-secondary-charts {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-metrics-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .categories-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-table-wrapper,
+  .um-table-wrapper,
+  .sm-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table-wrapper table,
+  .um-table-wrapper table,
+  .sm-table-wrapper table {
+    min-width: 0 !important;
+  }
+
+  .admin-sidebar {
+    width: 100% !important;
+    max-width: 18rem !important;
+  }
+
+  .admin-page-content {
+    padding: 1rem !important;
+  }
+
+  .admin-filters-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .admin-filters-row > * {
+    width: 100% !important;
+  }
+
+  .admin-layout .admin-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .admin-layout .admin-sidebar.open {
+    transform: translateX(0) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-layout .admin-sidebar {
+    transform: none !important;
   }
 }

@@ -1,6 +1,5 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
-import EmojiPicker, { Theme } from "emoji-picker-react";
 import {
   ArrowLeft,
   Verified,
@@ -15,10 +14,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme.store";
+import { useIsMdUp } from "@/hooks/useMediaQuery";
 import type { Message } from "@/services";
 import { ChatAvatar } from "./index";
 import MessageBubble from "./MessageBubble";
 import ChatTermsOverlay from "./ChatTermsOverlay";
+
+const LazyEmojiPicker = lazy(() =>
+  import("emoji-picker-react").then((mod) => ({ default: mod.default })),
+);
 
 export interface ChatParticipant {
   id?: string;
@@ -87,6 +91,7 @@ const ChatArea = ({
   isVisible = true,
 }: ChatAreaProps) => {
   const { theme } = useThemeStore();
+  const isMdUp = useIsMdUp();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -94,8 +99,7 @@ const ChatArea = ({
 
   const handleSend = () => {
     onSend();
-    // Blur input on mobile devices to hide the keyboard
-    if (window.innerWidth < 768) {
+    if (!isMdUp) {
       inputRef.current?.blur();
     }
   };
@@ -174,7 +178,7 @@ const ChatArea = ({
           {onBack && (
             <button
               onClick={onBack}
-              className={cn("p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg", !isWidget && "lg:hidden")}
+              className={cn("p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg", !isWidget && "md:hidden")}
             >
               <ArrowLeft size={20} />
             </button>
@@ -264,8 +268,9 @@ const ChatArea = ({
           ) : null}
             <button
             onClick={onToggleInfoPanel}
+            aria-label="Conversation options"
             className={cn(
-              "p-2 rounded-lg transition-colors",
+              "p-2 min-w-[44px] min-h-[44px] rounded-lg transition-colors",
               showInfoPanel
                 ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
@@ -327,8 +332,10 @@ const ChatArea = ({
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                aria-label={showEmojiPicker ? "Close emoji picker" : "Open emoji picker"}
+                aria-expanded={showEmojiPicker}
                 className={cn(
-                  "p-2 rounded-lg transition-colors",
+                  "p-2 min-w-[44px] min-h-[44px] rounded-lg transition-colors",
                   showEmojiPicker
                     ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
                     : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
@@ -339,17 +346,25 @@ const ChatArea = ({
 
               {showEmojiPicker && (
                 <div className="absolute bottom-12 left-0 z-50 shadow-2xl border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-                  <EmojiPicker
-                    onEmojiClick={(emojiData) => {
-                      setMessageInput(messageInput + emojiData.emoji);
-                    }}
-                    theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
-                    lazyLoadEmojis={true}
-                    skinTonesDisabled={true}
-                    searchPlaceHolder="Search emojis..."
-                    width={320}
-                    height={400}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="w-[320px] h-[400px] flex items-center justify-center bg-white dark:bg-slate-900 text-sm text-slate-500">
+                        Loading emojis…
+                      </div>
+                    }
+                  >
+                    <LazyEmojiPicker
+                      onEmojiClick={(emojiData) => {
+                        setMessageInput(messageInput + emojiData.emoji);
+                      }}
+                      theme={(theme === "dark" ? "dark" : "light") as import("emoji-picker-react").Theme}
+                      lazyLoadEmojis={true}
+                      skinTonesDisabled={true}
+                      searchPlaceHolder="Search emojis..."
+                      width={320}
+                      height={400}
+                    />
+                  </Suspense>
                 </div>
               )}
             </div>
@@ -366,7 +381,8 @@ const ChatArea = ({
             <Button
               onClick={handleSend}
               disabled={disabledMessageInput || !messageInput.trim() || !isConnected}
-              className={cn("h-10 w-10 p-0 rounded-full text-white disabled:opacity-50", role === "admin" ? "bg-indigo-600 hover:bg-indigo-500" : "bg-teal hover:bg-teal-light")}
+              aria-label="Send message"
+              className={cn("h-11 w-11 min-h-[44px] min-w-[44px] p-0 rounded-full text-white disabled:opacity-50", role === "admin" ? "bg-indigo-600 hover:bg-indigo-500" : "bg-teal hover:bg-teal-light")}
             >
               <Send size={18} />
             </Button>

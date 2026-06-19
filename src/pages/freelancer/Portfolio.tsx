@@ -136,7 +136,7 @@ const FreelancerPortfolio = () => {
       : portfolioItemsState.filter((item) => (item.skills?.[0] || item.category) === selectedCategory);
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-background min-h-screen transition-colors duration-300">
+    <div className="w-full bg-slate-50 dark:bg-background flex-1 h-full overflow-y-auto transition-colors duration-300">
       <div className="w-full">
         <DashboardHeader
           title="My Portfolio"
@@ -152,7 +152,7 @@ const FreelancerPortfolio = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+        <main className="dashboard-content">
           {/* Category Filter */}
           <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-2">
             {categories.map((category) => (

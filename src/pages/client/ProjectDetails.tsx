@@ -229,7 +229,7 @@ const ProjectDetails = () => {
       />
 
       {/* Main Content Area */}
-      <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+      <main className="dashboard-content">
          {/* PROJECT HEADER CARD */}
         <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -247,7 +247,7 @@ const ProjectDetails = () => {
                   {project.category}
                 </span>
               </div>
-               <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white">
+               <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white break-words sm:break-normal" style={{ overflowWrap: 'anywhere' }}>
                 {project.title}
               </h1>
               <div className="flex items-center gap-4 text-sm text-slate-500">

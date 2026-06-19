@@ -13,9 +13,11 @@ import {
 } from "@/components/chat";
 import { useUnreadStore } from "@/stores/unread.store";
 import { useConversations } from "@/hooks/queries/useClientDashboardQueries";
+import { useIsMdUp } from "@/hooks/useMediaQuery";
 
 const AdminMessages = () => {
   const { user } = useAuth();
+  const isMdUp = useIsMdUp();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -136,7 +138,7 @@ const AdminMessages = () => {
       });
       
       if (convs.length > 0 && !selectedConversation) {
-        if (window.innerWidth >= 768) {
+        if (isMdUp) {
           setSelectedConversation(convs[0]);
         }
       }
@@ -322,12 +324,20 @@ const AdminMessages = () => {
           />
           
           {showInfoPanel && infoPanelParticipant && (
-            <ChatInfoPanel
-              participant={infoPanelParticipant}
-              project={null}
-              role="admin"
-              className="w-72 hidden xl:flex"
-            />
+            <>
+              <div 
+                className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 xl:hidden"
+                onClick={() => setShowInfoPanel(false)}
+              />
+              <div className="absolute inset-y-0 right-0 z-50 flex w-72 sm:w-80 shadow-2xl xl:static xl:shadow-none xl:z-auto bg-[#09090b] transition-transform">
+                <ChatInfoPanel
+                  participant={infoPanelParticipant}
+                  project={null}
+                  role="admin"
+                  className="flex w-full border-l-0 xl:border-l"
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

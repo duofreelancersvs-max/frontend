@@ -1,1 +1,7 @@
+# Force HTTPS and non-WWW canonical URL
+http://connectmeindia.com/*  https://connectmeindia.com/:splat  301!
+http://www.connectmeindia.com/*  https://connectmeindia.com/:splat  301!
+https://www.connectmeindia.com/*  https://connectmeindia.com/:splat  301!
+
+# SPA Fallback
 /*  /index.html  200

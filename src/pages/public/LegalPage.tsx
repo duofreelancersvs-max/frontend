@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { SEO } from '@/components/SEO/SEO';
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   Shield,
   CreditCard,
@@ -267,9 +268,10 @@ const LegalPage = ({ defaultSlug }: { defaultSlug?: string }) => {
         canonical={`/legal/${slug}`} 
       />
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-white/5">
+      <section className="relative pt-20 pb-14 md:pt-36 md:pb-28 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-white/5">
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-royal-blue/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
@@ -397,6 +399,7 @@ const LegalPage = ({ defaultSlug }: { defaultSlug?: string }) => {
         </div>
       </section>
 
+      </PublicMain>
       <PublicFooter />
     </div>
   );

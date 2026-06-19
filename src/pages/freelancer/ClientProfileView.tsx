@@ -33,7 +33,7 @@ const ClientProfileView = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#0B1120]">
+      <div className="flex items-center justify-center min-h-[50vh] bg-slate-50 dark:bg-[#0B1120]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
@@ -46,7 +46,7 @@ const ClientProfileView = () => {
   const rating = clientProfile?.averageRating || participant?.rating || 0;
 
   return (
-    <div className="flex-1 bg-slate-50 dark:bg-background min-h-screen">
+    <div className="flex-1 bg-slate-50 dark:bg-background h-full overflow-y-auto">
       <DashboardHeader
         title="Client Profile"
         onMenuClick={() => navigate(-1)}
@@ -60,7 +60,7 @@ const ClientProfileView = () => {
         </button>
       </DashboardHeader>
 
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="dashboard-content max-w-4xl mx-auto">
         <div className="bg-white dark:bg-white/5 rounded-2xl shadow-sm border border-slate-100 dark:border-white/10 overflow-hidden">
           {/* Header section */}
           <div className="p-8 border-b border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center gap-6">

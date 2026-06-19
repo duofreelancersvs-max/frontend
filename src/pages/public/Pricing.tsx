@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   Check,
   X,
@@ -16,6 +17,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { toast } from "react-toastify";
 import { subscriptionService, paymentService } from "@/services";
 import { publicService, type SubscriptionPlan } from "@/services/public.service";
+import { loadRazorpay } from "@/lib/loadRazorpay";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -321,7 +323,8 @@ const Pricing = () => {
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      await loadRazorpay();
+      const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", () => {
         toast.error("Payment failed. Please try again.");
         setIsProcessing(null);
@@ -406,9 +409,10 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white">
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-28 pb-20 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
+      <section className="relative pt-20 pb-14 md:pt-32 md:pb-32 overflow-hidden bg-white dark:bg-transparent border-b border-slate-200 dark:border-none">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
@@ -752,6 +756,7 @@ const Pricing = () => {
         </div>
       )}
 
+      </PublicMain>
       <PublicFooter />
     </div>
   );

@@ -22,6 +22,7 @@ import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { TrialBanner } from "@/components/feature-gate";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
+import { loadRazorpay } from "@/lib/loadRazorpay";
 
 // Plan features
 const planFeatures = {
@@ -218,6 +219,7 @@ const FreelancerSubscription = () => {
         },
       };
 
+      await loadRazorpay();
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", () => {
         toast.error("Payment failed. Please try again.");
@@ -287,7 +289,7 @@ const FreelancerSubscription = () => {
         />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-8">
+        <main className="dashboard-content-loose">
           {/* TRIAL BANNER + USAGE INDICATOR */}
           <TrialBanner />
 

@@ -271,8 +271,9 @@ const Home = () => {
 
       <PublicNavbar dark />
 
+      <main id="main-content">
       {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
-      <section className="relative min-h-[75vh] md:min-h-[90vh] flex items-center pt-32 md:pt-40 pb-12 bg-white dark:bg-[#050B15] z-30">
+      <section className="relative min-h-[60vh] md:min-h-[90vh] flex items-center pt-20 md:pt-40 pb-10 md:pb-12 bg-white dark:bg-[#050B15] z-30">
         {/* Subtle Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Main Gradient Surface */}
@@ -608,7 +609,7 @@ const Home = () => {
             </div>
           </AnimatedSection>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-sm mx-auto sm:max-w-none">
             {isFreelancer ? (
               isLoadingProjects ? (
                 <div className="col-span-full flex justify-center py-12">
@@ -623,7 +624,7 @@ const Home = () => {
                   <AnimatedSection key={project._id || idx} delay={idx * 100}>
                     <Link to={`/freelancer/project/${project._id}`} className="block h-full">
                       <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
-                        <div className="h-24 bg-gradient-to-r from-teal to-royal-blue relative">
+                        <div className="h-20 md:h-24 bg-gradient-to-r from-teal to-royal-blue relative">
                           <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
                             <Briefcase size={12} className="text-white" />
                             <span className="text-white text-xs font-semibold">
@@ -632,15 +633,15 @@ const Home = () => {
                           </div>
                         </div>
 
-                        <div className="px-6 pb-8 pt-4 flex-1 flex flex-col">
-                          <h3 className="font-bold text-navy dark:text-white text-lg mb-2 group-hover:text-teal transition-colors line-clamp-1">
+                        <div className="px-4 pb-6 pt-3 md:px-6 md:pb-8 md:pt-4 flex-1 flex flex-col">
+                          <h3 className="font-bold text-navy dark:text-white text-base md:text-lg mb-2 group-hover:text-teal transition-colors line-clamp-1">
                             {project.title}
                           </h3>
                           <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 flex-1">
                             {project.description || "No description provided."}
                           </p>
 
-                          <div className="flex flex-wrap gap-1.5 mb-6">
+                          <div className="flex flex-wrap gap-1.5 mb-4">
                             {(project.skills || []).slice(0, 3).map((skill: any, i: number) => (
                               <span
                                 key={i}
@@ -651,7 +652,7 @@ const Home = () => {
                             ))}
                           </div>
 
-                          <div className="mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
+                          <div className="mt-auto pt-4 border-t border-slate-100 dark:border-white/5">
                             <Button
                               variant="ghost"
                               className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4 w-full"
@@ -680,7 +681,7 @@ const Home = () => {
                   return (
                     <AnimatedSection key={freelancer._id} delay={idx * 100}>
                       <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
-                        <div className="h-24 bg-gradient-to-r from-navy to-royal-blue relative">
+                        <div className="h-20 md:h-24 bg-gradient-to-r from-navy to-royal-blue relative">
                           <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
                             <Star size={12} className="text-gold fill-gold" />
                             <span className="text-white text-xs font-semibold">
@@ -689,8 +690,8 @@ const Home = () => {
                           </div>
                         </div>
 
-                        <div className="px-6 pb-8 -mt-12 relative flex-1 flex flex-col">
-                          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-4 group-hover:scale-110 transition-transform overflow-hidden">
+                        <div className="px-4 pb-6 md:px-6 md:pb-8 -mt-8 md:-mt-12 relative flex-1 flex flex-col">
+                          <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-3 group-hover:scale-110 transition-transform overflow-hidden">
                             {freelancer.profilePicture ? (
                               <img
                                 src={freelancer.profilePicture}
@@ -704,14 +705,14 @@ const Home = () => {
                               initials
                             )}
                           </div>
-                          <h3 className="font-bold text-navy dark:text-white text-xl mb-1 group-hover:text-teal transition-colors">
+                          <h3 className="font-bold text-navy dark:text-white text-lg md:text-xl mb-1 group-hover:text-teal transition-colors">
                             {name}
                           </h3>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-1 h-4">
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-1 h-4">
                             {freelancer.headline || freelancer.categories?.[0]}
                           </p>
 
-                          <div className="flex flex-wrap gap-1.5 mb-6">
+                          <div className="flex flex-wrap gap-1.5 mb-4">
                             {freelancer.skills.slice(0, 3).map((skill) => (
                               <span
                                 key={
@@ -724,7 +725,7 @@ const Home = () => {
                             ))}
                           </div>
 
-                          <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                          <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
                             <div className="text-lg font-black text-navy dark:text-white">
                               ₹{freelancer.hourlyRate}
                               <span className="text-slate-400 dark:text-slate-500 font-normal text-sm">
@@ -926,6 +927,8 @@ const Home = () => {
           </div>
         </section>
       )}
+
+      </main>
 
       <PublicFooter />
 

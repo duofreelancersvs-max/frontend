@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:static": "npm run build && node scripts/prerender-public.mjs",
+    "prerender": "node scripts/prerender-public.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -69,6 +71,8 @@
     "happy-dom": "^20.4.0",
     "jsdom": "^27.4.0",
     "postcss": "^8.4.38",
+    "puppeteer": "^25.1.0",
+    "serve": "^14.2.6",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.0.0",

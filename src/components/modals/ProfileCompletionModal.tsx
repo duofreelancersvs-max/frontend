@@ -240,7 +240,7 @@ export default function ProfileCompletionModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
       <DialogContent
-        className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] p-0"
+        className="w-[calc(100%-2rem)] xs:w-[92%] sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] p-0"
         hideClose
         onTouchMove={preventBodyScroll}
       >

@@ -461,7 +461,7 @@ export const PublicNavbar = ({
               <div className="lg:hidden flex items-center gap-2">
                 <button
                   className={cn(
-                    "p-2 rounded-lg transition-colors",
+                    "min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors",
                     isWhite || dark
                       ? "text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                       : "text-white hover:bg-white/10",

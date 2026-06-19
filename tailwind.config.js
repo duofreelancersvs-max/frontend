@@ -11,7 +11,11 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        lg: "2rem",
+      },
       screens: {
         "2xl": "1400px",
       },
@@ -22,7 +26,7 @@ module.exports = {
         sans: ["Inter", "sans-serif"],
       },
       fontSize: {
-        xxs: ["0.625rem", { lineHeight: "1rem" }], // 10px
+        xxs: ["0.75rem", { lineHeight: "1.125rem" }], // 12px — WCAG minimum for UI labels
       },
       colors: {
         border: "hsl(var(--border))",

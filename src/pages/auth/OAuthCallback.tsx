@@ -11,6 +11,7 @@ import {
   waitForOAuthSession,
 } from "@/lib/oauth";
 import { toast } from "react-toastify";
+import { SEO } from "@/components/SEO/SEO";
 
 export default function OAuthCallback() {
   const navigate = useNavigate();
@@ -106,7 +107,9 @@ export default function OAuthCallback() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <>
+        <SEO title="Sign In Error | ConnectMeIndia" noIndex />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
           <div className="text-red-500 mb-4">
             <svg
@@ -146,11 +149,14 @@ export default function OAuthCallback() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <>
+      <SEO title="Signing In | ConnectMeIndia" noIndex />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center px-4">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal mx-auto mb-4"></div>
         <h2 className="text-xl font-semibold text-navy">
@@ -161,5 +167,6 @@ export default function OAuthCallback() {
         </p>
       </div>
     </div>
+    </>
   );
 }

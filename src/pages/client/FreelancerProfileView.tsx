@@ -78,7 +78,7 @@ const FreelancerProfileView = () => {
 
       {/* Header Info */}
       <div className="bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
-        <div className="px-6 lg:px-8 py-6 lg:py-8">
+        <div className="dashboard-content">
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Avatar */}
@@ -183,7 +183,7 @@ const FreelancerProfileView = () => {
       </div>
 
       {/* Grid Content */}
-      <div className="px-6 lg:px-8 py-6 lg:py-8">
+      <div className="dashboard-content">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">

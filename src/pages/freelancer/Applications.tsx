@@ -152,7 +152,7 @@ const FreelancerApplications = () => {
       />
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+        <main className="dashboard-content">
           {/* Status Tabs */}
           <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
             <div className="flex overflow-x-auto scrollbar-hide">

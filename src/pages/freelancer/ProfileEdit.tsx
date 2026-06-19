@@ -483,7 +483,7 @@ const FreelancerProfileEdit = () => {
   // ---------- LOADING STATE ----------
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50 dark:bg-background">
+      <div className="flex-1 flex items-center justify-center h-full min-h-[50vh] bg-slate-50 dark:bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={36} className="animate-spin text-teal" />
           <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -499,7 +499,7 @@ const FreelancerProfileEdit = () => {
     "?";
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-background min-h-screen transition-colors duration-300">
+    <div className="w-full bg-slate-50 dark:bg-background flex-1 h-full overflow-y-auto transition-colors duration-300">
       <div className="w-full">
         {/* Header Bar */}
         <DashboardHeader
@@ -507,7 +507,7 @@ const FreelancerProfileEdit = () => {
           onMenuClick={() => setSidebarOpen(true)}
         >
           <div className="flex items-center gap-2 lg:gap-4 ml-auto">
-            <Link to="/freelancer/profile" className="hidden sm:flex">
+            <Link to="/freelancer/profile" className="hidden lg:flex">
               <Button
                 variant="outline"
                 className="border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
@@ -517,7 +517,7 @@ const FreelancerProfileEdit = () => {
               </Button>
             </Link>
             <Button
-              className="bg-teal hover:bg-teal-light text-white hidden sm:flex"
+              className="bg-teal hover:bg-teal-light text-white hidden lg:flex"
               onClick={handleSaveChanges}
               disabled={saving}
             >
@@ -533,7 +533,7 @@ const FreelancerProfileEdit = () => {
 
         {/* Main Content Area */}
         <PullToRefresh onRefresh={handleRefresh}>
-          <main className="p-4 lg:p-8 pb-24 sm:pb-8">
+          <main className="p-4 lg:p-8 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:pb-8 lg:pb-8 dashboard-content">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* LEFT - Main Form */}
             <div className="flex-1 space-y-6">
@@ -1384,7 +1384,10 @@ const FreelancerProfileEdit = () => {
         </main>
         </PullToRefresh>
         {/* MOBILE STICKY SAVE BAR */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-white/10 px-4 py-3 flex gap-3 shadow-lg">
+        <div 
+          className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-white/10 px-4 py-3 flex gap-3 shadow-lg transition-all duration-300"
+          style={{ paddingBottom: 'calc(0.75rem + var(--mobile-nav-pb, env(safe-area-inset-bottom, 0px)))' }}
+        >
           <Link to={`/freelancer/${user?._id}`} className="flex-1">
             <Button
               variant="outline"

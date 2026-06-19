@@ -6,15 +6,17 @@ import {
   AdminRoute,
 } from "@/components/auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
-import ClientLayout from "@/layouts/ClientLayout";
-import FreelancerLayout from "@/layouts/FreelancerLayout";
-import AdminLayout from "@/components/layouts/AdminLayout";
 import { UnreadListener } from "@/components/chat/UnreadListener";
 import PageLoader from "@/components/shared/PageLoader";
 import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
 import { usePwaStore } from "@/stores/pwa.store";
 import { AppInstallPrompt } from "@/components/pwa/AppInstallPrompt";
+import SkipLink from "@/components/common/SkipLink";
+
+const ClientLayout = lazy(() => import("@/layouts/ClientLayout"));
+const FreelancerLayout = lazy(() => import("@/layouts/FreelancerLayout"));
+const AdminLayout = lazy(() => import("@/components/layouts/AdminLayout"));
 
 // Public
 const Home = lazy(() => import("@/pages/public/Home"));
@@ -135,6 +137,7 @@ function App() {
 
   return (
     <>
+      <SkipLink />
       <ThemeInitializer />
       <UnreadListener />
       <UpgradeModalHost />
@@ -316,7 +319,9 @@ function App() {
           path="/client"
           element={
             <ClientRoute>
-              <ClientLayout />
+              <Suspense fallback={<PageLoader />}>
+                <ClientLayout />
+              </Suspense>
             </ClientRoute>
           }
         >
@@ -422,7 +427,9 @@ function App() {
         <Route
           element={
             <FreelancerRoute>
-              <FreelancerLayout />
+              <Suspense fallback={<PageLoader />}>
+                <FreelancerLayout />
+              </Suspense>
             </FreelancerRoute>
           }
         >

@@ -1,19 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  Home,
-  User,
-  FolderOpen,
-  Search,
-  FileText,
-  Mail,
-  CreditCard,
-  Star,
-  Settings,
-  LogOut,
-  X,
-  Award,
-} from "lucide-react";
+import { LogOut, X, Award, Download, Share } from "lucide-react";
+import { usePwaStore } from "@/stores/pwa.store";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { freelancerService, subscriptionService } from "@/services";
@@ -21,43 +9,7 @@ import type { FreelancerProfile, Subscription } from "@/services";
 import { useUnreadStore } from "@/stores/unread.store";
 import Logo from "@/components/shared/Logo";
 import { UsageIndicator } from "@/components/feature-gate";
-
-const sidebarNavItems = [
-  {
-    icon: Home,
-    label: "Dashboard",
-    href: "/freelancer/dashboard",
-    badge: null,
-  },
-  { icon: User, label: "My Profile", href: "/freelancer/profile", badge: null },
-  {
-    icon: FolderOpen,
-    label: "Portfolio",
-    href: "/freelancer/portfolio",
-    badge: null,
-  },
-  { icon: Search, label: "Find Work", href: "/freelancer/projects", badge: null },
-  {
-    icon: FileText,
-    label: "My Applications",
-    href: "/freelancer/applications",
-    badge: null,
-  },
-  { icon: Mail, label: "Messages", href: "/freelancer/messages", id: "messages" },
-  {
-    icon: CreditCard,
-    label: "Subscription",
-    href: "/freelancer/subscription",
-    badge: null,
-  },
-  { icon: Star, label: "Reviews", href: "/freelancer/reviews", badge: null },
-  {
-    icon: Settings,
-    label: "Settings",
-    href: "/freelancer/settings",
-    badge: null,
-  },
-];
+import { freelancerSidebarNavItems } from "@/config/navigation";
 
 export interface FreelancerSidebarProps {
   isOpen: boolean;
@@ -71,6 +23,39 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
 
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+
+  // PWA Install Logic
+  const { isAppInstalled, deferredPrompt } = usePwaStore();
+  const [isIosSafari, setIsIosSafari] = useState(false);
+  const [showIosPrompt, setShowIosPrompt] = useState(false);
+  const [showAndroidPrompt, setShowAndroidPrompt] = useState(false);
+
+  useEffect(() => {
+    // Detect iOS Safari
+    const ua = window.navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+    const isSafari = /WebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+    const isStandalone = (window.navigator as any).standalone === true;
+
+    if (isIOS && isSafari && !isStandalone) {
+      setIsIosSafari(true);
+    }
+  }, []);
+
+  const handleInstall = async () => {
+    if (isIosSafari) {
+      setShowIosPrompt(true);
+      setTimeout(() => setShowIosPrompt(false), 5000);
+      return;
+    }
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } else {
+      setShowAndroidPrompt(true);
+      setTimeout(() => setShowAndroidPrompt(false), 5000);
+    }
+  };
 
   useEffect(() => {
     const fetchSidebarData = async () => {
@@ -109,8 +94,11 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
     : 0;
 
   const subscriptionPlan = subscription?.plan || "free";
-  const freelancerName = user?.fullName || user?.email?.split("@")[0] || "Freelancer";
-  const avatarInitial = (user?.fullName?.[0] || freelancerName.charAt(0)).toUpperCase();
+  const freelancerName =
+    user?.fullName || user?.email?.split("@")[0] || "Freelancer";
+  const avatarInitial = (
+    user?.fullName?.[0] || freelancerName.charAt(0)
+  ).toUpperCase();
 
   return (
     <>
@@ -141,7 +129,9 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
               <p className="text-sm font-heading font-semibold text-white truncate">
                 {freelancerName}
               </p>
-              <p className="text-xxs font-medium text-slate-400 truncate uppercase tracking-wider">Freelancer</p>
+              <p className="text-xxs font-medium text-slate-400 truncate uppercase tracking-wider">
+                Freelancer
+              </p>
             </div>
             <button
               onClick={handleLogout}
@@ -179,7 +169,11 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
 
             {/* Usage Indicator */}
             <div className="px-3 pb-1">
-              <UsageIndicator compact={true} hideCta={true} className="w-full" />
+              <UsageIndicator
+                compact={true}
+                hideCta={true}
+                className="w-full"
+              />
             </div>
 
             {/* Subscription Badge */}
@@ -228,10 +222,40 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
             </div>
           </div>
 
+          {/* Install App Button */}
+          {!isAppInstalled && (
+            <div className="px-4 pb-4 shrink-0">
+              <button
+                onClick={handleInstall}
+                className="w-full flex flex-col items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-teal to-teal-dark hover:from-teal-light hover:to-teal transition-all shadow-lg active-scale group"
+              >
+                <div className="flex items-center gap-2 text-white">
+                  <Download
+                    size={16}
+                    className="group-hover:-translate-y-0.5 transition-transform"
+                  />
+                  <span className="text-sm font-bold tracking-wide">
+                    Install App
+                  </span>
+                </div>
+                {showIosPrompt && (
+                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
+                    Tap <Share size={10} className="inline mx-0.5" /> then "Add
+                    to Home Screen"
+                  </span>
+                )}
+                {showAndroidPrompt && (
+                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
+                    Tap your browser menu (⋮) then "Install app"
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="px-3 py-2 space-y-1">
-
-            {sidebarNavItems.map((item) => {
+            {freelancerSidebarNavItems.map((item) => {
               const isActive =
                 location.pathname === item.href ||
                 location.pathname.startsWith(item.href + "/");
@@ -242,9 +266,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                 <Link
                   key={item.label}
                   to={item.href}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) onClose();
-                  }}
+                  onClick={() => onClose()}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition-all group",
                     isActive
@@ -252,7 +274,14 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
                       : "text-white hover:bg-white/5 hover:text-white",
                   )}
                 >
-                  <item.icon size={20} className={cn(isActive ? "text-white" : "text-white group-hover:text-white transition-colors")} />
+                  <item.icon
+                    size={20}
+                    className={cn(
+                      isActive
+                        ? "text-white"
+                        : "text-white group-hover:text-white transition-colors",
+                    )}
+                  />
                   <span className="flex-1">{item.label}</span>
                   {itemBadge && (
                     <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
@@ -264,7 +293,8 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
             })}
           </nav>
         </div>
-      </aside>      {/* SIDEBAR OVERLAY (Mobile) */}
+      </aside>{" "}
+      {/* SIDEBAR OVERLAY (Mobile) */}
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"

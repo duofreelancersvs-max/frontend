@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   ArrowRight,
   TrendingUp,
@@ -110,9 +111,10 @@ const Categories = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* Hero Section */}
-      <section className="relative pt-28 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
+      <section className="relative pt-20 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-background border-b border-slate-200 dark:border-white/5">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
         
@@ -245,6 +247,7 @@ const Categories = () => {
         </div>
       </section>
 
+      </PublicMain>
       <PublicFooter />
     </div>
   );

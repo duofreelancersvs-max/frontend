@@ -10,6 +10,7 @@ import { freelancerService } from "@/services";
 import { publicService } from "@/services/public.service";
 import type { FreelancerProfile } from "@/services";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { useIsMdUp } from "@/hooks/useMediaQuery";
 
 // Categories and skills will be fetched dynamically from the backend
 
@@ -97,6 +98,13 @@ const ClientFreelancers = () => {
   const navigate = useNavigate();
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const isMdUp = useIsMdUp();
+
+  useEffect(() => {
+    if (!isMdUp && viewMode === "list") {
+      setViewMode("grid");
+    }
+  }, [isMdUp, viewMode]);
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
   const [totalFreelancers, setTotalFreelancers] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -208,7 +216,7 @@ const ClientFreelancers = () => {
         </DashboardHeader>
 
         {/* Main Content Area */}
-        <main className="px-6 lg:px-8 py-6 lg:py-8 flex-1 flex flex-col">
+        <main className="dashboard-content flex-1 flex flex-col">
           {/* SEARCH & FILTERS */}
           <div className="mb-6 lg:mb-8">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -239,13 +247,14 @@ const ClientFreelancers = () => {
                 </Button>
               </div>
 
-              {/* View Toggle */}
-              <div className="flex items-center gap-2">
+              {/* View Toggle — desktop only */}
+              <div className="hidden md:flex items-center gap-2">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
                    className={viewMode === "grid" ? "bg-navy dark:bg-white dark:text-navy" : "dark:text-slate-400"}
+                  aria-label="Grid view"
                 >
                   <Grid3X3 size={18} />
                 </Button>
@@ -254,6 +263,7 @@ const ClientFreelancers = () => {
                   size="sm"
                   onClick={() => setViewMode("list")}
                    className={viewMode === "list" ? "bg-navy dark:bg-white dark:text-navy" : "dark:text-slate-400"}
+                  aria-label="List view"
                 >
                   <List size={18} />
                 </Button>
@@ -370,7 +380,7 @@ const ClientFreelancers = () => {
             <>
               {viewMode === "grid" ? (
                 hasFilters ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4 lg:gap-6">
                     {freelancers.map((freelancer) => (
                       <FreelancerCard
                         key={freelancer._id || freelancer.id}
@@ -392,7 +402,7 @@ const ClientFreelancers = () => {
                         <h2 className="text-xl font-bold text-navy dark:text-white mb-6 border-b border-slate-100 dark:border-white/10 pb-2">
                           {category}
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 lg:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4 lg:gap-6">
                           {catFreelancers.map((freelancer) => (
                             <FreelancerCard
                               key={freelancer._id || freelancer.id}
@@ -405,7 +415,7 @@ const ClientFreelancers = () => {
                   </div>
                 )
                ) : (
-                <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
+                <div className="hidden md:block bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">

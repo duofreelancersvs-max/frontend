@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth.store";
 import type { UserRole } from "@/types/auth.types";
-import NotFound from "@/pages/public/NotFound";
+import AccessDenied from "@/components/auth/AccessDenied";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ export function ProtectedRoute({
     );
     
     if (returnNotFoundOnDeny) {
-      return <NotFound />;
+      return <AccessDenied />;
     }
 
     // Redirect to appropriate dashboard based on role

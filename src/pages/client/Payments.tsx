@@ -114,7 +114,7 @@ const ClientPayments = () => {
           title="Payments"
           onMenuClick={() => setSidebarOpen(true)}
         />
-      <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+      <main className="dashboard-content">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-success-green/10 flex items-center justify-center mb-3">

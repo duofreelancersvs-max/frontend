@@ -20,6 +20,7 @@ import { TermsModal } from "@/components/modals/TermsModal";
 import { useEffect } from "react";
 import { useUnreadStore } from "@/stores/unread.store";
 import { useConversations } from "@/hooks/queries/useClientDashboardQueries";
+import { useIsMdUp } from "@/hooks/useMediaQuery";
 
 interface ClientMessagesProps {
   isWidget?: boolean;
@@ -42,6 +43,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const deepLinkHandled = useRef(false);
+  const isMdUp = useIsMdUp();
   const { setActiveConversation, resetCount, addPendingMessage, getPendingMessages, clearPendingMessages, unreadCounts } = useUnreadStore();
   const [currentApplication, setCurrentApplication] = useState<Application | null>(null);
   const [allClientApplications, setAllClientApplications] = useState<Application[]>([]);
@@ -187,7 +189,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
       
       // Auto-select the conversation with the most recent message (first after sort)
       if (convs.length > 0 && !selectedConversation && !deepLinkHandled.current) {
-        if (!isWidget && window.innerWidth >= 768) {
+        if (!isWidget && isMdUp) {
           setSelectedConversation(convs[0]);
         }
       }
@@ -592,7 +594,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
        )}
 
        {/* Chat Container */}
-      <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-100 dark:bg-background">
+      <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-100 dark:bg-background relative">
         {/* Conversation List */}
         <ConversationList
           conversations={conversationItems}
@@ -632,7 +634,7 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
           applicationStatus={currentApplication?.status}
           onHire={handleHire}
           onReject={handleReject}
-          isVisible={isWidget ? mobileView === "chat" : mobileView === "chat" || window.innerWidth >= 768}
+          isVisible={isWidget ? mobileView === "chat" : mobileView === "chat" || isMdUp}
           className={cn(
             "flex-1",
             isWidget
@@ -644,12 +646,21 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
 
         {/* Info Panel */}
         {showInfoPanel && infoPanelParticipant && (
-          <ChatInfoPanel
-            participant={infoPanelParticipant}
-            project={chatProject}
-            role="client"
-            className="hidden xl:flex w-72"
-          />
+          <>
+            <div 
+              className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 xl:hidden"
+              onClick={() => setShowInfoPanel(false)}
+            />
+            <div className="absolute inset-y-0 right-0 z-50 flex w-72 sm:w-80 shadow-2xl xl:static xl:shadow-none xl:z-auto bg-white dark:bg-[#050B15] transition-transform">
+              <ChatInfoPanel
+                participant={infoPanelParticipant}
+                project={chatProject}
+                role="client"
+                className="flex w-full"
+                isHired={currentApplication?.status === "hired" || currentApplication?.status === "accepted"}
+              />
+            </div>
+          </>
         )}
       </div>
 

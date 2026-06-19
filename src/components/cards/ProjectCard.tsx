@@ -35,7 +35,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   return (
     <div
       className={cn(
-        "w-[320px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-md transition-shadow duration-300 flex flex-col p-5 border border-transparent hover:border-slate-100",
+        "w-full max-w-[320px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-md transition-shadow duration-300 flex flex-col p-5 border border-transparent hover:border-slate-100",
         className,
       )}
     >

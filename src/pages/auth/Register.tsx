@@ -21,11 +21,12 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/shared/Logo";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import type { UserRole } from "@/types/auth.types";
 import { TurnstileWidget } from "@/components/common/TurnstileWidget";
 import { useThemeStore } from "@/stores/theme.store";
 import { GoogleLogin } from "@react-oauth/google";
+import { SEO } from "@/components/SEO/SEO";
+import AuthFormPanel from "@/components/auth/AuthFormPanel";
 
 type Step = "role" | "form";
 
@@ -161,6 +162,11 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex font-sans">
+      <SEO
+        title="Create Account | ConnectMeIndia"
+        description="Join ConnectMeIndia as a client or freelancer. Post projects, find work, and collaborate across India."
+        canonical="/register"
+      />
       {/* LEFT SIDE - Branding */}
       <div className="hidden md:flex md:w-[40%] lg:w-[45%] relative bg-navy overflow-hidden">
         {/* Background */}
@@ -219,49 +225,27 @@ const Register = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE - Register Form */}
-      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-slate-50 dark:bg-background relative py-20 lg:py-24 overflow-y-auto">
-        {isLoading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
-            <div className="bg-white dark:bg-[#121A2A] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-white/10 flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-teal" />
-              <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">
-                Creating your account...
-              </p>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                Please wait a moment
-              </p>
+      {/* RIGHT SIDE - Register Form (mobile-first) */}
+      <AuthFormPanel
+        maxWidth="lg"
+        loadingOverlay={
+          isLoading ? (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
+              <div className="bg-white dark:bg-[#121A2A] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-white/10 flex flex-col items-center gap-4 mx-4">
+                <Loader2 className="w-8 h-8 animate-spin text-teal" />
+                <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg">
+                  Creating your account...
+                </p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  Please wait a moment
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-        <div className="w-full absolute top-0 left-0 p-6 flex items-center justify-between md:justify-end lg:p-10 lg:gap-6 z-30">
-          <div className="md:hidden">
-            <Logo size="sm" />
-          </div>
-          <div className="flex items-center gap-4 lg:gap-6">
-            <ThemeToggle />
-            <Link to="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-500 dark:text-slate-400 hover:text-navy dark:hover:text-white rounded-xl transition-all border border-slate-200 dark:border-white/10 lg:border-none flex items-center px-4"
-              >
-                <ArrowLeft size={16} className="mr-2" />
-                <span className="font-bold text-xs uppercase tracking-wider">
-                  Home
-                </span>
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="w-full max-w-lg px-4 sm:px-0">
-          {/* Mobile Logo */}
-          {/* Mobile Logo spacer - removed overlap */}
-          <div className="md:hidden mb-6" />
-
+          ) : undefined
+        }
+      >
           {/* Form Card */}
-          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100 dark:border-white/10">
+          <div className="bg-white dark:bg-white/5 rounded-2xl shadow-xl p-5 sm:p-8 border border-slate-100 dark:border-white/10">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-navy dark:text-white mb-2">
                 Create Account
@@ -782,8 +766,7 @@ const Register = () => {
               </Link>
             </p>
           </div>
-        </div>
-      </div>
+      </AuthFormPanel>
     </div>
   );
 };

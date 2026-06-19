@@ -12,6 +12,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowRight,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -151,8 +152,9 @@ const FindWork = () => {
       />
       <PublicNavbar dark />
 
+      <main id="main-content">
       {/* Hero/Header Section - White Background like Categories/Find Talent */}
-      <section className="relative pt-28 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
+      <section className="relative pt-20 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-white dark:bg-[#050B15] border-b border-slate-200 dark:border-white/5">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.05]" />
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
 
@@ -198,7 +200,7 @@ const FindWork = () => {
         </div>
       </section>
 
-      <main className="py-12 container mx-auto px-4 lg:px-8">
+      <div className="py-12 container mx-auto px-4 lg:px-8">
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
             <button
@@ -441,6 +443,7 @@ const FindWork = () => {
             </Button>
           </div>
         )}
+      </div>
       </main>
     </div>
   );
@@ -514,15 +517,8 @@ const ProjectCard = ({
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100 dark:border-white/5">
           <div className="flex items-center gap-3">
-            <div className="flex -space-x-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050B15] bg-slate-100 dark:bg-white/10 flex items-center justify-center text-xxs font-bold text-slate-400"
-                >
-                  {String.fromCharCode(64 + i)}
-                </div>
-              ))}
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+              <Users size={16} />
             </div>
             <p className="text-xs font-bold text-slate-500">
               <span className="text-navy dark:text-white">

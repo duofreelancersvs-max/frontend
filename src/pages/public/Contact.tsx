@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   ChevronRight,
   Mail,
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { SEO } from "@/components/SEO/SEO";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -128,10 +130,16 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
+      <SEO
+        title="Contact Us | ConnectMeIndia"
+        description="Get in touch with ConnectMeIndia. We're here to help clients and freelancers with projects, support, and partnerships."
+        canonical="/contact"
+      />
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-24 md:pt-40 md:pb-40 overflow-hidden bg-white dark:bg-transparent border-b border-slate-100 dark:border-white/5">
+      <section className="relative pt-20 pb-16 md:pt-40 md:pb-40 overflow-hidden bg-white dark:bg-transparent border-b border-slate-100 dark:border-white/5">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.05] dark:opacity-[0.1]" />
 
         {/* Decorative Glows */}
@@ -423,6 +431,7 @@ const Contact = () => {
         </div>
       </section>
 
+      </PublicMain>
       <PublicFooter />
     </div>
   );

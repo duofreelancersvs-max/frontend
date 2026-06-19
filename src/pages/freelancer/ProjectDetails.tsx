@@ -128,6 +128,22 @@ const ProjectDetails = () => {
     setShowTermsForApply(true);
   }, [project, profile]);
 
+  // Proceed with application once profile query updates and is complete
+  useEffect(() => {
+    if (pendingApplyRef.current && profile) {
+      const isComplete =
+        profile.categories?.length &&
+        profile.skills?.length &&
+        profile.headline?.trim() &&
+        profile.contactInfo;
+
+      if (isComplete) {
+        pendingApplyRef.current = null;
+        setShowTermsForApply(true);
+      }
+    }
+  }, [profile]);
+
   const handleTermsAccepted = () => {
     setShowTermsForApply(false);
     setSelectedProjectForApply(pendingApplyRef.current);
@@ -172,7 +188,7 @@ const ProjectDetails = () => {
         onMenuClick={() => setSidebarOpen(true)}
       />
 
-      <main className="px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+      <main className="dashboard-content">
         <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 lg:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div className="space-y-3">
@@ -189,7 +205,7 @@ const ProjectDetails = () => {
                   {project.category}
                 </span>
               </div>
-               <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white">
+               <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white break-words sm:break-normal" style={{ overflowWrap: 'anywhere' }}>
                 {project.title}
               </h1>
               <div className="flex items-center gap-4 text-sm text-slate-500">
@@ -358,11 +374,6 @@ const ProjectDetails = () => {
         onComplete={() => {
           setShowProfileModal(false);
           setProfileModalMessage("");
-          const p = pendingApplyRef.current;
-          pendingApplyRef.current = null;
-          if (p) {
-            setShowTermsForApply(true);
-          }
         }}
       />
 

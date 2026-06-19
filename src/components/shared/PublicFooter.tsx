@@ -4,7 +4,7 @@ import Logo from "@/components/shared/Logo";
 
 export const PublicFooter = () => {
   return (
-    <footer className="bg-[#050B15] text-white pt-24 pb-12 relative overflow-hidden border-t border-white/5">
+    <footer className="bg-[#050B15] text-white pt-16 md:pt-24 pb-10 md:pb-12 relative overflow-hidden border-t border-white/5">
       {/* Decorative Glows */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-royal-blue/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />

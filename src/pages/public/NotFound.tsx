@@ -4,6 +4,7 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO/SEO";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -15,9 +16,13 @@ const NotFound = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-[#0B1120]">
+      <SEO
+        title="Page Not Found | ConnectMeIndia"
+        description="The page you are looking for could not be found on ConnectMeIndia."
+      />
       <PublicNavbar />
       
-      <main className="flex-1 flex items-center justify-center relative p-4 sm:p-8 overflow-hidden py-20 lg:py-24">
+      <main id="main-content" className="flex-1 flex items-center justify-center relative p-4 sm:p-8 overflow-hidden py-20 lg:py-24">
         {/* Background glow effects */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
         

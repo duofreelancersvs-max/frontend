@@ -6,6 +6,44 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, Menu, MessageSquare, Search, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import Logo from "@/components/shared/Logo";
+
+function MobileUsagePill() {
+  const { user } = useAuth();
+  const { showUsageIndicator, usage, context } = useFeatureGate(
+    user?.role === "freelancer",
+  );
+
+  if (user?.role !== "freelancer" || !showUsageIndicator || !usage) {
+    return null;
+  }
+
+  const planLabel = (context?.planName || "Free").split(" ")[0];
+
+  if (usage.limit === -1) {
+    return (
+      <Link
+        to="/freelancer/subscription"
+        className="lg:hidden inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-teal/10 text-teal border border-teal/30 shrink-0 min-h-[32px]"
+        aria-label="Pro plan with unlimited applications"
+      >
+        {planLabel} ∞
+      </Link>
+    );
+  }
+
+  const remaining = Math.max(0, usage.remaining);
+
+  return (
+    <Link
+      to="/freelancer/subscription"
+      className="lg:hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-secondary border border-border text-foreground shrink-0 min-h-[26px] sm:min-h-[32px]"
+      aria-label={`${remaining} of ${usage.limit} applications remaining this month`}
+    >
+      <span className="truncate max-w-[70px] sm:max-w-none">{planLabel} {remaining}/{usage.limit}</span>
+    </Link>
+  );
+}
 
 interface DashboardHeaderProps {
   title: string;
@@ -93,44 +131,48 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
     <>
       <header
         className={cn(
-          "h-20 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 transition-all shadow-sm",
+          "h-14 md:h-16 lg:h-20 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-3 sm:px-6 lg:px-8 sticky top-0 z-30 transition-all shadow-sm",
           className,
         )}
       >
-        {/* Left Section */}
-        <div className="flex items-center gap-4">
+        {/* Left Section — ProdMatch-style: hamburger + logo on mobile, title on desktop */}
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={onMenuClick}
-            className="lg:hidden w-10 h-10 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-all"
+            className="lg:hidden w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-all shrink-0"
             aria-label="Open menu"
           >
-            <Menu size={24} />
+            <Menu size={20} />
           </button>
-          <h1 className="text-xl font-heading font-semibold text-foreground tracking-tight">
+          <div className="lg:hidden shrink-0">
+            <Logo size="sm" className="h-8 sm:h-10 w-auto" />
+          </div>
+          <h1 className="hidden lg:block text-xl font-heading font-semibold text-foreground tracking-tight truncate">
             {title}
           </h1>
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          <MobileUsagePill />
           {children}
 
           <div className="flex items-center gap-1.5 mr-1 md:mr-2">
-            <ThemeToggle className="w-9 h-9 md:w-10 md:h-10 rounded-xl" />
+            <ThemeToggle className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl" />
           </div>
 
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 dark:bg-secondary/20 rounded-2xl border border-border">
+          <div className="flex items-center gap-0.5 sm:gap-1.5 px-1 sm:px-2 py-1 bg-secondary/50 dark:bg-secondary/20 rounded-2xl border border-border shrink-0">
             {/* Search */}
             <button
               onClick={openSearch}
-              className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all"
+              className="w-9 h-9 sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all shrink-0"
               title="Search (press /)"
             >
               <Search size={18} />
             </button>
 
             {/* Messages */}
-            <Link to={`/${role}/messages`} className="relative w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all" aria-label="Messages">
+            <Link to={`/${role}/messages`} className="relative w-9 h-9 sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all shrink-0" aria-label="Messages">
               <MessageSquare size={18} />
 
               {totalUnreadCount > 0 && (
@@ -148,7 +190,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className={cn(
-                "flex items-center gap-2 p-1 rounded-2xl transition-all border border-transparent",
+                "flex items-center gap-2 p-1 rounded-2xl transition-all border border-transparent min-h-[44px]",
                 isProfileOpen
                   ? "bg-accent border-border"
                   : "hover:bg-accent hover:border-border"

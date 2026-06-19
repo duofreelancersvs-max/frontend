@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCategoryStyle } from "@/lib/category-styles";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import PublicMain from "@/components/shared/PublicMain";
 import {
   ArrowRight,
   Award,
@@ -24,7 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { freelancerService, reviewService } from "@/services";
+import { freelancerService, reviewService, applicationService } from "@/services";
 import type {
   FreelancerProfile as FreelancerProfileType,
   Review,
@@ -85,7 +86,7 @@ const AnimatedSection = ({
 const FreelancerProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [showFullBio, setShowFullBio] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(3);
@@ -94,6 +95,20 @@ const FreelancerProfile = () => {
     useState<FreelancerProfileType | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reviewsData, setReviewsData] = useState<Review[]>([]);
+  const [isHiredByMe, setIsHiredByMe] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'client' && id) {
+      applicationService.getMyClientApplications().then(appsRes => {
+        const apps = appsRes.applications || [];
+        const isHired = apps.some(app => 
+          (app.freelancerId === id || app.freelancer?._id === id || app.freelancer?.id === id) &&
+          (app.status === 'hired' || app.status === 'accepted')
+        );
+        setIsHiredByMe(isHired);
+      }).catch(err => console.error("Error fetching client applications:", err));
+    }
+  }, [isAuthenticated, user, id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -216,32 +231,6 @@ const FreelancerProfile = () => {
     }),
   }));
 
-  const similarFreelancers = [
-    {
-      id: 1,
-      name: "Karthik M.",
-      title: "Video Editor",
-      avatar: "KM",
-      rating: 4.8,
-      verified: true,
-    },
-    {
-      id: 2,
-      name: "Sneha R.",
-      title: "Motion Designer",
-      avatar: "SR",
-      rating: 4.9,
-      verified: true,
-    },
-    {
-      id: 3,
-      name: "Arun K.",
-      title: "Video Editor",
-      avatar: "AK",
-      rating: 4.7,
-      verified: false,
-    },
-  ];
 
   const ratingBreakdown = [
     { stars: 5, percentage: 85 },
@@ -260,6 +249,7 @@ const FreelancerProfile = () => {
         canonical={`/freelancer/${id}`} 
       />
       <PublicNavbar dark />
+      <PublicMain>
 
       {/* 1. PROFILE HEADER */}
       <section className="relative bg-navy dark:bg-[#03070C] pt-20">
@@ -812,48 +802,14 @@ const FreelancerProfile = () => {
                 </Button>
               </div>
 
-              {/* 9. SIMILAR FREELANCERS */}
-              <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-6 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5">
-                <h3 className="font-bold text-navy dark:text-white mb-4">
-                  Similar Freelancers
-                </h3>
-                <div className="space-y-4">
-                  {similarFreelancers.map((fl) => (
-                    <Link
-                      key={fl.id}
-                      to={`/freelancer/${fl.id}`}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold">
-                        {fl.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-navy dark:text-white group-hover:text-royal-blue dark:group-hover:text-teal transition-colors">
-                            {fl.name}
-                          </h4>
-                          {fl.verified && (
-                            <BadgeCheck size={14} className="text-gold" />
-                          )}
-                        </div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          {fl.title}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-                          <Star size={12} className="text-gold fill-gold" />
-                          <span>{fl.rating}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
       </div>
 
       {/* 10. CTA SECTION */}
+      {!isHiredByMe && (
       <section className="py-20 bg-gradient-to-r from-teal to-teal-light relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-10"
@@ -892,8 +848,10 @@ const FreelancerProfile = () => {
           </AnimatedSection>
         </div>
       </section>
+      )}
 
       {/* 11. FOOTER */}
+      </PublicMain>
       <PublicFooter />
 
       {/* MOBILE FIXED CONTACT BAR */}

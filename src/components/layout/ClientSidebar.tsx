@@ -1,35 +1,17 @@
-import {
-  Home,
-  Folder,
-  PlusCircle,
-  Search,
-  Mail,
-  Star,
-  Settings,
-  LogOut,
-  X,
-} from "lucide-react";
-import {} from "react";
+import { useState, useEffect } from "react";
+import { LogOut, X, Download, Share } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { usePwaStore } from "@/stores/pwa.store";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadStore } from "@/stores/unread.store";
 import Logo from "@/components/shared/Logo";
+import { clientSidebarNavItems } from "@/config/navigation";
 
 interface ClientSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const sidebarNavItems = [
-  { icon: Home, label: "Dashboard", href: "/client/dashboard" },
-  { icon: Folder, label: "My Projects", href: "/client/projects" },
-  { icon: PlusCircle, label: "Post Project", href: "/client/post-project" },
-  { icon: Search, label: "Find Freelancers", href: "/client/freelancers" },
-  { icon: Mail, label: "Messages", href: "/client/messages", id: "messages" },
-  { icon: Star, label: "Reviews", href: "/client/reviews" },
-  { icon: Settings, label: "Settings", href: "/client/settings" },
-];
 
 const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
   const { user, logout } = useAuth();
@@ -41,6 +23,39 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
       await logout();
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  // PWA Install Logic
+  const { isAppInstalled, deferredPrompt } = usePwaStore();
+  const [isIosSafari, setIsIosSafari] = useState(false);
+  const [showIosPrompt, setShowIosPrompt] = useState(false);
+  const [showAndroidPrompt, setShowAndroidPrompt] = useState(false);
+
+  useEffect(() => {
+    // Detect iOS Safari
+    const ua = window.navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+    const isSafari = /WebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+    const isStandalone = (window.navigator as any).standalone === true;
+
+    if (isIOS && isSafari && !isStandalone) {
+      setIsIosSafari(true);
+    }
+  }, []);
+
+  const handleInstall = async () => {
+    if (isIosSafari) {
+      setShowIosPrompt(true);
+      setTimeout(() => setShowIosPrompt(false), 5000);
+      return;
+    }
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } else {
+      setShowAndroidPrompt(true);
+      setTimeout(() => setShowAndroidPrompt(false), 5000);
     }
   };
 
@@ -77,7 +92,9 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
               <p className="text-sm font-heading font-semibold text-white truncate">
                 {clientName}
               </p>
-              <p className="text-xxs font-medium text-slate-400 uppercase tracking-wider">Client Account</p>
+              <p className="text-xxs font-medium text-slate-400 uppercase tracking-wider">
+                Client Account
+              </p>
             </div>
             <button
               onClick={handleLogout}
@@ -90,10 +107,41 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto min-h-0 pb-6">
+        <div className="flex-1 overflow-y-auto min-h-0 pb-6 pt-4">
+          {/* Install App Button */}
+          {!isAppInstalled && (
+            <div className="px-4 pb-4 shrink-0 border-b border-border/50 mb-2">
+              <button
+                onClick={handleInstall}
+                className="w-full flex flex-col items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-teal to-teal-dark hover:from-teal-light hover:to-teal transition-all shadow-lg active-scale group"
+              >
+                <div className="flex items-center gap-2 text-white">
+                  <Download
+                    size={16}
+                    className="group-hover:-translate-y-0.5 transition-transform"
+                  />
+                  <span className="text-sm font-bold tracking-wide">
+                    Install App
+                  </span>
+                </div>
+                {showIosPrompt && (
+                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
+                    Tap <Share size={10} className="inline mx-0.5" /> then "Add
+                    to Home Screen"
+                  </span>
+                )}
+                {showAndroidPrompt && (
+                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
+                    Tap your browser menu (⋮) then "Install app"
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Navigation */}
-          <nav className="px-3 py-6 space-y-1">
-            {sidebarNavItems.map((item) => {
+          <nav className="px-3 py-2 space-y-1">
+            {clientSidebarNavItems.map((item) => {
               const isActive = location.pathname === item.href;
               const itemBadge =
                 item.id === "messages" && unreadCount > 0 ? unreadCount : null;
@@ -108,11 +156,16 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                       : "text-white hover:bg-white/5 hover:text-white",
                   )}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) onClose();
-                  }}
+                  onClick={() => onClose()}
                 >
-                  <item.icon size={20} className={cn(isActive ? "text-white" : "text-white group-hover:text-white transition-colors")} />
+                  <item.icon
+                    size={20}
+                    className={cn(
+                      isActive
+                        ? "text-white"
+                        : "text-white group-hover:text-white transition-colors",
+                    )}
+                  />
                   <span className="flex-1">{item.label}</span>
                   {itemBadge && (
                     <span className="px-2 py-0.5 text-xxs font-bold bg-primary-foreground text-primary rounded-full">
@@ -123,8 +176,6 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
               );
             })}
           </nav>
-
-
         </div>
       </aside>
 
