@@ -17,6 +17,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProPlanBadge } from "@/components/shared/ProPlanBadge";
 import { cn } from "@/lib/utils";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
@@ -691,7 +692,7 @@ const Home = () => {
                         </div>
 
                         <div className="px-4 pb-6 md:px-6 md:pb-8 -mt-8 md:-mt-12 relative flex-1 flex flex-col">
-                          <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-3 group-hover:scale-110 transition-transform overflow-hidden">
+                          <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white dark:border-[#050B15] shadow-xl mb-3 group-hover:scale-110 transition-transform overflow-hidden relative">
                             {freelancer.profilePicture ? (
                               <img
                                 src={freelancer.profilePicture}
@@ -704,10 +705,17 @@ const Home = () => {
                             ) : (
                               initials
                             )}
+                            {(freelancer.featuredProfile || freelancer.prioritySearch) && (
+                              <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
+                                <ProPlanBadge className="absolute top-0 right-0 scale-75 origin-top-right rounded-bl-xl shadow-md" />
+                              </div>
+                            )}
                           </div>
-                          <h3 className="font-bold text-navy dark:text-white text-lg md:text-xl mb-1 group-hover:text-teal transition-colors">
-                            {name}
-                          </h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-navy dark:text-white text-lg md:text-xl group-hover:text-teal transition-colors">
+                              {name}
+                            </h3>
+                          </div>
                           <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-1 h-4">
                             {freelancer.headline || freelancer.categories?.[0]}
                           </p>

@@ -319,32 +319,32 @@ const ClientDashboard = () => {
             {statsData.map((stat, idx) => {
               const CardContent = (
                 <div
-                  className="bg-white dark:bg-white/5 rounded-xl p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group cursor-pointer"
+                  className="bg-white dark:bg-white/5 rounded-xl p-3 sm:p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 group cursor-pointer"
                 >
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
+                      "w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
                       stat.color,
                     )}
                   >
-                    <stat.icon size={20} />
+                    <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 truncate">
+                  <div className="flex-1 min-w-0 w-full">
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 line-clamp-1">
                       {stat.label}
                     </p>
-                    <div className="flex items-end justify-between gap-2">
-                      <p className="text-xl font-bold text-navy dark:text-white leading-none">
+                    <div className="flex items-end justify-between gap-2 w-full">
+                      <p className="text-lg sm:text-xl font-bold text-navy dark:text-white leading-none">
                         {stat.value}
                       </p>
-                      <div className="shrink-0">
+                      <div className="shrink-0 max-w-[60%] sm:max-w-none">
                         {stat.change.startsWith("+") || stat.change.startsWith("-") ? (
-                          <div className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                            <TrendingUp size={10} />
+                          <div className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded truncate max-w-full">
+                            <TrendingUp size={10} className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                             {stat.change}
                           </div>
                         ) : (
-                          <span className="inline-block text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                          <span className="inline-block text-[9px] sm:text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-full">
                             {stat.change}
                           </span>
                         )}

@@ -136,16 +136,16 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
         )}
       >
         {/* Left Section — ProdMatch-style: hamburger + logo on mobile, title on desktop */}
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
           <button
             onClick={onMenuClick}
-            className="lg:hidden w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-all shrink-0"
+            className="lg:hidden w-8 h-8 sm:w-10 sm:h-10 min-w-[32px] sm:min-w-[40px] flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-all shrink-0"
             aria-label="Open menu"
           >
-            <Menu size={20} />
+            <Menu size={20} className="w-5 h-5 sm:w-5 sm:h-5" />
           </button>
-          <div className="lg:hidden shrink-0">
-            <Logo size="sm" className="h-8 sm:h-10 w-auto" />
+          <div className="lg:hidden shrink flex items-center min-w-0">
+            <Logo size="sm" className="h-7 sm:h-10 w-auto object-contain max-w-[100px] sm:max-w-none" />
           </div>
           <h1 className="hidden lg:block text-xl font-heading font-semibold text-foreground tracking-tight truncate">
             {title}
