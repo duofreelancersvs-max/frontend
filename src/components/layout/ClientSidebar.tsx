@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { LogOut, X, Download, Share } from "lucide-react";
+import { LogOut, X, Download } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { usePwaStore } from "@/stores/pwa.store";
+import InstallAppModal from "../modals/InstallAppModal";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadStore } from "@/stores/unread.store";
@@ -27,10 +28,9 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
   };
 
   // PWA Install Logic
-  const { isAppInstalled, deferredPrompt } = usePwaStore();
+  const { isAppInstalled } = usePwaStore();
   const [isIosSafari, setIsIosSafari] = useState(false);
-  const [showIosPrompt, setShowIosPrompt] = useState(false);
-  const [showAndroidPrompt, setShowAndroidPrompt] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   useEffect(() => {
     // Detect iOS Safari
@@ -44,19 +44,8 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
     }
   }, []);
 
-  const handleInstall = async () => {
-    if (isIosSafari) {
-      setShowIosPrompt(true);
-      setTimeout(() => setShowIosPrompt(false), 5000);
-      return;
-    }
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-    } else {
-      setShowAndroidPrompt(true);
-      setTimeout(() => setShowAndroidPrompt(false), 5000);
-    }
+  const handleInstall = () => {
+    setIsInstallModalOpen(true);
   };
 
   const clientName = user?.fullName || user?.email?.split("@")[0] || "Client";
@@ -124,17 +113,6 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
                     Install App
                   </span>
                 </div>
-                {showIosPrompt && (
-                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
-                    Tap <Share size={10} className="inline mx-0.5" /> then "Add
-                    to Home Screen"
-                  </span>
-                )}
-                {showAndroidPrompt && (
-                  <span className="text-[10px] text-white/90 animate-in fade-in slide-in-from-top-1 text-center font-medium mt-1">
-                    Tap your browser menu (⋮) then "Install app"
-                  </span>
-                )}
               </button>
             </div>
           )}
@@ -186,6 +164,12 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
           onClick={onClose}
         />
       )}
+
+      <InstallAppModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        isIosSafari={isIosSafari}
+      />
     </>
   );
 };
