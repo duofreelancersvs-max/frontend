@@ -164,6 +164,17 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           if (isAuthenticated && initializedRef.current && event !== "TOKEN_REFRESHED") {
             return;
           }
+          
+          if (event === "SIGNED_IN") {
+            // Register this device's session ID with the backend
+            try {
+              await axiosClient.patch('/users/me/session', {}, {
+                headers: { Authorization: `Bearer ${session.access_token}` }
+              });
+            } catch (err) {
+              console.error("[AuthInitializer] Failed to register session:", err);
+            }
+          }
 
           const synced = await syncSessionWithBackend(session.access_token);
 

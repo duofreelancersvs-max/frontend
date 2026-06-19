@@ -28,8 +28,13 @@ window.addEventListener("vite:preloadError", () => {
   console.warn(
     "Vite preload error (new version available). Reloading page to fetch new chunks...",
   );
-  // Reload the page to get the new index.html with correct chunk paths
-  window.location.reload();
+  
+  // Only reload once per session to prevent infinite loops causing a blank page
+  const isReloaded = sessionStorage.getItem('vite-reloaded');
+  if (!isReloaded) {
+    sessionStorage.setItem('vite-reloaded', 'true');
+    window.location.reload();
+  }
 });
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
@@ -39,7 +44,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <HelmetProvider>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AuthInitializer>
               <ScrollToTop />
               <AnalyticsTracker />

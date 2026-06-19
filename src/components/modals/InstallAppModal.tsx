@@ -31,7 +31,7 @@ export default function InstallAppModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-navy text-white border-border/50">
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md bg-navy text-white border-border/50 p-6 rounded-2xl">
         <DialogHeader>
           <div className="mx-auto w-12 h-12 rounded-full bg-teal/20 flex items-center justify-center mb-4 text-teal">
             <Download size={24} />
@@ -101,10 +101,10 @@ export default function InstallAppModal({
               </div>
             </div>
             
-            <div className="mt-4 flex justify-center">
+            <div className="mt-6 flex justify-center w-full pb-2">
               <button 
                 onClick={onClose}
-                className="text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                className="w-full py-2.5 rounded-xl border border-white/10 text-slate-300 hover:text-white hover:bg-white/5 font-medium transition-colors focus:outline-none"
               >
                 Got it, thanks!
               </button>

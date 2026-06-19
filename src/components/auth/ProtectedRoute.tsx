@@ -53,8 +53,6 @@ export function ProtectedRoute({
     return <Navigate to="/" replace />;
   }
 
-  console.log(`[ProtectedRoute] Access granted to ${location.pathname}`);
-
   return <>{children}</>;
 }
 

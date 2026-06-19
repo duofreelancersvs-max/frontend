@@ -143,6 +143,16 @@ axiosClient.interceptors.response.use(
       ) {
         return Promise.reject(error);
       }
+      
+      // If the backend invalidated the session due to a concurrent login
+      if (errorCode === 'SESSION_INVALIDATED') {
+        import("react-toastify").then(({ toast }) => {
+          toast.error("You have been logged out because your account was accessed from another device.");
+        });
+        useAuthStore.getState().logout();
+        window.location.replace("/login");
+        return Promise.reject(error);
+      }
 
       originalRequest._retry = true;
 
