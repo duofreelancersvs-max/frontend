@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/find-work",
+      "destination": "/projects",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
