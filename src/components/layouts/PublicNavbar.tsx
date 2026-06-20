@@ -28,7 +28,7 @@ const PublicNavbar = () => {
 
   const navLinks = [
     { name: "Find Talent", href: "/freelancers" },
-    { name: "Find Work", href: "/find-work" },
+    { name: "Find Work", href: "/projects" },
     { name: "Post Project", href: "/client/post-project" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "Pricing", href: "/pricing" },

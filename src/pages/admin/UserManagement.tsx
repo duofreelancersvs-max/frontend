@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { adminService } from "@/services";
+import { format } from "date-fns";
+import { DayPicker, type DateRange } from "react-day-picker";
 import {
   Users,
   UserPlus,
@@ -488,6 +490,37 @@ const UserManagement = () => {
   const [proSubmitting, setProSubmitting] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
+        setIsDatePickerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    if (range?.from) {
+      setStartDate(format(range.from, "yyyy-MM-dd"));
+    } else {
+      setStartDate("");
+    }
+    if (range?.to) {
+      setEndDate(format(range.to, "yyyy-MM-dd"));
+    } else {
+      setEndDate("");
+    }
+  };
+
+  const selectedRange = {
+    from: startDate ? new Date(startDate + "T00:00:00") : undefined,
+    to: endDate ? new Date(endDate + "T00:00:00") : undefined,
+  };
+
   // Toast import via existing toastify is not present — log to console.
   const handleProOverride = (user: User, next: boolean) => {
     setProTarget({ user, next });
@@ -861,21 +894,61 @@ const UserManagement = () => {
             <ChevronDown size={16} />
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-300">
-            <Calendar size={16} className="text-slate-400" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent border-none outline-none text-slate-300 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
-            />
-            <span className="text-slate-500">-</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent border-none outline-none text-slate-300 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
-            />
+          <div className="relative" ref={datePickerRef}>
+            <button
+              type="button"
+              onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-300 min-w-[220px]"
+            >
+              <Calendar size={16} className="text-slate-400" />
+              <span className="flex-1 text-left">
+                {startDate && endDate 
+                  ? `${format(new Date(startDate + "T00:00:00"), "MMM dd, yyyy")} - ${format(new Date(endDate + "T00:00:00"), "MMM dd, yyyy")}`
+                  : startDate 
+                    ? format(new Date(startDate + "T00:00:00"), "MMM dd, yyyy") 
+                    : "Select Date Range"}
+              </span>
+              <ChevronDown size={14} className="text-slate-500" />
+            </button>
+
+            {isDatePickerOpen && (
+              <div className="absolute z-50 top-full mt-2 right-0 bg-[#09090b] border border-slate-700 rounded-2xl shadow-2xl p-3 animate-in slide-in-from-top-2 duration-150">
+                <DayPicker
+                  mode="range"
+                  selected={selectedRange}
+                  onSelect={handleDateRangeSelect}
+                  classNames={{
+                    root: "rdp-custom",
+                    months: "flex",
+                    month: "space-y-3",
+                    month_caption: "flex justify-center items-center relative h-9",
+                    caption_label: "text-sm font-semibold text-slate-200",
+                    nav: "flex items-center gap-1",
+                    button_previous: "h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-white/10 transition-colors absolute left-1",
+                    button_next: "h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-white/10 transition-colors absolute right-1",
+                    month_grid: "w-full border-collapse",
+                    weekdays: "flex",
+                    weekday: "text-slate-500 text-xs font-medium w-9 text-center py-1",
+                    week: "flex w-full mt-1",
+                    day: "w-9 text-center text-sm p-0",
+                    day_button: "h-9 w-9 rounded-lg font-medium transition-all text-sm text-slate-300 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-500",
+                    range_start: "!bg-indigo-500 !text-white hover:!bg-indigo-600 rounded-l-lg rounded-r-none",
+                    range_end: "!bg-indigo-500 !text-white hover:!bg-indigo-600 rounded-r-lg rounded-l-none",
+                    range_middle: "!bg-indigo-500/10 !text-indigo-200 !rounded-none",
+                    selected: "!bg-indigo-500 !text-white shadow-md shadow-indigo-500/20",
+                    today: "text-indigo-400 font-bold border border-indigo-500/40",
+                    outside: "text-slate-700 opacity-50",
+                    disabled: "text-slate-700 opacity-40 cursor-not-allowed hover:bg-transparent",
+                  }}
+                  components={{
+                    Chevron: (props) => {
+                      if (props.orientation === "left") return <ChevronLeft size={16} />;
+                      return <ChevronRight size={16} />;
+                    },
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {hasActiveFilters && (

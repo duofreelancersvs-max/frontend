@@ -223,6 +223,10 @@ function App() {
           }
         />
         <Route
+          path="/find-work"
+          element={<Navigate to="/projects" replace />}
+        />
+        <Route
           path="/categories"
           element={
             <Suspense fallback={<PageLoader />}>
