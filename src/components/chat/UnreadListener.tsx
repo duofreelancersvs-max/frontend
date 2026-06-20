@@ -4,19 +4,47 @@ import { useUnreadStore } from "@/stores/unread.store";
 import { useAuthStore } from "@/stores/auth.store";
 import type { Message } from "@/services/conversation.service";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMyConversations } from "@/hooks/queries/useFreelancerDashboardQueries";
 
 export const UnreadListener = () => {
-  const { fetchInitialCounts, incrementCount, resetCount, updateCount, activeConversationId, addPendingMessage } = useUnreadStore();
+  const { incrementCount, resetCount, updateCount, activeConversationId, addPendingMessage } = useUnreadStore();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const currentUserId = useAuthStore((s) => s.user?._id);
   const queryClient = useQueryClient();
 
-  // Initial fetch on mount/auth
+  // Derive unread counts from the shared React Query cache instead of making
+  // a separate GET /conversations call.  FreelancerLayout / ClientLayout already
+  // fetch via useMyConversations(), so this reuses that cache entry (zero extra
+  // HTTP requests).
+  const { data } = useMyConversations({ enabled: !!isAuthenticated && !!currentUserId });
+  const conversations = data?.conversations || [];
+
   useEffect(() => {
-    if (isAuthenticated && currentUserId) {
-      fetchInitialCounts(currentUserId.toString());
+    if (!isAuthenticated || !currentUserId || !conversations.length) return;
+
+    const myId = currentUserId.toString();
+    const counts: Record<string, number> = {};
+    let total = 0;
+
+    for (const conv of conversations as any[]) {
+      const convId = (conv.id || conv._id || "").toString();
+      let count = 0;
+
+      if (typeof conv.unreadCount === "number") {
+        count = conv.unreadCount;
+      } else if (conv.unreadCount && typeof conv.unreadCount === "object") {
+        const isClient = (conv.clientId?._id || conv.clientId || "").toString() === myId;
+        count = isClient ? (conv.unreadCount.client || 0) : (conv.unreadCount.freelancer || 0);
+      }
+
+      if (convId) {
+        counts[convId] = count;
+        total += count;
+      }
     }
-  }, [isAuthenticated, currentUserId, fetchInitialCounts]);
+
+    useUnreadStore.setState({ unreadCounts: counts, totalUnreadCount: total });
+  }, [isAuthenticated, currentUserId, conversations]);
 
   // Socket listener
   useSocket({

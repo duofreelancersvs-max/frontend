@@ -4,13 +4,12 @@ import { LogOut, X, Award, Download } from "lucide-react";
 import { usePwaStore } from "@/stores/pwa.store";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { freelancerService, subscriptionService } from "@/services";
-import type { FreelancerProfile, Subscription } from "@/services";
 import { useUnreadStore } from "@/stores/unread.store";
 import Logo from "@/components/shared/Logo";
 import { UsageIndicator } from "@/components/feature-gate";
 import { freelancerSidebarNavItems } from "@/config/navigation";
 import InstallAppModal from "@/components/modals/InstallAppModal";
+import { useMyFreelancerProfile, useMySubscription } from "@/hooks/queries/useFreelancerDashboardQueries";
 
 export interface FreelancerSidebarProps {
   isOpen: boolean;
@@ -22,8 +21,8 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
   const { logout, user } = useAuth();
   const unreadCount = useUnreadStore((s) => s.totalUnreadCount);
 
-  const [profile, setProfile] = useState<FreelancerProfile | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const { data: profile } = useMyFreelancerProfile();
+  const { data: subscription } = useMySubscription();
 
   // PWA Install Logic
   const { isAppInstalled } = usePwaStore();
@@ -44,22 +43,6 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
   const handleInstall = () => {
     setIsInstallModalOpen(true);
   };
-
-  useEffect(() => {
-    const fetchSidebarData = async () => {
-      try {
-        const [profileData, subData] = await Promise.allSettled([
-          freelancerService.getMyProfile(),
-          subscriptionService.getMySubscription(),
-        ]);
-        if (profileData.status === "fulfilled") setProfile(profileData.value);
-        if (subData.status === "fulfilled") setSubscription(subData.value);
-      } catch (error) {
-        console.error("Error fetching sidebar data:", error);
-      }
-    };
-    fetchSidebarData();
-  }, []);
 
   const handleLogout = async () => {
     try {

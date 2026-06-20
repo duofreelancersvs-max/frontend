@@ -574,39 +574,48 @@ const FreelancerDashboard = () => {
                           <Clock size={12} />
                           {project.postedTime}
                         </div>
-                        {(() => {
-                          const status = appStatusByProjectId.get(project.id);
-                          const hasApplied =
-                            status &&
-                            status !== "withdrawn" &&
-                            status !== "rejected";
-                          const applyLabel = hasApplied
-                            ? status === "shortlisted"
-                              ? "Shortlisted"
-                              : status === "hired"
-                                ? "Hired"
-                                : status === "accepted"
-                                  ? "Accepted"
-                                  : "Applied"
-                            : "Apply Now";
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="w-1/2 text-sm border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5"
+                            onClick={() => navigate(`/freelancer/project/${project.id}`)}
+                          >
+                            View Details
+                          </Button>
+                          {(() => {
+                            const status = appStatusByProjectId.get(project.id);
+                            const hasApplied =
+                              status &&
+                              status !== "withdrawn" &&
+                              status !== "rejected";
+                            const applyLabel = hasApplied
+                              ? status === "shortlisted"
+                                ? "Shortlisted"
+                                : status === "hired"
+                                  ? "Hired"
+                                  : status === "accepted"
+                                    ? "Accepted"
+                                    : "Applied"
+                              : "Apply Now";
 
-                          return (
-                            <Button
-                              className={cn(
-                                "w-full text-sm",
-                                hasApplied
-                                  ? "bg-slate-100 text-slate-500 hover:bg-slate-100 cursor-not-allowed dark:bg-white/5 dark:text-slate-400"
-                                  : "bg-royal-blue hover:bg-royal-blue-hover text-white",
-                              )}
-                              disabled={!!hasApplied}
-                              onClick={() =>
-                                !hasApplied && handleApplyClick(project)
-                              }
-                            >
-                              {applyLabel}
-                            </Button>
-                          );
-                        })()}
+                            return (
+                              <Button
+                                className={cn(
+                                  "w-1/2 text-sm",
+                                  hasApplied
+                                    ? "bg-slate-100 text-slate-500 hover:bg-slate-100 cursor-not-allowed dark:bg-white/5 dark:text-slate-400"
+                                    : "bg-royal-blue hover:bg-royal-blue-hover text-white",
+                                )}
+                                disabled={!!hasApplied}
+                                onClick={() =>
+                                  !hasApplied && handleApplyClick(project)
+                                }
+                              >
+                                {applyLabel}
+                              </Button>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   ))}

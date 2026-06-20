@@ -26,10 +26,11 @@ export const useMySubscription = () => {
   });
 };
 
-export const useMyConversations = () => {
+export const useMyConversations = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['conversations'],
     queryFn: () => conversationService.getAll(),
     staleTime: 1000 * 60 * 2,
+    ...options,
   });
 };

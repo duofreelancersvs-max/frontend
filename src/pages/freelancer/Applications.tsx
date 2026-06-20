@@ -21,37 +21,26 @@ import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
 import { ReportModal } from "@/components/common/ReportModal";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
+import { useMyApplications } from "@/hooks/queries/useFreelancerDashboardQueries";
 
 const FreelancerApplications = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const { refetch: refetchUsage } = useFeatureGate();
 
   const [activeTab, setActiveTab] = useState("all");
-  const [applications, setApplications] = useState<Application[]>([]);
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [withdrawAppId, setWithdrawAppId] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
-  const fetchApplications = async () => {
-    try {
-      const data = await applicationService.getMyApplications();
-      setApplications(data.applications || []);
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-    }
-  };
+  const { data: appsData, refetch: refetchApplications } = useMyApplications();
+  const applications = [...(appsData?.applications || [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 
   const location = useLocation();
   const openAppId = (location.state as any)?.openApplicationId;
-
-  useEffect(() => {
-    const loadAndSelect = async () => {
-      await fetchApplications();
-    };
-    loadAndSelect();
-  }, []);
 
   useEffect(() => {
     if (openAppId && applications.length > 0) {
@@ -65,7 +54,7 @@ const FreelancerApplications = () => {
     try {
       setIsWithdrawing(true);
       await applicationService.withdraw(withdrawAppId);
-      await fetchApplications(); // Refresh the list
+      await refetchApplications(); // Refresh the list
       refetchUsage(); // Refresh usage limits so the sidebar updates
       setWithdrawAppId(null);
     } catch (error) {

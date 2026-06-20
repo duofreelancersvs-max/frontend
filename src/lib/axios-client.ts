@@ -179,11 +179,9 @@ axiosClient.interceptors.response.use(
         return axiosClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed (auth error OR network error — Supabase unreachable)
-        // In both cases clear stale tokens and send user to login
+        // In both cases clear stale tokens so ProtectedRoute redirects to login
         console.error("[axios-client] Token refresh failed, logging out:", refreshError);
         useAuthStore.getState().logout();
-        // Use replace so the user can't "back" into a broken state
-        window.location.replace("/login");
         return Promise.reject(refreshError);
       }
     }
