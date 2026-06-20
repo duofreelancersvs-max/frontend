@@ -34,9 +34,11 @@ export function formatBackendApiError(err: unknown, fallback: string): string {
 
     if (
       ax.code === "ECONNABORTED" ||
-      ax.message.toLowerCase().includes("timeout")
+      ax.code === "ERR_CANCELED" ||
+      ax.message.toLowerCase().includes("timeout") ||
+      ax.message.toLowerCase().includes("aborted")
     ) {
-      return "Request timed out. Check your connection and try again.";
+      return "Request timed out or was interrupted. Check your internet connection and try again.";
     }
 
     if (!ax.response) {
@@ -47,6 +49,11 @@ export function formatBackendApiError(err: unknown, fallback: string): string {
     }
   }
 
-  if (err instanceof Error && err.message) return err.message;
+  if (err instanceof Error && err.message) {
+    if (err.message.toLowerCase().includes("aborted")) {
+      return "Request was interrupted. Check your internet connection and try again.";
+    }
+    return err.message;
+  }
   return fallback;
 }

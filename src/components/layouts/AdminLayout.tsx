@@ -34,6 +34,17 @@ const AdminLayout = () => {
     setCurrentDate(date.toLocaleDateString("en-US", options));
   }, []);
 
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isSidebarOpen]);
+
   return (
     <div className="admin-layout dark min-h-screen bg-[#09090b] text-white selection:bg-indigo-500/30">
       {/* Mobile Overlay */}

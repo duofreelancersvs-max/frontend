@@ -96,12 +96,37 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           return;
         }
 
-        const { data: { session }, error } = await supabase.auth.getSession();
+        let { data: { session }, error } = await supabase.auth.getSession();
+
+        // Fallback: If Supabase has no session, but Zustand does, try to restore Supabase session from Zustand tokens
+        if (!session?.user && useAuthStore.getState().isAuthenticated) {
+          const tokens = useAuthStore.getState().tokens;
+          if (tokens?.accessToken && tokens?.refreshToken) {
+            const { data, error: setSessionError } = await supabase.auth.setSession({
+              access_token: tokens.accessToken,
+              refresh_token: tokens.refreshToken,
+            });
+            if (!setSessionError && data.session) {
+              session = data.session;
+              error = null;
+            }
+          }
+        }
 
         if (error || !session?.user) {
           if (useAuthStore.getState().isAuthenticated) {
+            // Last resort: verify with backend directly using Zustand token
+            const synced = await syncSessionWithBackend();
+            if (synced) {
+              const user = useAuthStore.getState().user;
+              if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
+                navigate("/");
+              }
+              unblock();
+              return;
+            }
             console.warn(
-              "[AuthInitializer] No Supabase session but store has auth — logging out."
+              "[AuthInitializer] No session and sync failed — logging out."
             );
             forceLogout();
           } else {

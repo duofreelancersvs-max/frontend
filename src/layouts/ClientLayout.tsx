@@ -62,6 +62,17 @@ const ClientLayout = () => {
   }, [location.pathname, resetPosition, resetNavScroll]);
 
   useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     const mainEl = document.getElementById("main-content");
     if (!mainEl) return;
     const handleScroll = (e: Event) => onNavScroll(e as any);
