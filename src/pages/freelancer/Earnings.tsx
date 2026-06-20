@@ -134,7 +134,7 @@ const FreelancerEarnings = () => {
 
   const categoryMap: any = {};
   completedProjectsList.forEach((p) => {
-    const cat = p.category || "Other";
+    const cat = p.categories?.[0] || "Other";
     categoryMap[cat] = (categoryMap[cat] || 0) + 0;
   });
 

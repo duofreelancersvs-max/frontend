@@ -29,18 +29,17 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
 
   // PWA Install Logic
   const { isAppInstalled } = usePwaStore();
-  const [isIosSafari, setIsIosSafari] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   useEffect(() => {
     // Detect iOS Safari
     const ua = window.navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
-    const isSafari = /WebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
     const isStandalone = (window.navigator as any).standalone === true;
 
-    if (isIOS && isSafari && !isStandalone) {
-      setIsIosSafari(true);
+    if (isIOS && !isStandalone) {
+      setIsIOS(true);
     }
   }, []);
 
@@ -168,7 +167,7 @@ const ClientSidebar = ({ isOpen, onClose }: ClientSidebarProps) => {
       <InstallAppModal
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
-        isIosSafari={isIosSafari}
+        isIOS={isIOS}
       />
     </>
   );

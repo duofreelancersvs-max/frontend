@@ -195,7 +195,7 @@ const FreelancerApplications = () => {
                     <div className="flex-1">
                       <div className="flex items-start gap-3">
                         {(() => {
-                          const category = (application.project as any)?.category || (application.project as any)?.skills?.[0] || "Default";
+                          const category = (application.project as any)?.categories?.[0] || (application.project as any)?.skills?.[0] || "Default";
                           const style = getCategoryStyle(category);
                           const Icon = style.icon;
                           return (

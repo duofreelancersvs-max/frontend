@@ -226,7 +226,7 @@ const ClientProjects = () => {
     .filter(
       (project) =>
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.category.toLowerCase().includes(searchQuery.toLowerCase()),
+        (project.categories || []).some(c => c.toLowerCase().includes(searchQuery.toLowerCase())),
     );
 
   // Sort projects
@@ -468,9 +468,11 @@ const ClientProjects = () => {
                           {project.title}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                           <span className="inline-block px-2.5 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-xs font-medium w-fit">
-                            {project.category}
-                          </span>
+                           {(project.categories || []).map((cat) => (
+                             <span key={cat} className="inline-block px-2.5 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded-md text-xs font-medium w-fit">
+                              {cat}
+                            </span>
+                           ))}
                           {project.location &&
                             (project.location.city ||
                               project.location.country) && (
@@ -667,8 +669,8 @@ const ClientProjects = () => {
                                   {project.title}
                                 </p>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {project.category}
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                                    {(project.categories || []).join(", ")}
                                   </p>
                                   {project.location &&
                                     (project.location.city ||

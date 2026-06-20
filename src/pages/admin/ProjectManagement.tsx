@@ -29,7 +29,7 @@ interface ProjectRow {
   title: string;
   description?: string;
   status: string;
-  category?: string;
+  categories?: string[];
   clientName?: string;
   clientId: string;
 
@@ -87,7 +87,7 @@ const ProjectManagement = () => {
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [viewProject, setViewProject] = useState<ProjectRow | null>(null);
   const [editProject, setEditProject] = useState<ProjectRow | null>(null);
-  const [editForm, setEditForm] = useState({ status: "", category: "", title: "", description: "" });
+  const [editForm, setEditForm] = useState({ status: "", categories: [] as string[], title: "", description: "" });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -158,7 +158,7 @@ const ProjectManagement = () => {
     setEditProject(project);
     setEditForm({
       status: project.status,
-      category: project.category || "",
+      categories: project.categories || [],
       title: project.title,
       description: project.description || "",
     });
@@ -341,7 +341,7 @@ const ProjectManagement = () => {
 
             <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem", overflowY: "auto", flex: 1 }}>
               <DetailRow label="Client" value={viewProject.clientName || "Unknown"} />
-              <DetailRow label="Category" value={viewProject.category || "—"} />
+              <DetailRow label="Categories" value={(viewProject.categories || []).join(", ") || "—"} />
 
               <DetailRow label="Deadline" value={formatDate(viewProject.deadline)} />
               <DetailRow label="Created" value={formatDate(viewProject.createdAt)} />
@@ -410,11 +410,11 @@ const ProjectManagement = () => {
 
               {/* Category */}
               <div>
-                <label style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", fontWeight: 600, display: "block", marginBottom: 6 }}>Category</label>
+                <label style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", fontWeight: 600, display: "block", marginBottom: 6 }}>Categories (comma separated)</label>
                 <input
                   type="text"
-                  value={editForm.category}
-                  onChange={(e) => setEditForm((f) => ({ ...f, category: e.target.value }))}
+                  value={editForm.categories.join(", ")}
+                  onChange={(e) => setEditForm((f) => ({ ...f, categories: e.target.value.split(",").map(c => c.trim()).filter(Boolean) }))}
                   className="admin-search-input"
                   style={{ width: "100%" }}
                 />
@@ -499,7 +499,7 @@ const ProjectTableRow = ({
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{project.clientName || "Unknown"}</span>
       </td>
       <td>
-        <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{project.category || "—"}</span>
+        <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{(project.categories || []).join(", ") || "—"}</span>
       </td>
       <td><StatusBadge status={project.status} /></td>
 

@@ -77,6 +77,7 @@ export const AppInstallPrompt = () => {
       <button 
         onClick={handleDismiss}
         className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+        aria-label="Close"
       >
         <X size={18} />
       </button>

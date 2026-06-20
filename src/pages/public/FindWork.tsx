@@ -465,7 +465,7 @@ const ProjectCard = ({
           {/* Mobile Status Header */}
           <div className="flex items-center justify-between mb-4">
             <span className="px-3 py-1 bg-teal/10 text-teal dark:text-teal-light text-xxs font-black uppercase tracking-widest rounded-full border border-teal/20">
-              {project.category}
+              {(project.categories || []).join(", ")}
             </span>
             <div className="flex items-center gap-1.5 text-xxs font-bold text-slate-400 uppercase tracking-wider">
               <Calendar size={12} className="text-slate-300" />

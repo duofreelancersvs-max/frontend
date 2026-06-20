@@ -57,7 +57,7 @@ export interface AdminProject {
   title: string;
   description?: string;
   status: string;
-  category?: string;
+  categories?: string[];
   clientId: string;
   clientName?: string;
   customClientName?: string;
@@ -87,7 +87,7 @@ export interface VerificationItem {
     displayName?: string;
     isVerified?: boolean;
     verificationBadge?: string;
-    category?: string;
+    categories?: string[];
   } | null;
   documentType: "aadhaar" | "pan" | "portfolio_proof" | "certificate";
   documentNumber: string;
@@ -232,6 +232,8 @@ export const adminService = {
     search?: string;
     role?: string;
     status?: string;
+    startDate?: string;
+    endDate?: string;
   }) =>
     api.get<{ users: AdminUser[]; pagination: PaginationMeta }>("/admin/users", {
       params,
@@ -254,7 +256,7 @@ export const adminService = {
     page?: number;
     limit?: number;
     status?: string;
-    category?: string;
+    categories?: string[];
     search?: string;
   }) =>
     api.get<{ projects: AdminProject[]; pagination: PaginationMeta }>(
@@ -265,7 +267,7 @@ export const adminService = {
   getProjectById: (projectId: string) =>
     api.get<AdminProject>(`/admin/projects/${projectId}`),
 
-  updateProject: (projectId: string, data: { status?: string; category?: string; title?: string; description?: string; visibility?: string }) =>
+  updateProject: (projectId: string, data: { status?: string; categories?: string[]; title?: string; description?: string; visibility?: string }) =>
     api.patch<{ message: string; project: AdminProject }>(`/admin/projects/${projectId}`, data),
 
   deleteProject: (projectId: string) =>

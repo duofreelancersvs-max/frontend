@@ -243,9 +243,11 @@ const ProjectDetails = () => {
                 >
                    {getStatusLabel(project.status)}
                 </span>
-                <span className="px-3 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 rounded-lg text-sm font-medium">
-                  {project.category}
-                </span>
+                {(project.categories || []).map((cat) => (
+                  <span key={cat} className="px-3 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 rounded-lg text-sm font-medium">
+                    {cat}
+                  </span>
+                ))}
               </div>
                <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white break-words sm:break-normal" style={{ overflowWrap: 'anywhere' }}>
                 {project.title}

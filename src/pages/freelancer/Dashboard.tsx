@@ -523,8 +523,8 @@ const FreelancerDashboard = () => {
                         className={cn(
                           "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-all",
                           getCategoryStyle(
-                            (project as any).category ||
-                              project.skills?.[0] ||
+                            (project as any).categories?.[0] ||
+                              (project as any).skills?.[0] ||
                               "Default",
                           ).gradient,
                         )}

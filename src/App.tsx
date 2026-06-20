@@ -19,7 +19,7 @@ const FreelancerLayout = lazy(() => import("@/layouts/FreelancerLayout"));
 const AdminLayout = lazy(() => import("@/components/layouts/AdminLayout"));
 
 // Public
-const Home = lazy(() => import("@/pages/public/Home"));
+import Home from "@/pages/public/Home";
 const LaunchPage = lazy(() => import("@/pages/public/Launch"));
 
 const About = lazy(() => import("@/pages/public/About"));
@@ -120,7 +120,12 @@ function App() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      (window as any).deferredPWAEvent = e;
     };
+
+    if ((window as any).deferredPWAEvent) {
+      setDeferredPrompt((window as any).deferredPWAEvent);
+    }
 
     const handleAppInstalled = () => {
       setAppInstalled(true);
@@ -151,11 +156,7 @@ function App() {
         {/* Public Pages (full-page Suspense is fine here — no persistent layout) */}
         <Route
           path="/"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Home />
-            </Suspense>
-          }
+          element={<Home />}
         />
         <Route
           path="/launch"

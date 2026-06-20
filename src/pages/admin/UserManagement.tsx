@@ -472,6 +472,8 @@ const UserManagement = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [slideOverUser, setSlideOverUser] = useState<User | null>(null);
@@ -563,6 +565,8 @@ const UserManagement = () => {
         search: searchQuery || undefined,
         role: roleParam,
         status: statusParam,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
       });
 
       const mapped: User[] = (result.users || []).map((u: any) => {
@@ -625,6 +629,8 @@ const UserManagement = () => {
     statusFilter,
     currentPage,
     itemsPerPage,
+    startDate,
+    endDate,
   ]);
 
   // Fetch stats
@@ -747,13 +753,17 @@ const UserManagement = () => {
     setRoleFilter("all");
     setStatusFilter("all");
     setLocationFilter("all");
+    setStartDate("");
+    setEndDate("");
   };
 
   const hasActiveFilters =
     searchQuery ||
     roleFilter !== "all" ||
     statusFilter !== "all" ||
-    locationFilter !== "all";
+    locationFilter !== "all" ||
+    startDate ||
+    endDate;
 
   return (
     <>
@@ -851,10 +861,22 @@ const UserManagement = () => {
             <ChevronDown size={16} />
           </div>
 
-          <button className="um-date-picker">
-            <Calendar size={16} />
-            Date Range
-          </button>
+          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-300">
+            <Calendar size={16} className="text-slate-400" />
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none outline-none text-slate-300 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+            />
+            <span className="text-slate-500">-</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none outline-none text-slate-300 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+            />
+          </div>
 
           {hasActiveFilters && (
             <button className="um-clear-filters" onClick={clearFilters}>

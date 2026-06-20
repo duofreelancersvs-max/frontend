@@ -11,13 +11,13 @@ import { usePwaStore } from "@/stores/pwa.store";
 interface InstallAppModalProps {
   isOpen: boolean;
   onClose: () => void;
-  isIosSafari: boolean;
+  isIOS: boolean;
 }
 
 export default function InstallAppModal({
   isOpen,
   onClose,
-  isIosSafari,
+  isIOS,
 }: InstallAppModalProps) {
   const { deferredPrompt } = usePwaStore();
 
@@ -67,7 +67,7 @@ export default function InstallAppModal({
               </h3>
               
               <div className="space-y-4">
-                {isIosSafari ? (
+                {isIOS ? (
                   <>
                     <div className="flex gap-4 items-start">
                       <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 font-bold text-teal">1</div>

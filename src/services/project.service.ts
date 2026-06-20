@@ -6,7 +6,7 @@ export interface Project {
   title: string;
   description: string;
   contactInfo?: string;
-  category: string;
+  categories: string[];
   requiredSkills: string[];
   experienceLevel: "Entry" | "Intermediate" | "Expert";
   deadline: string;
@@ -48,7 +48,7 @@ export interface CreateProjectRequest {
   title: string;
   description: string;
   contactInfo?: string;
-  category: string;
+  categories: string[];
   requiredSkills: string[];
   deadline: string;
   location?: {

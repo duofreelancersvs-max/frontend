@@ -67,7 +67,6 @@ interface ChatAreaProps {
 const ChatArea = ({
   participant,
   participants,
-  project,
   messages,
   messageInput,
   setMessageInput,
@@ -122,13 +121,17 @@ const ChatArea = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showEmojiPicker]);
-  const VerifyIcon = role === "client" || role === "admin" ? Verified : BadgeCheck;
+  const VerifyIcon =
+    role === "client" || role === "admin" ? Verified : BadgeCheck;
 
   const isInitialMount = useRef(true);
   const prevParticipantId = useRef(participant?.id);
 
   useEffect(() => {
-    if (isInitialMount.current || prevParticipantId.current !== participant?.id) {
+    if (
+      isInitialMount.current ||
+      prevParticipantId.current !== participant?.id
+    ) {
       messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
       isInitialMount.current = false;
       prevParticipantId.current = participant?.id;
@@ -158,12 +161,22 @@ const ChatArea = ({
         )}
       >
         <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-white/5 flex items-center justify-center mb-4">
-          <MessageSquare size={28} className="text-slate-400 dark:text-slate-500" />
+          <MessageSquare
+            size={28}
+            className="text-slate-400 dark:text-slate-500"
+          />
         </div>
         <h3 className="text-lg font-semibold text-navy dark:text-white mb-1">
           Select a conversation
         </h3>
-        <p className={cn("text-sm", role === "admin" ? "text-slate-400" : "text-slate-500 dark:text-slate-400")}>
+        <p
+          className={cn(
+            "text-sm",
+            role === "admin"
+              ? "text-slate-400"
+              : "text-slate-500 dark:text-slate-400",
+          )}
+        >
           Choose a conversation to start messaging
         </p>
       </div>
@@ -171,20 +184,41 @@ const ChatArea = ({
   }
 
   return (
-    <div className={cn("flex-1 min-h-0 flex flex-col min-w-0 border-r", role === "admin" ? "bg-[#09090b] border-white/5" : "bg-slate-50 dark:bg-[#050B15] border-slate-200 dark:border-white/5", className)}>
+    <div
+      className={cn(
+        "flex-1 min-h-0 flex flex-col min-w-0 border-r",
+        role === "admin"
+          ? "bg-[#09090b] border-white/5"
+          : "bg-slate-50 dark:bg-[#050B15] border-slate-200 dark:border-white/5",
+        className,
+      )}
+    >
       {/* Chat Header */}
-      <div className={cn("h-16 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10 border-b", role === "admin" ? "bg-[#18181b] border-white/5" : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/5")}>
+      <div
+        className={cn(
+          "h-16 px-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10 border-b",
+          role === "admin"
+            ? "bg-[#18181b] border-white/5"
+            : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/5",
+        )}
+      >
         <div className="flex items-center gap-3">
           {onBack && (
             <button
               onClick={onBack}
-              className={cn("p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg", !isWidget && "md:hidden")}
+              className={cn(
+                "p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg",
+                !isWidget && "md:hidden",
+              )}
             >
               <ArrowLeft size={20} />
             </button>
           )}
-          {role === 'client' ? (
-            <Link to={`/client/freelancer/${participant.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          {role === "client" ? (
+            <Link
+              to={`/client/freelancer/${participant.id}`}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <ChatAvatar
                 name={participant.name}
                 size="md"
@@ -201,12 +235,14 @@ const ChatArea = ({
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {participant.online ? "Online" : "Offline"}
-                  {project && ` • ${project.title}`}
                 </p>
               </div>
             </Link>
           ) : (
-            <button onClick={onToggleInfoPanel} className="flex items-center gap-3 hover:opacity-80 transition-opacity text-left">
+            <button
+              onClick={onToggleInfoPanel}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity text-left"
+            >
               <ChatAvatar
                 name={participant.name}
                 size="md"
@@ -223,7 +259,6 @@ const ChatArea = ({
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {participant.online ? "Online" : "Offline"}
-                  {project && ` • ${project.title}`}
                 </p>
               </div>
             </button>
@@ -231,7 +266,10 @@ const ChatArea = ({
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           {role === "client" && applicationId ? (
-            applicationStatus === "pending" || applicationStatus === "viewed" || applicationStatus === "shortlisted" || !applicationStatus ? (
+            applicationStatus === "pending" ||
+            applicationStatus === "viewed" ||
+            applicationStatus === "shortlisted" ||
+            !applicationStatus ? (
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
@@ -255,24 +293,28 @@ const ChatArea = ({
               <span
                 className={cn(
                   "hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-medium border",
-                  applicationStatus === "accepted" || applicationStatus === "hired"
+                  applicationStatus === "accepted" ||
+                    applicationStatus === "hired"
                     ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30"
                     : applicationStatus === "rejected"
                       ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/30"
-                      : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-white/10"
+                      : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-white/10",
                 )}
               >
-                {applicationStatus.charAt(0).toUpperCase() + applicationStatus.slice(1)}
+                {applicationStatus.charAt(0).toUpperCase() +
+                  applicationStatus.slice(1)}
               </span>
             )
           ) : null}
-            <button
+          <button
             onClick={onToggleInfoPanel}
             aria-label="Conversation options"
             className={cn(
               "p-2 min-w-[44px] min-h-[44px] rounded-lg transition-colors",
               showInfoPanel
-                ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
+                ? role === "admin"
+                  ? "bg-indigo-600/10 text-indigo-400"
+                  : "bg-teal/10 text-teal"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
             )}
           >
@@ -298,9 +340,14 @@ const ChatArea = ({
           let senderName = undefined;
 
           if (role === "admin" && participants) {
-            const sender = participants.find((p) => (p.id || p._id) === msg.senderId);
+            const sender = participants.find(
+              (p) => (p.id || p._id) === msg.senderId,
+            );
             if (sender) {
-              senderName = sender.fullName || sender.firstName + " " + sender.lastName || "User";
+              senderName =
+                sender.fullName ||
+                sender.firstName + " " + sender.lastName ||
+                "User";
               isOwn = sender.role === "client"; // Client on right, Freelancer on left
             }
           }
@@ -326,18 +373,29 @@ const ChatArea = ({
       {!termsAccepted ? (
         <ChatTermsOverlay onAcceptClick={onAcceptTermsClick} />
       ) : (
-        <div className={cn("p-4 flex-shrink-0 relative border-t", role === "admin" ? "bg-[#18181b] border-white/5" : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/10")}>
+        <div
+          className={cn(
+            "p-4 flex-shrink-0 relative border-t",
+            role === "admin"
+              ? "bg-[#18181b] border-white/5"
+              : "bg-white dark:bg-[#050B15] border-slate-200 dark:border-white/10",
+          )}
+        >
           <div className="flex items-center gap-2">
             <div className="relative" ref={emojiPickerRef}>
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                aria-label={showEmojiPicker ? "Close emoji picker" : "Open emoji picker"}
+                aria-label={
+                  showEmojiPicker ? "Close emoji picker" : "Open emoji picker"
+                }
                 aria-expanded={showEmojiPicker}
                 className={cn(
                   "p-2 min-w-[44px] min-h-[44px] rounded-lg transition-colors",
                   showEmojiPicker
-                    ? (role === "admin" ? "bg-indigo-600/10 text-indigo-400" : "bg-teal/10 text-teal")
+                    ? role === "admin"
+                      ? "bg-indigo-600/10 text-indigo-400"
+                      : "bg-teal/10 text-teal"
                     : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
                 )}
               >
@@ -357,7 +415,11 @@ const ChatArea = ({
                       onEmojiClick={(emojiData) => {
                         setMessageInput(messageInput + emojiData.emoji);
                       }}
-                      theme={(theme === "dark" ? "dark" : "light") as import("emoji-picker-react").Theme}
+                      theme={
+                        (theme === "dark"
+                          ? "dark"
+                          : "light") as import("emoji-picker-react").Theme
+                      }
                       lazyLoadEmojis={true}
                       skinTonesDisabled={true}
                       searchPlaceHolder="Search emojis..."
@@ -376,13 +438,25 @@ const ChatArea = ({
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               disabled={disabledMessageInput}
-              className={cn("flex-1 h-10 px-4 rounded-full border-0 text-base sm:text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed", role === "admin" ? "bg-white/5 text-white placeholder-slate-500 focus:ring-indigo-500/30" : "bg-slate-100 dark:bg-white/5 focus:ring-teal/30 dark:text-white")}
+              className={cn(
+                "flex-1 h-10 px-4 rounded-full border-0 text-base sm:text-sm focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                role === "admin"
+                  ? "bg-white/5 text-white placeholder-slate-500 focus:ring-indigo-500/30"
+                  : "bg-slate-100 dark:bg-white/5 focus:ring-teal/30 dark:text-white",
+              )}
             />
             <Button
               onClick={handleSend}
-              disabled={disabledMessageInput || !messageInput.trim() || !isConnected}
+              disabled={
+                disabledMessageInput || !messageInput.trim() || !isConnected
+              }
               aria-label="Send message"
-              className={cn("h-11 w-11 min-h-[44px] min-w-[44px] p-0 rounded-full text-white disabled:opacity-50", role === "admin" ? "bg-indigo-600 hover:bg-indigo-500" : "bg-teal hover:bg-teal-light")}
+              className={cn(
+                "h-11 w-11 min-h-[44px] min-w-[44px] p-0 rounded-full text-white disabled:opacity-50",
+                role === "admin"
+                  ? "bg-indigo-600 hover:bg-indigo-500"
+                  : "bg-teal hover:bg-teal-light",
+              )}
             >
               <Send size={18} />
             </Button>

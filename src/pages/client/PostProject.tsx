@@ -129,7 +129,7 @@ const PostProject = () => {
           const project = await projectService.getById(projectId);
           setFormData({
             title: project.title || "",
-            categories: project.category ? [project.category] : [],
+            categories: project.categories || [],
             description: project.description || "",
             contactInfo: project.contactInfo || "",
             customClientName: "",
@@ -235,7 +235,9 @@ const PostProject = () => {
   const handleCategoryToggle = (category: string) => {
     setFormData((prev) => ({
       ...prev,
-      categories: [category],
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
     }));
   };
 
@@ -321,7 +323,7 @@ const PostProject = () => {
         title: formData.title,
         description: formData.description,
         contactInfo: formData.contactInfo,
-        category: formData.categories[0],
+        categories: formData.categories,
         requiredSkills: formData.skills,
         deadline: formData.deadline,
         location: {
@@ -358,9 +360,14 @@ const PostProject = () => {
 
   // Skills filtered by selected category + search
   const availableSkills = React.useMemo(() => {
-    return formData.categories.length > 0
-      ? skillsByCategory[formData.categories[0]] || []
-      : allSkillOptions;
+    if (formData.categories.length === 0) return allSkillOptions;
+    
+    const skillsSet = new Set<string>();
+    formData.categories.forEach(cat => {
+      const skills = skillsByCategory[cat] || [];
+      skills.forEach(skill => skillsSet.add(skill));
+    });
+    return Array.from(skillsSet);
   }, [formData.categories, skillsByCategory, allSkillOptions]);
 
   const filteredSkills = React.useMemo(() => {

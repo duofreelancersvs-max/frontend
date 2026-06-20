@@ -10,6 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: "script-defer",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "logo.png"],
       manifest: {
         name: "ConnectMeIndia",
@@ -43,36 +44,13 @@ export default defineConfig({
     }),
   ],
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (!id.includes("node_modules")) {
-            if (id.includes("/src/pages/admin/")) return "admin-pages";
-            if (id.includes("/src/components/chat/")) return "chat";
-            return undefined;
-          }
-          if (id.includes("react-dom") || id.includes("react-router")) return "vendor";
-          if (id.includes("@tanstack/react-query")) return "query";
-          if (id.includes("lucide-react")) return "icons";
-          if (id.includes("framer-motion")) return "motion";
-          if (id.includes("emoji-picker-react")) return "emoji";
-          if (id.includes("@react-oauth/google")) return "oauth";
-          if (
-            id.includes("axios") ||
-            id.includes("react-helmet") ||
-            id.includes("react-toastify")
-          ) {
-            return "utils";
-          }
-        },
-      },
-    },
     chunkSizeWarningLimit: 1000,
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["@radix-ui/react-slot", "@radix-ui/react-primitive"],
   },
   test: {
     globals: true,

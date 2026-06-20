@@ -223,10 +223,10 @@ const MyProjects = () => {
                     <User size={13} />
                     <span>Posted as: <strong style={{ color: "var(--um-accent)" }}>{project.customClientName}</strong></span>
                   </div>
-                  {project.category && (
+                  {project.categories && project.categories.length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                       <Briefcase size={13} />
-                      <span>{project.category}</span>
+                      <span>{project.categories.join(", ")}</span>
                     </div>
                   )}
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>

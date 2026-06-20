@@ -55,7 +55,7 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
     >
       {isDark === true && (
         <img
-          src="/darkThemeLogo.png"
+          src="/darkThemeLogo.webp"
           alt="ConnectMeIndia"
           className={imageClasses}
           width={300}
@@ -65,7 +65,7 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
       )}
       {isDark === false && (
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="ConnectMeIndia"
           className={imageClasses}
           width={300}
@@ -76,7 +76,7 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
       {isDark === undefined && (
         <>
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="ConnectMeIndia"
             className={cn(imageClasses, "block dark:hidden")}
             width={300}
@@ -84,7 +84,7 @@ const Logo: React.FC<LogoProps> = ({ className, size = "md", isDark }) => {
             onError={handleError}
           />
           <img
-            src="/darkThemeLogo.png"
+            src="/darkThemeLogo.webp"
             alt="ConnectMeIndia"
             className={cn(imageClasses, "hidden dark:block")}
             width={300}

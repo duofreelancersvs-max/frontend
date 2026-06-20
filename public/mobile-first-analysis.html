@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ProdMatch Mobile-First → ConnectMeIndia Implementation Guide</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #0d9488;
+      --primary-soft: #ccfbf1;
+      --border: #e2e8f0;
+      --prodmatch: #6366f1;
+      --cmi: #0d9488;
+      --success: #16a34a;
+      --warning: #d97706;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    header.hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0d9488 100%);
+      color: white;
+      border-radius: calc(var(--radius) + 4px);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    header.hero h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+    header.hero p { opacity: 0.9; font-size: 0.95rem; max-width: 640px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge-prod { background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.4); }
+    .badge-cmi { background: rgba(13,148,136,0.25); border: 1px solid rgba(13,148,136,0.4); }
+    .badge-done { background: rgba(22,163,74,0.2); border: 1px solid rgba(22,163,74,0.35); color: #bbf7d0; }
+    section.card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    section.card h2 {
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    section.card h3 { font-size: 0.95rem; font-weight: 700; margin: 16px 0 8px; color: var(--text); }
+    p, li { font-size: 0.92rem; color: #334155; }
+    ul { padding-left: 20px; margin: 8px 0; }
+    li { margin-bottom: 6px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 640px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 12px; }
+    .compare-table th, .compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+    .compare-table th { background: #f1f5f9; font-weight: 700; }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .status-yes { background: #dcfce7; color: #166534; }
+    .status-partial { background: #fef3c7; color: #92400e; }
+    .status-no { background: #fee2e2; color: #991b1b; }
+    .phone-mock {
+      background: #111827; border-radius: 28px; padding: 12px; max-width: 280px; margin: 0 auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .phone-screen {
+      background: white; border-radius: 20px; overflow: hidden; font-size: 10px;
+    }
+    .mock-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; border-bottom: 1px solid #e5e7eb; height: 44px;
+    }
+    .mock-header .left { display: flex; align-items: center; gap: 6px; }
+    .mock-bar { width: 14px; height: 2px; background: #64748b; border-radius: 1px; }
+    .mock-logo { font-weight: 800; color: var(--prodmatch); font-size: 11px; }
+    .mock-pill { background: #f1f5f9; padding: 2px 6px; border-radius: 999px; font-size: 8px; color: #64748b; }
+    .mock-icons { display: flex; gap: 8px; color: #64748b; }
+    .mock-content { padding: 10px; }
+    .mock-greeting { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+    .mock-sub { color: #64748b; font-size: 9px; margin-bottom: 10px; }
+    .mock-cta {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px;
+      padding: 10px; margin-bottom: 10px;
+    }
+    .mock-cta-title { font-size: 8px; font-weight: 800; color: #dc2626; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .mock-cta-btn { background: #dc2626; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 9px; font-weight: 700; margin-top: 6px; }
+    .mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .mock-stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; }
+    .mock-stat-val { font-size: 14px; font-weight: 800; }
+    .mock-stat-label { font-size: 8px; color: #64748b; }
+    .mock-bottom {
+      display: flex; justify-content: space-around; align-items: center;
+      border-top: 1px solid #e5e7eb; padding: 6px 0 8px; background: rgba(255,255,255,0.95);
+    }
+    .mock-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 8px; color: #94a3b8; }
+    .mock-tab.active { color: var(--prodmatch); font-weight: 700; }
+    .mock-tab-icon { width: 16px; height: 16px; border-radius: 4px; background: currentColor; opacity: 0.3; }
+    .mock-tab.active .mock-tab-icon { opacity: 1; }
+    .flow { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+    .flow-step {
+      display: flex; gap: 12px; padding: 12px 0; border-left: 3px solid var(--primary);
+      margin-left: 8px; padding-left: 16px; position: relative;
+    }
+    .flow-step::before {
+      content: ''; width: 10px; height: 10px; background: var(--primary);
+      border-radius: 50%; position: absolute; left: -6px; top: 16px;
+    }
+    .flow-step strong { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+    .code {
+      background: #0f172a; color: #e2e8f0; border-radius: 10px;
+      padding: 14px; font-family: ui-monospace, monospace; font-size: 0.78rem;
+      overflow-x: auto; margin: 10px 0; line-height: 1.5;
+    }
+    .code .kw { color: #7dd3fc; }
+    .code .str { color: #86efac; }
+    .code .cm { color: #64748b; }
+    details { margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    summary {
+      padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      background: #f8fafc; list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary { border-bottom: 1px solid var(--border); }
+    details .inner { padding: 14px; }
+    .refs { font-size: 0.82rem; }
+    .refs a { color: var(--primary); text-decoration: none; }
+    .refs a:hover { text-decoration: underline; }
+    footer { text-align: center; padding: 24px 0; color: var(--muted); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>ProdMatch Mobile-First Design Analysis</h1>
+      <p>How <a href="https://prodmatchai.in/dashboard" style="color:#a5f3fc">prodmatchai.in/dashboard</a> implements mobile-first UX — and how ConnectMeIndia maps the same patterns in code.</p>
+      <div class="badges">
+        <span class="badge badge-prod">Reference: ProdMatch.ai</span>
+        <span class="badge badge-cmi">Target: ConnectMeIndia</span>
+        <span class="badge badge-done">Implemented in codebase</span>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>📱 ProdMatch Mobile Layout (from live UI)</h2>
+      <div class="grid-2">
+        <div>
+          <p>The logged-in ProdMatch dashboard (see your screenshot) follows a <strong>three-zone mobile shell</strong>:</p>
+          <ul>
+            <li><strong>Sticky top bar (~44–56px)</strong> — hamburger, logo, usage pill, search &amp; notifications. No large page title.</li>
+            <li><strong>Scrollable content</strong> — greeting, status strip, one hero CTA card, 2×2 metric grid. Tight 12–16px margins.</li>
+            <li><strong>Fixed bottom nav</strong> — exactly 5 tabs: Home · Matches · Apps · DSA · Profile. Icon + 10px label. Active tab in brand blue.</li>
+          </ul>
+          <p style="margin-top:12px">Secondary destinations (settings, filters, legal) stay in the hamburger drawer — not in the bottom bar. This matches industry guidance: <em>3–5 thumb-reachable primary destinations only</em>.</p>
+        </div>
+        <div class="phone-mock" aria-hidden="true">
+          <div class="phone-screen">
+            <div class="mock-header">
+              <div class="left">
+                <div><div class="mock-bar"></div><div class="mock-bar" style="margin-top:3px"></div><div class="mock-bar" style="margin-top:3px"></div></div>
+                <span class="mock-logo">ProdMatch</span>
+                <span class="mock-pill">Free 0/5</span>
+              </div>
+              <div class="mock-icons">🔍 🔔</div>
+            </div>
+            <div class="mock-content">
+              <div class="mock-greeting">Good afternoon Gowtham</div>
+              <div class="mock-sub">3,564 active roles · catalog warming up</div>
+              <div class="mock-cta">
+                <div class="mock-cta-title">NEXT BEST ACTION</div>
+                <div>Upload your resume</div>
+                <button class="mock-cta-btn">Upload PDF ↗</button>
+              </div>
+              <div class="mock-grid">
+                <div class="mock-stat"><div class="mock-stat-val">—</div><div class="mock-stat-label">Readiness</div></div>
+                <div class="mock-stat"><div class="mock-stat-val">0</div><div class="mock-stat-label">Shortlisted</div></div>
+                <div class="mock-stat"><div class="mock-stat-val">0</div><div class="mock-stat-label">Applied</div></div>
+                <div class="mock-stat"><div class="mock-stat-val">51</div><div class="mock-stat-label">Companies</div></div>
+              </div>
+            </div>
+            <div class="mock-bottom">
+              <div class="mock-tab active"><div class="mock-tab-icon"></div>Home</div>
+              <div class="mock-tab"><div class="mock-tab-icon"></div>Matches</div>
+              <div class="mock-tab"><div class="mock-tab-icon"></div>Apps</div>
+              <div class="mock-tab"><div class="mock-tab-icon"></div>DSA</div>
+              <div class="mock-tab"><div class="mock-tab-icon"></div>Profile</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🧭 Navigation Architecture</h2>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>ProdMatch.ai</th>
+            <th>ConnectMeIndia (now)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bottom tab bar (mobile)</td>
+            <td>5 primary tabs, fixed, labeled icons</td>
+            <td><code>BottomNav.tsx</code> — Client: Home·Projects·Post·Messages·Settings<br/>Freelancer: Home·Find Work·Apps·Messages·Profile</td>
+            <td><span class="status status-yes">Done</span></td>
+          </tr>
+          <tr>
+            <td>Hamburger drawer</td>
+            <td>Secondary routes + account</td>
+            <td><code>ClientSidebar</code> / <code>FreelancerSidebar</code> — Reviews, Subscription, Portfolio, etc.</td>
+            <td><span class="status status-yes">Done</span></td>
+          </tr>
+          <tr>
+            <td>Desktop sidebar</td>
+            <td>N/A (web app)</td>
+            <td>Fixed 256px sidebar at <code>lg:</code> breakpoint</td>
+            <td><span class="status status-yes">Done</span></td>
+          </tr>
+          <tr>
+            <td>Shared nav config</td>
+            <td>Single source of truth</td>
+            <td><code>src/config/navigation.ts</code></td>
+            <td><span class="status status-yes">Done</span></td>
+          </tr>
+          <tr>
+            <td>Safe area insets</td>
+            <td>Padding above home indicator</td>
+            <td><code>env(safe-area-inset-bottom)</code> on bottom nav + layout padding</td>
+            <td><span class="status status-yes">Done</span></td>
+          </tr>
+          <tr>
+            <td>Hide-on-scroll nav</td>
+            <td>Some apps hide bar while reading</td>
+            <td>Not yet — optional enhancement</td>
+            <td><span class="status status-partial">Future</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>📐 Spacing &amp; Layout Rules</h2>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Element</th><th>ProdMatch</th><th>ConnectMeIndia implementation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Viewport</td>
+            <td><code>device=phone</code> constraints, no horizontal scroll</td>
+            <td><code>100dvh</code>, <code>overflow-x: clip</code>, <code>viewport-fit=cover</code></td>
+          </tr>
+          <tr>
+            <td>Header height</td>
+            <td>~44–56px compact bar</td>
+            <td><code>h-14</code> mobile → <code>h-20</code> desktop in <code>DashboardHeader</code></td>
+          </tr>
+          <tr>
+            <td>Content padding</td>
+            <td>12–16px horizontal</td>
+            <td><code>.dashboard-content</code> → <code>px-4 py-4</code> mobile, <code>px-8 py-6</code> desktop</td>
+          </tr>
+          <tr>
+            <td>Stat cards</td>
+            <td>2×2 grid on phone</td>
+            <td><code>grid-cols-2</code> on mobile dashboards (client + freelancer)</td>
+          </tr>
+          <tr>
+            <td>Bottom nav height</td>
+            <td>~56px + safe area</td>
+            <td><code>h-14</code> + <code>pb-[env(safe-area-inset-bottom)]</code></td>
+          </tr>
+          <tr>
+            <td>Touch targets</td>
+            <td>≥44×44pt (iOS HIG)</td>
+            <td><code>min-h-[44px]</code> on each bottom nav link</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>⚙️ Implementation Flow in ConnectMeIndia</h2>
+      <div class="flow">
+        <div class="flow-step">
+          <div>
+            <strong>1. Layout shell (<code>ClientLayout</code> / <code>FreelancerLayout</code>)</strong>
+            Full viewport height, scrollable main column, bottom padding reserved for nav bar.
+          </div>
+        </div>
+        <div class="flow-step">
+          <div>
+            <strong>2. Bottom navigation (<code>BottomNav.tsx</code>)</strong>
+            Rendered only below <code>lg</code>. Reads items from <code>navigation.ts</code>. Active state + message badges.
+          </div>
+        </div>
+        <div class="flow-step">
+          <div>
+            <strong>3. Compact header (<code>DashboardHeader.tsx</code>)</strong>
+            Mobile: hamburger + logo + search/messages. Desktop: full title + theme toggle + profile.
+          </div>
+        </div>
+        <div class="flow-step">
+          <div>
+            <strong>4. Page content (<code>.dashboard-content</code> utilities)</strong>
+            All dashboard pages use shared spacing classes instead of ad-hoc <code>px-6 py-6</code>.
+          </div>
+        </div>
+        <div class="flow-step">
+          <div>
+            <strong>5. Progressive disclosure</strong>
+            Floating chat hidden on mobile (Messages is in bottom nav). Sidebar holds infrequent routes.
+          </div>
+        </div>
+      </div>
+
+      <h3>Key code locations</h3>
+      <div class="code">
+<span class="cm">// Bottom nav — mobile only, 5 items, safe area</span>
+<span class="kw">&lt;nav</span> <span class="str">className="fixed bottom-0 inset-x-0 z-40 lg:hidden ... pb-[env(safe-area-inset-bottom)]"</span><span class="kw">&gt;</span>
+
+<span class="cm">// Layout — reserve space so content isn't hidden</span>
+<span class="str">pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0</span>
+
+<span class="cm">// Shared mobile padding</span>
+<span class="str">.dashboard-content { @apply px-4 py-4 space-y-4 lg:px-8 lg:py-6 lg:space-y-6; }</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>📚 Industry Best Practices (Web Research)</h2>
+      <p>ProdMatch aligns with established mobile dashboard patterns cited by UX research:</p>
+      <ul>
+        <li><strong>Rule of 3–5 tabs</strong> — Bottom bar should not exceed 5 destinations; more items go in drawer/menu. <span class="refs">(<a href="https://superfiles.in/bottom-navigation-ux-thumb-zone-rules.php">Superfiles</a>, <a href="https://www.uxpin.com/studio/blog/mobile-navigation-examples/">UXPin</a>)</span></li>
+        <li><strong>Always pair icons with labels</strong> — 10–12px text under each icon; icons alone fail accessibility. <span class="refs">(<a href="https://superfiles.in/bottom-navigation-ux-thumb-zone-rules.php">Superfiles</a>)</span></li>
+        <li><strong>Thumb zone placement</strong> — Primary actions in bottom 40% of screen; avoid top-corner critical actions. <span class="refs">(<a href="https://www.uxpin.com/studio/blog/mobile-navigation-examples/">UXPin</a>)</span></li>
+        <li><strong>Progressive disclosure</strong> — Show metrics &amp; CTA first; secondary details in expandable sections or kebab menus. <span class="refs">(<a href="https://querio.ai/articles/how-to-design-dashboards-for-mobile-users">Querio</a>)</span></li>
+        <li><strong>Hybrid navigation</strong> — Bottom tabs for top-level + hamburger for secondary (Spotify, Gmail pattern). <span class="refs">(<a href="https://www.uxpin.com/studio/blog/mobile-navigation-examples/">UXPin</a>)</span></li>
+      </ul>
+
+      <details>
+        <summary>ProdMatch → ConnectMeIndia tab mapping</summary>
+        <div class="inner">
+          <table class="compare-table">
+            <thead><tr><th>ProdMatch tab</th><th>Client equivalent</th><th>Freelancer equivalent</th></tr></thead>
+            <tbody>
+              <tr><td>Home</td><td>Dashboard</td><td>Dashboard</td></tr>
+              <tr><td>Matches</td><td>My Projects</td><td>Find Work</td></tr>
+              <tr><td>Apps</td><td>Post Project</td><td>My Applications</td></tr>
+              <tr><td>DSA</td><td>Messages</td><td>Messages</td></tr>
+              <tr><td>Profile</td><td>Settings</td><td>Profile</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>✅ Remaining Enhancements (Optional)</h2>
+      <ul>
+        <li><strong>Usage pill in header</strong> — ProdMatch shows "Free 0/5" in the top bar; freelancers already have <code>UsageIndicator</code> in sidebar — could surface on mobile header.</li>
+        <li><strong>Hide bottom nav on scroll down</strong> — Reveal on scroll up for feed-style pages.</li>
+        <li><strong>Page-level mobile titles</strong> — Since header shows logo on mobile, each page can show its title inside content (dashboard greeting already does this).</li>
+        <li><strong>Auth &amp; public pages</strong> — Apply same tight padding to login, register, and marketing pages.</li>
+      </ul>
+    </section>
+
+    <footer>
+      ConnectMeIndia mobile-first implementation guide · Reference: <a href="https://prodmatchai.in/dashboard">prodmatchai.in/dashboard</a>
+    </footer>
+  </div>
+</body>
+</html>

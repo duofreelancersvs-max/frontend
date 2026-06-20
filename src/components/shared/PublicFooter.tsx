@@ -92,10 +92,10 @@ export const PublicFooter = () => {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-400 text-sm">
             © 2026 ConnectMeIndia. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-slate-500 text-sm">
+          <div className="flex items-center gap-6 text-slate-400 text-sm">
             <Link
               to="/terms-and-conditions"
               className="hover:text-white transition-colors"
