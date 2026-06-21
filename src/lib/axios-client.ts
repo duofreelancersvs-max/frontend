@@ -120,6 +120,14 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
 
+    // Always send X-Device-Id for single-device login tracking
+    let deviceId = localStorage.getItem('device_id');
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem('device_id', deviceId);
+    }
+    config.headers['X-Device-Id'] = deviceId;
+
     // Remove custom property before sending request
     delete customConfig.skipAuth;
 
