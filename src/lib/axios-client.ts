@@ -33,26 +33,6 @@ const stopLoading = () => {
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
-export const getOrCreateDeviceId = (): string => {
-  let deviceId = localStorage.getItem('device_id');
-  if (!deviceId || deviceId === 'undefined' || deviceId === 'null') {
-    try {
-      deviceId = crypto.randomUUID();
-    } catch (e) {
-      deviceId = 'device-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-    }
-    localStorage.setItem('device_id', deviceId);
-  }
-  
-  // Also store in a cookie because ad-blockers (like Brave) strip custom headers,
-  // but they never strip first-party cookies. The backend will read this cookie
-  // as the ultimate source of truth for device enforcement.
-  const secureFlag = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `app-device-id=${deviceId}; path=/; max-age=31536000; SameSite=Lax${secureFlag}`;
-  
-  return deviceId;
-};
-
 // Extend AxiosRequestConfig to include custom properties
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -139,14 +119,6 @@ axiosClient.interceptors.request.use(
       !customConfig._manualAuth
     ) {
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
-    }
-
-    const deviceId = getOrCreateDeviceId();
-    
-    if (config.headers && typeof config.headers.set === 'function') {
-      config.headers.set('X-App-Session-Id', deviceId);
-    } else if (config.headers) {
-      config.headers['X-App-Session-Id'] = deviceId;
     }
 
     // Remove custom property before sending request

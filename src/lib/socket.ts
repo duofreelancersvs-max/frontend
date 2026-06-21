@@ -1,6 +1,5 @@
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/stores/auth.store";
-import { getOrCreateDeviceId } from "./axios-client";
 
 // ─── Types mirroring backend socket.types.ts ────────────────────────
 
@@ -146,7 +145,7 @@ export function getSocket(): AppSocket {
   const token = useAuthStore.getState().tokens?.accessToken;
 
   socket = io(getServerUrl(), {
-    auth: { token: token || "", deviceId: getOrCreateDeviceId() },
+    auth: { token: token || "" },
     autoConnect: false,
     transports: ["websocket", "polling"],
     reconnection: true,
@@ -168,7 +167,7 @@ export function connectSocket(): AppSocket {
   // Always set the latest token before connecting
   const token = useAuthStore.getState().tokens?.accessToken;
   if (token) {
-    s.auth = { token, deviceId: getOrCreateDeviceId() };
+    s.auth = { token };
   }
 
   if (!s.connected) {
