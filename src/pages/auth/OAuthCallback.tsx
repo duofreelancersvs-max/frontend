@@ -30,6 +30,7 @@ export default function OAuthCallback() {
 
       const requestBody: Record<string, string> = {
         accessToken: session.access_token,
+        refreshToken: session.refresh_token || '',
       };
       if (storedRole) {
         requestBody.role = storedRole;
@@ -43,16 +44,13 @@ export default function OAuthCallback() {
         );
       }
 
+      // Do NOT call supabase.auth.setSession() here.  The Supabase session
+      // from waitForOAuthSession / signInWithIdToken is already valid.
+      // Overwriting it with tokens echoed from the backend can fail (403)
+      // if the session rotated during the backend round-trip, which
+      // destroys the session and triggers SIGNED_OUT → forceLogout.
+
       const finalRefreshToken = tokens.refreshToken || session.refresh_token;
-
-      const { error: setSessionError } = await supabase.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: finalRefreshToken,
-      });
-
-      if (setSessionError) {
-        console.error("Supabase session sync error:", setSessionError);
-      }
 
       setAuth(user, {
         accessToken: tokens.accessToken,
@@ -97,7 +95,14 @@ export default function OAuthCallback() {
   useEffect(() => {
     if (hasRun.current) return;
     hasRun.current = true;
-    void completeOAuth();
+    void completeOAuth().then(() => {
+      // After successful PKCE exchange, clear the URL params so that a
+      // retry button click does not attempt to re-exchange the same
+      // (now-consumed) authorization code.
+      if (window.location.search || window.location.hash) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    });
   }, [completeOAuth]);
 
   const handleRetry = () => {

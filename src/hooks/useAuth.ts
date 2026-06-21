@@ -189,19 +189,23 @@ export function useAuth(): UseAuthReturn {
     [navigate, setError, setLoading],
   );
 
-  // Logout
+  // Logout — always clears both Supabase session AND Zustand, even if
+  // signOut() fails (e.g. network error).
   const logout = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
-      logoutStore();
-      navigate("/login");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Logout failed");
-    } finally {
-      setLoading(false);
+    } catch {
+      // ignore
     }
-  }, [navigate, logoutStore, setError, setLoading]);
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // signOut may fail on network errors — continue to clear Zustand anyway
+    }
+    logoutStore();
+    navigate("/login");
+    setLoading(false);
+  }, [navigate, logoutStore, setLoading]);
 
   // OAuth sign in
   const signInWithOAuth = useCallback(
@@ -281,6 +285,7 @@ export function useAuth(): UseAuthReturn {
 
         const requestBody: Record<string, string> = {
           accessToken: session.access_token,
+          refreshToken: session.refresh_token,
         };
         if (role) {
           requestBody.role = role;
@@ -294,16 +299,18 @@ export function useAuth(): UseAuthReturn {
           );
         }
 
+        // Do NOT call supabase.auth.setSession() here.  signInWithIdToken
+        // (line above) already created a valid Supabase session.  Overwriting
+        // it with the backend-issued JWT (tokens.accessToken) would destroy
+        // the Supabase session because Supabase can't verify backend JWTs,
+        // causing: setSession → _getUser 403 → _removeSession → SIGNED_OUT
+        // → forceLogout on every login.
+        //
+        // The Supabase session (with Supabase tokens) stays intact for
+        // Supabase operations.  Zustand stores the backend JWT for API calls
+        // via axios.
+
         const finalRefreshToken = tokens.refreshToken || session.refresh_token;
-
-        const { error: setSessionError } = await supabase.auth.setSession({
-          access_token: tokens.accessToken,
-          refresh_token: finalRefreshToken,
-        });
-
-        if (setSessionError) {
-          console.error("Supabase session sync error:", setSessionError);
-        }
 
         setAuth(syncUser, {
           accessToken: tokens.accessToken,

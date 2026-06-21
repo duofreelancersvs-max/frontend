@@ -56,7 +56,40 @@ interface ApiErrorResponse {
   };
 }
 
-// Create axios instance
+// ─── Token refresh queue ───────────────────────────────────────────────────
+// When multiple concurrent requests fail with 401, only ONE refresh call
+// should be made.  Others queue up and reuse the result.  This prevents
+// the Supabase refresh-token single-use race condition where N parallel
+// 401s each call refreshSession(), but only the first succeeds — the rest
+// destroy the session and log the user out.
+interface PendingRequest {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}
+
+let isRefreshing = false;
+let refreshFailed = false;
+let failedQueue: PendingRequest[] = [];
+
+function processQueue(error: unknown, token: string | null) {
+  failedQueue.forEach((pending) => {
+    if (error) {
+      pending.reject(error);
+    } else {
+      pending.resolve(token!);
+    }
+  });
+  failedQueue = [];
+}
+
+function enqueueRefresh(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    failedQueue.push({ resolve, reject });
+  });
+}
+
+// ─── Axios instance ────────────────────────────────────────────────────────
+
 const axiosClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -134,24 +167,38 @@ axiosClient.interceptors.response.use(
       !originalRequest._retry &&
       !originalRequest._manualAuth
     ) {
-      // Don't retry if the backend specifically returned a logical error message
-      // like "Account already exists" or role mismatch
-      const errorMessage = errorData?.error?.message ?? "";
+      // Use error codes (not fragile string matching) to decide whether
+      // to skip refresh.  Backend returns these codes for logical errors
+      // that are NOT token-expiry issues.
       if (
-        errorMessage.includes("Account already exists") ||
-        errorMessage.includes("role")
+        errorCode === "ACCOUNT_EXISTS" ||
+        errorCode === "ROLE_MISMATCH"
       ) {
         return Promise.reject(error);
       }
       
       // If the backend invalidated the session due to a concurrent login
       if (errorCode === 'SESSION_INVALIDATED') {
-        useAuthStore.getState().logout();
+        await fullLogout();
         window.location.replace("/login?reason=session_invalidated");
         return Promise.reject(error);
       }
 
+      // ── Refresh queue: only one refresh at a time ────────────────────
+      if (isRefreshing) {
+        // Another request is already refreshing — wait for it
+        try {
+          const token = await enqueueRefresh();
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosClient(originalRequest);
+        } catch (refreshError) {
+          return Promise.reject(refreshError);
+        }
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+      refreshFailed = false;
 
       try {
         // Use Supabase to refresh the session
@@ -164,30 +211,49 @@ axiosClient.interceptors.response.use(
           throw new Error(refreshError?.message || "Failed to refresh session");
         }
 
+        const newToken = session.access_token;
+        const newRefreshToken = session.refresh_token;
+
         // Update tokens in store
         const { tokens, setTokens } = useAuthStore.getState();
         if (tokens) {
           setTokens({
             ...tokens,
-            accessToken: session.access_token,
-            refreshToken: session.refresh_token,
+            accessToken: newToken,
+            refreshToken: newRefreshToken,
           });
         }
 
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
+        // Process all queued requests with the new token
+        processQueue(null, newToken);
+
+        // Retry the original request
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed (auth error OR network error — Supabase unreachable)
-        // In both cases clear stale tokens so ProtectedRoute redirects to login
+        // Refresh failed — process queue with error, then full logout
+        refreshFailed = true;
+        processQueue(refreshError, null);
         console.error("[axios-client] Token refresh failed, logging out:", refreshError);
-        useAuthStore.getState().logout();
+        await fullLogout();
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
     return Promise.reject(error);
   },
 );
+
+// ─── Helper: full logout (clear both Zustand AND Supabase session) ─────────
+async function fullLogout() {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    // signOut can fail on network errors — continue anyway
+  }
+  useAuthStore.getState().logout();
+}
 
 export default axiosClient;

@@ -44,6 +44,25 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
   // ─── backend sync ──────────────────────────────────────────────────────────
 
+  /** Decode a JWT and return its payload (without verification). */
+  const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+    try {
+      const base64 = token.split(".")[1];
+      const json = atob(base64.replace(/-/g, "+").replace(/_/g, "/"));
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  };
+
+  /** Check whether a Supabase access token is expired (with 30s buffer). */
+  const isTokenExpired = (token: string): boolean => {
+    const payload = decodeJwtPayload(token);
+    if (!payload || typeof payload.exp !== "number") return false; // can't tell — assume valid
+    // 30-second buffer so we refresh slightly before actual expiry
+    return payload.exp * 1000 < Date.now() + 30_000;
+  };
+
   const syncSessionWithBackend = async (tokenOverride?: string): Promise<boolean> => {
     const token = tokenOverride || useAuthStore.getState().tokens?.accessToken;
 
@@ -121,6 +140,21 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
               error = null;
             }
           }
+        }
+
+        // If we have a session but the access token is expired (or about to
+        // expire within 30s), proactively refresh before syncing with the
+        // backend.  This prevents the backend from rejecting an expired token
+        // and triggering a full logout.
+        if (session?.access_token && isTokenExpired(session.access_token)) {
+          const { data: refreshed, error: refreshErr } =
+            await supabase.auth.refreshSession();
+          if (!refreshErr && refreshed.session) {
+            session = refreshed.session;
+            error = null;
+          }
+          // If refresh fails, continue with the expired session —
+          // syncSessionWithBackend will handle the 401.
         }
 
         if (error || !session?.user) {

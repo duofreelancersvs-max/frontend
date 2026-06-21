@@ -4,9 +4,14 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    '⚠️  Supabase configuration missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file'
-  );
+  const msg =
+    "FATAL: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set. " +
+    "The app cannot function without them.";
+  console.error(msg);
+  // In production, throw so the app fails fast instead of silently degrading.
+  if (import.meta.env.PROD) {
+    throw new Error(msg);
+  }
 }
 
 /**
