@@ -68,7 +68,6 @@ interface PendingRequest {
 }
 
 let isRefreshing = false;
-let refreshFailed = false;
 let failedQueue: PendingRequest[] = [];
 
 function processQueue(error: unknown, token: string | null) {
@@ -198,7 +197,6 @@ axiosClient.interceptors.response.use(
 
       originalRequest._retry = true;
       isRefreshing = true;
-      refreshFailed = false;
 
       try {
         // Use Supabase to refresh the session
@@ -232,7 +230,6 @@ axiosClient.interceptors.response.use(
         return axiosClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed — process queue with error, then full logout
-        refreshFailed = true;
         processQueue(refreshError, null);
         console.error("[axios-client] Token refresh failed, logging out:", refreshError);
         await fullLogout();
