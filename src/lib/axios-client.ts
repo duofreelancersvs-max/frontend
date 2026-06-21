@@ -33,6 +33,19 @@ const stopLoading = () => {
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
+export const getOrCreateDeviceId = (): string => {
+  let deviceId = localStorage.getItem('device_id');
+  if (!deviceId || deviceId === 'undefined' || deviceId === 'null') {
+    try {
+      deviceId = crypto.randomUUID();
+    } catch (e) {
+      deviceId = 'device-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    }
+    localStorage.setItem('device_id', deviceId);
+  }
+  return deviceId;
+};
+
 // Extend AxiosRequestConfig to include custom properties
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -120,21 +133,12 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
 
-    // Always send X-Device-Id for single-device login tracking
-    let deviceId = localStorage.getItem('device_id');
-    if (!deviceId || deviceId === 'undefined' || deviceId === 'null') {
-      try {
-        deviceId = crypto.randomUUID();
-      } catch (e) {
-        deviceId = 'device-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-      }
-      localStorage.setItem('device_id', deviceId);
-    }
+    const deviceId = getOrCreateDeviceId();
     
     if (config.headers && typeof config.headers.set === 'function') {
-      config.headers.set('X-Device-Id', deviceId);
+      config.headers.set('X-App-Session-Id', deviceId);
     } else if (config.headers) {
-      config.headers['X-Device-Id'] = deviceId;
+      config.headers['X-App-Session-Id'] = deviceId;
     }
 
     // Remove custom property before sending request

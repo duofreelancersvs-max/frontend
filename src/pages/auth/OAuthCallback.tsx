@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
+import { getOrCreateDeviceId } from "@/lib/axios-client";
 import { formatBackendApiError } from "@/lib/auth-request-errors";
 import {
   consumeOAuthRole,
@@ -31,7 +32,7 @@ export default function OAuthCallback() {
       const requestBody: Record<string, string> = {
         accessToken: session.access_token,
         refreshToken: session.refresh_token || '',
-        deviceId: localStorage.getItem('device_id') || '',
+        deviceId: getOrCreateDeviceId(),
       };
       if (storedRole) {
         requestBody.role = storedRole;

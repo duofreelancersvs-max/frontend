@@ -4,7 +4,7 @@ import { isAxiosError, type AxiosRequestHeaders } from "axios";
 import { clearOAuthRole, getOAuthRedirectUrl, setOAuthRole, syncOAuthWithBackend } from "@/lib/oauth";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
-import axiosClient from "@/lib/axios-client";
+import axiosClient, { getOrCreateDeviceId } from "@/lib/axios-client";
 import type { CustomAxiosRequestConfig } from "@/lib/axios-client";
 import { formatBackendApiError } from "@/lib/auth-request-errors";
 import type { LoginCredentials, RegisterData, User } from "@/types/auth.types";
@@ -74,7 +74,7 @@ export function useAuth(): UseAuthReturn {
             email: credentials.email,
             password: credentials.password,
             ...(credentials.role ? { role: credentials.role } : {}),
-            deviceId: localStorage.getItem('device_id') || '',
+            deviceId: getOrCreateDeviceId(),
           },
           {
             skipAuth: true,
