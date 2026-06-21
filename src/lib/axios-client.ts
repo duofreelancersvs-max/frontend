@@ -168,12 +168,20 @@ axiosClient.interceptors.response.use(
     }
 
     // If error is 401 and we haven't retried yet, try to refresh token
-    // Skip auto-retry for requests with manually-set Authorization
-    if (
-      status === 401 &&
-      !originalRequest._retry &&
-      !originalRequest._manualAuth
-    ) {
+    // Handle SESSION_INVALIDATED first — always, even for manual-auth requests
+    // (AuthInitializer uses manual auth headers during init).
+    if (status === 401) {
+      if (errorCode === 'SESSION_INVALIDATED') {
+        await fullLogout();
+        window.location.replace("/login?reason=session_invalidated");
+        return Promise.reject(error);
+      }
+
+      // Skip auto-retry for requests with manually-set Authorization
+      if (originalRequest._manualAuth) {
+        return Promise.reject(error);
+      }
+
       // Use error codes (not fragile string matching) to decide whether
       // to skip refresh.  Backend returns these codes for logical errors
       // that are NOT token-expiry issues.
@@ -183,11 +191,9 @@ axiosClient.interceptors.response.use(
       ) {
         return Promise.reject(error);
       }
-      
-      // If the backend invalidated the session due to a concurrent login
-      if (errorCode === 'SESSION_INVALIDATED') {
-        await fullLogout();
-        window.location.replace("/login?reason=session_invalidated");
+
+      // Only retry once
+      if (originalRequest._retry) {
         return Promise.reject(error);
       }
 
