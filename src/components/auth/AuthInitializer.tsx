@@ -143,12 +143,21 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         if (!session?.user && useAuthStore.getState().isAuthenticated) {
           const tokens = useAuthStore.getState().tokens;
           if (tokens?.refreshToken) {
-            const { data, error: refreshError } = await supabase.auth.refreshSession({
-              refresh_token: tokens.refreshToken,
-            });
-            if (!refreshError && data.session) {
+            try {
+              const { data, error: refreshError } = await supabase.auth.refreshSession({
+                refresh_token: tokens.refreshToken,
+              });
+              if (refreshError || !data.session) {
+                throw refreshError || new Error('No session returned from refreshSession');
+              }
               session = data.session;
               error = null;
+            } catch (err) {
+              console.warn('[AuthInitializer] Failed to restore session from refresh token:', err);
+              // Clean up stale Zustand state if we can't restore
+              useAuthStore.getState().logout();
+              unblock();
+              return;
             }
           }
         }
