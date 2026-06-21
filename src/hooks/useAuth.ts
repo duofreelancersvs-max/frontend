@@ -197,6 +197,13 @@ export function useAuth(): UseAuthReturn {
     } catch {
       // ignore
     }
+
+    try {
+      await axiosClient.post("/auth/logout");
+    } catch {
+      // ignore backend logout failure
+    }
+
     try {
       await supabase.auth.signOut();
     } catch {
