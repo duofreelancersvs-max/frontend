@@ -250,6 +250,14 @@ async function fullLogout() {
   } catch {
     // signOut can fail on network errors — continue anyway
   }
+  
+  // Force wipe Supabase local storage if signOut fails to do so (prevents 401 logout loops)
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+      localStorage.removeItem(key);
+    }
+  });
+
   useAuthStore.getState().logout();
 }
 

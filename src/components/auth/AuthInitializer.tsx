@@ -91,6 +91,12 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
       // own fallback paths; during OAuth the callback page handles cleanup.
       if ((status === 401 || status === 404) && !isOAuthCallbackRef.current && initializingRef.current === false) {
         supabase.auth.signOut().catch(() => {});
+        // Force wipe local storage to prevent flickering/loops
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+            localStorage.removeItem(key);
+          }
+        });
         logout();
       }
       return false;
