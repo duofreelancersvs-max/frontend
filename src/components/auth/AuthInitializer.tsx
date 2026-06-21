@@ -133,15 +133,20 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         let { data: { session }, error } = await supabase.auth.getSession();
 
         // Fallback: If Supabase has no session, but Zustand does, try to restore
-        // Supabase session from Zustand tokens.
+        // Supabase session by refreshing from the stored refresh token.
+        //
+        // IMPORTANT: We use setSession (which internally refreshes) rather than
+        // creating a brand-new session.  A fresh setSession + refresh preserves
+        // the Supabase session_id, whereas calling setSession with an expired
+        // access_token can create a new session with a different session_id —
+        // which would break single-device session tracking.
         if (!session?.user && useAuthStore.getState().isAuthenticated) {
           const tokens = useAuthStore.getState().tokens;
-          if (tokens?.accessToken && tokens?.refreshToken) {
-            const { data, error: setSessionError } = await supabase.auth.setSession({
-              access_token: tokens.accessToken,
+          if (tokens?.refreshToken) {
+            const { data, error: refreshError } = await supabase.auth.refreshSession({
               refresh_token: tokens.refreshToken,
             });
-            if (!setSessionError && data.session) {
+            if (!refreshError && data.session) {
               session = data.session;
               error = null;
             }
