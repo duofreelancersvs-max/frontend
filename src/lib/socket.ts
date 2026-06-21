@@ -145,7 +145,7 @@ export function getSocket(): AppSocket {
   const token = useAuthStore.getState().tokens?.accessToken;
 
   socket = io(getServerUrl(), {
-    auth: { token: token || "" },
+    auth: { token: token || "", deviceId: localStorage.getItem('device_id') || "" },
     autoConnect: false,
     transports: ["websocket", "polling"],
     reconnection: true,
@@ -166,7 +166,7 @@ export function connectSocket(): AppSocket {
   // Always set the latest token before connecting
   const token = useAuthStore.getState().tokens?.accessToken;
   if (token) {
-    s.auth = { token };
+    s.auth = { token, deviceId: localStorage.getItem('device_id') || "" };
   }
 
   if (!s.connected) {
