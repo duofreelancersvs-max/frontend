@@ -43,6 +43,13 @@ export const getOrCreateDeviceId = (): string => {
     }
     localStorage.setItem('device_id', deviceId);
   }
+  
+  // Also store in a cookie because ad-blockers (like Brave) strip custom headers,
+  // but they never strip first-party cookies. The backend will read this cookie
+  // as the ultimate source of truth for device enforcement.
+  const secureFlag = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `app-device-id=${deviceId}; path=/; max-age=31536000; SameSite=Lax${secureFlag}`;
+  
   return deviceId;
 };
 
@@ -104,6 +111,7 @@ function enqueueRefresh(): Promise<string> {
 
 const axiosClient = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
