@@ -31,6 +31,7 @@ export default function OAuthCallback() {
       const requestBody: Record<string, string> = {
         accessToken: session.access_token,
         refreshToken: session.refresh_token || '',
+        deviceId: localStorage.getItem('device_id') || '',
       };
       if (storedRole) {
         requestBody.role = storedRole;

@@ -74,6 +74,7 @@ export function useAuth(): UseAuthReturn {
             email: credentials.email,
             password: credentials.password,
             ...(credentials.role ? { role: credentials.role } : {}),
+            deviceId: localStorage.getItem('device_id') || '',
           },
           {
             skipAuth: true,

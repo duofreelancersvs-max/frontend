@@ -122,11 +122,20 @@ axiosClient.interceptors.request.use(
 
     // Always send X-Device-Id for single-device login tracking
     let deviceId = localStorage.getItem('device_id');
-    if (!deviceId) {
-      deviceId = crypto.randomUUID();
+    if (!deviceId || deviceId === 'undefined' || deviceId === 'null') {
+      try {
+        deviceId = crypto.randomUUID();
+      } catch (e) {
+        deviceId = 'device-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      }
       localStorage.setItem('device_id', deviceId);
     }
-    config.headers['X-Device-Id'] = deviceId;
+    
+    if (config.headers && typeof config.headers.set === 'function') {
+      config.headers.set('X-Device-Id', deviceId);
+    } else if (config.headers) {
+      config.headers['X-Device-Id'] = deviceId;
+    }
 
     // Remove custom property before sending request
     delete customConfig.skipAuth;
