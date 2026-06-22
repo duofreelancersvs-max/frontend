@@ -5,6 +5,7 @@ import {
   useOutletContext,
   useNavigate,
 } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import {
   FileText,
@@ -70,6 +71,7 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,6 +157,27 @@ const ProjectDetails = () => {
     setShowApplicationModal(false);
     setSelectedProjectForApply(null);
     toast.success("Application submitted successfully!");
+
+    // Optimistically update the cache so the UI updates instantly
+    queryClient.setQueryData(["myApplications"], (old: any) => {
+      const newApp = {
+        id: "temp-" + Date.now(),
+        projectId: project?._id || project?.id || "",
+        project: { _id: project?._id || project?.id || "" },
+        status: "pending",
+        createdAt: new Date().toISOString()
+      };
+      if (!old) return { applications: [newApp] };
+      return {
+        ...old,
+        applications: [newApp, ...old.applications]
+      };
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["myApplications"] });
+    if (project) {
+      setProject({ ...project, applications: (project.applications || 0) + 1 });
+    }
     if (convId) {
       navigate("/freelancer/messages", {
         state: { conversationId: convId },
@@ -230,7 +253,10 @@ const ProjectDetails = () => {
               {project.status === "open" && (() => {
                 const projectId = project._id || project.id || "";
                 const existingApp = myApplications.find(
-                  (app) => (app.project?.id || app.project?._id || app.projectId) === projectId
+                  (app) => {
+                    const appId = app.project?.id || app.project?._id || app.projectId || app.project;
+                    return appId === projectId;
+                  }
                 );
                 if (existingApp && existingApp.status !== "withdrawn" && existingApp.status !== "rejected") {
                   const statusLabel: Record<string, string> = {

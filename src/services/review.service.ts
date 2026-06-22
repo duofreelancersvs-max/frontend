@@ -40,11 +40,11 @@ export const reviewService = {
   
   getForUser: (userId: string) =>
     api.get<{ reviews: Review[]; averageRating: number; total: number }>(
-      `/reviews/user/${userId}`
+      `/reviews/user/${userId}`, { skipAuth: true }
     ),
   
   getForProject: (projectId: string) =>
-    api.get<{ reviews: Review[] }>(`/reviews/project/${projectId}`),
+    api.get<{ reviews: Review[] }>(`/reviews/project/${projectId}`, { skipAuth: true }),
   
   create: (data: CreateReviewRequest) => api.post<Review>("/reviews", data),
   

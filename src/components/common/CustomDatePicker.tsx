@@ -66,21 +66,21 @@ export const CustomDatePicker = ({
             disabled={(date) => !isAfter(date, today) && date.toDateString() !== today.toDateString()}
             startMonth={today}
             classNames={{
-              root: "rdp-custom",
+              root: "rdp-custom relative",
               months: "flex",
               month: "space-y-3",
               month_caption: "flex justify-center items-center relative h-9",
               caption_label: "text-sm font-semibold text-navy dark:text-white",
               nav: "flex items-center gap-1",
               button_previous: cn(
-                "h-7 w-7 rounded-lg flex items-center justify-center",
+                "h-7 w-7 rounded-lg flex items-center justify-center z-10",
                 "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors",
-                "absolute left-1"
+                "absolute left-1 top-1"
               ),
               button_next: cn(
-                "h-7 w-7 rounded-lg flex items-center justify-center",
+                "h-7 w-7 rounded-lg flex items-center justify-center z-10",
                 "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors",
-                "absolute right-1"
+                "absolute right-1 top-1"
               ),
               month_grid: "w-full border-collapse",
               weekdays: "flex",

@@ -245,6 +245,9 @@ export const adminService = {
   getUserById: (userId: string) =>
     api.get<{ user: AdminUser; profile: unknown }>(`/admin/users/${userId}`),
 
+  updateUser: (userId: string, data: any) =>
+    api.patch<{ message: string; user: AdminUser }>(`/admin/users/${userId}`, data),
+
   updateUserStatus: (userId: string, status: string) =>
     api.patch<{ message: string; user: AdminUser }>(
       `/admin/users/${userId}/status`,

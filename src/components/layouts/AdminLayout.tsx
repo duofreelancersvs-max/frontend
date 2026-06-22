@@ -50,7 +50,7 @@ const AdminLayout = () => {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -59,13 +59,13 @@ const AdminLayout = () => {
       <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content */}
-      <main id="main-content" className="admin-main">
+      <main id="main-content" className="admin-main lg:ml-64 transition-all duration-300">
         {/* Header */}
         <header className="admin-header bg-[#18181b]/80 backdrop-blur-md border-b border-white/5">
           <div className="admin-header-left">
             {/* Mobile Menu Toggle */}
             <button
-              className="admin-header-icon md:hidden mr-2 text-slate-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="admin-header-icon lg:hidden mr-2 text-slate-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
               aria-expanded={isSidebarOpen}
@@ -78,7 +78,7 @@ const AdminLayout = () => {
           </div>
 
           {/* Search */}
-          <div className="admin-search hidden md:block w-96">
+          <div className="admin-search hidden lg:block w-96">
             <div className="relative group">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"

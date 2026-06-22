@@ -26,6 +26,7 @@ export interface Project {
     id: string;
     fullName: string;
     avatar?: string;
+    rating?: number;
   };
   freelancerId?: string;
   freelancer?: {

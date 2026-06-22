@@ -283,16 +283,37 @@ const UserDetailSlideOver = ({
   user,
   isOpen,
   onClose,
+  onUpdateUser,
 }: {
   user: User | null;
   isOpen: boolean;
   onClose: () => void;
+  onUpdateUser?: (id: string, updates: Partial<User>) => void;
 }) => {
   const [activeTab, setActiveTab] = useState<
     "overview" | "activity" | "projects" | "settings"
   >("overview");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [editLocation, setEditLocation] = useState({ city: "", state: "" });
+
+  useEffect(() => {
+    if (user) {
+      setEditLocation({ city: user.location, state: user.state });
+    }
+  }, [user]);
 
   if (!user) return null;
+
+  const handleSaveLocation = async () => {
+    try {
+      if (onUpdateUser) {
+        onUpdateUser(user.id, { location: editLocation.city, state: editLocation.state });
+      }
+      setIsEditingLocation(false);
+    } catch (err) {
+      console.error("Failed to save location", err);
+    }
+  };
 
   const recentActivity = [
     { action: "Joined the platform", time: user.joinedDate, type: "info" },
@@ -387,9 +408,39 @@ const UserDetailSlideOver = ({
                 </div>
                 <div className="um-detail-row">
                   <MapPin size={16} />
-                  <span>
-                    {user.location}, {user.state}
-                  </span>
+                  {isEditingLocation ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={editLocation.city}
+                        onChange={(e) => setEditLocation({ ...editLocation, city: e.target.value })}
+                        className="admin-input flex-1 p-1 text-sm h-7"
+                        placeholder="City"
+                      />
+                      <input
+                        type="text"
+                        value={editLocation.state}
+                        onChange={(e) => setEditLocation({ ...editLocation, state: e.target.value })}
+                        className="admin-input flex-1 p-1 text-sm h-7"
+                        placeholder="State"
+                      />
+                      <button onClick={handleSaveLocation} className="text-emerald-500 hover:text-emerald-600">
+                        <Check size={16} />
+                      </button>
+                      <button onClick={() => setIsEditingLocation(false)} className="text-slate-400 hover:text-slate-600">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>
+                        {user.location}, {user.state}
+                      </span>
+                      <button onClick={() => setIsEditingLocation(true)} className="text-slate-400 hover:text-royal-blue" title="Edit Location">
+                        <Edit size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="um-detail-row">
                   <Calendar size={16} />
@@ -551,6 +602,32 @@ const UserManagement = () => {
       // Don't close the modal on failure — let the admin retry
     } finally {
       setProSubmitting(false);
+    }
+  };
+
+  const handleUserUpdateLocally = async (id: string, updates: Partial<User>) => {
+    try {
+      // Send to backend
+      const apiPayload: any = {};
+      if (updates.location || updates.state) {
+        apiPayload.address = {
+          city: updates.location,
+          state: updates.state
+        };
+      }
+      
+      if (Object.keys(apiPayload).length > 0) {
+        await adminService.updateUser(id, apiPayload);
+      }
+
+      // Update local state
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+      if (slideOverUser?.id === id) {
+        setSlideOverUser(prev => prev ? { ...prev, ...updates } : null);
+      }
+    } catch (err) {
+      console.error("[Admin] Failed to update user", err);
+      alert("Failed to update user");
     }
   };
 
@@ -1142,6 +1219,7 @@ const UserManagement = () => {
         user={slideOverUser}
         isOpen={!!slideOverUser}
         onClose={() => setSlideOverUser(null)}
+        onUpdateUser={handleUserUpdateLocally}
       />
 
       {/* Pro Override Confirmation */}

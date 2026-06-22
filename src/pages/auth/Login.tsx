@@ -493,53 +493,57 @@ const Login = () => {
                   Back
                 </button>
 
-                {/* OAuth Buttons */}
-                <div className="space-y-3" ref={containerRef}>
-                  {/* Google Sign In */}
-                  <div className="flex justify-center w-full relative z-10 overflow-hidden rounded-lg">
-                    {googleBtnWidth > 0 && (
-                      <GoogleLogin
-                        onSuccess={async (credentialResponse) => {
-                          if (credentialResponse.credential && selectedRole) {
-                            try {
-                              await signInWithGoogleIdToken(
-                                credentialResponse.credential,
-                                selectedRole,
-                              );
-                            } catch {
-                              // Error is handled in the hook
-                            }
-                          }
-                        }}
-                        onError={() => {
-                          console.error("Google Sign In Failed");
-                        }}
-                        text="signin_with"
-                        theme={theme === "dark" ? "filled_black" : "outline"}
-                        size="large"
-                        shape="rectangular"
-                        width={googleBtnWidth > 400 ? 400 : googleBtnWidth}
-                      />
-                    )}
-                    {isLoading && (
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-[1px] cursor-not-allowed">
-                        <Loader2 className="w-5 h-5 animate-spin text-emerald-600 dark:text-emerald-500" />
+                {selectedRole !== "admin" && (
+                  <>
+                    {/* OAuth Buttons */}
+                    <div className="space-y-3" ref={containerRef}>
+                      {/* Google Sign In */}
+                      <div className="flex justify-center w-full relative z-10 overflow-hidden rounded-lg">
+                        {googleBtnWidth > 0 && (
+                          <GoogleLogin
+                            onSuccess={async (credentialResponse) => {
+                              if (credentialResponse.credential && selectedRole) {
+                                try {
+                                  await signInWithGoogleIdToken(
+                                    credentialResponse.credential,
+                                    selectedRole,
+                                  );
+                                } catch {
+                                  // Error is handled in the hook
+                                }
+                              }
+                            }}
+                            onError={() => {
+                              console.error("Google Sign In Failed");
+                            }}
+                            text="signin_with"
+                            theme={theme === "dark" ? "filled_black" : "outline"}
+                            size="large"
+                            shape="rectangular"
+                            width={googleBtnWidth > 400 ? 400 : googleBtnWidth}
+                          />
+                        )}
+                        {isLoading && (
+                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-[1px] cursor-not-allowed">
+                            <Loader2 className="w-5 h-5 animate-spin text-emerald-600 dark:text-emerald-500" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200 dark:border-white/10" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white dark:bg-[#121A2A] text-slate-500 dark:text-slate-400 rounded-full">
-                      OR
-                    </span>
-                  </div>
-                </div>
+                    {/* Divider */}
+                    <div className="relative my-6">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200 dark:border-white/10" />
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-4 bg-white dark:bg-[#121A2A] text-slate-500 dark:text-slate-400 rounded-full">
+                          OR
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Email */}
                 <div className="space-y-2">
@@ -603,19 +607,8 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="rememberMe"
-                      checked={formData.rememberMe}
-                      onChange={handleChange}
-                      className="w-4 h-4 rounded border-slate-300 text-teal focus:ring-teal"
-                      disabled={isLoading}
-                    />
-                    <span className="text-sm text-slate-600">Remember me</span>
-                  </label>
+                {/* Forgot Password */}
+                <div className="flex items-center justify-end">
                   <Link
                     to="/forgot-password"
                     className="text-sm text-teal font-medium hover:underline"

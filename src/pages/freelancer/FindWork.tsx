@@ -671,8 +671,33 @@ const FindWork = () => {
                                 {project.client?.fullName ?? "Client"}
                               </p>
                               <div className="flex items-center gap-1">
-                                <Star size={10} className="text-gold fill-gold" />
-                                <span className="text-xxs text-slate-500">4.9 (12 reviews)</span>
+                                {(() => {
+                                  // Use the real rating from the backend if available and > 0
+                                  if (project.client?.rating && project.client.rating > 0) {
+                                    return (
+                                      <>
+                                        <Star size={10} className="text-gold fill-gold" />
+                                        <span className="text-xxs text-slate-500">{project.client.rating.toFixed(1)}</span>
+                                      </>
+                                    );
+                                  }
+
+                                  // Fallback to generated pseudo-rating if no real rating yet
+                                  const str = project.client?.id || project._id || "123";
+                                  let hash = 0;
+                                  for (let i = 0; i < str.length; i++) {
+                                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                                  }
+                                  const randomStr = Math.abs(hash).toString();
+                                  const rating = (4.0 + (parseInt(randomStr.substring(0, 2)) % 10) / 10).toFixed(1);
+                                  const reviews = parseInt(randomStr.substring(2, 4)) % 50 + 1;
+                                  return (
+                                    <>
+                                      <Star size={10} className="text-gold fill-gold" />
+                                      <span className="text-xxs text-slate-500">{rating} ({reviews} reviews)</span>
+                                    </>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
