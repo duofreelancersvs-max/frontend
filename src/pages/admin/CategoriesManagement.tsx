@@ -145,8 +145,8 @@ const CategoriesManagement = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", gap: "1rem" }}>
-          <div className="um-search-wrapper" style={{ flex: 1, maxWidth: 320 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", gap: "1rem", flexWrap: "wrap" }}>
+          <div className="um-search-wrapper" style={{ flex: 1, minWidth: "260px", maxWidth: "320px" }}>
             <Search size={18} className="um-search-icon" />
             <input type="text" placeholder="Search categories..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="um-search-input" />
             {searchQuery && <button className="um-search-clear" onClick={() => setSearchQuery("")}><X size={16} /></button>}
@@ -167,7 +167,7 @@ const CategoriesManagement = () => {
               <p style={{ color: "var(--admin-white)", fontSize: "1.125rem" }}>No categories yet</p>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 380px), 1fr))", gap: 0 }}>
               {categories.map((cat) => (
                 <div key={cat._id} style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border)", borderRight: "1px solid var(--admin-border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>

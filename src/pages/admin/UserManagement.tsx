@@ -174,7 +174,7 @@ const UserRow = ({
 
   return (
     <tr className={isSelected ? "selected" : ""}>
-      <td>
+      <td data-label="Select">
         <input
           type="checkbox"
           checked={isSelected}
@@ -182,7 +182,7 @@ const UserRow = ({
           className="um-checkbox"
         />
       </td>
-      <td>
+      <td data-label="User">
         <div className="um-user-cell">
           <div className="um-user-avatar">{user.initials}</div>
           <div className="um-user-info">
@@ -195,28 +195,28 @@ const UserRow = ({
           </div>
         </div>
       </td>
-      <td>
+      <td data-label="Status">
         <StatusBadge status={user.status} />
       </td>
-      <td>
+      <td data-label="Location">
         <span className="um-location">
           {user.location}, {user.state}
         </span>
       </td>
-      <td>
+      <td data-label="Joined">
         <span className="um-date">{user.joinedDate}</span>
       </td>
-      <td>
+      <td data-label="Last Active">
         <span
           className={`um-last-active ${user.lastActiveRecent ? "recent" : ""}`}
         >
           {user.lastActive}
         </span>
       </td>
-      <td>
+      <td data-label={user.role === "client" ? "Spent" : "Revenue"}>
         <span className="um-revenue">{user.revenue}</span>
       </td>
-      <td>
+      <td data-label="Actions">
         <div className="um-actions-wrapper" ref={actionsRef}>
           <button
             className="um-actions-btn"
@@ -1094,7 +1094,7 @@ const UserManagement = () => {
       {/* Data Table */}
       <div className="um-table-wrapper">
         {paginatedUsers.length > 0 ? (
-          <table className="um-table">
+          <table className="um-table admin-table-responsive">
             <thead>
               <tr>
                 <th>

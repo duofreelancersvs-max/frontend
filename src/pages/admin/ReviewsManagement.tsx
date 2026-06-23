@@ -173,7 +173,7 @@ const ReviewsManagement = () => {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="um-table" style={{ minWidth: 800 }}>
+              <table className="um-table admin-table-responsive" style={{ minWidth: 800 }}>
                 <thead>
                   <tr>
                     <th>Reviewer</th>
@@ -196,7 +196,7 @@ const ReviewsManagement = () => {
 
                     return (
                       <tr key={review._id}>
-                        <td>
+                        <td data-label="Reviewer">
                           <div className="um-user-cell">
                             <div className="um-user-avatar" style={{ width: 32, height: 32, fontSize: "0.75rem" }}>{initials}</div>
                             <div className="um-user-info">
@@ -204,17 +204,25 @@ const ReviewsManagement = () => {
                             </div>
                           </div>
                         </td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{freelancerName}</td>
-                        <td style={{ color: "var(--admin-white)", fontSize: "0.875rem", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{projectTitle}</td>
-                        <td>{renderStars(review.rating)}</td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{review.comment || "—"}</td>
-                        <td>
+                        <td data-label="Freelancer" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{freelancerName}</td>
+                        <td data-label="Project">
+                          <span style={{ color: "var(--admin-white)", fontSize: "0.875rem", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "bottom" }}>
+                            {projectTitle}
+                          </span>
+                        </td>
+                        <td data-label="Rating">{renderStars(review.rating)}</td>
+                        <td data-label="Review">
+                          <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "bottom" }}>
+                            {review.comment || "—"}
+                          </span>
+                        </td>
+                        <td data-label="Status">
                           <span className={`admin-status-badge ${status === "visible" ? "completed" : status === "flagged" ? "cancelled" : "pending"}`}>
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                           </span>
                         </td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(review.createdAt)}</td>
-                        <td>
+                        <td data-label="Date" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(review.createdAt)}</td>
+                        <td data-label="Actions">
                           <ActionMenu
                             reviewId={review._id}
                             status={status as "visible" | "hidden" | "flagged"}

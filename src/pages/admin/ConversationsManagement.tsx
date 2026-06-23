@@ -155,9 +155,12 @@ const ConversationsManagement = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "1.5rem" }}>
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Conversations List */}
-          <div className="admin-card" style={{ padding: 0, overflow: "hidden", flex: selectedConversation ? "0 0 45%" : 1, maxWidth: selectedConversation ? "45%" : "100%" }}>
+          <div 
+            className={`admin-card p-0 overflow-hidden ${selectedConversation ? "hidden md:block md:max-w-[45%]" : "block"}`} 
+            style={{ flex: selectedConversation ? "0 0 45%" : 1, maxWidth: selectedConversation ? undefined : "100%" }}
+          >
             {loading ? (
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "4rem 0" }}>
                 <Loader2 size={32} style={{ color: "var(--admin-indigo)", animation: "spin 1s linear infinite" }} />
@@ -198,14 +201,14 @@ const ConversationsManagement = () => {
                           <span style={{ color: "var(--admin-white)", fontWeight: 600, fontSize: "0.875rem" }}>
                             {getParticipants(conv)}
                           </span>
-                          <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.75rem" }}>{lastTime}</span>
+                          <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.75rem", whiteSpace: "nowrap" }}>{lastTime}</span>
                         </div>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: 2 }}>
-                          <span style={{ color: roleInfo.color, fontSize: "0.7rem", fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: `${roleInfo.color}15` }}>
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: 2, flexWrap: "wrap" }}>
+                          <span style={{ color: roleInfo.color, fontSize: "0.7rem", fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: `${roleInfo.color}15`, whiteSpace: "nowrap" }}>
                             {roleInfo.label}
                           </span>
                           {conv.projectId?.title && (
-                            <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.7rem" }}>
+                            <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.7rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "150px" }}>
                               Project: {conv.projectId.title}
                             </span>
                           )}
@@ -245,7 +248,7 @@ const ConversationsManagement = () => {
             )}
 
             {pagination && pagination.totalPages > 1 && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 1.5rem", borderTop: "1px solid var(--admin-border)", flexWrap: "wrap", gap: "1rem" }}>
                 <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>
                   Page {pagination.page} of {pagination.totalPages} ({pagination.totalItems} total)
                 </span>
@@ -263,7 +266,7 @@ const ConversationsManagement = () => {
 
           {/* Messages Panel */}
           {selectedConversation && (
-            <div className="admin-card" style={{ flex: 1, padding: 0, overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "70vh" }}>
+            <div className="admin-card flex-1 p-0 overflow-hidden flex flex-col h-[75vh] md:h-auto md:max-h-[75vh]">
               {/* Messages Header */}
               <div style={{
                 display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 1.25rem",

@@ -137,7 +137,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
     )}>
       {/* Logo */}
       <div className="px-6 py-8 border-b border-white/5 flex items-center justify-between">
-        <Logo isDark size="sm" />
+        <div onClick={() => setIsOpen(false)} className="cursor-pointer">
+          <Logo isDark size="sm" />
+        </div>
         <button 
           className="lg:hidden text-slate-400 hover:text-white transition-colors"
           onClick={() => setIsOpen(false)}
@@ -161,6 +163,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => setIsOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all group",
                     isActive

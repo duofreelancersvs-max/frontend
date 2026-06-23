@@ -146,7 +146,7 @@ const ReportsManagement = () => {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="um-table" style={{ minWidth: 800 }}>
+              <table className="um-table admin-table-responsive" style={{ minWidth: 800 }}>
                 <thead>
                   <tr>
                     <th>Reported User</th>
@@ -167,7 +167,7 @@ const ReportsManagement = () => {
 
                     return (
                       <tr key={report._id}>
-                        <td>
+                        <td data-label="Reported User">
                           <div className="um-user-cell">
                             <div className="um-user-avatar" style={{ width: 32, height: 32, fontSize: "0.75rem" }}>
                                 {report.reportedUser?.avatar ? (
@@ -181,20 +181,24 @@ const ReportsManagement = () => {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="Reporter">
                             <Link to={`/admin/users?search=${encodeURIComponent(report.reporter?.email || '')}`} className="hover:underline text-slate-300" style={{ fontSize: "0.875rem" }}>
                                 {reporterName}
                             </Link>
                         </td>
-                        <td style={{ color: "var(--admin-white)", fontSize: "0.875rem", fontWeight: 500 }}>{report.reason}</td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.description || "—"}</td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(report.createdAt)}</td>
-                        <td>
+                        <td data-label="Reason" style={{ color: "var(--admin-white)", fontSize: "0.875rem", fontWeight: 500 }}>{report.reason}</td>
+                        <td data-label="Description">
+                          <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "bottom" }}>
+                            {report.description || "—"}
+                          </span>
+                        </td>
+                        <td data-label="Date" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(report.createdAt)}</td>
+                        <td data-label="Status">
                           <span className={`admin-status-badge ${status === "reviewed" ? "completed" : status === "dismissed" ? "cancelled" : "pending"}`}>
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Actions">
                           <ActionMenu
                             reportId={report._id}
                             status={status as "pending" | "reviewed" | "dismissed"}

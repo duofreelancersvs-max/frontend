@@ -140,13 +140,13 @@ const ApplicationsManagement = () => {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="admin-table" style={{ minWidth: 800 }}>
+              <table className="um-table admin-table-responsive" style={{ minWidth: 900 }}>
                 <thead>
                   <tr>
                     <th>Freelancer</th>
                     <th>Project</th>
                     <th>Client</th>
-                    <th>Proposed Rate</th>
+                    <th>Rate</th>
                     <th>Status</th>
                     <th>Applied</th>
                     <th style={{ textAlign: "right" }}>Actions</th>
@@ -159,7 +159,7 @@ const ApplicationsManagement = () => {
                     const initials = freelancerName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
                     return (
                       <tr key={app._id}>
-                        <td>
+                        <td data-label="Freelancer">
                           <div className="um-user-cell">
                             <div className="um-user-avatar" style={{ width: 32, height: 32, fontSize: "0.75rem" }}>{initials}</div>
                             <div className="um-user-info">
@@ -167,16 +167,18 @@ const ApplicationsManagement = () => {
                             </div>
                           </div>
                         </td>
-                        <td style={{ color: "var(--admin-white)", fontSize: "0.875rem", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {app.projectId?.title || "—"}
+                        <td data-label="Project">
+                          <span style={{ color: "var(--admin-white)", fontSize: "0.875rem", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "bottom" }}>
+                            {app.projectId?.title || "—"}
+                          </span>
                         </td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{clientName}</td>
-                        <td style={{ color: "var(--admin-white)", fontWeight: 500, fontSize: "0.875rem" }}>
+                        <td data-label="Client" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{clientName}</td>
+                        <td data-label="Rate" style={{ color: "var(--admin-white)", fontWeight: 500, fontSize: "0.875rem" }}>
                           {app.proposedRate ? `₹${app.proposedRate.toLocaleString()}` : "—"}
                         </td>
-                        <td><StatusBadge status={app.status} /></td>
-                        <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(app.createdAt)}</td>
-                        <td>
+                        <td data-label="Status"><StatusBadge status={app.status} /></td>
+                        <td data-label="Applied" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(app.createdAt)}</td>
+                        <td data-label="Actions">
                           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.375rem" }}>
                             <button
                               className="um-actions-btn"

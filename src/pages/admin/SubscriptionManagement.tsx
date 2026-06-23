@@ -266,24 +266,24 @@ const TransactionRow = ({
 
   return (
     <tr>
-      <td className="sm-tx-id">{transaction.transactionId.slice(0, 15)}...</td>
-      <td>
+      <td data-label="ID" className="sm-tx-id">{transaction.transactionId.slice(0, 15)}...</td>
+      <td data-label="Freelancer">
         <div className="sm-tx-user">
           <span className="sm-tx-name">{transaction.freelancerName}</span>
           <span className="sm-tx-email">{transaction.freelancerEmail}</span>
         </div>
       </td>
-      <td>
+      <td data-label="Plan">
         <span className={`sm-plan-tag ${transaction.plan.toLowerCase()}`}>
           {transaction.plan}
         </span>
       </td>
-      <td className="sm-tx-amount">₹{transaction.amount.toLocaleString()}</td>
-      <td className="sm-tx-date">{transaction.date}</td>
-      <td>
+      <td data-label="Amount" className="sm-tx-amount">₹{transaction.amount.toLocaleString()}</td>
+      <td data-label="Date" className="sm-tx-date">{transaction.date}</td>
+      <td data-label="Status">
         <span className={`sm-status-badge ${className}`}>{label}</span>
       </td>
-      <td>
+      <td data-label="Actions">
         <div className="sm-tx-actions">
           <button
             className="sm-tx-btn"
@@ -693,7 +693,7 @@ const SubscriptionManagement = () => {
 
             {/* Transactions Table */}
             <div className="sm-tx-table-wrapper">
-              <table className="sm-tx-table">
+              <table className="sm-tx-table admin-table-responsive">
                 <thead>
                   <tr>
                     <th>Transaction ID</th>

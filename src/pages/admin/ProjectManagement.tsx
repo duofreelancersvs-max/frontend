@@ -216,13 +216,13 @@ const ProjectManagement = () => {
           {/* Tabs + Search Bar */}
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", padding: "1rem 1.5rem", borderBottom: "1px solid var(--admin-border)", gap: "1rem" }}>
             {/* Tabs */}
-            <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", flexWrap: "nowrap", paddingBottom: "0.25rem", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={activeTab === tab.key ? "admin-btn admin-btn-primary admin-btn-sm" : "admin-btn admin-btn-outline admin-btn-sm"}
-                  style={{ borderRadius: "9999px", fontSize: "0.8125rem" }}
+                  style={{ borderRadius: "9999px", fontSize: "0.8125rem", whiteSpace: "nowrap", flexShrink: 0 }}
                 >
                   {tab.label}
                 </button>
@@ -264,7 +264,7 @@ const ProjectManagement = () => {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="admin-table" style={{ minWidth: 900 }}>
+              <table className="admin-table admin-table-responsive" style={{ minWidth: 900 }}>
                 <thead>
                   <tr>
                     <th>Project</th>
@@ -485,31 +485,26 @@ const ProjectTableRow = ({
 
   return (
     <tr>
-      <td>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <td data-label="Project">
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, textAlign: "right", alignItems: "flex-end" }}>
           <span style={{ fontWeight: 600, color: "var(--admin-white)", fontSize: "0.875rem" }}>{project.title}</span>
-          {project.description && (
-            <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.75rem", maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
-              {project.description}
-            </span>
-          )}
         </div>
       </td>
-      <td>
+      <td data-label="Client">
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem" }}>{project.clientName || "Unknown"}</span>
       </td>
-      <td>
+      <td data-label="Category">
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{(project.categories || []).join(", ") || "—"}</span>
       </td>
-      <td><StatusBadge status={project.status} /></td>
+      <td data-label="Status"><StatusBadge status={project.status} /></td>
 
-      <td>
+      <td data-label="Deadline">
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(project.deadline)}</span>
       </td>
-      <td>
+      <td data-label="Created">
         <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(project.createdAt)}</span>
       </td>
-      <td>
+      <td data-label="Actions">
         <div className="um-actions-wrapper" ref={actionsRef} style={{ display: "flex", justifyContent: "flex-end" }}>
           <button
             className="um-actions-btn"

@@ -101,7 +101,7 @@ const AuditLogs = () => {
             </div>
           ) : (
             <div style={{ maxHeight: 600, overflowY: "auto" }}>
-              <table className="admin-table" style={{ minWidth: 700 }}>
+              <table className="admin-table admin-table-responsive" style={{ minWidth: 700 }}>
                 <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
                   <tr>
                     <th>Admin</th>
@@ -114,7 +114,7 @@ const AuditLogs = () => {
                 <tbody>
                   {logs.map((log) => (
                     <tr key={log._id}>
-                      <td>
+                      <td data-label="Admin">
                         <div className="um-user-cell">
                           <div style={{
                             width: 28, height: 28, borderRadius: "50%",
@@ -129,7 +129,7 @@ const AuditLogs = () => {
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Action">
                         <span style={{
                           display: "inline-flex", alignItems: "center", gap: "0.25rem",
                           padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500,
@@ -141,11 +141,13 @@ const AuditLogs = () => {
                           {log.action}
                         </span>
                       </td>
-                      <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem", textTransform: "capitalize" }}>{log.resource}</td>
-                      <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {log.details || "—"}
+                      <td data-label="Resource" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.875rem", textTransform: "capitalize" }}>{log.resource}</td>
+                      <td data-label="Details">
+                        <span style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "bottom" }}>
+                          {log.details || "—"}
+                        </span>
                       </td>
-                      <td style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(log.createdAt)}</td>
+                      <td data-label="Date" style={{ color: "var(--admin-cloud-gray)", fontSize: "0.8125rem" }}>{formatDate(log.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>

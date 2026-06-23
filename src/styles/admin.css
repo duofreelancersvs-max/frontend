@@ -223,6 +223,7 @@
 .admin-main {
   flex: 1;
   margin-left: 0;
+  min-width: 0;
   min-height: 100vh;
   background-color: var(--admin-midnight);
 }
@@ -3933,11 +3934,12 @@
   background-color: var(--admin-dark-navy);
   border: 1px solid var(--admin-border);
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .sm-tx-table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
 }
 
@@ -7457,11 +7459,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .admin-table-wrapper table,
-  .um-table-wrapper table,
-  .sm-table-wrapper table {
-    min-width: 0 !important;
-  }
+
 
   .admin-sidebar {
     width: 100% !important;
@@ -7472,12 +7470,16 @@
     padding: 1rem !important;
   }
 
-  .admin-filters-row {
+  .admin-filters-row,
+  .um-filter-row,
+  .sm-tx-filters {
     flex-direction: column !important;
     align-items: stretch !important;
   }
 
-  .admin-filters-row > * {
+  .admin-filters-row > *,
+  .um-filter-row > *,
+  .sm-tx-filters > * {
     width: 100% !important;
   }
 
@@ -7487,6 +7489,62 @@
 
   .admin-layout .admin-sidebar.open {
     transform: translateX(0) !important;
+  }
+
+  /* Responsive Table as Cards */
+  .admin-table-responsive {
+    min-width: 0 !important;
+  }
+  
+  .admin-table-responsive thead {
+    display: none;
+  }
+  
+  .admin-table-responsive tbody,
+  .admin-table-responsive tr,
+  .admin-table-responsive td {
+    display: block;
+    width: 100%;
+  }
+  
+  .admin-table-responsive tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--admin-dark-navy);
+  }
+  
+  .admin-table-responsive td {
+    border-bottom: 1px solid var(--admin-border);
+    position: relative;
+    padding: 0.75rem 0 0.75rem 40% !important;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 48px;
+  }
+  
+  .admin-table-responsive td:last-child {
+    border-bottom: none;
+  }
+  
+  .admin-table-responsive td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 35%;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-cloud-gray);
   }
 }
 

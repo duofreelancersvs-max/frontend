@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -28,11 +27,11 @@ window.addEventListener("vite:preloadError", () => {
   console.warn(
     "Vite preload error (new version available). Reloading page to fetch new chunks...",
   );
-  
+
   // Only reload once per session to prevent infinite loops causing a blank page
-  const isReloaded = sessionStorage.getItem('vite-reloaded');
+  const isReloaded = sessionStorage.getItem("vite-reloaded");
   if (!isReloaded) {
-    sessionStorage.setItem('vite-reloaded', 'true');
+    sessionStorage.setItem("vite-reloaded", "true");
     window.location.reload();
   }
 });
@@ -40,19 +39,19 @@ window.addEventListener("vite:preloadError", () => {
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <AuthInitializer>
-              <ScrollToTop />
-              <AnalyticsTracker />
-              <App />
-            </AuthInitializer>
-          </BrowserRouter>
-        </QueryClientProvider>
-      </GoogleOAuthProvider>
-    </HelmetProvider>
-  </React.StrictMode>,
+  <HelmetProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <AuthInitializer>
+            <ScrollToTop />
+            <AnalyticsTracker />
+            <App />
+          </AuthInitializer>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
+  </HelmetProvider>,
 );

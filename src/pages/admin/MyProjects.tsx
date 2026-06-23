@@ -106,7 +106,7 @@ const MyProjects = () => {
       </div>
 
       {/* Stats strip */}
-      <div className="um-stats-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "1.5rem" }}>
+      <div className="um-stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "1.5rem" }}>
         <div className="um-stat-card indigo">
           <div className="um-stat-icon"><Briefcase size={20} /></div>
           <div className="um-stat-info">
@@ -192,6 +192,7 @@ const MyProjects = () => {
                       lineHeight: 1.4,
                       flex: 1,
                       marginRight: "0.5rem",
+                      wordBreak: "break-word"
                     }}
                   >
                     {project.title}
@@ -211,6 +212,7 @@ const MyProjects = () => {
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
+                      wordBreak: "break-word"
                     }}
                   >
                     {project.description}
@@ -221,7 +223,7 @@ const MyProjects = () => {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.78rem", color: "var(--um-text-muted)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                     <User size={13} />
-                    <span>Posted as: <strong style={{ color: "var(--um-accent)" }}>{project.customClientName}</strong></span>
+                    <span style={{ wordBreak: "break-all" }}>Posted as: <strong style={{ color: "var(--um-accent)" }}>{project.customClientName}</strong></span>
                   </div>
                   {project.categories && project.categories.length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
