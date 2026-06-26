@@ -164,9 +164,9 @@ axiosClient.interceptors.response.use(
     // Handle SESSION_INVALIDATED first — always, even for manual-auth requests
     // (AuthInitializer uses manual auth headers during init).
     if (status === 401) {
-      if (errorCode === 'SESSION_INVALIDATED' && originalRequest.headers.Authorization) {
+      if ((errorCode === 'SESSION_INVALIDATED' || errorCode === 'SESSION_EXPIRED') && originalRequest.headers.Authorization) {
         await fullLogout();
-        window.location.replace("/login?reason=session_invalidated");
+        window.location.replace(`/login?reason=${errorCode.toLowerCase()}`);
         return Promise.reject(error);
       }
 

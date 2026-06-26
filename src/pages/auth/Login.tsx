@@ -36,7 +36,7 @@ const Login = () => {
   const location = useLocation();
   const sessionExpired =
     (location.state as { sessionExpired?: boolean } | null)?.sessionExpired ??
-    (searchParams.get("reason") === "session_invalidated");
+    (searchParams.get("reason") === "session_invalidated" || searchParams.get("reason") === "session_expired");
   const initialRole = searchParams.get("role") as UserRole;
   const isValidRole =
     initialRole === "client" ||
@@ -329,6 +329,8 @@ const Login = () => {
                 <span>
                   {searchParams.get("reason") === "session_invalidated" 
                     ? "You have been logged out because your account was accessed from another device."
+                    : searchParams.get("reason") === "session_expired"
+                    ? "Your session has expired after 24 hours. Please log in again."
                     : "Your session has expired. Please sign in again."}
                   <button
                     type="button"
