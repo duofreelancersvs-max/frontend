@@ -59,7 +59,7 @@ const SEARCH_LINKS: { label: string; href: (role: string) => string }[] = [
   { label: "Find Freelancers", href: () => "/client/freelancers" },
   { label: "Post Project", href: () => "/client/post-project" },
   { label: "My Projects", href: () => "/client/projects" },
-  { label: "Find Work", href: () => "/freelancer/find-work" },
+  { label: "Find Work", href: () => "/freelancer/projects" },
   { label: "My Applications", href: () => "/freelancer/applications" },
   { label: "Reviews", href: (r) => `/${r}/reviews` },
 ];
