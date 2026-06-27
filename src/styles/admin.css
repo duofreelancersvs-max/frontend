@@ -228,6 +228,12 @@
   background-color: var(--admin-midnight);
 }
 
+@media (min-width: 1024px) {
+  .admin-main {
+    margin-left: 260px;
+  }
+}
+
 /* ===== ADMIN HEADER ===== */
 .admin-header {
   height: 56px;

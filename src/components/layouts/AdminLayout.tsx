@@ -59,7 +59,7 @@ const AdminLayout = () => {
       <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content */}
-      <main id="main-content" className="admin-main lg:ml-64 transition-all duration-300">
+      <main id="main-content" className="admin-main transition-all duration-300">
         {/* Header */}
         <header className="admin-header bg-[#18181b]/80 backdrop-blur-md border-b border-white/5">
           <div className="admin-header-left">
