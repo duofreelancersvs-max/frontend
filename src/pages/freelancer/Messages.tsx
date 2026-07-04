@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
+import { useOutletContext, useLocation } from "react-router-dom";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
@@ -212,32 +212,36 @@ const FreelancerMessages = ({ isWidget }: FreelancerMessagesProps = {}) => {
 
   // ── Deep-link: auto-select conversation from navigation state ──
   const location = useLocation();
-  const nav = useNavigate();
 
   useEffect(() => {
     deepLinkHandled.current = false;
   }, [location.key]);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const queryConversationId = searchParams.get("conversation");
+    
     const state = location.state as { conversationId?: string } | null;
+    const conversationIdToOpen = state?.conversationId || queryConversationId;
     
     const handleDeepLink = async () => {
-      if (!state || !conversationsLoaded || deepLinkHandled.current) return;
+      if (!conversationIdToOpen || !conversationsLoaded || deepLinkHandled.current) return;
       
-      if (state.conversationId) {
-        deepLinkHandled.current = true;
-        const target = conversations.find(
-          (c) => c.id === state.conversationId || c._id === state.conversationId,
-        );
-        if (target) {
-          setSelectedConversation(target);
-          setMobileView("chat");
-        }
-        nav(location.pathname, { replace: true, state: {} });
+      deepLinkHandled.current = true;
+      const target = conversations.find(
+        (c) => c.id === conversationIdToOpen || c._id === conversationIdToOpen,
+      );
+      if (target) {
+        setSelectedConversation(target);
+        setMobileView("chat");
       }
+      
+      // Clean up URL and state
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
     };
     handleDeepLink();
-  }, [location.state, conversationsLoaded, conversations, nav, location.pathname]);
+  }, [location.state, location.search, conversationsLoaded, conversations]);
 
   useEffect(() => {
     const fetchMessages = async () => {

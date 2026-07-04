@@ -461,7 +461,7 @@ const Register = () => {
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            placeholder="John Doe"
+                            placeholder="Enter your full name"
                             className="pl-11 h-12"
                             required
                             disabled={isLoading}
@@ -487,7 +487,7 @@ const Register = () => {
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            placeholder="John"
+                            placeholder="Enter your first name"
                             className="pl-11 h-12"
                             required
                             disabled={isLoading}
@@ -507,7 +507,7 @@ const Register = () => {
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
-                            placeholder="Doe"
+                            placeholder="Enter your last name"
                             className="pl-11 h-12"
                             required
                             disabled={isLoading}
@@ -533,7 +533,7 @@ const Register = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter Password"
+                      placeholder="Enter your email address"
                       className="pl-11 h-12"
                       required
                       disabled={isLoading}
@@ -556,7 +556,7 @@ const Register = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="9876543210"
+                      placeholder="Enter your phone number"
                       className="pl-11 h-12"
                       required
                       disabled={isLoading}
@@ -579,7 +579,7 @@ const Register = () => {
                       type={showPassword ? "text" : "password"}
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Create a password"
+                      placeholder="Enter your password"
                       className="pl-11 pr-11 h-12"
                       required
                       minLength={8}

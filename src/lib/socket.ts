@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/stores/auth.store";
+import type { NotificationResponseDto } from "@/types/notification.types";
 
 // ─── Types mirroring backend socket.types.ts ────────────────────────
 
@@ -110,6 +111,8 @@ interface ServerToClientEvents {
   "conversation:created": (data: SocketConversation) => void;
 
   "application:new": (data: { projectId: string; applicationId: string }) => void;
+  
+  "notification:new": (data: NotificationResponseDto) => void;
 
   error: (data: { message: string; event?: string }) => void;
 }

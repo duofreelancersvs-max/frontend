@@ -89,15 +89,24 @@ export const useFeatureGate = (
       const end = new Date(context.trialEndsAt).getTime();
       const start = context.trialStartedAt
         ? new Date(context.trialStartedAt).getTime()
-        : end - (context.trialDaysGranted || 7) * 86_400_000;
+        : end - (context.trialDaysGranted || 14) * 86_400_000;
       const now = Date.now();
       const totalMs = Math.max(1, end - start);
       const remainingMs = Math.max(0, end - now);
       trialDaysRemaining = Math.ceil(remainingMs / 86_400_000);
-      trialProgressPct = Math.min(
+      
+      const timeProgressPct = Math.min(
         100,
         Math.max(0, ((totalMs - remainingMs) / totalMs) * 100),
       );
+
+      let appProgressPct = 0;
+      if (isLimited && limit > 0) {
+        const usedApps = Math.max(0, limit - remaining);
+        appProgressPct = Math.min(100, Math.max(0, (usedApps / limit) * 100));
+      }
+
+      trialProgressPct = Math.max(timeProgressPct, appProgressPct);
     }
 
     const canApply = !featureGatesEnabled

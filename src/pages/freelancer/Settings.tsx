@@ -4,6 +4,7 @@ import {
   User,
   Lock,
   Shield,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { userService, settingsService, freelancerService } from "@/services";
 import type { FreelancerProfile } from "@/services/freelancer.service";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { PushNotificationSettings } from "@/components/shared/PushNotificationSettings";
 import type {
   PrivacySettings,
 } from "@/services/settings.service";
@@ -163,6 +165,7 @@ const FreelancerSettings = () => {
   const settingsSections = [
     { id: "account", label: "Account", icon: User },
     { id: "security", label: "Security", icon: Lock },
+    { id: "notifications", label: "Notifications", icon: Bell },
     { id: "privacy", label: "Privacy", icon: Shield },
   ];
 
@@ -345,6 +348,14 @@ const FreelancerSettings = () => {
                   >
                     {saving ? "Updating..." : "Update Password"}
                   </Button>
+                </div>
+              )}
+              {activeSection === "notifications" && (
+                <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 shadow-sm space-y-6">
+                  <h2 className="text-lg font-bold text-navy dark:text-white">
+                    Notification Preferences
+                  </h2>
+                  <PushNotificationSettings />
                 </div>
               )}
               {activeSection === "privacy" && (

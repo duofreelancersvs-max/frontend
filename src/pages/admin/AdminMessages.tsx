@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { conversationService } from "@/services";
 import type { Conversation, Message } from "@/services";
@@ -18,6 +19,9 @@ import { useIsMdUp } from "@/hooks/useMediaQuery";
 const AdminMessages = () => {
   const { user } = useAuth();
   const isMdUp = useIsMdUp();
+  const location = useLocation();
+  const deepLinkHandled = useRef(false);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -137,13 +141,42 @@ const AdminMessages = () => {
         return prev;
       });
       
-      if (convs.length > 0 && !selectedConversation) {
+      if (convs.length > 0 && !selectedConversation && !location.search && !location.state) {
         if (isMdUp) {
           setSelectedConversation(convs[0]);
         }
       }
     }
-  }, [convData?.conversations, selectedConversation]);
+  }, [convData?.conversations, selectedConversation, isMdUp, location.search, location.state]);
+
+  useEffect(() => {
+    deepLinkHandled.current = false;
+  }, [location.key]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const queryConversationId = searchParams.get("conversation");
+    
+    const state = location.state as { conversationId?: string } | null;
+    const conversationIdToOpen = state?.conversationId || queryConversationId;
+    
+    const handleDeepLink = async () => {
+      if (!conversationIdToOpen || conversations.length === 0 || deepLinkHandled.current) return;
+      
+      deepLinkHandled.current = true;
+      const target = conversations.find(
+        (c) => c.id === conversationIdToOpen || c._id === conversationIdToOpen,
+      );
+      if (target) {
+        setSelectedConversation(target);
+        setMobileView("chat");
+      }
+      
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    };
+    handleDeepLink();
+  }, [location.state, location.search, conversations]);
 
   useEffect(() => {
     const fetchMessages = async () => {

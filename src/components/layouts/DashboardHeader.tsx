@@ -7,6 +7,7 @@ import { ChevronDown, Menu, MessageSquare, Search, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import Logo from "@/components/shared/Logo";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 
 function MobileUsagePill() {
   const { user } = useAuth();
@@ -171,13 +172,16 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
               <Search size={18} />
             </button>
 
+            {/* Notifications */}
+            <NotificationBell />
+
             {/* Messages */}
             <Link to={`/${role}/messages`} className="relative w-9 h-9 sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-all shrink-0" aria-label="Messages">
               <MessageSquare size={18} />
 
               {totalUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-primary text-primary-foreground text-xxs font-bold rounded-full border-2 border-background flex items-center justify-center">
-                  {totalUnreadCount}
+                <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center leading-none">
+                  {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
                 </span>
               )}
             </Link>

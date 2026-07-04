@@ -15,6 +15,8 @@ import type {
   PrivacySettings,
 } from "@/services/settings.service";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
+import { PushNotificationSettings } from "@/components/shared/PushNotificationSettings";
+import { Bell } from "lucide-react";
 
 const ClientSettings = () => {
   const { setSidebarOpen } = useOutletContext<ClientLayoutContext>();
@@ -190,6 +192,7 @@ const ClientSettings = () => {
     { id: "account", label: "Account", icon: User },
     { id: "contact", label: "Contact Info", icon: Phone },
     { id: "security", label: "Security", icon: Lock },
+    { id: "notifications", label: "Notifications", icon: Bell },
     { id: "privacy", label: "Privacy", icon: Shield },
   ];
 
@@ -419,6 +422,15 @@ const ClientSettings = () => {
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>
+              </div>
+            )}
+
+            {activeSection === "notifications" && (
+              <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-6 space-y-6">
+                <h2 className="text-lg font-bold text-navy dark:text-white">
+                  Notification Preferences
+                </h2>
+                <PushNotificationSettings />
               </div>
             )}
 

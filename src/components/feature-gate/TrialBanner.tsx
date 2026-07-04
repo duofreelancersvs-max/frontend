@@ -30,12 +30,27 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
     trialExpired,
     trialDaysRemaining,
     trialProgressPct,
+    usage,
   } = useFeatureGate();
 
   if (!showTrialBanner && !trialExpired) return null;
 
-  const expiringSoon = inTrial && trialDaysRemaining <= 2;
+  const appsRunningOut = !!(usage && usage.limit > 0 && usage.remaining <= 5);
+  const expiringSoon = inTrial && (trialDaysRemaining <= 2 || appsRunningOut);
   const expired = trialExpired;
+
+  let bannerText = "You're on a Pro-tier free trial";
+  const timeExpired = trialDaysRemaining === 0;
+
+  if (timeExpired) {
+    bannerText = `Trial time expired. You have ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
+  } else if (expiringSoon) {
+    if (appsRunningOut && trialDaysRemaining > 2) {
+      bannerText = `Only ${usage!.remaining} application${usage!.remaining === 1 ? "" : "s"} left in trial`;
+    } else {
+      bannerText = `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining === 1 ? "" : "s"} (${usage?.remaining ?? 0} apps left)`;
+    }
+  }
 
   if (expired) {
     return (
@@ -116,9 +131,7 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
               expiringSoon ? "text-gold" : "text-royal-blue",
             )}
           >
-            {expiringSoon
-              ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining === 1 ? "" : "s"}`
-              : "You're on a Pro-tier free trial"}
+            {bannerText}
           </p>
           <div className="mt-1.5 flex items-center gap-2">
             <div className="flex-1 h-1.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden max-w-xs">
@@ -137,7 +150,9 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
                 expiringSoon ? "text-gold/80" : "text-royal-blue/80",
               )}
             >
-              {Math.round(trialProgressPct)}% used
+              {timeExpired && usage && usage.limit > 0
+                ? `${Math.round((usage.used / usage.limit) * 100)}% apps used`
+                : `${Math.round(trialProgressPct)}% used`}
             </span>
           </div>
         </div>

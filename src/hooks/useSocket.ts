@@ -5,6 +5,7 @@ import {
   type SocketMessage,
   type SocketConversation,
 } from "@/lib/socket";
+import type { NotificationResponseDto } from "@/types/notification.types";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUnreadStore } from "@/stores/unread.store";
 
@@ -26,6 +27,8 @@ interface UseSocketOptions {
   }) => void;
   /** Called when a new conversation is created for this user. */
   onConversationCreated?: (conversation: SocketConversation) => void;
+  /** Called when a new notification arrives. */
+  onNotificationNew?: (notification: NotificationResponseDto) => void;
 }
 
 interface UseSocketReturn {
@@ -43,7 +46,7 @@ interface UseSocketReturn {
 // ─── Hook ──────────────────────────────────────────────────────────
 
 export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
-  const { conversationId, onNewMessage, onMessageRead, onConversationCreated } =
+  const { conversationId, onNewMessage, onMessageRead, onConversationCreated, onNotificationNew } =
     options;
 
   const [isConnected, setIsConnected] = useState(false);
@@ -57,9 +60,11 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   const onNewMessageRef = useRef(onNewMessage);
   const onMessageReadRef = useRef(onMessageRead);
   const onConversationCreatedRef = useRef(onConversationCreated);
+  const onNotificationNewRef = useRef(onNotificationNew);
   onNewMessageRef.current = onNewMessage;
   onMessageReadRef.current = onMessageRead;
   onConversationCreatedRef.current = onConversationCreated;
+  onNotificationNewRef.current = onNotificationNew;
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
@@ -105,6 +110,10 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       onConversationCreatedRef.current?.(conv);
     };
 
+    const handleNotificationNew = (notif: NotificationResponseDto) => {
+      onNotificationNewRef.current?.(notif);
+    };
+
     const handleError = (err: any) => {
       console.error("[Socket] Server error:", err.message);
     };
@@ -121,6 +130,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     s.on("user:offline", handleUserOffline);
     s.on("users:online", handleUsersOnline);
     s.on("conversation:created", handleConversationCreated);
+    s.on("notification:new", handleNotificationNew);
     s.on("error", handleError);
 
     // Request current online users if already connected
@@ -141,6 +151,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       s.off("user:offline", handleUserOffline);
       s.off("users:online", handleUsersOnline);
       s.off("conversation:created", handleConversationCreated);
+      s.off("notification:new", handleNotificationNew);
       s.off("error", handleError);
       
       socketRef.current = null;

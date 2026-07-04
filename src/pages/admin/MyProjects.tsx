@@ -82,6 +82,16 @@ const MyProjects = () => {
     setCurrentPage(1);
   }, [searchQuery]);
 
+  const handleStatusChange = async (projectId: string, newStatus: string) => {
+    try {
+      await adminService.updateProject(projectId, { status: newStatus });
+      toast.success("Project status updated successfully");
+      fetchProjects();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update project status");
+    }
+  };
+
   return (
     <div className="um-page-wrapper">
       {/* Header */}
@@ -255,6 +265,31 @@ const MyProjects = () => {
                       </span>
                     </div>
                   )}
+                </div>
+
+                {/* Actions */}
+                <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px solid var(--um-border)", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                  <label style={{ fontSize: "0.75rem", color: "var(--um-text-muted)", marginRight: "0.5rem" }}>Update Status:</label>
+                  <select
+                    value={project.status}
+                    onChange={(e) => handleStatusChange(project._id, e.target.value)}
+                    style={{
+                      padding: "0.3rem 0.6rem",
+                      borderRadius: "6px",
+                      border: "1px solid var(--um-border)",
+                      background: "var(--um-bg-secondary)",
+                      color: "var(--um-text-primary)",
+                      fontSize: "0.8rem",
+                      cursor: "pointer",
+                      outline: "none"
+                    }}
+                  >
+                    <option value="open">Open</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="draft">Draft</option>
+                  </select>
                 </div>
               </div>
             ))}

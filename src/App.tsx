@@ -7,12 +7,15 @@ import {
 } from "@/components/auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import { UnreadListener } from "@/components/chat/UnreadListener";
+import { NotificationListener } from "@/components/shared/NotificationListener";
 import PageLoader from "@/components/shared/PageLoader";
 import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
 import { usePwaStore } from "@/stores/pwa.store";
 import { AppInstallPrompt } from "@/components/pwa/AppInstallPrompt";
 import SkipLink from "@/components/common/SkipLink";
+import { useThemeStore } from "@/stores/theme.store";
+
 
 const ClientLayout = lazy(() => import("@/layouts/ClientLayout"));
 const FreelancerLayout = lazy(() => import("@/layouts/FreelancerLayout"));
@@ -113,6 +116,7 @@ function SP({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const theme = useThemeStore((s) => s.theme);
   const setDeferredPrompt = usePwaStore((state) => state.setDeferredPrompt);
   const setAppInstalled = usePwaStore((state) => state.setAppInstalled);
 
@@ -145,11 +149,13 @@ function App() {
       <SkipLink />
       <ThemeInitializer />
       <UnreadListener />
+      <NotificationListener />
       <UpgradeModalHost />
       <AppInstallPrompt />
       <ToastContainer 
         position="top-center" 
         autoClose={3000} 
+        theme={theme}
         toastClassName="!rounded-2xl !shadow-xl !mt-4 sm:!mt-0 !mx-4 sm:!mx-0 !w-auto"
       />
       <Routes>

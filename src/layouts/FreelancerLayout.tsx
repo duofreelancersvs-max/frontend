@@ -72,13 +72,7 @@ const FreelancerLayout = () => {
     };
   }, [sidebarOpen]);
 
-  useEffect(() => {
-    const mainEl = document.getElementById("main-content");
-    if (!mainEl) return;
-    const handleScroll = (e: Event) => onNavScroll(e as any);
-    mainEl.addEventListener("scroll", handleScroll, true);
-    return () => mainEl.removeEventListener("scroll", handleScroll, true);
-  }, [onNavScroll]);
+  // The capturing scroll listener was removed to prevent layout bouncing when scrolling inside children (e.g. ChatArea)
 
   return (
     <div className="flex h-[100dvh] bg-background font-sans transition-colors duration-300 overflow-hidden">

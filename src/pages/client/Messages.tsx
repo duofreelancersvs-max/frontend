@@ -213,39 +213,52 @@ const ClientMessages = ({ isWidget }: ClientMessagesProps = {}) => {
   }, [location.key]);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const queryConversationId = searchParams.get("conversation");
+    const queryFreelancerId = searchParams.get("freelancer");
+    
     const state = location.state as { conversationId?: string; freelancerId?: string } | null;
     
+    const conversationIdToOpen = state?.conversationId || queryConversationId;
+    const freelancerIdToOpen = state?.freelancerId || queryFreelancerId;
+    
     const handleDeepLink = async () => {
-      if (!state || !conversationsLoaded || deepLinkHandled.current) return;
+      if (!conversationIdToOpen && !freelancerIdToOpen) return;
+      if (!conversationsLoaded || deepLinkHandled.current) return;
       
-      if (state.conversationId) {
+      if (conversationIdToOpen) {
         deepLinkHandled.current = true;
         const target = conversations.find(
-          (c) => c.id === state.conversationId || c._id === state.conversationId,
+          (c) => c.id === conversationIdToOpen || c._id === conversationIdToOpen,
         );
         if (target) {
           setSelectedConversation(target);
           setMobileView("chat");
         }
-        window.history.replaceState({}, "");
-      } else if (state.freelancerId) {
+        
+        // Clean up URL and state
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      } else if (freelancerIdToOpen) {
         deepLinkHandled.current = true;
         const target = conversations.find((c) => {
           const freelancer = c.participants?.find(p => p.role === "freelancer") || c.participants?.[0];
-          return freelancer?.id === state.freelancerId || (freelancer as any)?._id === state.freelancerId;
+          return freelancer?.id === freelancerIdToOpen || (freelancer as any)?._id === freelancerIdToOpen;
         });
         
         if (target) {
           setSelectedConversation(target);
           setMobileView("chat");
-          window.history.replaceState({}, "");
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, "", newUrl);
         } else {
           try {
-            const newConv = await conversationService.create({ participantId: state.freelancerId });
+            const newConv = await conversationService.create({ participantId: freelancerIdToOpen });
             setConversations(prev => [newConv, ...prev]);
             setSelectedConversation(newConv);
             setMobileView("chat");
-            window.history.replaceState({}, "");
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, "", newUrl);
           } catch (err) {
             console.error("Failed to create conversation", err);
           }
