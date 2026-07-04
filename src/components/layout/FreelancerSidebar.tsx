@@ -115,7 +115,7 @@ const FreelancerSidebar = ({ isOpen, onClose }: FreelancerSidebarProps) => {
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto min-h-0 pb-6">
+        <div className="flex-1 overflow-y-auto min-h-0 pb-24 lg:pb-6">
           {/* Top Info Section */}
           <div className="shrink-0 pt-4 pb-2 border-b border-border/50 mb-2">
             {/* Profile Completeness Indicator */}
