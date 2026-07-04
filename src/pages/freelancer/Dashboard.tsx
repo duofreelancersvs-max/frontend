@@ -387,16 +387,16 @@ const FreelancerDashboard = () => {
               <TrialBanner />
 
               {/* WELCOME BANNER */}
-              <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-4 sm:p-6 lg:p-8">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-teal/20 rounded-full blur-[80px] translate-x-1/3 -translate-y-1/2" />
-                <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-royal-blue/30 rounded-full blur-[60px]" />
+              <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-4 sm:p-5 lg:p-6">
+                <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-teal/20 rounded-full blur-[60px] translate-x-1/3 -translate-y-1/2" />
+                <div className="absolute bottom-0 left-1/2 w-32 sm:w-48 h-32 sm:h-48 bg-royal-blue/30 rounded-full blur-[50px]" />
 
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-5">
                   <div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
                       {getGreeting()}, {freelancerName}! 👋
                     </h2>
-                    <p className="text-white/80">
+                    <p className="text-sm sm:text-base text-white/80">
                       Your profile is{" "}
                       <span className="text-teal-light font-semibold">
                         {profileCompletion}% complete
@@ -404,76 +404,88 @@ const FreelancerDashboard = () => {
                       . Complete it to get more project invites!
                     </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto mt-2 lg:mt-0">
                     <Link to="/freelancer/profile" className="w-full sm:w-auto">
-                      <Button className="bg-white text-navy hover:bg-slate-100 font-semibold w-full">
-                        <User size={18} className="mr-2" />
+                      <Button size="sm" className="bg-white text-navy hover:bg-slate-100 font-semibold w-full h-8 sm:h-9">
+                        <User size={16} className="mr-2" />
                         Complete Profile
                       </Button>
                     </Link>
-                    <Link
-                      to={`/freelancer/${user?._id}`}
-                      className="w-full sm:w-auto"
-                    >
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white/20 border-white/40 text-white hover:bg-white/30 hover:border-white/50 transition-all font-semibold backdrop-blur-sm"
+                    <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                      <Link
+                        to={`/freelancer/${user?._id}`}
+                        className="w-full sm:w-auto"
                       >
-                        <Eye size={18} className="mr-2" />
-                        Preview Profile
-                      </Button>
-                    </Link>
-                    <Link
-                      to="/freelancer/projects"
-                      className="w-full sm:w-auto"
-                    >
-                      <Button
-                        variant="outline"
-                        className="w-full bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all font-semibold"
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full h-8 sm:h-9 bg-white/20 border-white/40 text-white hover:bg-white/30 hover:border-white/50 transition-all font-semibold backdrop-blur-sm px-2 sm:px-4"
+                        >
+                          <Eye size={16} className="mr-1.5" />
+                          Preview
+                        </Button>
+                      </Link>
+                      <Link
+                        to="/freelancer/projects"
+                        className="w-full sm:w-auto"
                       >
-                        <Search size={18} className="mr-2" />
-                        Browse Projects
-                      </Button>
-                    </Link>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full h-8 sm:h-9 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all font-semibold px-2 sm:px-4"
+                        >
+                          <Search size={16} className="mr-1.5" />
+                          Browse
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </section>
 
               {/* STATS CARDS */}
-              <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+              <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                 {statsData.map((stat, idx) => (
                   <div
                     key={idx}
-                    className="bg-white dark:bg-white/5 rounded-2xl p-5 lg:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-white dark:bg-white/5 rounded-xl p-3 sm:p-4 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 group"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className={cn(
-                          "w-12 h-12 rounded-xl flex items-center justify-center text-white",
-                          stat.color,
-                        )}
-                      >
-                        <stat.icon size={24} />
-                      </div>
-                      {stat.trend === "up" && (
-                        <TrendingUp size={16} className="text-success-green" />
+                    <div
+                      className={cn(
+                        "w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105",
+                        stat.color,
                       )}
+                    >
+                      <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <p className="text-2xl lg:text-3xl font-bold text-navy dark:text-white mb-1">
-                      {stat.value}
-                    </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {stat.label}
-                    </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-                      {stat.change}
-                    </p>
+                    <div className="flex-1 min-w-0 w-full">
+                      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 line-clamp-1">
+                        {stat.label}
+                      </p>
+                      <div className="flex items-end justify-between gap-2 w-full">
+                        <p className="text-lg sm:text-xl font-bold text-navy dark:text-white leading-none">
+                          {stat.value}
+                        </p>
+                        <div className="shrink-0 max-w-[60%] sm:max-w-none">
+                          {stat.trend === "up" ? (
+                            <div className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded truncate max-w-full">
+                              <TrendingUp size={10} className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                              {stat.change}
+                            </div>
+                          ) : (
+                            <span className="inline-block text-[9px] sm:text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded truncate max-w-full">
+                              {stat.change}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </section>
 
               {/* PROFILE COMPLETENESS */}
-              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5 lg:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-navy dark:text-white">
                     Complete Your Profile
@@ -482,18 +494,18 @@ const FreelancerDashboard = () => {
                     {profileCompletion}%
                   </span>
                 </div>
-                <div className="h-3 bg-slate-100 rounded-full overflow-hidden mb-6">
+                <div className="h-2.5 sm:h-3 bg-slate-100 rounded-full overflow-hidden mb-5 sm:mb-6">
                   <div
                     className="h-full bg-gradient-to-r from-teal to-teal-light rounded-full transition-all"
                     style={{ width: `${profileCompletion}%` }}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {profileCompletionItems.map((item, idx) => (
                     <div
                       key={idx}
                       className={cn(
-                        "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+                        "flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border transition-colors",
                         item.completed
                           ? "bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5"
                           : "bg-gold/5 dark:bg-gold/10 border-gold/20 hover:border-gold/40 cursor-pointer",
@@ -501,11 +513,11 @@ const FreelancerDashboard = () => {
                     >
                       {item.completed ? (
                         <CheckCircle
-                          size={18}
-                          className="text-success-green shrink-0"
+                          size={16}
+                          className="text-success-green shrink-0 sm:w-[18px] sm:h-[18px]"
                         />
                       ) : (
-                        <AlertCircle size={18} className="text-gold shrink-0" />
+                        <AlertCircle size={16} className="text-gold shrink-0 sm:w-[18px] sm:h-[18px]" />
                       )}
                       <span
                         className={cn(
@@ -520,9 +532,9 @@ const FreelancerDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-6 flex justify-center">
+                <div className="mt-5 sm:mt-6 flex justify-center">
                   <Link to="/freelancer/profile">
-                    <Button className="bg-teal hover:bg-teal-light text-white">
+                    <Button size="sm" className="bg-teal hover:bg-teal-light text-white h-9 px-6">
                       <Zap size={16} className="mr-2" />
                       Complete Now
                     </Button>
@@ -531,8 +543,8 @@ const FreelancerDashboard = () => {
               </section>
 
               {/* RECOMMENDED PROJECTS */}
-              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm">
-                <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/5">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/5">
                   <h3 className="text-lg font-bold text-navy dark:text-white">
                     Projects Matching Your Skills
                   </h3>
@@ -543,7 +555,7 @@ const FreelancerDashboard = () => {
                     View All <ArrowRight size={14} />
                   </Link>
                 </div>
-                <div className="p-4 sm:p-5 lg:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 sm:p-5 lg:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                   {recommendedProjectsData.map((project) => (
                     <div
                       key={project.id}
@@ -654,7 +666,7 @@ const FreelancerDashboard = () => {
 
               {/* APPLICATION STATUS */}
               <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 dark:border-white/5">
+                <div className="flex items-center justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/5">
                   <h3 className="text-lg font-bold text-navy dark:text-white">
                     Your Applications
                   </h3>
@@ -781,7 +793,7 @@ const FreelancerDashboard = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* LEFT COLUMN: MESSAGES */}
                 <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm h-full flex flex-col">
-                  <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/5 shrink-0">
+                  <div className="flex items-center justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/5 shrink-0">
                     <h3 className="text-lg font-bold text-navy dark:text-white">
                       New Messages
                     </h3>
@@ -851,7 +863,7 @@ const FreelancerDashboard = () => {
                 {/* RIGHT COLUMN: SUBSCRIPTION & QUICK ACTIONS */}
                 <div className="flex flex-col gap-6">
                   {/* SUBSCRIPTION STATUS */}
-                  <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+                  <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5 lg:p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div
@@ -931,7 +943,7 @@ const FreelancerDashboard = () => {
                   </section>
 
                   {/* QUICK ACTIONS */}
-                  <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5 lg:p-6">
+                  <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5 lg:p-6">
                     <h3 className="text-lg font-bold text-navy dark:text-white mb-4">
                       Quick Actions
                     </h3>

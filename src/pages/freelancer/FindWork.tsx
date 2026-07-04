@@ -647,7 +647,7 @@ const FindWork = () => {
                         </button>
                       </div>
                       {/* Card Content */}
-                      <div className="p-5 flex-1 flex flex-col">
+                      <div className="p-4 sm:p-5 flex-1 flex flex-col">
                         {/* Title, status badge & Client */}
                         <div className="mb-4">
                           <div className="flex items-start justify-between gap-2 mb-2">

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import Logo from "@/components/shared/Logo";
 import { NotificationBell } from "@/components/shared/NotificationBell";
+import { PushNotificationBanner } from "@/components/shared/PushNotificationBanner";
 
 function MobileUsagePill() {
   const { user } = useAuth();
@@ -41,7 +42,8 @@ function MobileUsagePill() {
       className="lg:hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-secondary border border-border text-foreground shrink-0 min-h-[26px] sm:min-h-[32px]"
       aria-label={`${remaining} of ${usage.limit} applications remaining this month`}
     >
-      <span className="truncate max-w-[70px] sm:max-w-none">{planLabel} {remaining}/{usage.limit}</span>
+      <span className="hidden sm:inline truncate max-w-none">{planLabel} {remaining}/{usage.limit}</span>
+      <span className="sm:hidden leading-none tracking-tight font-medium">{remaining}/{usage.limit}</span>
     </Link>
   );
 }
@@ -158,11 +160,11 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
           <MobileUsagePill />
           {children}
 
-          <div className="flex items-center gap-1.5 mr-1 md:mr-2">
-            <ThemeToggle className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl" />
+          <div className="flex items-center gap-1.5 mr-1 sm:mr-2">
+            <ThemeToggle className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl" />
           </div>
 
-          <div className="flex items-center gap-0.5 sm:gap-1.5 px-1 sm:px-2 py-1 bg-secondary/50 dark:bg-secondary/20 rounded-2xl border border-border shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 sm:px-2 sm:py-1 sm:bg-secondary/50 sm:dark:bg-secondary/20 sm:rounded-2xl sm:border sm:border-border shrink-0">
             {/* Search */}
             <button
               onClick={openSearch}
@@ -297,6 +299,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
           </div>
         </div>
       </header>
+      <PushNotificationBanner className="mx-4 sm:mx-6 lg:mx-8 mt-4 lg:mt-6 mb-0" />
 
       {/* Global Search Overlay */}
       {isSearchOpen && (

@@ -58,40 +58,34 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
         role="alert"
         aria-live="polite"
         className={cn(
-          "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-4 py-3",
+          "relative flex items-center justify-between gap-2 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 py-2.5 pl-3 pr-8 sm:pr-4",
           className,
         )}
       >
-        <div className="flex items-start gap-3">
-          <div className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/40 shrink-0">
-            <Crown size={18} className="text-red-600 dark:text-red-400" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-red-900 dark:text-red-300">
-              Your free trial has ended
-            </p>
-            <p className="text-xs text-red-700 dark:text-red-400/80 mt-0.5">
-              Upgrade to Pro for unlimited applications. The Free plan allows up to 5 applications per month.
-            </p>
-          </div>
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <Crown className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-red-900 dark:text-red-300 truncate">
+            Trial time expired. {usage?.remaining ?? 0} applications left.
+          </span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {onDismiss && (
-            <button
-              onClick={onDismiss}
-              aria-label="Dismiss banner"
-              className="p-1 hover:bg-red-100 dark:hover:bg-red-900/40 rounded transition-colors"
-            >
-              <X size={16} className="text-red-500" />
-            </button>
-          )}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <Button
             size="sm"
             variant="destructive"
             onClick={() => navigate("/freelancer/subscription")}
+            className="h-7 px-3 text-xs whitespace-nowrap"
           >
-            Upgrade now
+            Upgrade
           </Button>
+          {onDismiss && (
+            <button
+              onClick={onDismiss}
+              aria-label="Dismiss banner"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 p-1 hover:bg-red-100 dark:hover:bg-red-900/40 rounded transition-colors"
+            >
+              <X className="w-4 h-4 text-red-500" />
+            </button>
+          )}
         </div>
       </div>
     );
@@ -104,77 +98,61 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
       role="status"
       aria-live="polite"
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border px-4 py-3",
+        "relative flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-8 sm:pr-4",
         expiringSoon
           ? "border-gold/30 bg-gold/10"
           : "border-sky-blue/30 bg-sky-blue/10",
         className,
       )}
     >
-      <div className="flex items-start gap-3 min-w-0">
-        <div
-          className={cn(
-            "p-1.5 rounded-lg shrink-0",
-            expiringSoon ? "bg-gold/20" : "bg-sky-blue/20",
-          )}
-        >
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 overflow-hidden flex-1">
+        <div className="flex items-center gap-2.5">
           {expiringSoon ? (
-            <Clock size={18} className="text-gold" />
+            <Clock className="w-4 h-4 text-gold shrink-0" />
           ) : (
-            <Sparkles size={18} className="text-royal-blue" />
+            <Sparkles className="w-4 h-4 text-royal-blue shrink-0" />
           )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p
+          <span
             className={cn(
-              "text-sm font-semibold",
+              "text-xs sm:text-sm font-semibold truncate",
               expiringSoon ? "text-gold" : "text-royal-blue",
             )}
           >
             {bannerText}
-          </p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden max-w-xs">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all",
-                  expiringSoon ? "bg-gold" : "bg-royal-blue",
-                )}
-                style={{ width: `${Math.min(100, trialProgressPct)}%` }}
-                aria-label={`${Math.round(trialProgressPct)}% of trial used`}
-              />
-            </div>
-            <span
+          </span>
+        </div>
+        
+        <div className="hidden sm:flex items-center gap-2 w-full sm:w-auto max-w-[150px]">
+          <div className="flex-1 h-1.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
+            <div
               className={cn(
-                "text-xs font-medium shrink-0",
-                expiringSoon ? "text-gold/80" : "text-royal-blue/80",
+                "h-full rounded-full",
+                expiringSoon ? "bg-gold" : "bg-royal-blue",
               )}
-            >
-              {timeExpired && usage && usage.limit > 0
-                ? `${Math.round((usage.used / usage.limit) * 100)}% apps used`
-                : `${Math.round(trialProgressPct)}% used`}
-            </span>
+              style={{ width: `${Math.min(100, trialProgressPct)}%` }}
+            />
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {onDismiss && (
-          <button
-            onClick={onDismiss}
-            aria-label="Dismiss banner"
-            className="p-1 hover:bg-white/30 dark:hover:bg-white/5 rounded transition-colors"
-          >
-            <X size={16} className="text-slate-500" />
-          </button>
-        )}
+      
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <Button
           size="sm"
           variant="outline"
           onClick={() => navigate("/freelancer/subscription")}
-          className="border-current text-current hover:bg-white/30"
+          className="h-7 px-3 text-xs whitespace-nowrap border-current text-current hover:bg-white/30"
         >
           View plans
         </Button>
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            aria-label="Dismiss banner"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 p-1 hover:bg-white/30 dark:hover:bg-white/5 rounded transition-colors"
+          >
+            <X className="w-4 h-4 text-slate-500" />
+          </button>
+        )}
       </div>
     </div>
   );

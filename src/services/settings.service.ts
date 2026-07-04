@@ -6,6 +6,7 @@ export interface NotificationSettings {
   sms: boolean;
   projectUpdates: boolean;
   messages: boolean;
+  pushBannerDismissed?: boolean;
 }
 
 export interface PrivacySettings {

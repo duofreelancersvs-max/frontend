@@ -178,7 +178,7 @@ const FreelancerApplications = () => {
               return (
                 <div
                   key={application._id || application.id}
-                  className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm p-5 hover:shadow-md transition-all"
+                  className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5 hover:shadow-md transition-all"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex-1">

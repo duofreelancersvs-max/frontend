@@ -187,7 +187,7 @@ const FreelancerEarnings = () => {
           {/* STATS CARDS */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {/* Total Earnings */}
-            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-success-green/10 flex items-center justify-center">
                   <Wallet size={20} className="text-success-green" />
@@ -204,7 +204,7 @@ const FreelancerEarnings = () => {
             </div>
 
             {/* This Month */}
-            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-royal-blue/10 flex items-center justify-center">
                   <TrendingUp size={20} className="text-royal-blue" />
@@ -221,7 +221,7 @@ const FreelancerEarnings = () => {
             </div>
 
             {/* Pending */}
-            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
                   <Clock size={20} className="text-gold" />
@@ -234,7 +234,7 @@ const FreelancerEarnings = () => {
             </div>
 
             {/* Projects Completed */}
-            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-5">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
                   <CheckCircle size={20} className="text-teal" />

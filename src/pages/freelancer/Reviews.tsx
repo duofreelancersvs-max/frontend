@@ -67,7 +67,7 @@ const FreelancerReviews = () => {
         />
         <main className="dashboard-content">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 sm:p-5 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-3">
                 <Star size={20} className="text-gold fill-gold" />
               </div>
@@ -76,14 +76,14 @@ const FreelancerReviews = () => {
                 {averageRating.toFixed(1)}
               </p>
             </div>
-            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 sm:p-5 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center mb-3">
                 <MessageCircle size={20} className="text-teal" />
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Reviews</p>
               <p className="text-2xl font-bold text-navy dark:text-white">{totalReviews}</p>
             </div>
-            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 sm:p-5 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-success-green/10 flex items-center justify-center mb-3">
                 <TrendingUp size={20} className="text-success-green" />
               </div>
@@ -92,7 +92,7 @@ const FreelancerReviews = () => {
                 {reviewsData.filter((r: any) => r.rating === 5).length}
               </p>
             </div>
-            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
+            <div className="bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 p-4 sm:p-5 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-royal-blue/10 flex items-center justify-center mb-3">
                 <ThumbsUp size={20} className="text-royal-blue" />
               </div>

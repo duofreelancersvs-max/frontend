@@ -294,7 +294,7 @@ const FreelancerSubscription = () => {
           <TrialBanner />
 
           {usage && (
-            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 p-5 shadow-sm">
+            <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 p-4 sm:p-5 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">

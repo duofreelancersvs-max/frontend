@@ -640,11 +640,11 @@ const FreelancerProfileEdit = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="p-5 lg:p-6">
+                <div className="p-4 sm:p-5 lg:p-6">
                   {/* BASIC INFO TAB */}
                   {activeTab === "basic" && (
                     <div className="space-y-6">
-                      <div className="grid sm:grid-cols-2 gap-6">
+                      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                         {/* First Name */}
                         <div>
                           <label className="block text-sm font-medium text-navy dark:text-white mb-2">
@@ -678,7 +678,7 @@ const FreelancerProfileEdit = () => {
                         </div>
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-6">
+                      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                         {/* Display Name */}
                         <div>
                           <label className="block text-sm font-medium text-navy dark:text-white mb-2">
@@ -786,7 +786,7 @@ const FreelancerProfileEdit = () => {
                         </p>
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-6">
+                      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                         {/* Availability */}
                         <div>
                           <label className="block text-sm font-medium text-navy dark:text-white mb-2">
@@ -862,39 +862,43 @@ const FreelancerProfileEdit = () => {
                         {skills.map((skill) => (
                           <div
                             key={skill.name}
-                            className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
+                            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
                           >
-                            <GripVertical
-                              size={16}
-                              className="text-slate-400 dark:text-slate-500 cursor-grab"
-                            />
-                            <span className="flex-1 font-medium text-navy dark:text-white">
-                              {skill.name}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-slate-500 w-16">
-                                Level {skill.proficiency}
-                              </span>
-                              <input
-                                type="range"
-                                min="1"
-                                max="5"
-                                value={skill.proficiency}
-                                onChange={(e) =>
-                                  updateSkillProficiency(
-                                    skill.name,
-                                    parseInt(e.target.value),
-                                  )
-                                }
-                                className="w-24 accent-teal"
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <GripVertical
+                                size={16}
+                                className="text-slate-400 dark:text-slate-500 cursor-grab shrink-0"
                               />
+                              <span className="font-medium text-navy dark:text-white truncate">
+                                {skill.name}
+                              </span>
                             </div>
-                            <button
-                              onClick={() => removeSkill(skill.name)}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto mt-1 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-200 dark:border-white/10">
+                              <div className="flex items-center gap-2 flex-1 sm:flex-none max-w-[200px]">
+                                <span className="text-xs text-slate-500 shrink-0 min-w-[3.5rem]">
+                                  Level {skill.proficiency}
+                                </span>
+                                <input
+                                  type="range"
+                                  min="1"
+                                  max="5"
+                                  value={skill.proficiency}
+                                  onChange={(e) =>
+                                    updateSkillProficiency(
+                                      skill.name,
+                                      parseInt(e.target.value),
+                                    )
+                                  }
+                                  className="w-full sm:w-24 accent-teal"
+                                />
+                              </div>
+                              <button
+                                onClick={() => removeSkill(skill.name)}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors shrink-0 ml-2"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                         {skills.length === 0 && (
@@ -938,7 +942,7 @@ const FreelancerProfileEdit = () => {
                   {/* PORTFOLIO TAB */}
                   {activeTab === "portfolio" && (
                     <div className="space-y-6">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <h4 className="text-sm font-medium text-navy dark:text-white">
                           Portfolio Items ({portfolio.length})
                         </h4>
@@ -947,7 +951,7 @@ const FreelancerProfileEdit = () => {
                             setEditingPortfolioItem(null);
                             setShowPortfolioModal(true);
                           }}
-                          className="bg-teal hover:bg-teal-light text-white"
+                          className="bg-teal hover:bg-teal-light text-white w-full sm:w-auto"
                         >
                           <Plus size={16} className="mr-2" />
                           Add New Project
@@ -1255,7 +1259,7 @@ const FreelancerProfileEdit = () => {
             {/* RIGHT SIDEBAR */}
             <div className="lg:w-80 flex flex-col gap-6">
               {/* Profile Completeness */}
-              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-5">
+              <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-4 sm:p-5">
                 <h3 className="text-lg font-bold text-navy dark:text-white mb-4">
                   Profile Completeness
                 </h3>
@@ -1329,7 +1333,7 @@ const FreelancerProfileEdit = () => {
               </section>
 
               {/* Profile Tips */}
-              <section className="bg-gradient-to-br from-royal-blue/5 to-teal/5 dark:from-royal-blue/10 dark:to-teal/10 rounded-2xl border border-royal-blue/10 dark:border-white/10 p-5">
+              <section className="bg-gradient-to-br from-royal-blue/5 to-teal/5 dark:from-royal-blue/10 dark:to-teal/10 rounded-2xl border border-royal-blue/10 dark:border-white/10 p-4 sm:p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Lightbulb size={18} className="text-gold" />
                   <h3 className="font-bold text-navy dark:text-white">
@@ -1428,7 +1432,7 @@ const FreelancerProfileEdit = () => {
       {showExperienceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
+            <div className="flex items-center justify-between p-4 sm:p-5 lg:p-6 border-b border-slate-100 dark:border-white/10">
               <h3 className="text-lg font-bold text-navy dark:text-white">
                 Add Experience
               </h3>
@@ -1440,7 +1444,7 @@ const FreelancerProfileEdit = () => {
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-navy dark:text-white mb-2">
                   Job Title *
@@ -1562,7 +1566,7 @@ const FreelancerProfileEdit = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 p-5 border-t border-slate-100">
+            <div className="flex gap-3 p-4 sm:p-5 border-t border-slate-100">
               <Button
                 variant="outline"
                 className="flex-1"
@@ -1589,7 +1593,7 @@ const FreelancerProfileEdit = () => {
       {showEducationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100">
               <h3 className="text-lg font-bold text-navy">Add Education</h3>
               <button
                 onClick={() => setShowEducationModal(false)}
@@ -1599,7 +1603,7 @@ const FreelancerProfileEdit = () => {
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-navy mb-2">
                   Institution *
@@ -1649,7 +1653,7 @@ const FreelancerProfileEdit = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 p-5 border-t border-slate-100">
+            <div className="flex gap-3 p-4 sm:p-5 border-t border-slate-100">
               <Button
                 variant="outline"
                 className="flex-1"
