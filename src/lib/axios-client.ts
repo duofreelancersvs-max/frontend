@@ -31,7 +31,7 @@ const stopLoading = () => {
   }
 };
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
 
 // Extend AxiosRequestConfig to include custom properties
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -141,6 +141,19 @@ axiosClient.interceptors.response.use(
   },
   async (error: AxiosError) => {
     stopLoading();
+
+    // ─── Enhanced error logging for debugging ────────────────────────────
+    if (import.meta.env.DEV || !error.response) {
+      console.error("[axios-client] Request failed:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        code: error.code,
+        message: error.message,
+        hasResponse: !!error.response,
+        responseData: error.response?.data,
+      });
+    }
     
     const originalRequest = error.config as CustomAxiosRequestConfig;
     const status = error.response?.status;

@@ -547,10 +547,9 @@ const ClientProjects = () => {
                       </div>
 
                       {/* Card Footer */}
-                      <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-
-                           <div className="flex flex-col items-center text-center border-slate-200/60 dark:border-white/5">
+                      <div className="px-5 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10">
+                        <div className="grid grid-cols-2 gap-3 mb-4 divide-x divide-slate-200/60 dark:divide-white/5">
+                           <div className="flex flex-col items-center text-center">
                             <span className="text-xxs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                               Applicants
                             </span>
@@ -571,36 +570,36 @@ const ClientProjects = () => {
                         <div className="flex gap-2">
                           <Link
                             to={`/client/project/${project._id}`}
-                            className="flex-1"
+                            className="flex-1 min-w-0"
                           >
                              <Button
                               variant="outline"
-                              className="w-full h-9 text-xs border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:bg-white dark:hover:bg-white/5 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
+                              className="w-full h-9 px-2 text-xs border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:bg-white dark:hover:bg-white/5 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
                             >
-                              <Eye size={14} className="mr-1.5" /> View Details
+                              <Eye size={14} className="mr-1.5 shrink-0" /> <span className="truncate">View Details</span>
                             </Button>
                           </Link>
 
                           {project.status === "open" ? (
                             <Link
                               to={`/client/project/${project._id}/applications`}
-                              className="flex-1"
+                              className="flex-1 min-w-0"
                             >
-                              <Button className="w-full h-9 text-xs bg-teal hover:bg-teal-light text-white shadow-sm shadow-teal/20">
-                                <Users size={14} className="mr-1.5" />{" "}
-                                Applications
+                              <Button className="w-full h-9 px-2 text-xs bg-teal hover:bg-teal-light text-white shadow-sm shadow-teal/20">
+                                <Users size={14} className="mr-1.5 shrink-0" />{" "}
+                                <span className="truncate">Applicants</span>
                               </Button>
                             </Link>
                           ) : project.status === "in-progress" ? (
                             <Button
-                              className="flex-1 h-9 text-xs bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm shadow-royal-blue/20"
+                              className="flex-1 h-9 px-2 text-xs bg-royal-blue hover:bg-royal-blue/90 text-white shadow-sm shadow-royal-blue/20"
                               onClick={() => handleCompleteClick(project._id)}
                               disabled={completingId === project._id}
                             >
                               {completingId === project._id ? (
                                 <Loader2
                                   size={14}
-                                  className="mr-1.5 animate-spin"
+                                  className="mr-1.5 shrink-0 animate-spin"
                                 />
                               ) : (
                                 <CheckCircle size={14} className="mr-1.5" />

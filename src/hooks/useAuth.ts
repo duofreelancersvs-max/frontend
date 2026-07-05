@@ -331,9 +331,8 @@ export function useAuth(): UseAuthReturn {
           navigate("/", { replace: true });
         }
       } catch (err: unknown) {
-        const error = err as { message?: string };
-        const message = error.message || "Google Sign-In failed";
-        
+        const message = formatBackendApiError(err, "Google Sign-In failed");
+
         setError(message);
         toast.error(message);
         throw err;

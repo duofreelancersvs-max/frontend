@@ -32,7 +32,7 @@ import { useMyApplications, useMyFreelancerProfile } from "@/hooks/queries/useFr
 import type { Project } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
-import { TrialBanner } from "@/components/feature-gate";
+import { TrialBanner, UsageIndicator } from "@/components/feature-gate";
 
 /**
  * Application state for a single project card. Drives both the status
@@ -402,6 +402,7 @@ const FindWork = () => {
         <main className="dashboard-content">
           {/* TRIAL BANNER */}
           <TrialBanner />
+          <UsageIndicator className="mb-6" />
 
           {/* Tabs */}
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-xl w-full md:w-fit overflow-x-auto scrollbar-hide hide-scrollbar mb-6">

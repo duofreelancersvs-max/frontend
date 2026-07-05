@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Star,
   User,
   X,
   Check,
@@ -106,11 +105,7 @@ const faqItems = [
     answer:
       "You can cancel anytime. Re-subscribing takes one click — we don't make you re-enter your payment details.",
   },
-  {
-    question: "Is there a free trial for Pro?",
-    answer:
-      "Yes! New users get a 7-day free trial of Pro features. No credit card required to start the trial.",
-  },
+
   {
     question: "What happens to my applications if I downgrade?",
     answer:
@@ -120,34 +115,6 @@ const faqItems = [
     question: "Do you offer refunds?",
     answer:
       "We offer a 7-day money-back guarantee for first-time subscribers. If you're not satisfied, contact support within 7 days of purchase for a full refund.",
-  },
-];
-
-// Testimonials
-const testimonials = [
-  {
-    name: "Priya Sharma",
-    role: "Video Editor",
-    plan: "Pro",
-    quote:
-      "Since upgrading to Pro, I've seen a 3x increase in project invitations. The priority search feature really works!",
-    rating: 5,
-  },
-  {
-    name: "Anjali Patel",
-    role: "3D Animator",
-    plan: "Pro",
-    quote:
-      "Having unlimited applications helped me reach out to more clients. My profile views doubled!",
-    rating: 5,
-  },
-  {
-    name: "Rahul Verma",
-    role: "Motion Graphics Artist",
-    plan: "Pro",
-    quote:
-      "Unlimited applications and priority support let me focus on the work, not the platform. Worth every rupee.",
-    rating: 5,
   },
 ];
 
@@ -172,65 +139,74 @@ const FreelancerSubscription = () => {
   // Live plan / usage context (server of record)
   const { usage, context } = useFeatureGate();
 
-  const handlePayment = useCallback(async (planId: string) => {
-    if (isProcessing) return;
-    setIsProcessing(planId);
-    try {
-      const order = await paymentService.createOrder(planId);
+  const handlePayment = useCallback(
+    async (planId: string) => {
+      if (isProcessing) return;
+      setIsProcessing(planId);
+      try {
+        const order = await paymentService.createOrder(planId);
 
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
-        name: "ConnectMeIndia",
-        description: "Pro Plan Subscription",
-        image: `${window.location.origin}/newLogo.png`,
-        order_id: order.order_id,
-        theme: { 
-          color: "#14b8a6",
-          backdrop_color: "#0f172a" 
-        },
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id: string;
-          razorpay_signature: string;
-        }) => {
-          try {
-            const result = await paymentService.verifyPayment({
-              ...response,
-              planId,
-            });
-            if (result.status === "ok") {
-              toast.success("Subscription activated successfully!");
-              const sub = await subscriptionService.getMySubscription();
-              setCurrentSubscription(sub);
-            } else {
-              toast.error("Payment verification failed. Please contact support.");
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: order.currency,
+          name: "ConnectMeIndia",
+          description: "Pro Plan Subscription",
+          image: `${window.location.origin}/newLogo.png`,
+          order_id: order.order_id,
+          theme: {
+            color: "#14b8a6",
+            backdrop_color: "#0f172a",
+          },
+          handler: async (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              const result = await paymentService.verifyPayment({
+                ...response,
+                planId,
+              });
+              if (result.status === "ok") {
+                toast.success("Subscription activated successfully!");
+                const sub = await subscriptionService.getMySubscription();
+                setCurrentSubscription(sub);
+              } else {
+                toast.error(
+                  "Payment verification failed. Please contact support.",
+                );
+              }
+            } catch {
+              toast.error(
+                "Payment verification failed. Please contact support.",
+              );
             }
-          } catch {
-            toast.error("Payment verification failed. Please contact support.");
-          }
-          setIsProcessing(null);
-        },
-        modal: {
-          ondismiss: () => {
             setIsProcessing(null);
           },
-        },
-      };
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(null);
+            },
+          },
+        };
 
-      await loadRazorpay();
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => {
-        toast.error("Payment failed. Please try again.");
+        await loadRazorpay();
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", () => {
+          toast.error("Payment failed. Please try again.");
+          setIsProcessing(null);
+        });
+        rzp.open();
+      } catch (error: any) {
+        toast.error(
+          error?.message || "Failed to initiate payment. Please try again.",
+        );
         setIsProcessing(null);
-      });
-      rzp.open();
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to initiate payment. Please try again.");
-      setIsProcessing(null);
-    }
-  }, [isProcessing]);
+      }
+    },
+    [isProcessing],
+  );
 
   const handleCancel = useCallback(async () => {
     if (isCancelling) return;
@@ -330,7 +306,9 @@ const FreelancerSubscription = () => {
                   <div>
                     <h2 className="text-lg font-bold text-navy dark:text-white">
                       Your Current Plan:{" "}
-                      <span className="text-teal capitalize">{currentPlan}</span>
+                      <span className="text-teal capitalize">
+                        {currentPlan}
+                      </span>
                       {currentSubscription?.status === "cancelled" && (
                         <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full">
                           Cancelled
@@ -349,10 +327,13 @@ const FreelancerSubscription = () => {
                   variant="outline"
                   className={cn(
                     "border-teal text-teal hover:bg-teal hover:text-white dark:bg-transparent",
-                    currentSubscription?.status === "cancelled" && "border-red-500 text-red-500 hover:bg-transparent hover:text-red-500 cursor-not-allowed opacity-60"
+                    currentSubscription?.status === "cancelled" &&
+                      "border-red-500 text-red-500 hover:bg-transparent hover:text-red-500 cursor-not-allowed opacity-60",
                   )}
                   onClick={handleCancel}
-                  disabled={isCancelling || currentSubscription?.status === "cancelled"}
+                  disabled={
+                    isCancelling || currentSubscription?.status === "cancelled"
+                  }
                 >
                   {isCancelling ? (
                     <Loader2 size={16} className="animate-spin mr-2" />
@@ -405,12 +386,18 @@ const FreelancerSubscription = () => {
                   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
                     <User size={20} className="text-slate-500" />
                   </div>
-                  <h3 className="text-xl font-bold text-navy dark:text-white">Free</h3>
+                  <h3 className="text-xl font-bold text-navy dark:text-white">
+                    Free
+                  </h3>
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-navy dark:text-white">₹0</span>
-                  <span className="text-slate-500 dark:text-slate-400">/month</span>
+                  <span className="text-4xl font-bold text-navy dark:text-white">
+                    ₹0
+                  </span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    /month
+                  </span>
                 </div>
 
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
@@ -456,7 +443,9 @@ const FreelancerSubscription = () => {
                       <span
                         className={cn(
                           "text-sm",
-                          item.included ? "text-navy dark:text-white" : "text-slate-400 dark:text-white/30",
+                          item.included
+                            ? "text-navy dark:text-white"
+                            : "text-slate-400 dark:text-white/30",
                         )}
                       >
                         {item.feature}
@@ -479,7 +468,9 @@ const FreelancerSubscription = () => {
                   <div className="w-10 h-10 rounded-xl bg-teal/10 flex items-center justify-center">
                     <Zap size={20} className="text-teal" />
                   </div>
-                  <h3 className="text-xl font-bold text-navy dark:text-white">Pro</h3>
+                  <h3 className="text-xl font-bold text-navy dark:text-white">
+                    Pro
+                  </h3>
                 </div>
 
                 <div className="mb-6">
@@ -511,16 +502,22 @@ const FreelancerSubscription = () => {
                     disabled
                     className={cn(
                       "w-full bg-teal/20 text-teal cursor-not-allowed",
-                      currentSubscription?.status === "cancelled" && "bg-slate-100 dark:bg-white/10 text-slate-500"
+                      currentSubscription?.status === "cancelled" &&
+                        "bg-slate-100 dark:bg-white/10 text-slate-500",
                     )}
                   >
-                    {currentSubscription?.status === "cancelled" ? "Current Plan (Ending)" : "Current Plan"}
+                    {currentSubscription?.status === "cancelled"
+                      ? "Current Plan (Ending)"
+                      : "Current Plan"}
                   </Button>
                 ) : (
                   <Button
                     className="w-full bg-teal hover:bg-teal-light text-white font-bold"
                     onClick={() => handlePayment("pro")}
-                    disabled={isProcessing === "pro" || currentSubscription?.status === "cancelled"}
+                    disabled={
+                      isProcessing === "pro" ||
+                      currentSubscription?.status === "cancelled"
+                    }
                   >
                     {isProcessing === "pro" ? (
                       <Loader2 size={16} className="animate-spin mr-2" />
@@ -533,7 +530,9 @@ const FreelancerSubscription = () => {
                   {planFeatures.pro.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3">
                       <Check size={16} className="text-success-green" />
-                      <span className="text-sm text-navy dark:text-white">{item.feature}</span>
+                      <span className="text-sm text-navy dark:text-white">
+                        {item.feature}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -567,7 +566,11 @@ const FreelancerSubscription = () => {
                   {comparisonFeatures.map((feature, idx) => (
                     <tr
                       key={idx}
-                      className={idx % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-slate-50/50 dark:bg-white/5"}
+                      className={
+                        idx % 2 === 0
+                          ? "bg-white dark:bg-transparent"
+                          : "bg-slate-50/50 dark:bg-white/5"
+                      }
                     >
                       <td className="text-xs sm:text-sm text-navy dark:text-white px-3 py-3 sm:px-6 sm:py-4 font-medium">
                         {feature.name}
@@ -640,54 +643,6 @@ const FreelancerSubscription = () => {
             </div>
           </section>
 
-          {/* TESTIMONIALS */}
-          <section>
-            <h2 className="text-xl font-bold text-navy dark:text-white mb-6 text-center">
-              What Our Pro Members Say
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((testimonial, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6"
-                >
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={
-                          i < testimonial.rating
-                            ? "text-gold fill-gold"
-                            : "text-slate-200 dark:text-slate-700"
-                        }
-                      />
-                    ))}
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400 italic mb-4">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm">
-                      {testimonial.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-navy dark:text-white text-sm">
-                        {testimonial.name}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {testimonial.role} •{" "}
-                        <span className="text-teal">
-                          {testimonial.plan} Member
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
           {/* FAQ */}
           <section className="bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 dark:border-white/10">
@@ -731,7 +686,9 @@ const FreelancerSubscription = () => {
                   <Check size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy dark:text-white">Cancel Anytime</p>
+                  <p className="font-semibold text-navy dark:text-white">
+                    Cancel Anytime
+                  </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     No long-term commitment
                   </p>
@@ -742,7 +699,9 @@ const FreelancerSubscription = () => {
                   <Lock size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy dark:text-white">No Hidden Fees</p>
+                  <p className="font-semibold text-navy dark:text-white">
+                    No Hidden Fees
+                  </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     What you see is what you pay
                   </p>
@@ -753,7 +712,9 @@ const FreelancerSubscription = () => {
                   <Shield size={20} className="text-success-green" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-navy dark:text-white">7-Day Guarantee</p>
+                  <p className="font-semibold text-navy dark:text-white">
+                    7-Day Guarantee
+                  </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     Full refund if not satisfied
                   </p>

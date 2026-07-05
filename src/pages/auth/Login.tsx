@@ -330,7 +330,7 @@ const Login = () => {
                   {searchParams.get("reason") === "session_invalidated" 
                     ? "You have been logged out because your account was accessed from another device."
                     : searchParams.get("reason") === "session_expired"
-                    ? "Your session has expired after 24 hours. Please log in again."
+                    ? "Your session has expired. Please log in again."
                     : "Your session has expired. Please sign in again."}
                   <button
                     type="button"

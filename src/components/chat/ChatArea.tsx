@@ -10,6 +10,8 @@ import {
   Smile,
   Send,
   MessageSquare,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -323,50 +325,78 @@ const ChatArea = ({
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 lg:px-6 py-4">
-        {messages.map((msg, index) => {
-          const msgDate = new Date(msg.createdAt).toLocaleDateString();
-          const msgTime = new Date(msg.createdAt).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          const prevMsgDate =
-            index > 0
-              ? new Date(messages[index - 1].createdAt).toLocaleDateString()
-              : null;
-          const showDate = index === 0 || msgDate !== prevMsgDate;
-          let isOwn = msg.senderId === currentUserId;
-          let senderName = undefined;
+      {/* Messages Area Container */}
+      <div className="relative flex-1 min-h-0 flex flex-col">
+        {/* Messages */}
+        <div 
+          className={cn(
+            "flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 lg:px-6 py-4 transition-all duration-300",
+            disabledMessageInput && "blur-md opacity-30 pointer-events-none select-none"
+          )}
+        >
+          {messages.map((msg, index) => {
+            const msgDate = new Date(msg.createdAt).toLocaleDateString();
+            const msgTime = new Date(msg.createdAt).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const prevMsgDate =
+              index > 0
+                ? new Date(messages[index - 1].createdAt).toLocaleDateString()
+                : null;
+            const showDate = index === 0 || msgDate !== prevMsgDate;
+            let isOwn = msg.senderId === currentUserId;
+            let senderName = undefined;
 
-          if (role === "admin" && participants) {
-            const sender = participants.find(
-              (p) => (p.id || p._id) === msg.senderId,
-            );
-            if (sender) {
-              senderName =
-                sender.fullName ||
-                sender.firstName + " " + sender.lastName ||
-                "User";
-              isOwn = sender.role === "client"; // Client on right, Freelancer on left
+            if (role === "admin" && participants) {
+              const sender = participants.find(
+                (p) => (p.id || p._id) === msg.senderId,
+              );
+              if (sender) {
+                senderName =
+                  sender.fullName ||
+                  sender.firstName + " " + sender.lastName ||
+                  "User";
+                isOwn = sender.role === "client"; // Client on right, Freelancer on left
+              }
             }
-          }
 
-          return (
-            <MessageBubble
-              key={msg.id}
-              content={msg.content}
-              timestamp={msgTime}
-              isOwn={isOwn}
-              isRead={msg.read}
-              showDate={showDate}
-              dateLabel={msgDate}
-              senderName={senderName}
-              role={role}
-            />
-          );
-        })}
-        <div ref={messagesEndRef} />
+            return (
+              <MessageBubble
+                key={msg.id}
+                content={msg.content}
+                timestamp={msgTime}
+                isOwn={isOwn}
+                isRead={msg.read}
+                showDate={showDate}
+                dateLabel={msgDate}
+                senderName={senderName}
+                role={role}
+              />
+            );
+          })}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Upgrade Overlay */}
+        {disabledMessageInput && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 bg-white/10 dark:bg-[#050B15]/10">
+            <div className="bg-white dark:bg-white/5 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 text-center max-w-sm">
+              <Lock className="w-12 h-12 text-teal mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-navy dark:text-white mb-2">Messaging Locked</h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
+                You've reached your free application limit. Upgrade to Pro to continue messaging clients and secure jobs.
+              </p>
+              <Link 
+                to="/freelancer/subscription"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal hover:bg-teal/90 text-white font-medium rounded-xl transition-all shadow-lg shadow-teal/25 hover:shadow-teal/40 hover:-translate-y-0.5"
+              >
+                <Sparkles className="w-5 h-5" />
+                Upgrade to Pro
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input or Terms Overlay */}

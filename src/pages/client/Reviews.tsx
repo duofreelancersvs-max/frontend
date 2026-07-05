@@ -134,10 +134,10 @@ const ClientReviews = () => {
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {review.reviewer?.avatar || review.reviewer?.fullName?.charAt(0) || "F"}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                       <div>
-                         <p className="font-semibold text-navy dark:text-white">
+                         <p className="font-semibold text-navy dark:text-white truncate">
                           {review.reviewer?.fullName || "Freelancer"}
                         </p>
                          <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -164,7 +164,7 @@ const ClientReviews = () => {
                         </span>
                       </div>
                     </div>
-                     <p className="text-slate-600 dark:text-slate-400 mb-3">{review.comment}</p>
+                     <p className="text-slate-600 dark:text-slate-400 mb-3 break-words whitespace-pre-wrap">{review.comment}</p>
                     <div className="flex items-center gap-4">
                       <Button
                         variant="ghost"

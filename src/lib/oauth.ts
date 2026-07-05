@@ -8,7 +8,7 @@ import type { User } from "@/types/auth.types";
 const OAUTH_ROLE_STORAGE_KEY = "oauth_role";
 const OAUTH_ROLE_COOKIE = "oauth_role";
 const OAUTH_ROLE_MAX_AGE_SECONDS = 600;
-const OAUTH_SYNC_TIMEOUT_MS = 45_000;
+const OAUTH_SYNC_TIMEOUT_MS = 60_000;
 const OAUTH_SYNC_MAX_ATTEMPTS = 3;
 
 /** Parent domain for cookies so role survives www ↔ apex (e.g. .connectmeindia.com). */
@@ -224,7 +224,7 @@ export async function syncOAuthWithBackend(
     try {
       const response = await axiosClient.post<{
         data: OAuthSyncResult;
-      }>("/auth/oauth/callback", requestBody, {
+      }>("/auth/google/sync", requestBody, {
         skipAuth: true,
         timeout: OAUTH_SYNC_TIMEOUT_MS,
       } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
@@ -232,6 +232,19 @@ export async function syncOAuthWithBackend(
       return response.data.data;
     } catch (err) {
       lastError = err;
+
+      // Enhanced logging — capture exact failure details for mobile debugging
+      if (isAxiosError(err)) {
+        console.error(`[syncOAuthWithBackend] Attempt ${attempt}/${OAUTH_SYNC_MAX_ATTEMPTS} failed:`, {
+          status: err.response?.status,
+          code: err.code,
+          message: err.message,
+          data: err.response?.data,
+          hasResponse: !!err.response,
+        });
+      } else {
+        console.error(`[syncOAuthWithBackend] Attempt ${attempt}/${OAUTH_SYNC_MAX_ATTEMPTS} failed:`, err);
+      }
 
       if (!isRetryableOAuthSyncError(err) || attempt === OAUTH_SYNC_MAX_ATTEMPTS) {
         throw err;

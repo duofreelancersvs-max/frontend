@@ -63,44 +63,80 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     return payload.exp * 1000 < Date.now() + 30_000;
   };
 
+  /** Check if the login flow wrote auth state very recently (< 10s ago). */
+  const isFreshLogin = (): boolean => {
+    const { tokens, isAuthenticated } = useAuthStore.getState();
+    if (!isAuthenticated || !tokens?.accessToken) return false;
+    // Decode the access token to check when it was issued
+    const payload = decodeJwtPayload(tokens.accessToken);
+    if (!payload || typeof payload.iat !== "number") return false;
+    // If the token was issued within the last 10 seconds, the login flow
+    // just completed — don't destroy the session it created.
+    return payload.iat * 1000 > Date.now() - 10_000;
+  };
+
   const syncSessionWithBackend = async (tokenOverride?: string): Promise<boolean> => {
     const token = tokenOverride || useAuthStore.getState().tokens?.accessToken;
 
     if (!token) return false;
 
-    try {
-      const { data } = await axiosClient.get<{ data: { user: User } }>(
-        "/auth/me",
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+    // Retry up to 2 times with backoff for transient network errors
+    const MAX_RETRIES = 2;
+    let lastError: any = null;
 
-      const latestTokens = tokenOverride
-        ? {
-            accessToken: tokenOverride,
-            refreshToken: useAuthStore.getState().tokens?.refreshToken || "",
-            expiresIn: useAuthStore.getState().tokens?.expiresIn || 3600,
-          }
-        : useAuthStore.getState().tokens!;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const { data } = await axiosClient.get<{ data: { user: User } }>(
+          "/auth/me",
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
 
-      setAuth(data.data.user, latestTokens);
-      return true;
-    } catch (error: any) {
-      const status = error?.response?.status;
-      // Only clear Supabase session for definitive auth failures outside of
-      // the init window and OAuth callback.  During init the block has its
-      // own fallback paths; during OAuth the callback page handles cleanup.
-      if ((status === 401 || status === 404) && !isOAuthCallbackRef.current && initializingRef.current === false) {
-        supabase.auth.signOut().catch(() => {});
-        // Force wipe local storage to prevent flickering/loops
-        Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-            localStorage.removeItem(key);
-          }
-        });
-        logout();
+        const latestTokens = tokenOverride
+          ? {
+              accessToken: tokenOverride,
+              refreshToken: useAuthStore.getState().tokens?.refreshToken || "",
+              expiresIn: useAuthStore.getState().tokens?.expiresIn || 3600,
+            }
+          : useAuthStore.getState().tokens!;
+
+        setAuth(data.data.user, latestTokens);
+        return true;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+
+        // Definitive auth failure — no point retrying
+        if (status === 401 || status === 404) {
+          break;
+        }
+
+        // Network error (no response) or 5xx — retry with backoff
+        if (attempt < MAX_RETRIES) {
+          const delayMs = 800 * (attempt + 1); // 800ms, 1600ms
+          await new Promise((r) => setTimeout(r, delayMs));
+          continue;
+        }
       }
-      return false;
     }
+
+    // All retries exhausted — handle the failure
+    const status = lastError?.response?.status;
+
+    // Only clear Supabase session for definitive auth failures outside of
+    // the init window and OAuth callback.  During init the block has its
+    // own fallback paths; during OAuth the callback page handles cleanup.
+    if ((status === 401 || status === 404) && !isOAuthCallbackRef.current && initializingRef.current === false) {
+      supabase.auth.signOut().catch(() => {});
+      // Force wipe local storage to prevent flickering/loops
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+          localStorage.removeItem(key);
+        }
+      });
+      logout();
+    }
+
+    return false;
   };
 
   // ─── main effect ───────────────────────────────────────────────────────────
@@ -213,6 +249,13 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
             navigate("/");
           }
+          unblock();
+        } else if (isFreshLogin()) {
+          // The login flow (signInWithGoogleIdToken / OAuthCallback) just
+          // wrote auth state < 10s ago.  Don't destroy that session just
+          // because the init sync had a transient failure (cold start,
+          // slow network).  Trust the existing Zustand state and unblock.
+          console.warn("[AuthInitializer] Backend sync failed but login was recent — trusting existing auth state.");
           unblock();
         } else {
           // Backend rejected the token — the session is dead.  Force

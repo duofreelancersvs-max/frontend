@@ -34,7 +34,7 @@ import {
 } from "@/hooks/queries/useFreelancerDashboardQueries";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import { getCategoryStyle } from "@/lib/category-styles";
-import { TrialBanner } from "@/components/feature-gate";
+import { TrialBanner, UsageIndicator } from "@/components/feature-gate";
 import { TermsModal } from "@/components/modals/TermsModal";
 import ProjectApplicationModal from "@/components/modals/ProjectApplicationModal";
 import ProfileCompletionModal from "@/components/modals/ProfileCompletionModal";
@@ -385,6 +385,7 @@ const FreelancerDashboard = () => {
             <>
               {/* TRIAL BANNER */}
               <TrialBanner />
+              <UsageIndicator className="mb-6" />
 
               {/* WELCOME BANNER */}
               <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy via-[#0f2445] to-royal-blue p-4 sm:p-5 lg:p-6">

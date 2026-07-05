@@ -113,10 +113,10 @@ const FreelancerReviews = () => {
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-royal-blue to-teal flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {review.client.avatar}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                       <div>
-                        <p className="font-semibold text-navy dark:text-white">
+                        <p className="font-semibold text-navy dark:text-white truncate">
                           {review.client.name}
                         </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -146,7 +146,7 @@ const FreelancerReviews = () => {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
                       Project: {review.projectTitle}
                     </p>
-                    <p className="text-slate-600 dark:text-slate-300 mb-3">{review.review}</p>
+                    <p className="text-slate-600 dark:text-slate-300 mb-3 break-words whitespace-pre-wrap">{review.review}</p>
                     <button className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-teal transition-colors">
                       <ThumbsUp size={14} />
                       {review.helpful} found this helpful
