@@ -224,7 +224,7 @@ export async function syncOAuthWithBackend(
     try {
       const response = await axiosClient.post<{
         data: OAuthSyncResult;
-      }>("/auth/google/sync", requestBody, {
+      }>("/auth/oauth/verify", requestBody, {
         skipAuth: true,
         timeout: OAUTH_SYNC_TIMEOUT_MS,
       } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
