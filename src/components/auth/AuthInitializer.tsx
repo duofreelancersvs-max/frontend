@@ -37,6 +37,12 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
   /** Hard logout -> redirect to /login with "session expired" banner. */
   const forceLogout = useCallback(() => {
+    // Clean up cross-tab refresh state
+    try {
+      localStorage.removeItem('auth-refresh-in-progress');
+    } catch {
+      // Ignore
+    }
     logout();
     unblock();
     navigate("/login", { replace: true, state: { sessionExpired: true } });
@@ -363,9 +369,22 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
       },
     );
 
+    // ── beforeunload: clean up cross-tab state ────────────────────────
+    // When a tab closes, remove any in-progress refresh flag so other tabs
+    // don't get stuck waiting for a refresh that will never complete.
+    const handleBeforeUnload = () => {
+      try {
+        localStorage.removeItem('auth-refresh-in-progress');
+      } catch {
+        // Ignore — page is unloading
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
       clearTimeout(safetyTimer);
       subscription.unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

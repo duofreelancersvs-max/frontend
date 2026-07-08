@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   RefreshCw,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import type { UserRole } from "@/types/auth.types";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { useThemeStore } from "@/stores/theme.store";
 import { GoogleLogin } from "@react-oauth/google";
 import { SEO } from "@/components/SEO/SEO";
 import AuthFormPanel from "@/components/auth/AuthFormPanel";
+import { isInAppBrowser } from "@/lib/oauth";
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -86,6 +88,7 @@ const Login = () => {
     rememberMe: false,
   });
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [inAppBrowserDetected] = useState(() => isInAppBrowser());
 
   const handleRoleSelect = (role: UserRole) => {
     if (role === "client" || role === "freelancer") {
@@ -340,6 +343,20 @@ const Login = () => {
                     Dismiss
                   </button>
                 </span>
+              </div>
+            )}
+
+            {inAppBrowserDetected && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm flex items-start gap-2">
+                <ExternalLink size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold mb-1">You're using an in-app browser</p>
+                  <p className="text-blue-700">
+                    For the best experience, tap the menu (⋯) and choose{" "}
+                    <strong>"Open in Chrome"</strong> or <strong>"Open in Safari"</strong>.
+                    Some features may not work inside social media apps.
+                  </p>
+                </div>
               </div>
             )}
 

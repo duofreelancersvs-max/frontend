@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Mail, CheckCircle, KeyRound } from "lucide-react";
+import { ArrowLeft, Mail, CheckCircle, KeyRound, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,11 +9,13 @@ import { toast } from "react-toastify";
 import { TurnstileWidget } from "@/components/common/TurnstileWidget";
 import { SEO } from "@/components/SEO/SEO";
 import AuthFormPanel from "@/components/auth/AuthFormPanel";
+import { isInAppBrowser } from "@/lib/oauth";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [inAppBrowserDetected] = useState(() => isInAppBrowser());
   const { resetPassword, isLoading, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,6 +110,19 @@ const ForgotPassword = () => {
                 {error && (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                     {error}
+                  </div>
+                )}
+
+                {inAppBrowserDetected && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm flex items-start gap-2">
+                    <ExternalLink size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1">You're using an in-app browser</p>
+                      <p className="text-blue-700">
+                        For the best experience, tap the menu (⋯) and choose{" "}
+                        <strong>"Open in Chrome"</strong> or <strong>"Open in Safari"</strong>.
+                      </p>
+                    </div>
                   </div>
                 )}
 

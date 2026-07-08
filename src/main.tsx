@@ -6,6 +6,7 @@ import { enforceCanonicalDomain } from "@/lib/domain-normalizer";
 import App from "./App.tsx";
 import ScrollToTop from "./components/common/ScrollToTop.tsx";
 import { AnalyticsTracker } from "./components/shared/AnalyticsTracker.tsx";
+import { ClarityTracker } from "./components/shared/ClarityTracker.tsx";
 import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
@@ -51,6 +52,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         >
           <AuthInitializer>
             <ScrollToTop />
+            <ClarityTracker />
             <AnalyticsTracker />
             <App />
           </AuthInitializer>

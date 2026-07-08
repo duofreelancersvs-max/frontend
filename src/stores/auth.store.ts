@@ -76,13 +76,20 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        tokens: state.tokens,
+        // Tokens are NOT persisted — they live only in memory and are
+        // re-populated by AuthInitializer from the Supabase session on
+        // every page load.  This prevents a second copy of tokens in
+        // localStorage alongside Supabase's own storage, reducing the
+        // attack surface for XSS token theft.
         lastSupabaseUrl: state.lastSupabaseUrl,
       }),
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as Partial<AuthState>),
+        // Tokens always start as null — AuthInitializer fills them from Supabase
+        tokens: null,
         isAuthenticated: !!((persisted as Partial<AuthState>).user ?? current.user),
+        isLoading: true, // Always start loading until AuthInitializer completes
       }),
     }
   )

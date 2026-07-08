@@ -51,9 +51,33 @@ export function useAuth(): UseAuthReturn {
     clearError,
   } = useAuthStore();
 
+  const clearPartialSupabaseSession = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Continue clearing local app auth state even if Supabase signOut fails.
+    }
+    // Clear all Supabase and auth-related localStorage keys
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (
+          key.startsWith("sb-") && key.endsWith("-auth-token") ||
+          key === "cmi-auth-token" ||
+          key === "auth-storage"
+        ) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {
+      // localStorage access can throw in rare cases
+    }
+    logoutStore();
+  }, [logoutStore]);
+
   // Login with email/password
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<void> => {
+      let supabaseSessionStarted = false;
       try {
         setLoading(true);
         setError(null);
@@ -70,29 +94,63 @@ export function useAuth(): UseAuthReturn {
         if (supabaseError) {
           // If Supabase fails (e.g. user not confirmed), fall back to the
           // backend login which handles auto-confirmation.
-          const { data: response } = await axiosClient.post<{
-            data: {
-              user: User;
-              tokens: {
-                accessToken: string;
-                refreshToken: string;
-                expiresIn: number;
+          //
+          // IMPORTANT: Wrap the backend call in its own try/catch so we can
+          // provide specific error messages for network vs auth failures.
+          let apiResponse;
+          try {
+            apiResponse = await axiosClient.post<{
+              data: {
+                user: User;
+                tokens: {
+                  accessToken: string;
+                  refreshToken: string;
+                  expiresIn: number;
+                };
               };
-            };
-          }>(
-            "/auth/login",
-            {
-              email: credentials.email,
-              password: credentials.password,
-              ...(credentials.role ? { role: credentials.role } : {}),
-            },
-            {
-              skipAuth: true,
-              headers: (credentials.turnstileToken ? { "x-turnstile-token": credentials.turnstileToken } : {}) as AxiosRequestHeaders,
-            } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
-          );
+            }>(
+              "/auth/login",
+              {
+                email: credentials.email,
+                password: credentials.password,
+                ...(credentials.role ? { role: credentials.role } : {}),
+              },
+              {
+                skipAuth: true,
+                headers: (credentials.turnstileToken ? { "x-turnstile-token": credentials.turnstileToken } : {}) as AxiosRequestHeaders,
+              } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
+            );
+          } catch (apiErr: unknown) {
+            // The backend call failed. Determine if it's a network error
+            // (server unreachable) or an auth error (wrong password, etc).
+            const isNetworkError = isAxiosError(apiErr) && !apiErr.response;
+            const isAuthError = isAxiosError(apiErr) && apiErr.response?.status === 401;
+            const errorData = isAxiosError(apiErr)
+              ? (apiErr.response?.data as { error?: { code?: string; message?: string } } | undefined)
+              : undefined;
+            const errorCode = errorData?.error?.code;
 
-          const { user: apiUser, tokens: apiTokens } = response.data;
+            if (isNetworkError) {
+              // Backend is unreachable — the user cannot log in at all.
+              // Show a clear message instead of "Invalid email or password".
+              throw new Error("Our servers are temporarily unavailable. Please check your connection and try again.");
+            }
+
+            if (isAuthError) {
+              // Session invalidated (single-device) or wrong credentials.
+              // Show the backend's specific error message.
+              if (errorCode === 'SESSION_INVALIDATED' || errorCode === 'SESSION_EXPIRED') {
+                throw new Error("Your session was invalidated because you logged in from another device. Please sign in again.");
+              }
+              // Other 401 errors (wrong password, etc) — show the backend's message
+              throw apiErr;
+            }
+
+            // Other errors (400, 429, 500, etc) — let formatBackendApiError handle it
+            throw apiErr;
+          }
+
+          const { user: apiUser, tokens: apiTokens } = apiResponse.data.data;
 
           if (credentials.role && apiUser.role !== credentials.role) {
             throw new Error(
@@ -125,6 +183,7 @@ export function useAuth(): UseAuthReturn {
         if (!session) {
           throw new Error("No session established");
         }
+        supabaseSessionStarted = true;
 
         const verifyPayload: Record<string, string> = {
           accessToken: session.access_token,
@@ -134,20 +193,38 @@ export function useAuth(): UseAuthReturn {
           verifyPayload.role = credentials.role;
         }
 
-        const { data: verifyResponse } = await axiosClient.post<{
-          data: {
-            user: User;
-            tokens: {
-              accessToken: string;
-              refreshToken: string;
-              expiresIn: number;
+        let verifiedUser: User;
+        let verifiedTokens: { accessToken: string; refreshToken: string; expiresIn: number };
+        try {
+          const verifyResponse = await axiosClient.post<{
+            data: {
+              user: User;
+              tokens: {
+                accessToken: string;
+                refreshToken: string;
+                expiresIn: number;
+              };
             };
-          };
-        }>("/auth/login/verify", verifyPayload, {
-          skipAuth: true,
-        } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
+          }>("/auth/login/verify", verifyPayload, {
+            skipAuth: true,
+          } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
 
-        const { user: verifiedUser, tokens: verifiedTokens } = verifyResponse.data;
+          verifiedUser = verifyResponse.data.data.user;
+          verifiedTokens = verifyResponse.data.data.tokens;
+        } catch (verifyErr: unknown) {
+          // If the backend returns SESSION_INVALIDATED, the Supabase session
+          // is from a stale session (user logged in elsewhere).  Clean up and
+          // show a clear message.
+          const isAuthErr = isAxiosError(verifyErr) && verifyErr.response?.status === 401;
+          if (isAuthErr) {
+            const errCode = (verifyErr.response?.data as { error?: { code?: string } })?.error?.code;
+            if (errCode === 'SESSION_INVALIDATED' || errCode === 'SESSION_EXPIRED') {
+              await clearPartialSupabaseSession();
+              throw new Error("Your session was invalidated because you logged in from another device. Please sign in again.");
+            }
+          }
+          throw verifyErr;
+        }
 
         if (credentials.role && verifiedUser.role !== credentials.role) {
           throw new Error(
@@ -168,6 +245,9 @@ export function useAuth(): UseAuthReturn {
           navigate("/");
         }
       } catch (err: unknown) {
+        if (supabaseSessionStarted) {
+          await clearPartialSupabaseSession();
+        }
         const message = formatBackendApiError(err, "Invalid email or password");
         setError(message);
         toast.error(message);
@@ -176,7 +256,7 @@ export function useAuth(): UseAuthReturn {
         setLoading(false);
       }
     },
-    [navigate, setAuth, setError, setLoading],
+    [clearPartialSupabaseSession, navigate, setAuth, setError, setLoading],
   );
 
   // Register new user
@@ -320,6 +400,7 @@ export function useAuth(): UseAuthReturn {
   // Google ID Token sign in (Native Google popup)
   const signInWithGoogleIdToken = useCallback(
     async (idToken: string, role?: string): Promise<void> => {
+      let supabaseSessionStarted = false;
       try {
         setLoading(true);
         setError(null);
@@ -343,6 +424,7 @@ export function useAuth(): UseAuthReturn {
         if (!session) {
           throw new Error("No session established");
         }
+        supabaseSessionStarted = true;
 
         const requestBody: Record<string, string> = {
           accessToken: session.access_token,
@@ -385,6 +467,9 @@ export function useAuth(): UseAuthReturn {
           navigate("/", { replace: true });
         }
       } catch (err: unknown) {
+        if (supabaseSessionStarted) {
+          await clearPartialSupabaseSession();
+        }
         const message = formatBackendApiError(err, "Google Sign-In failed");
 
         setError(message);
@@ -394,7 +479,7 @@ export function useAuth(): UseAuthReturn {
         setLoading(false);
       }
     },
-    [navigate, setAuth, setError, setLoading],
+    [clearPartialSupabaseSession, navigate, setAuth, setError, setLoading],
   );
 
   // Reset password
@@ -463,12 +548,12 @@ export function useAuth(): UseAuthReturn {
   // Refresh user data
   const refreshUser = useCallback(async (): Promise<void> => {
     try {
-      const { data } = await axiosClient.get<{ user: User }>("/auth/me");
-      if (data.user) {
+      const { data } = await axiosClient.get<{ data: { user: User } }>("/auth/me");
+      if (data.data.user) {
         // We only update the user, keeping the tokens
         const currentTokens = useAuthStore.getState().tokens;
         if (currentTokens) {
-          setAuth(data.user, currentTokens);
+          setAuth(data.data.user, currentTokens);
         }
       }
     } catch (error) {

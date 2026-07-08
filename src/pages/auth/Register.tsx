@@ -14,6 +14,7 @@ import {
   Quote,
   CheckCircle,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { useThemeStore } from "@/stores/theme.store";
 import { GoogleLogin } from "@react-oauth/google";
 import { SEO } from "@/components/SEO/SEO";
 import AuthFormPanel from "@/components/auth/AuthFormPanel";
+import { isInAppBrowser } from "@/lib/oauth";
 
 type Step = "role" | "form";
 
@@ -50,6 +52,7 @@ const Register = () => {
     clearError,
   } = useAuth();
   const { theme } = useThemeStore();
+  const [inAppBrowserDetected] = useState(() => isInAppBrowser());
 
   const [googleBtnWidth, setGoogleBtnWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -262,6 +265,20 @@ const Register = () => {
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
+              </div>
+            )}
+
+            {inAppBrowserDetected && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm flex items-start gap-2">
+                <ExternalLink size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold mb-1">You're using an in-app browser</p>
+                  <p className="text-blue-700">
+                    For the best experience, tap the menu (⋯) and choose{" "}
+                    <strong>"Open in Chrome"</strong> or <strong>"Open in Safari"</strong>.
+                    Some features may not work inside social media apps.
+                  </p>
+                </div>
               </div>
             )}
 

@@ -83,9 +83,13 @@ export default function OAuthCallback() {
       setError(message);
       toast.error(message);
 
-      if (message.includes("Account already exists")) {
+      try {
         await supabase.auth.signOut();
+      } catch {
+        // Keep the visible OAuth error, but remove the partial browser session.
       }
+      localStorage.removeItem("cmi-auth-token");
+      useAuthStore.getState().logout();
     } finally {
       setLoading(false);
       setIsRetrying(false);

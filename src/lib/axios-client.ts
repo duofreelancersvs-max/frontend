@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useUpgradeModalStore } from "@/stores/upgrade-modal.store";
 import type { PlanErrorMeta } from "@/types/feature-gate.types";
 import { supabase } from "@/lib/supabase";
+import { getApiBaseUrl } from "@/lib/api-config";
 import NProgress from "nprogress";
 
 NProgress.configure({ showSpinner: true, speed: 400 });
@@ -31,7 +32,7 @@ const stopLoading = () => {
   }
 };
 
-const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
+const API_URL = getApiBaseUrl();
 
 // Extend AxiosRequestConfig to include custom properties
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -70,6 +71,22 @@ interface PendingRequest {
 let isRefreshing = false;
 let failedQueue: PendingRequest[] = [];
 
+// ─── Cross-tab refresh coordination ───────────────────────────────────────
+// When multiple browser tabs are open, each has its own isRefreshing flag.
+// Without coordination, two tabs can simultaneously call refreshSession(),
+// but Supabase refresh tokens are single-use — one succeeds, the other
+// destroys the session.  A BroadcastChannel signals other tabs to wait.
+const REFRESH_BROADCAST_KEY = 'auth-refresh';
+const REFRESHLocalStorage_KEY = 'auth-refresh-in-progress';
+let refreshBroadcast: BroadcastChannel | null = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    refreshBroadcast = new BroadcastChannel(REFRESH_BROADCAST_KEY);
+  }
+} catch {
+  // BroadcastChannel not supported — fall back to tab-only refresh
+}
+
 function processQueue(error: unknown, token: string | null) {
   failedQueue.forEach((pending) => {
     if (error) {
@@ -79,6 +96,19 @@ function processQueue(error: unknown, token: string | null) {
     }
   });
   failedQueue = [];
+}
+
+// Listen for cross-tab refresh signals
+if (refreshBroadcast) {
+  refreshBroadcast.onmessage = (event) => {
+    if (event.data?.type === 'refresh-completed') {
+      // Another tab finished refreshing — the new tokens are in Supabase's
+      // localStorage.  Process any queued requests with a fresh read.
+      // We don't have the exact new token here, but the queued requests
+      // will read it from Zustand on retry.
+      localStorage.removeItem(REFRESHLocalStorage_KEY);
+    }
+  };
 }
 
 function enqueueRefresh(): Promise<string> {
@@ -174,12 +204,25 @@ axiosClient.interceptors.response.use(
     }
 
     // If error is 401 and we haven't retried yet, try to refresh token
-    // Handle SESSION_INVALIDATED first — always, even for manual-auth requests
-    // (AuthInitializer uses manual auth headers during init).
     if (status === 401) {
-      if ((errorCode === 'SESSION_INVALIDATED' || errorCode === 'SESSION_EXPIRED') && originalRequest.headers.Authorization) {
-        await fullLogout();
-        window.location.replace(`/login?reason=${errorCode.toLowerCase()}`);
+      // ── SESSION_INVALIDATED / SESSION_EXPIRED: always force-logout ────
+      // These are definitive "your session is dead" signals from the backend.
+      // Handle them FIRST and ALWAYS, regardless of whether the request had
+      // an Authorization header.  This catches:
+      //   - Normal API calls with Bearer token (old session after new login)
+      //   - Login verify calls (skipAuth: true, no header, but backend still
+      //     returns SESSION_INVALIDATED because the Supabase token is from a
+      //     stale session)
+      //
+      // SKIP if already on /login — the login flow has its own error handling
+      // and showing a redirect on top of the login error creates UX confusion.
+      if (errorCode === 'SESSION_INVALIDATED' || errorCode === 'SESSION_EXPIRED') {
+        const onLoginPage = window.location.pathname === '/login' ||
+                            window.location.pathname === '/register';
+        if (!onLoginPage) {
+          await fullLogout();
+          window.location.replace(`/login?reason=${errorCode.toLowerCase()}`);
+        }
         return Promise.reject(error);
       }
 
@@ -213,6 +256,24 @@ axiosClient.interceptors.response.use(
         } catch (refreshError) {
           return Promise.reject(refreshError);
         }
+      }
+
+      // ── Cross-tab coordination ──────────────────────────────────────
+      // Check if another tab is already refreshing.  If so, wait for it
+      // to complete instead of starting a competing refresh.
+      if (refreshBroadcast) {
+        const otherTabRefreshing = localStorage.getItem(REFRESHLocalStorage_KEY);
+        if (otherTabRefreshing) {
+          try {
+            const token = await enqueueRefresh();
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosClient(originalRequest);
+          } catch (refreshError) {
+            return Promise.reject(refreshError);
+          }
+        }
+        localStorage.setItem(REFRESHLocalStorage_KEY, Date.now().toString());
+        refreshBroadcast.postMessage({ type: 'refresh-started' });
       }
 
       originalRequest._retry = true;
@@ -268,6 +329,11 @@ axiosClient.interceptors.response.use(
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
+        // Clean up cross-tab refresh coordination
+        if (refreshBroadcast) {
+          localStorage.removeItem(REFRESHLocalStorage_KEY);
+          refreshBroadcast.postMessage({ type: 'refresh-completed' });
+        }
       }
     }
 
@@ -283,12 +349,22 @@ async function fullLogout() {
     // signOut can fail on network errors — continue anyway
   }
   
-  // Force wipe Supabase local storage if signOut fails to do so (prevents 401 logout loops)
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-      localStorage.removeItem(key);
-    }
-  });
+  // Force wipe ALL Supabase localStorage keys to prevent 401 logout loops.
+  // Supabase stores session data under keys like "sb-<project-ref>-auth-token"
+  // and our custom key "cmi-auth-token".  Wipe them all.
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (
+        key.startsWith("sb-") && key.endsWith("-auth-token") ||
+        key === "cmi-auth-token" ||
+        key === "auth-storage"
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch {
+    // localStorage access can throw in some edge cases
+  }
 
   useAuthStore.getState().logout();
 }

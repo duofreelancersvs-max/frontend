@@ -42,10 +42,13 @@ export default defineConfig({
         ],
       },
       workbox: {
-        importScripts: ['/push-sw.js'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        importScripts: ["/push-sw.js"],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
   ],

@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/stores/auth.store";
+import { getApiOrigin } from "@/lib/api-config";
 import type { NotificationResponseDto } from "@/types/notification.types";
 
 // ─── Types mirroring backend socket.types.ts ────────────────────────
@@ -125,18 +126,8 @@ export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 let socket: AppSocket | null = null;
 
-/**
- * Derive the Socket.IO server URL from VITE_API_URL.
- * e.g. "http://localhost:3000/api/v1" → "http://localhost:3000"
- */
 function getServerUrl(): string {
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
-  try {
-    const url = new URL(apiUrl);
-    return url.origin;
-  } catch {
-    return "http://localhost:3000";
-  }
+  return getApiOrigin();
 }
 
 /**
