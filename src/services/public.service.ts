@@ -3,11 +3,13 @@ import { api } from '../lib/api';
 export interface SubscriptionPlan {
   _id: string;
   name: string;
+  description: string;
   price: number;
-  durationInDays: number;
+  billingCycle: 'monthly' | 'yearly';
   features: string[];
+  tier: number;
+  isFree: boolean;
   isActive: boolean;
-  tier: string;
   isPopular?: boolean;
 }
 

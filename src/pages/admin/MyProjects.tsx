@@ -20,16 +20,16 @@ import { useNavigate } from "react-router-dom";
 // ─── Status badge ────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  open: { label: "Open", cls: "admin-status-badge open" },
-  "in-progress": { label: "In Progress", cls: "admin-status-badge in-progress" },
-  completed: { label: "Completed", cls: "admin-status-badge completed" },
-  cancelled: { label: "Cancelled", cls: "admin-status-badge cancelled" },
-  draft: { label: "Draft", cls: "admin-status-badge pending" },
+  open: { label: "Open", cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  "in-progress": { label: "In Progress", cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  completed: { label: "Completed", cls: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" },
+  cancelled: { label: "Cancelled", cls: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+  draft: { label: "Draft", cls: "bg-slate-500/10 text-slate-400 border-slate-500/20" },
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const c = STATUS_CONFIG[status] ?? { label: status, cls: "admin-status-badge pending" };
-  return <span className={c.cls}>{c.label}</span>;
+  const c = STATUS_CONFIG[status] ?? { label: status, cls: "bg-slate-500/10 text-slate-400 border-slate-500/20" };
+  return <span className={`px-2.5 py-1 text-xs font-medium border rounded-full ${c.cls}`}>{c.label}</span>;
 };
 
 // ─── Main component ──────────────────────────────────────────────
@@ -93,232 +93,209 @@ const MyProjects = () => {
   };
 
   return (
-    <div className="um-page-wrapper">
+    <div className="flex flex-col min-h-full space-y-6">
       {/* Header */}
-      <div className="um-page-header">
-        <div className="um-page-title-group">
-          <div className="um-page-icon">
-            <Briefcase size={22} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-indigo-500/10 rounded-xl">
+            <Briefcase className="text-indigo-400" size={24} />
           </div>
           <div>
-            <h1 className="um-page-title">My Projects</h1>
-            <p className="um-page-subtitle">
+            <h1 className="text-2xl font-bold text-white tracking-tight">My Projects</h1>
+            <p className="text-slate-400 text-sm mt-1">
               Projects posted by admin with custom client identities
             </p>
           </div>
         </div>
         <button
-          className="admin-btn admin-btn-primary"
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors flex items-center gap-2"
           onClick={() => navigate("/admin/post-project")}
         >
-          + Post New Project
+          <span>+ Post New Project</span>
         </button>
       </div>
 
       {/* Stats strip */}
-      <div className="um-stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "1.5rem" }}>
-        <div className="um-stat-card indigo">
-          <div className="um-stat-icon"><Briefcase size={20} /></div>
-          <div className="um-stat-info">
-            <div className="um-stat-value">{totalItems}</div>
-            <div className="um-stat-label">Total Admin Projects</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Total Admin Projects */}
+        <div className="bg-[#18181b] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
+          <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400"><Briefcase size={24} /></div>
+          <div>
+            <div className="text-2xl font-bold text-white">{totalItems}</div>
+            <div className="text-sm text-slate-400 mt-1">Total Admin Projects</div>
           </div>
         </div>
-        <div className="um-stat-card amber">
-          <div className="um-stat-icon"><Clock size={20} /></div>
-          <div className="um-stat-info">
-            <div className="um-stat-value">
+        {/* Active Projects */}
+        <div className="bg-[#18181b] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
+          <div className="p-3 bg-amber-500/10 rounded-xl text-amber-400"><Clock size={24} /></div>
+          <div>
+            <div className="text-2xl font-bold text-white">
               {projects.filter((p) => p.status === "open" || p.status === "in-progress").length}
             </div>
-            <div className="um-stat-label">Active</div>
+            <div className="text-sm text-slate-400 mt-1">Active</div>
           </div>
         </div>
-        <div className="um-stat-card emerald">
-          <div className="um-stat-icon"><CheckCircle size={20} /></div>
-          <div className="um-stat-info">
-            <div className="um-stat-value">
+        {/* Completed Projects */}
+        <div className="bg-[#18181b] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400"><CheckCircle size={24} /></div>
+          <div>
+            <div className="text-2xl font-bold text-white">
               {projects.filter((p) => p.status === "completed").length}
             </div>
-            <div className="um-stat-label">Completed</div>
+            <div className="text-sm text-slate-400 mt-1">Completed</div>
           </div>
         </div>
       </div>
 
       {/* Search */}
-      <div className="um-filters-bar" style={{ marginBottom: "1.5rem" }}>
-        <div className="um-search-wrapper" style={{ flex: 1 }}>
-          <Search size={16} className="um-search-icon" />
-          <input
-            className="um-search-input"
-            placeholder="Search by project title or client name…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="um-search-clear" onClick={() => setSearchQuery("")}>
-              <X size={14} />
-            </button>
-          )}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="text-slate-500" size={18} />
         </div>
+        <input
+          type="text"
+          className="w-full bg-[#18181b] border border-white/10 rounded-xl py-3 pl-10 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+          placeholder="Search by project title or client name…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white transition-colors"
+            onClick={() => setSearchQuery("")}
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 size={36} className="animate-spin text-indigo-400" />
-        </div>
-      ) : projects.length === 0 ? (
-        <div className="um-empty-state">
-          <FolderOpen size={48} />
-          <p>No admin-posted projects found</p>
-          <span>
-            {searchQuery
-              ? "Try a different search term."
-              : 'Use "Post New Project" to add your first project.'}
-          </span>
-        </div>
-      ) : (
-        <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "1rem",
-            }}
-          >
-            {projects.map((project) => (
-              <div
-                key={project._id}
-                className="um-user-card"
-                style={{ cursor: "default" }}
-              >
-                {/* Card header */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
-                  <h3
-                    style={{
-                      fontSize: "0.95rem",
-                      fontWeight: 600,
-                      color: "var(--um-text-primary)",
-                      lineHeight: 1.4,
-                      flex: 1,
-                      marginRight: "0.5rem",
-                      wordBreak: "break-word"
-                    }}
-                  >
-                    {project.title}
-                  </h3>
-                  <StatusBadge status={project.status} />
-                </div>
-
-                {/* Description */}
-                {project.description && (
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--um-text-muted)",
-                      marginBottom: "0.75rem",
-                      lineHeight: 1.5,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      wordBreak: "break-word"
-                    }}
-                  >
-                    {project.description}
-                  </p>
-                )}
-
-                {/* Meta */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.78rem", color: "var(--um-text-muted)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                    <User size={13} />
-                    <span style={{ wordBreak: "break-all" }}>Posted as: <strong style={{ color: "var(--um-accent)" }}>{project.customClientName}</strong></span>
-                  </div>
-                  {project.categories && project.categories.length > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <Briefcase size={13} />
-                      <span>{project.categories.join(", ")}</span>
+      <div className="flex-1 flex flex-col">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center py-24">
+            <Loader2 size={36} className="animate-spin text-indigo-400" />
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+              <FolderOpen size={32} className="text-slate-400" />
+            </div>
+            <p className="text-lg font-medium text-white mb-2">No admin-posted projects found</p>
+            <p className="text-slate-400 max-w-sm">
+              {searchQuery
+                ? "Try a different search term or clear the search filter."
+                : 'Use the "Post New Project" button above to add your first project.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+              {projects.map((project) => (
+                <div
+                  key={project._id}
+                  className="bg-[#18181b] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-colors flex flex-col"
+                >
+                  {/* Card header */}
+                  <div className="flex justify-between items-start mb-4 gap-3">
+                    <h3 className="text-base font-semibold text-white leading-snug line-clamp-2 break-words flex-1">
+                      {project.title}
+                    </h3>
+                    <div className="shrink-0">
+                      <StatusBadge status={project.status} />
                     </div>
-                  )}
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                    <CalendarDays size={13} />
-                    <span>
-                      Created:{" "}
-                      {new Date(project.createdAt).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
                   </div>
-                  {project.deadline && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <Clock size={13} />
+
+                  {/* Description */}
+                  {project.description && (
+                    <p className="text-sm text-slate-400 mb-5 line-clamp-2 break-words leading-relaxed">
+                      {project.description}
+                    </p>
+                  )}
+
+                  {/* Meta */}
+                  <div className="flex flex-col gap-2.5 text-sm text-slate-400 mt-auto">
+                    <div className="flex items-center gap-2.5">
+                      <User size={14} className="text-slate-500" />
+                      <span className="truncate">Posted as: <strong className="text-indigo-400 font-medium">{project.customClientName}</strong></span>
+                    </div>
+                    {project.categories && project.categories.length > 0 && (
+                      <div className="flex items-center gap-2.5">
+                        <Briefcase size={14} className="text-slate-500" />
+                        <span className="truncate">{project.categories.join(", ")}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2.5">
+                      <CalendarDays size={14} className="text-slate-500" />
                       <span>
-                        Deadline:{" "}
-                        {new Date(project.deadline).toLocaleDateString("en-IN", {
+                        Created:{" "}
+                        {new Date(project.createdAt).toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
                         })}
                       </span>
                     </div>
-                  )}
-                </div>
+                    {project.deadline && (
+                      <div className="flex items-center gap-2.5">
+                        <Clock size={14} className="text-slate-500" />
+                        <span>
+                          Deadline:{" "}
+                          {new Date(project.deadline).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Actions */}
-                <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px solid var(--um-border)", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-                  <label style={{ fontSize: "0.75rem", color: "var(--um-text-muted)", marginRight: "0.5rem" }}>Update Status:</label>
-                  <select
-                    value={project.status}
-                    onChange={(e) => handleStatusChange(project._id, e.target.value)}
-                    style={{
-                      padding: "0.3rem 0.6rem",
-                      borderRadius: "6px",
-                      border: "1px solid var(--um-border)",
-                      background: "var(--um-bg-secondary)",
-                      color: "var(--um-text-primary)",
-                      fontSize: "0.8rem",
-                      cursor: "pointer",
-                      outline: "none"
-                    }}
-                  >
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="draft">Draft</option>
-                  </select>
+                  {/* Actions */}
+                  <div className="mt-5 pt-4 border-t border-white/5 flex justify-end items-center">
+                    {project.status !== "completed" ? (
+                      <button
+                        onClick={() => handleStatusChange(project._id, "completed")}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg transition-colors"
+                      >
+                        <CheckCircle size={14} />
+                        Mark as Completed
+                      </button>
+                    ) : (
+                      <span className="text-sm text-slate-400 flex items-center gap-1.5 px-2 py-1">
+                        <CheckCircle size={14} className="text-emerald-500" />
+                        Completed
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="um-pagination" style={{ marginTop: "1.5rem" }}>
-              <button
-                className="um-page-btn"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="um-page-info">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="um-page-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                <ChevronRight size={16} />
-              </button>
+              ))}
             </div>
-          )}
-        </>
-      )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center items-center gap-4">
+                <button
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <span className="text-sm font-medium text-slate-400">
+                  Page <span className="text-white">{currentPage}</span> of <span className="text-white">{totalPages}</span>
+                </span>
+                <button
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

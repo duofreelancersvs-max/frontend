@@ -24,21 +24,24 @@ vi.mock("@/services/public.service", () => ({
       {
         _id: "plan-free",
         name: "Free",
+        description: "Ideal for beginners",
         price: 0,
+        billingCycle: 'monthly',
         durationInDays: 30,
         features: [
           "5 applications / month",
           "1 active project",
-          "3 portfolio items",
           "Standard support",
         ],
         isActive: true,
-        tier: "free",
+        tier: 0,
       },
       {
         _id: "plan-pro",
         name: "Pro",
-        price: 399,
+        description: "For active professionals",
+        price: 499,
+        billingCycle: 'monthly',
         durationInDays: 30,
         features: [
           "Unlimited applications",
@@ -48,7 +51,7 @@ vi.mock("@/services/public.service", () => ({
           "Pro Member badge",
         ],
         isActive: true,
-        tier: "pro",
+        tier: 1,
         isPopular: true,
       },
     ]),
@@ -64,6 +67,10 @@ vi.mock("@/stores/auth.store", () => ({
     const state = { user: null, isAuthenticated: false };
     return selector ? selector(state) : state;
   }),
+}));
+
+vi.mock("@/components/SEO/SEO", () => ({
+  SEO: () => <div data-testid="mock-seo" />
 }));
 
 // Mock lucide-react icons
@@ -152,10 +159,10 @@ describe("Pricing", () => {
   it("displays correct pricing for Free and Pro monthly plans", async () => {
     renderWithRouter(<Pricing />);
     await waitFor(() => {
-      expect(screen.getAllByText(/₹399/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/₹499/i).length).toBeGreaterThan(0);
     });
     expect(screen.getAllByText(/₹0/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/₹399/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/₹499/i).length).toBeGreaterThan(0);
   });
 
   it("displays the 'Best For Growth' badge on the Pro plan", async () => {
@@ -206,7 +213,7 @@ describe("Pricing", () => {
     expect(screen.getAllByText(/portfolio capacity/i).length).toBeGreaterThan(
       0,
     );
-    expect(screen.getAllByText(/search boost/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/search priority/i).length).toBeGreaterThan(0);
   });
 
   it("renders the trust badge in the hero", async () => {
@@ -216,24 +223,6 @@ describe("Pricing", () => {
         0,
       );
     });
-  });
-
-  it("renders the FAQ section with the current 3 questions", () => {
-    renderWithRouter(<Pricing />);
-    expect(screen.getByText(/frequently asked questions/i)).toBeInTheDocument();
-    expect(screen.getByText(/can i cancel at any time/i)).toBeInTheDocument();
-    expect(screen.getByText(/which plan is right for me/i)).toBeInTheDocument();
-  });
-
-  it("allows toggling FAQ items", async () => {
-    renderWithRouter(<Pricing />);
-    const faqButton = screen.getByText(/can i cancel at any time/i);
-    await userEvent.click(faqButton);
-    expect(
-      screen.getByText(
-        /you can cancel your subscription from your dashboard settings/i,
-      ),
-    ).toBeInTheDocument();
   });
 
   it("renders CTA section", () => {

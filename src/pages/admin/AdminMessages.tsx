@@ -302,15 +302,15 @@ const AdminMessages = () => {
   } : null;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#09090b]">
+    <div className="flex flex-col bg-slate-50 dark:bg-background rounded-2xl border border-slate-200 dark:border-white/5 overflow-hidden h-[calc(100vh-140px)] md:h-[calc(100vh-160px)]">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/5 flex-shrink-0">
-        <h1 className="text-xl font-bold text-white">Direct Messages</h1>
-        <p className="text-sm text-slate-400">Manage your direct conversations with users.</p>
+      <div className="px-6 py-4 border-b border-slate-200 dark:border-white/5 flex-shrink-0">
+        <h1 className="text-xl font-bold text-navy dark:text-white">Direct Messages</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Manage your direct conversations with users.</p>
       </div>
       
       {/* Messages Layout */}
-      <div className="flex-1 min-h-0 flex relative">
+      <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-100 dark:bg-background relative">
         <ConversationList
           conversations={conversationItems}
           selectedId={selectedConversation?.id || selectedConversation?._id || null}
@@ -362,7 +362,7 @@ const AdminMessages = () => {
                 className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 xl:hidden"
                 onClick={() => setShowInfoPanel(false)}
               />
-              <div className="absolute inset-y-0 right-0 z-50 flex w-72 sm:w-80 shadow-2xl xl:static xl:shadow-none xl:z-auto bg-[#09090b] transition-transform">
+              <div className="absolute inset-y-0 right-0 z-50 flex w-72 sm:w-80 shadow-2xl xl:static xl:shadow-none xl:z-auto bg-white dark:bg-[#050B15] transition-transform">
                 <ChatInfoPanel
                   participant={infoPanelParticipant}
                   project={null}

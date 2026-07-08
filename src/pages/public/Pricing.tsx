@@ -111,28 +111,41 @@ const Pricing = () => {
           },
         };
 
-        const mappedPlans = dbPlans.map((dbPlan: SubscriptionPlan) => {
-          const tier = (dbPlan.tier || "free").toLowerCase();
-          const aesthetics = defaultAesthetics[tier] || defaultAesthetics.free;
-
-          return {
-            name: dbPlan.name,
-            tier: dbPlan.tier,
-            description: aesthetics.description,
-            monthlyPrice: dbPlan.price,
-            yearlyPrice: dbPlan.price * 10,
-            badge: aesthetics.badge,
-            borderColor: aesthetics.borderColor,
-            highlighted: aesthetics.highlighted,
-            buttonVariant: aesthetics.buttonVariant,
-            buttonClass: aesthetics.buttonClass,
-            buttonText: aesthetics.buttonText,
-            features: dbPlan.features,
-          };
+        const plansByTier = new Map<number, any>();
+        
+        dbPlans.forEach((dbPlan: SubscriptionPlan) => {
+          const tierStr = dbPlan.tier === 1 ? 'pro' : 'free';
+          const aesthetics = defaultAesthetics[tierStr] || defaultAesthetics.free;
+          
+          if (!plansByTier.has(dbPlan.tier)) {
+            plansByTier.set(dbPlan.tier, {
+              name: dbPlan.tier === 1 ? 'Pro' : 'Free',
+              tier: dbPlan.tier,
+              description: dbPlan.description || aesthetics.description,
+              monthlyPrice: 0,
+              yearlyPrice: 0,
+              badge: aesthetics.badge,
+              borderColor: aesthetics.borderColor,
+              highlighted: aesthetics.highlighted,
+              buttonVariant: aesthetics.buttonVariant,
+              buttonClass: aesthetics.buttonClass,
+              buttonText: aesthetics.buttonText,
+              features: dbPlan.features,
+            });
+          }
+          
+          const planConfig = plansByTier.get(dbPlan.tier);
+          if (dbPlan.billingCycle === 'yearly') {
+            planConfig.yearlyPrice = dbPlan.price;
+          } else {
+            planConfig.monthlyPrice = dbPlan.price;
+          }
         });
 
+        const mappedPlans = Array.from(plansByTier.values());
+
         if (mappedPlans.length > 0) {
-          setDisplayPlans(mappedPlans);
+          setDisplayPlans(mappedPlans.sort((a, b) => a.tier - b.tier));
         }
       } catch (error) {
         console.error("Error fetching public plans:", error);
@@ -240,8 +253,8 @@ const Pricing = () => {
     {
       name: "Pro",
       description: "For active professionals",
-      monthlyPrice: 399,
-      yearlyPrice: 3990,
+      monthlyPrice: 499,
+      yearlyPrice: 4999,
       badge: { text: "Best For Growth", color: "bg-teal text-white" },
       borderColor: "border-teal/50",
       highlighted: true,
@@ -526,6 +539,9 @@ const Pricing = () => {
                         /{billingCycle === "monthly" ? "mo" : "yr"}
                       </span>
                     </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                      GST included
+                    </p>
                   </div>
 
                   <ul className="space-y-4 mb-12 flex-1">

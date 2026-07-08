@@ -238,14 +238,6 @@ const FreelancerDashboard = () => {
       trend: "neutral" as const,
     },
     {
-      label: "Email Verification",
-      value: user?.isEmailVerified ? "Verified" : "Pending",
-      icon: user?.isEmailVerified ? CheckCircle : AlertCircle,
-      color: user?.isEmailVerified ? "bg-success-green" : "bg-gold",
-      change: user?.isEmailVerified ? "Email confirmed" : "Verify now to apply",
-      trend: "neutral" as const,
-    },
-    {
       label: "New Messages",
       value: String(unreadMessages),
       icon: MessageSquare,
@@ -445,7 +437,7 @@ const FreelancerDashboard = () => {
               </section>
 
               {/* STATS CARDS */}
-              <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+              <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                 {statsData.map((stat, idx) => (
                   <div
                     key={idx}

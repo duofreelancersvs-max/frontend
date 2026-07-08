@@ -151,8 +151,7 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
 
-    // Remove custom property before sending request
-    delete customConfig.skipAuth;
+    // Do NOT delete customConfig.skipAuth so the response interceptor knows this was an unauthenticated request
 
     return config;
   },
@@ -226,8 +225,8 @@ axiosClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // Skip auto-retry for requests with manually-set Authorization
-      if (originalRequest._manualAuth) {
+      // Skip auto-retry for requests with manually-set Authorization or explicitly skipped auth
+      if (originalRequest._manualAuth || originalRequest.skipAuth) {
         return Promise.reject(error);
       }
 

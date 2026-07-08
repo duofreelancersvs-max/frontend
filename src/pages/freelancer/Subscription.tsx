@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { subscriptionService, paymentService } from "@/services";
+import { subscriptionService, paymentService, publicService } from "@/services";
 import type { Subscription } from "@/services";
 import type { FreelancerLayoutContext } from "@/layouts/FreelancerLayout";
 import DashboardHeader from "@/components/layouts/DashboardHeader";
@@ -118,12 +118,6 @@ const faqItems = [
   },
 ];
 
-const PRICES = {
-  pro: {
-    monthly: 399,
-    yearly: 3999,
-  },
-};
 
 const FreelancerSubscription = () => {
   const { setSidebarOpen } = useOutletContext<FreelancerLayoutContext>();
@@ -135,6 +129,8 @@ const FreelancerSubscription = () => {
     useState<Subscription | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [pricing, setPricing] = useState({ monthly: 0, yearly: 0 });
+  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
 
   // Live plan / usage context (server of record)
   const { usage, context } = useFeatureGate();
@@ -235,7 +231,24 @@ const FreelancerSubscription = () => {
         console.error("Error fetching subscription:", error);
       }
     };
+    const fetchPricing = async () => {
+      try {
+        const dbPlans = await publicService.getSubscriptionPlans();
+        const proMonthly = dbPlans.find(p => p.tier === 1 && p.billingCycle === 'monthly');
+        const proYearly = dbPlans.find(p => p.tier === 1 && p.billingCycle === 'yearly');
+        setPricing({
+          monthly: proMonthly?.price || 499,
+          yearly: proYearly?.price || 4999,
+        });
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
+        setPricing({ monthly: 499, yearly: 4999 }); // fallback
+      } finally {
+        setIsLoadingPricing(false);
+      }
+    };
     fetchSubscription();
+    fetchPricing();
   }, []);
 
   const currentPlan = (currentSubscription?.plan || "free") as "free" | "pro";
@@ -248,11 +261,11 @@ const FreelancerSubscription = () => {
     : "N/A";
 
   const yearlySavings = {
-    pro: Math.round(
-      ((PRICES.pro.monthly * 12 - PRICES.pro.yearly) /
-        (PRICES.pro.monthly * 12)) *
+    pro: pricing.monthly > 0 ? Math.round(
+      ((pricing.monthly * 12 - pricing.yearly) /
+        (pricing.monthly * 12)) *
         100,
-    ),
+    ) : 20,
   };
 
   return (
@@ -474,17 +487,17 @@ const FreelancerSubscription = () => {
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-navy dark:text-white">
-                    ₹
-                    {billingPeriod === "monthly"
-                      ? PRICES.pro.monthly
-                      : PRICES.pro.yearly}
-                  </span>
+                    <span className="text-4xl font-bold text-navy dark:text-white">
+                      ₹
+                      {isLoadingPricing ? "..." : (billingPeriod === "monthly"
+                        ? pricing.monthly
+                        : pricing.yearly)}
+                    </span>
                   <span className="text-slate-500 dark:text-slate-400">
                     /{billingPeriod === "monthly" ? "month" : "year"}
                   </span>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    + 18% GST at checkout
+                    GST included
                   </p>
                   {billingPeriod === "yearly" && (
                     <p className="text-sm text-success-green mt-1">

@@ -1,4 +1,4 @@
-import { SEO } from '@/components/SEO/SEO';
+import { SEO } from "@/components/SEO/SEO";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -15,6 +15,8 @@ import {
   Building,
   Check,
   ShieldAlert,
+  Loader2,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProPlanBadge } from "@/components/shared/ProPlanBadge";
@@ -23,9 +25,10 @@ import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import freelancerService from "@/services/freelancer.service";
 import type { FreelancerProfile } from "@/services/freelancer.service";
-import { Loader2, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import projectService from "@/services/project.service";
+import { publicService } from "@/services/public.service";
+import type { SubscriptionPlan } from "@/services/public.service";
 
 // Custom hook for intersection observer animations
 const useInView = (options = {}) => {
@@ -74,7 +77,11 @@ const AnimatedSection = ({
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <SEO title="ConnectMeIndia | Hire Top Freelancers in India" description="ConnectMeIndia is the premier marketplace for hiring top talent and finding freelance jobs in India. Connect, collaborate, and build your next big project." canonical="/" />
+      <SEO
+        title="ConnectMeIndia | Hire Top Freelancers in India"
+        description="ConnectMeIndia is the premier marketplace for hiring top talent and finding freelance jobs in India. Connect, collaborate, and build your next big project."
+        canonical="/"
+      />
       {children}
     </div>
   );
@@ -191,30 +198,48 @@ const Home = () => {
     },
   ];
 
-  const plans = [
-    {
-      name: "Free",
-      description: "Perfect for getting started",
-      monthlyPrice: 0,
-      highlighted: false,
-      buttonText: "Get Started",
-      features: ["Create profile", "5 applications/month", "Basic support"],
-    },
-    {
-      name: "Pro",
-      description: "For serious freelancers",
-      monthlyPrice: 399,
-      highlighted: true,
-      buttonText: "Subscribe Now",
-      features: [
-        "Unlimited applications",
-        "Priority support",
-        "Top priority in search",
-      ],
-    },
-  ];
+  const [plans, setPlans] = useState<any[]>([]);
 
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const dbPlans = await publicService.getSubscriptionPlans();
+        const monthlyPlans = dbPlans.filter((p: SubscriptionPlan) => p.billingCycle === 'monthly').sort((a: SubscriptionPlan, b: SubscriptionPlan) => a.tier - b.tier);
+        
+        const defaultAesthetics: Record<string, any> = {
+          free: {
+            description: "Perfect for getting started",
+            highlighted: false,
+            buttonText: "Get Started",
+          },
+          pro: {
+            description: "For serious freelancers",
+            highlighted: true,
+            buttonText: "Subscribe Now",
+          }
+        };
 
+        const mappedPlans = monthlyPlans.map((dbPlan: SubscriptionPlan) => {
+          const tierStr = dbPlan.tier === 1 ? 'pro' : 'free';
+          const aesthetics = defaultAesthetics[tierStr] || defaultAesthetics.free;
+          return {
+            name: dbPlan.name,
+            description: dbPlan.description || aesthetics.description,
+            monthlyPrice: dbPlan.price,
+            highlighted: aesthetics.highlighted,
+            buttonText: aesthetics.buttonText,
+            features: dbPlan.features,
+          };
+        });
+        setPlans(mappedPlans);
+      } catch (error) {
+        console.error("Failed to fetch plans:", error);
+      } finally {
+        // isLoadingPlans was removed
+      }
+    };
+    fetchPlans();
+  }, []);
 
   const [topFreelancers, setTopFreelancers] = useState<FreelancerProfile[]>([]);
   const [isLoadingFreelancers, setIsLoadingFreelancers] = useState(true);
@@ -235,7 +260,7 @@ const Home = () => {
   }, []);
 
   // For freelancer view: recent projects
-  const isFreelancer = isAuthenticated && user?.role === 'freelancer';
+  const isFreelancer = isAuthenticated && user?.role === "freelancer";
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
 
@@ -243,11 +268,15 @@ const Home = () => {
     if (isFreelancer) {
       const fetchProjects = async () => {
         try {
-          const response = await projectService.searchPublic({ limit: 4, page: 1, status: 'open' });
+          const response = await projectService.searchPublic({
+            limit: 4,
+            page: 1,
+            status: "open",
+          });
           const data = (response as any).data || response;
           setRecentProjects(data.projects?.slice(0, 4) || []);
         } catch (error) {
-          console.error('Failed to fetch projects:', error);
+          console.error("Failed to fetch projects:", error);
         } finally {
           setIsLoadingProjects(false);
         }
@@ -273,402 +302,359 @@ const Home = () => {
       <PublicNavbar dark />
 
       <main id="main-content">
-      {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
-      <section className="relative min-h-[60vh] md:min-h-[90vh] flex items-center pt-20 md:pt-40 pb-10 md:pb-12 bg-white dark:bg-[#050B15] z-30">
-        {/* Subtle Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Main Gradient Surface */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-[#050B15] dark:via-[#0A1628] dark:to-[#112240]" />
+        {/* 2. HERO SECTION - CLEAN & PROFESSIONAL */}
+        <section className="relative min-h-[60vh] md:min-h-[90vh] flex items-center pt-20 md:pt-40 pb-10 md:pb-12 bg-white dark:bg-[#050B15] z-30">
+          {/* Subtle Background Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Main Gradient Surface */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-[#050B15] dark:via-[#0A1628] dark:to-[#112240]" />
 
-          {/* Floating Decorative Blobs - Light Mode Accent */}
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[60px] md:blur-[120px] will-change-transform -translate-y-1/2 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[50px] md:blur-[100px] will-change-transform translate-y-1/2 -translate-x-1/4" />
-        </div>
+            {/* Floating Decorative Blobs - Light Mode Accent */}
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-royal-blue/5 dark:bg-royal-blue/20 rounded-full blur-[60px] md:blur-[120px] will-change-transform -translate-y-1/2 translate-x-1/3" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal/5 dark:bg-teal/10 rounded-full blur-[50px] md:blur-[100px] will-change-transform translate-y-1/2 -translate-x-1/4" />
+          </div>
 
-        <div className="container mx-auto px-4 lg:px-8 relative z-30">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Headline */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
-              {isAuthenticated ? (
-                <>
-                  Welcome,{" "}
-                  <span className="text-teal">
-                    {user?.fullName || user?.email?.split("@")[0] || "User"}
-                  </span>
-                </>
-              ) : (
-                <>
-                  Welcome to the <br className="hidden sm:block" />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue">
-                    Empire of Freelancers
-                  </span>
-                </>
-              )}
-            </h1>
-
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
-              "Your Work. Your Money. Always..."
-            </p>
-
-            {/* Hero CTAs - Mobile-first unified layout */}
-            <div className="mt-8 mb-12 w-full max-w-lg mx-auto px-4 sm:px-0 space-y-3">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to={
-                      user?.role === "client"
-                        ? "/client/dashboard"
-                        : "/freelancer/dashboard"
-                    }
-                    className="block"
-                  >
-                    <Button
-                      size="lg"
-                      className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
-                    >
-                      Go to Dashboard
-                    </Button>
-                  </Link>
-                  <Link
-                    to={user?.role === "client" ? "/freelancers" : "/projects"}
-                    className="block"
-                  >
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
-                    >
-                      {user?.role === "client"
-                        ? "Find Freelancers"
-                        : "Browse Projects"}
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  {/* Primary: Role selection */}
-                  <Link to="/freelancers" className="block">
-                    <Button
-                      size="lg"
-                      className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
-                    >
-                      I want to Hire Talent
-                    </Button>
-                  </Link>
-                  <Link to="/projects" className="block">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
-                    >
-                      Earn money as a Freelancer
-                    </Button>
-                  </Link>
-
-                  {/* Separator */}
-                  <div className="flex items-center gap-4 py-1">
-                    <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
-                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                      or
+          <div className="container mx-auto px-4 lg:px-8 relative z-30">
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Headline */}
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-navy dark:text-white leading-tight md:leading-[1.1] mb-6 tracking-tight">
+                {isAuthenticated ? (
+                  <>
+                    Welcome,{" "}
+                    <span className="text-teal">
+                      {user?.fullName || user?.email?.split("@")[0] || "User"}
                     </span>
-                    <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
-                  </div>
-
-                  {/* Secondary: Auth */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link to="/login" className="block">
-                      <Button
-                        variant="outline"
-                        className="w-full h-14 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-teal hover:text-teal dark:hover:border-teal dark:hover:text-teal text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
-                      >
-                        Log In
-                      </Button>
-                    </Link>
-                    <Link to="/register" className="block">
-                      <Button className="w-full h-14 bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light hover:bg-teal hover:text-white border-none text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]">
-                        Create account
-                      </Button>
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Search Bar - POSITIONED LOWER FOR THUMB ZONE ON MOBILE */}
-            <div
-              ref={searchContainerRef}
-              className={cn(
-                "relative max-w-2xl mx-auto transition-all duration-300 px-2 sm:px-0",
-                searchFocused ? "scale-[1.02]" : "",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex items-center bg-white dark:bg-white/10 backdrop-blur-xl rounded-2xl border transition-all duration-300 overflow-hidden",
-                  searchFocused
-                    ? "border-teal shadow-2xl shadow-teal/20"
-                    : "border-slate-200 dark:border-white/20 shadow-lg",
+                  </>
+                ) : (
+                  <>
+                    Welcome to the <br className="hidden sm:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-royal-blue">
+                      Empire of Freelancers
+                    </span>
+                  </>
                 )}
-              >
-                <div className="flex items-center gap-3 px-5 flex-1">
-                  <Search className="text-slate-400" size={20} />
-                  <input
-                    type="text"
-                    value={heroQuery}
-                    onChange={(e) => setHeroQuery(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    placeholder="Search skills (e.g. Video Editing, CA, Web Dev...)"
-                    className="w-full py-5 bg-transparent text-navy dark:text-white placeholder:text-slate-400 focus:outline-none text-base md:text-lg"
-                    onFocus={() => {
-                      setSearchFocused(true);
-                      if (heroQuery.trim()) setShowDropdown(true);
-                    }}
-                    onBlur={() => setSearchFocused(false)}
-                  />
-                </div>
-                <Button
-                  onClick={handleSearchSubmit}
-                  className="hidden sm:flex m-2 bg-navy dark:bg-white text-white dark:text-navy hover:bg-teal dark:hover:bg-teal hover:text-white dark:hover:text-white px-8 py-6 rounded-xl font-bold transition-all duration-300 shadow-md"
-                >
-                  Search
-                </Button>
+              </h1>
+
+              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
+                "Your Work. Your Money. Always..."
+              </p>
+
+              {/* Hero CTAs - Mobile-first unified layout */}
+              <div className="mt-8 mb-12 w-full max-w-lg mx-auto px-4 sm:px-0 space-y-3">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to={
+                        user?.role === "client"
+                          ? "/client/dashboard"
+                          : "/freelancer/dashboard"
+                      }
+                      className="block"
+                    >
+                      <Button
+                        size="lg"
+                        className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
+                      >
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                    <Link
+                      to={
+                        user?.role === "client" ? "/freelancers" : "/projects"
+                      }
+                      className="block"
+                    >
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+                      >
+                        {user?.role === "client"
+                          ? "Find Freelancers"
+                          : "Browse Projects"}
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {/* Primary: Role selection */}
+                    <Link to="/freelancers" className="block">
+                      <Button
+                        size="lg"
+                        className="w-full h-14 bg-teal hover:bg-[#128a7f] text-white text-base font-bold rounded-2xl shadow-lg shadow-teal/20 transition-all duration-200 active:scale-[0.98]"
+                      >
+                        I want to Hire Talent
+                      </Button>
+                    </Link>
+                    <Link to="/projects" className="block">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full h-14 border-2 border-navy/15 dark:border-white/15 text-navy dark:text-white hover:bg-navy/5 dark:hover:bg-white/5 text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+                      >
+                        Earn money as a Freelancer
+                      </Button>
+                    </Link>
+
+                    {/* Separator */}
+                    <div className="flex items-center gap-4 py-1">
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+                      <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                        or
+                      </span>
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+                    </div>
+
+                    {/* Secondary: Auth */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link to="/login" className="block">
+                        <Button
+                          variant="outline"
+                          className="w-full h-14 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-teal hover:text-teal dark:hover:border-teal dark:hover:text-teal text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+                        >
+                          Log In
+                        </Button>
+                      </Link>
+                      <Link to="/register" className="block">
+                        <Button className="w-full h-14 bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light hover:bg-teal hover:text-white border-none text-base font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]">
+                          Create account
+                        </Button>
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Search Dropdown */}
-              {showDropdown && (
-                <div className="absolute top-full left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white dark:bg-[#0f172a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 overflow-hidden z-50 text-left">
-                  {heroSearching ? (
-                    <div className="flex items-center gap-3 px-5 py-6 text-slate-500 dark:text-slate-400">
-                      <Loader2 className="w-5 h-5 animate-spin text-teal" />
-                      Searching...
-                    </div>
-                  ) : heroResults.length > 0 ? (
-                    <div className="py-2">
-                      {heroResults.map((f) => (
-                        <Link
-                          key={f._id}
-                          to={`/freelancer/${f._id}`}
-                          className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center font-bold text-navy dark:text-white shrink-0">
-                            {f.profilePicture ? (
-                              <img
-                                src={f.profilePicture}
-                                className="w-full h-full object-cover rounded-full"
-                                width={40}
-                                height={40}
-                                loading="lazy"
-                                alt={f.displayName || f.firstName}
-                              />
-                            ) : (
-                              f.firstName[0]
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-navy dark:text-white truncate">
-                              {f.displayName || `${f.firstName} ${f.lastName}`}
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                              {f.headline || f.categories?.[0]}
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-5 py-6 text-center text-slate-500 dark:text-slate-400">
-                      No results found
-                    </div>
+              {/* Search Bar - POSITIONED LOWER FOR THUMB ZONE ON MOBILE */}
+              <div
+                ref={searchContainerRef}
+                className={cn(
+                  "relative max-w-2xl mx-auto transition-all duration-300 px-2 sm:px-0",
+                  searchFocused ? "scale-[1.02]" : "",
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex items-center bg-white dark:bg-white/10 backdrop-blur-xl rounded-2xl border transition-all duration-300 overflow-hidden",
+                    searchFocused
+                      ? "border-teal shadow-2xl shadow-teal/20"
+                      : "border-slate-200 dark:border-white/20 shadow-lg",
                   )}
+                >
+                  <div className="flex items-center gap-3 px-5 flex-1">
+                    <Search className="text-slate-400" size={20} />
+                    <input
+                      type="text"
+                      value={heroQuery}
+                      onChange={(e) => setHeroQuery(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                      placeholder="Search skills (e.g. Video Editing, CA, Web Dev...)"
+                      className="w-full py-5 bg-transparent text-navy dark:text-white placeholder:text-slate-400 focus:outline-none text-base md:text-lg"
+                      onFocus={() => {
+                        setSearchFocused(true);
+                        if (heroQuery.trim()) setShowDropdown(true);
+                      }}
+                      onBlur={() => setSearchFocused(false)}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSearchSubmit}
+                    className="hidden sm:flex m-2 bg-navy dark:bg-white text-white dark:text-navy hover:bg-teal dark:hover:bg-teal hover:text-white dark:hover:text-white px-8 py-6 rounded-xl font-bold transition-all duration-300 shadow-md"
+                  >
+                    Search
+                  </Button>
                 </div>
-              )}
+
+                {/* Search Dropdown */}
+                {showDropdown && (
+                  <div className="absolute top-full left-4 right-4 sm:left-0 sm:right-0 mt-2 bg-white dark:bg-[#0f172a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 overflow-hidden z-50 text-left">
+                    {heroSearching ? (
+                      <div className="flex items-center gap-3 px-5 py-6 text-slate-500 dark:text-slate-400">
+                        <Loader2 className="w-5 h-5 animate-spin text-teal" />
+                        Searching...
+                      </div>
+                    ) : heroResults.length > 0 ? (
+                      <div className="py-2">
+                        {heroResults.map((f) => (
+                          <Link
+                            key={f._id}
+                            to={`/freelancer/${f._id}`}
+                            className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center font-bold text-navy dark:text-white shrink-0">
+                              {f.profilePicture ? (
+                                <img
+                                  src={f.profilePicture}
+                                  className="w-full h-full object-cover rounded-full"
+                                  width={40}
+                                  height={40}
+                                  loading="lazy"
+                                  alt={f.displayName || f.firstName}
+                                />
+                              ) : (
+                                f.firstName[0]
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-navy dark:text-white truncate">
+                                {f.displayName ||
+                                  `${f.firstName} ${f.lastName}`}
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                {f.headline || f.categories?.[0]}
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-5 py-6 text-center text-slate-500 dark:text-slate-400">
+                        No results found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* Full-width Attached Disclaimer Ticker */}
+        <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group relative z-20">
+          <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
+            <ShieldAlert
+              size={18}
+              className="inline-block mr-3 text-teal shrink-0"
+            />
+            ConnectMeIndia is a Neutral Marketplace Platform. We connect
+            clients and freelancers directly. All interactions happen
+            between users.{" "}
+            <strong className="text-navy dark:text-white mx-1 font-bold">
+              CMI is not responsible for disputes between users.
+            </strong>{" "}
+            Be smart. Be safe. Verify before you pay.
+            <ShieldAlert
+              size={18}
+              className="inline-block ml-3 text-teal shrink-0 mr-8"
+            />
           </div>
         </div>
-      </section>
 
-      {/* 2. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
-      {!isAuthenticated && (
-        <section className="bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
-          
-          {/* Full-width Attached Disclaimer Ticker */}
-          <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group">
-            <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
-              <ShieldAlert size={18} className="inline-block mr-3 text-teal shrink-0" />
-              ConnectMeIndia is a Neutral Marketplace Platform. We connect clients and freelancers directly. All interactions happen between users. <strong className="text-navy dark:text-white mx-1 font-bold">CMI is not responsible for disputes between users.</strong> Be smart. Be safe. Verify before you pay.
-              <ShieldAlert size={18} className="inline-block ml-3 text-teal shrink-0 mr-8" />
-            </div>
-          </div>
-
-          <div className="container mx-auto px-4 lg:px-8 py-20 lg:py-24">
-
+        {/* 2. FEATURED FREELANCERS / LATEST CLIENT PROJECTS */}
+        <section
+          className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5"
+          id="find-talent"
+        >
+          <div className="container mx-auto px-4 lg:px-8">
             <AnimatedSection>
-              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-                <div className="max-w-2xl">
-                  <span className="text-teal font-bold tracking-widest uppercase text-sm mb-4 block">
-                    Top Skills
-                  </span>
-                  <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
-                    Browse by Top Category
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
-                    Find expert professionals across various domains to fuel your
-                    growth.
-                  </p>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+                <div>
+                  {isFreelancer ? (
+                    <>
+                      <span className="inline-block px-4 py-2 bg-teal/10 text-teal rounded-full text-sm font-semibold mb-4">
+                        Fresh Opportunities
+                      </span>
+                      <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
+                        Latest Client Projects
+                      </h2>
+                      <p className="text-slate-600 dark:text-slate-400 text-lg">
+                        Explore open projects posted by clients right now.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
+                        Top Talent
+                      </span>
+                      <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
+                        Featured Professionals
+                      </h2>
+                      <p className="text-slate-600 dark:text-slate-400 text-lg">
+                        Work with our top-rated creative experts in the region.
+                      </p>
+                    </>
+                  )}
                 </div>
-                <Link to="/categories">
-                  <Button
-                    variant="outline"
-                    className="border-slate-300 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl px-8 h-14 font-bold transition-all shadow-sm"
-                  >
-                    Browse All Categories
+                <Link to={isFreelancer ? "/projects" : "/freelancers"}>
+                  <Button className="bg-teal hover:bg-[#128a7f] text-white px-6 group rounded-xl py-6 font-bold transition-all shadow-lg shadow-teal/10 hover:shadow-teal/30">
+                    {isFreelancer
+                      ? "View All Projects"
+                      : "View All Freelancers"}
+                    <ArrowRight
+                      size={16}
+                      className="ml-2 group-hover:translate-x-1 transition-transform"
+                    />
                   </Button>
                 </Link>
               </div>
             </AnimatedSection>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {categories.map((cat, idx) => (
-                <AnimatedSection key={cat.name} delay={idx * 100}>
-                  <Link
-                    to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
-                    className="group bg-white dark:bg-white/5 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-teal/20 dark:hover:border-teal/20 hover:bg-slate-50 dark:hover:bg-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full shadow-sm dark:shadow-none"
-                  >
-                    <div
-                      className={cn(
-                        "w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
-                        cat.color,
-                      )}
-                    >
-                      <cat.icon size={28} />
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-navy dark:text-white mb-2">
-                      {cat.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
-                      {cat.desc}
-                    </p>
-                    <div className="flex items-center text-teal font-bold text-sm">
-                      Explore Pros{" "}
-                      <ArrowRight
-                        size={16}
-                        className="ml-2 group-hover:translate-x-1 transition-transform"
-                      />
-                    </div>
-                  </Link>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 3. FEATURED FREELANCERS / LATEST CLIENT PROJECTS */}
-      <section
-        className="py-24 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5"
-        id="find-talent"
-      >
-        <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-              <div>
-                {isFreelancer ? (
-                  <>
-                    <span className="inline-block px-4 py-2 bg-teal/10 text-teal rounded-full text-sm font-semibold mb-4">
-                      Fresh Opportunities
-                    </span>
-                    <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
-                      Latest Client Projects
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg">
-                      Explore open projects posted by clients right now.
-                    </p>
-                  </>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-sm mx-auto sm:max-w-none">
+              {isFreelancer ? (
+                isLoadingProjects ? (
+                  <div className="col-span-full flex justify-center py-12">
+                    <Loader2 className="w-10 h-10 animate-spin text-teal" />
+                  </div>
+                ) : recentProjects.length === 0 ? (
+                  <div className="col-span-full text-center py-12 text-slate-500 dark:text-slate-400">
+                    No open projects available at the moment.
+                  </div>
                 ) : (
-                  <>
-                    <span className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-full text-sm font-semibold mb-4">
-                      Top Talent
-                    </span>
-                    <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-2">
-                      Featured Professionals
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg">
-                      Work with our top-rated creative experts in the region.
-                    </p>
-                  </>
-                )}
-              </div>
-              <Link to={isFreelancer ? "/projects" : "/freelancers"}>
-                <Button className="bg-teal hover:bg-[#128a7f] text-white px-6 group rounded-xl py-6 font-bold transition-all shadow-lg shadow-teal/10 hover:shadow-teal/30">
-                  {isFreelancer ? "View All Projects" : "View All Freelancers"}
-                  <ArrowRight
-                    size={16}
-                    className="ml-2 group-hover:translate-x-1 transition-transform"
-                  />
-                </Button>
-              </Link>
-            </div>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-sm mx-auto sm:max-w-none">
-            {isFreelancer ? (
-              isLoadingProjects ? (
-                <div className="col-span-full flex justify-center py-12">
-                  <Loader2 className="w-10 h-10 animate-spin text-teal" />
-                </div>
-              ) : recentProjects.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-slate-500 dark:text-slate-400">
-                  No open projects available at the moment.
-                </div>
-              ) : (
-                recentProjects.map((project, idx) => (
-                  <AnimatedSection key={project._id || idx} delay={idx * 100}>
-                    <Link to={`/freelancer/project/${project._id}`} className="block h-full">
-                      <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
-                        <div className="h-20 md:h-24 bg-gradient-to-r from-teal to-royal-blue relative">
-                          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
-                            <Briefcase size={12} className="text-white" />
-                            <span className="text-white text-xs font-semibold">
-                              {project.status || "Open"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="px-4 pb-6 pt-3 md:px-6 md:pb-8 md:pt-4 flex-1 flex flex-col">
-                          <h3 className="font-bold text-navy dark:text-white text-base md:text-lg mb-2 group-hover:text-teal transition-colors line-clamp-1">
-                            {project.title}
-                          </h3>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 flex-1">
-                            {project.description || "No description provided."}
-                          </p>
-
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {(project.skills || []).slice(0, 3).map((skill: any, i: number) => (
-                              <span
-                                key={i}
-                                className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
-                              >
-                                {typeof skill === "string" ? skill : skill.name || skill}
+                  recentProjects.map((project, idx) => (
+                    <AnimatedSection key={project._id || idx} delay={idx * 100}>
+                      <Link
+                        to={`/freelancer/project/${project._id}`}
+                        className="block h-full"
+                      >
+                        <div className="group bg-white dark:bg-transparent dark:glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-white/5 h-full flex flex-col hover:-translate-y-2">
+                          <div className="h-20 md:h-24 bg-gradient-to-r from-teal to-royal-blue relative">
+                            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full">
+                              <Briefcase size={12} className="text-white" />
+                              <span className="text-white text-xs font-semibold">
+                                {project.status || "Open"}
                               </span>
-                            ))}
+                            </div>
                           </div>
 
-                          <div className="mt-auto pt-4 border-t border-slate-100 dark:border-white/5">
-                            <Button
-                              variant="ghost"
-                              className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4 w-full"
-                            >
-                              View Details
-                            </Button>
+                          <div className="px-4 pb-6 pt-3 md:px-6 md:pb-8 md:pt-4 flex-1 flex flex-col">
+                            <h3 className="font-bold text-navy dark:text-white text-base md:text-lg mb-2 group-hover:text-teal transition-colors line-clamp-1">
+                              {project.title}
+                            </h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 flex-1">
+                              {project.description ||
+                                "No description provided."}
+                            </p>
+
+                            <div className="flex flex-wrap gap-1.5 mb-4">
+                              {(project.skills || [])
+                                .slice(0, 3)
+                                .map((skill: any, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="text-xxs bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full font-semibold border border-slate-100 dark:border-white/5"
+                                  >
+                                    {typeof skill === "string"
+                                      ? skill
+                                      : skill.name || skill}
+                                  </span>
+                                ))}
+                            </div>
+
+                            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-white/5">
+                              <Button
+                                variant="ghost"
+                                className="text-teal font-bold hover:bg-teal/10 rounded-xl px-4 w-full"
+                              >
+                                View Details
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  </AnimatedSection>
-                ))
-              )
-            ) : (
-              isLoadingFreelancers ? (
+                      </Link>
+                    </AnimatedSection>
+                  ))
+                )
+              ) : isLoadingFreelancers ? (
                 <div className="col-span-full flex justify-center py-12">
                   <Loader2 className="w-10 h-10 animate-spin text-teal" />
                 </div>
@@ -705,7 +691,8 @@ const Home = () => {
                             ) : (
                               initials
                             )}
-                            {(freelancer.featuredProfile || freelancer.prioritySearch) && (
+                            {(freelancer.featuredProfile ||
+                              freelancer.prioritySearch) && (
                               <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
                                 <ProPlanBadge className="absolute top-0 right-0 scale-75 origin-top-right rounded-bl-xl shadow-md" />
                               </div>
@@ -748,188 +735,251 @@ const Home = () => {
                     </AnimatedSection>
                   );
                 })
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. PLANS & PRICING PREVIEW */}
-      {!isAuthenticated && (
-        <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
-        <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
-                Hiring Made Easy
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-6">
-                Affordable Plans for Everyone
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
-                Choose the perfect plan to unlock the full potential of our
-                marketplace.
-              </p>
+              )}
             </div>
-          </AnimatedSection>
+          </div>
+        </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {plans.map((plan, idx) => (
-              <AnimatedSection key={plan.name} delay={idx * 100}>
-                <div
-                  className={cn(
-                    "bg-white dark:bg-white/5 p-5 md:p-6 rounded-2xl border transition-all duration-500 h-full flex flex-col items-center text-center",
-                    plan.highlighted
-                      ? "border-teal dark:border-teal shadow-xl dark:shadow-none scale-105 z-10"
-                      : "border-slate-100 dark:border-white/10 hover:shadow-lg dark:hover:shadow-none hover:border-teal/20 dark:hover:border-teal/30",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
-                      plan.name === "Pro"
-                        ? "bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light"
-                        : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
-                    )}
-                  >
-                    {plan.name === "Pro" ? (
-                      <Zap size={24} />
-                    ) : (
-                      <User size={24} />
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold text-navy dark:text-white mb-0.5">
-                    {plan.name}
-                  </h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-xxs mb-3">
-                    {plan.description}
-                  </p>
-                  <div className="mb-4">
-                    <span className="text-2xl font-bold text-navy dark:text-white">
-                      ₹{plan.monthlyPrice}
+        {/* 3. BROWSE BY CATEGORY - MOVED UP & UPDATED */}
+        {!isAuthenticated && (
+          <section className="bg-white dark:bg-[#050B15] relative z-20 border-b border-slate-200 dark:border-white/5">
+            <div className="container mx-auto px-4 lg:px-8 py-20 lg:py-24">
+              <AnimatedSection>
+                <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+                  <div className="max-w-2xl">
+                    <span className="text-teal font-bold tracking-widest uppercase text-sm mb-4 block">
+                      Top Skills
                     </span>
-                    <span className="text-slate-500 dark:text-slate-400 text-xs">
-                      /mo
-                    </span>
+                    <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
+                      Browse by Top Category
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
+                      Find expert professionals across various domains to fuel
+                      your growth.
+                    </p>
                   </div>
-                  <ul className="space-y-2 mb-6 flex-1">
-                    {plan.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium text-left"
-                      >
-                        <Check
-                          size={14}
-                          className="text-teal dark:text-teal-light shrink-0"
-                        />{" "}
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/pricing" className="w-full">
+                  <Link to="/categories">
                     <Button
-                      className={cn(
-                        "w-full py-5 rounded-lg font-bold text-sm transition-all",
-                        plan.highlighted
-                          ? "bg-teal hover:bg-[#128a7f] text-white shadow-lg shadow-teal/10"
-                          : "bg-slate-50 dark:bg-white/5 text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10",
-                      )}
+                      variant="outline"
+                      className="border-slate-300 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl px-8 h-14 font-bold transition-all shadow-sm"
                     >
-                      {plan.buttonText}
+                      Browse All Categories
                     </Button>
                   </Link>
                 </div>
               </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-      )}
 
-      {/* 5. HOW IT WORKS */}
-      <section className="py-24 bg-slate-50 dark:bg-white/5 relative border-b border-slate-200 dark:border-white/5">
-        <div className="container mx-auto px-4 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
-                Process
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
-                How It Works
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
-                Three simple steps to build your dream team or find your next
-                gig.
-              </p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {categories.map((cat, idx) => (
+                  <AnimatedSection key={cat.name} delay={idx * 100}>
+                    <Link
+                      to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
+                      className="group bg-white dark:bg-white/5 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-teal/20 dark:hover:border-teal/20 hover:bg-slate-50 dark:hover:bg-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] block h-full shadow-sm dark:shadow-none"
+                    >
+                      <div
+                        className={cn(
+                          "w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg bg-gradient-to-br transition-all group-hover:scale-110 group-hover:-rotate-3",
+                          cat.color,
+                        )}
+                      >
+                        <cat.icon size={28} />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-navy dark:text-white mb-2">
+                        {cat.name}
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
+                        {cat.desc}
+                      </p>
+                      <div className="flex items-center text-teal font-bold text-sm">
+                        Explore Pros{" "}
+                        <ArrowRight
+                          size={16}
+                          className="ml-2 group-hover:translate-x-1 transition-transform"
+                        />
+                      </div>
+                    </Link>
+                  </AnimatedSection>
+                ))}
+              </div>
             </div>
-          </AnimatedSection>
+          </section>
+        )}
 
-          <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-            {[
-              {
-                icon: Layout,
-                title: "Post a Job",
-                desc: "Share your project details and requirements with our community of experts.",
-              },
-              {
-                icon: Users,
-                title: "Hire Pros",
-                desc: "Browse portfolios or let top-tier talent apply to your open projects directly.",
-              },
-              {
-                icon: BadgeCheck,
-                title: "Get Results",
-                desc: "Collaborate securely and get your high-quality work delivered on time.",
-              },
-            ].map((step, idx) => (
-              <AnimatedSection
-                key={idx}
-                delay={idx * 150}
-                className="text-center group"
-              >
-                <div className="w-20 h-20 bg-royal-blue/5 dark:bg-royal-blue/10 text-royal-blue rounded-full flex items-center justify-center mx-auto mb-8 text-2xl font-black italic relative transition-all duration-300 group-hover:scale-110 group-hover:bg-royal-blue group-hover:text-white border border-royal-blue/10">
-                  <step.icon size={32} />
-                  <div className="absolute -top-1 -right-1 w-8 h-8 bg-white dark:bg-[#121A2A] border-2 border-royal-blue rounded-full text-sm flex items-center justify-center not-italic shadow-sm text-navy dark:text-white">
-                    {idx + 1}
-                  </div>
+        {/* 4. PLANS & PRICING PREVIEW */}
+        {!isAuthenticated && (
+          <section className="py-24 bg-white dark:bg-[#050B15] overflow-hidden relative border-b border-slate-200 dark:border-white/5">
+            <div className="container mx-auto px-4 lg:px-8">
+              <AnimatedSection>
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                  <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
+                    Hiring Made Easy
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-6">
+                    Affordable Plans for Everyone
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg">
+                    Choose the perfect plan to unlock the full potential of our
+                    marketplace.
+                  </p>
                 </div>
-                <h3 className="text-2xl font-bold text-navy dark:text-white mb-4 transition-colors group-hover:text-royal-blue">
-                  {step.title}
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {step.desc}
-                </p>
               </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* 6. CTA SECTION */}
-      {!isAuthenticated && (
-        <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
-          <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
-          <div className="container mx-auto px-4 lg:px-8 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                {plans.map((plan, idx) => (
+                  <AnimatedSection key={plan.name} delay={idx * 100}>
+                    <div
+                      className={cn(
+                        "bg-white dark:bg-white/5 p-5 md:p-6 rounded-2xl border transition-all duration-500 h-full flex flex-col items-center text-center",
+                        plan.highlighted
+                          ? "border-teal dark:border-teal shadow-xl dark:shadow-none scale-105 z-10"
+                          : "border-slate-100 dark:border-white/10 hover:shadow-lg dark:hover:shadow-none hover:border-teal/20 dark:hover:border-teal/30",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
+                          plan.name === "Pro"
+                            ? "bg-teal/10 dark:bg-teal/20 text-teal dark:text-teal-light"
+                            : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40",
+                        )}
+                      >
+                        {plan.name === "Pro" ? (
+                          <Zap size={24} />
+                        ) : (
+                          <User size={24} />
+                        )}
+                      </div>
+                      <h3 className="text-lg font-bold text-navy dark:text-white mb-0.5">
+                        {plan.name}
+                      </h3>
+                      <p className="text-slate-500 dark:text-slate-400 text-xxs mb-3">
+                        {plan.description}
+                      </p>
+                      <div className="mb-4">
+                        <span className="text-2xl font-bold text-navy dark:text-white">
+                          ₹{plan.monthlyPrice}
+                        </span>
+                        <span className="text-slate-500 dark:text-slate-400 text-xs">
+                          /mo
+                        </span>
+                      </div>
+                      <ul className="space-y-2 mb-6 flex-1">
+                        {plan.features.map((f: string) => (
+                          <li
+                            key={f}
+                            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium text-left"
+                          >
+                            <Check
+                              size={14}
+                              className="text-teal dark:text-teal-light shrink-0"
+                            />{" "}
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      <Link to="/pricing" className="w-full">
+                        <Button
+                          className={cn(
+                            "w-full py-5 rounded-lg font-bold text-sm transition-all",
+                            plan.highlighted
+                              ? "bg-teal hover:bg-[#128a7f] text-white shadow-lg shadow-teal/10"
+                              : "bg-slate-50 dark:bg-white/5 text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-white/10",
+                          )}
+                        >
+                          {plan.buttonText}
+                        </Button>
+                      </Link>
+                    </div>
+                  </AnimatedSection>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 5. HOW IT WORKS */}
+        <section className="py-24 bg-slate-50 dark:bg-white/5 relative border-b border-slate-200 dark:border-white/5">
+          <div className="container mx-auto px-4 lg:px-8">
             <AnimatedSection>
-              <div className="text-center max-w-3xl mx-auto">
-                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-10">
-                  Ready to start your journey?
+              <div className="text-center mb-16">
+                <span className="text-royal-blue font-bold tracking-widest uppercase text-sm mb-4 block">
+                  Process
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white">
+                  How It Works
                 </h2>
-                <Link to="/register">
-                  <Button
-                    size="lg"
-                    className="bg-teal hover:bg-teal-light text-white px-12 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1"
-                  >
-                    Join the Community Today{" "}
-                    <ArrowRight size={20} className="ml-2" />
-                  </Button>
-                </Link>
+                <p className="text-slate-600 dark:text-slate-400 text-lg mt-4">
+                  Three simple steps to build your dream team or find your next
+                  gig.
+                </p>
               </div>
             </AnimatedSection>
+
+            <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+              {[
+                {
+                  icon: Layout,
+                  title: "Post a Job",
+                  desc: "Share your project details and requirements with our community of experts.",
+                },
+                {
+                  icon: Users,
+                  title: "Hire Pros",
+                  desc: "Browse portfolios or let top-tier talent apply to your open projects directly.",
+                },
+                {
+                  icon: BadgeCheck,
+                  title: "Get Results",
+                  desc: "Collaborate securely and get your high-quality work delivered on time.",
+                },
+              ].map((step, idx) => (
+                <AnimatedSection
+                  key={idx}
+                  delay={idx * 150}
+                  className="text-center group"
+                >
+                  <div className="w-20 h-20 bg-royal-blue/5 dark:bg-royal-blue/10 text-royal-blue rounded-full flex items-center justify-center mx-auto mb-8 text-2xl font-black italic relative transition-all duration-300 group-hover:scale-110 group-hover:bg-royal-blue group-hover:text-white border border-royal-blue/10">
+                    <step.icon size={32} />
+                    <div className="absolute -top-1 -right-1 w-8 h-8 bg-white dark:bg-[#121A2A] border-2 border-royal-blue rounded-full text-sm flex items-center justify-center not-italic shadow-sm text-navy dark:text-white">
+                      {idx + 1}
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-navy dark:text-white mb-4 transition-colors group-hover:text-royal-blue">
+                    {step.title}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {step.desc}
+                  </p>
+                </AnimatedSection>
+              ))}
+            </div>
           </div>
         </section>
-      )}
 
+        {/* 6. CTA SECTION */}
+        {!isAuthenticated && (
+          <section className="py-24 bg-white dark:bg-[#050B15] relative overflow-hidden border-t border-slate-200 dark:border-none">
+            <div className="absolute inset-0 bg-plus-pattern opacity-[0.03] dark:opacity-[0.03]" />
+            <div className="container mx-auto px-4 lg:px-8 relative z-10">
+              <AnimatedSection>
+                <div className="text-center max-w-3xl mx-auto">
+                  <h2 className="text-3xl md:text-5xl font-bold text-navy dark:text-white mb-10">
+                    Ready to start your journey?
+                  </h2>
+                  <Link to="/register">
+                    <Button
+                      size="lg"
+                      className="bg-teal hover:bg-teal-light text-white px-12 py-8 text-xl font-bold rounded-2xl shadow-2xl shadow-teal/20 transition-all hover:-translate-y-1"
+                    >
+                      Join the Community Today{" "}
+                      <ArrowRight size={20} className="ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </AnimatedSection>
+            </div>
+          </section>
+        )}
       </main>
 
       <PublicFooter />

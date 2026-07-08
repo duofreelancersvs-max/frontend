@@ -15,6 +15,7 @@ import { usePwaStore } from "@/stores/pwa.store";
 import { AppInstallPrompt } from "@/components/pwa/AppInstallPrompt";
 import SkipLink from "@/components/common/SkipLink";
 import { useThemeStore } from "@/stores/theme.store";
+import { PushNotificationModal } from "@/components/shared/PushNotificationModal";
 
 
 const ClientLayout = lazy(() => import("@/layouts/ClientLayout"));
@@ -695,6 +696,7 @@ function App() {
           }
         />
       </Routes>
+      <PushNotificationModal />
     </>
   );
 }

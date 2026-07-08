@@ -48,7 +48,7 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
     if (appsRunningOut && trialDaysRemaining > 2) {
       bannerText = `Only ${usage!.remaining} application${usage!.remaining === 1 ? "" : "s"} left in trial`;
     } else {
-      bannerText = `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining === 1 ? "" : "s"} (${usage?.remaining ?? 0} apps left)`;
+      bannerText = `Only ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
     }
   }
 

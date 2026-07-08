@@ -184,26 +184,68 @@ const Register = () => {
           {/* Center Content */}
           <div className="flex-1 flex flex-col justify-center">
             <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
-              Start Your
+              Connect.
+              <br />
+              Create.
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-light to-sky-blue">
-                Journey.
+                Collaborate.
               </span>
             </h2>
             <p className="text-slate-300 text-lg max-w-md">
-              Join thousands of professionals connecting on India&apos;s leading
-              creative marketplace.
+              Join the leading marketplace for creative professionals in India.
             </p>
 
-            {/* Stats */}
-            <div className="mt-12 grid grid-cols-2 gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                <div className="text-3xl font-bold text-white mb-1">10K+</div>
-                <div className="text-slate-400 text-sm">Active Users</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                <div className="text-3xl font-bold text-white mb-1">₹50Cr+</div>
-                <div className="text-slate-400 text-sm">Projects Completed</div>
+            {/* Generic skill category showcase */}
+            <div className="mt-10 relative">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  {
+                    label: "Design",
+                    sub: "UI/UX · Graphic",
+                    gradient: "from-teal to-teal-light",
+                  },
+                  {
+                    label: "Dev",
+                    sub: "Web · Mobile",
+                    gradient: "from-royal-blue to-blue-500",
+                  },
+                  {
+                    label: "Video",
+                    sub: "Edit · VFX",
+                    gradient: "from-gold to-orange-500",
+                  },
+                  {
+                    label: "Write",
+                    sub: "Copy · Content",
+                    gradient: "from-purple-600 to-pink-500",
+                  },
+                  {
+                    label: "Market",
+                    sub: "SEO · Ads",
+                    gradient: "from-green-500 to-teal",
+                  },
+                  {
+                    label: "More",
+                    sub: "50+ skills",
+                    gradient: "from-slate-600 to-slate-400",
+                  },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "rounded-2xl flex flex-col items-center justify-center text-white font-bold py-4 px-2 bg-gradient-to-br",
+                      item.gradient,
+                    )}
+                  >
+                    <span className="text-base font-extrabold tracking-tight">
+                      {item.label}
+                    </span>
+                    <span className="text-[10px] font-medium opacity-80 mt-0.5 text-center leading-tight">
+                      {item.sub}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -211,17 +253,22 @@ const Register = () => {
           {/* Testimonial */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
             <Quote size={24} className="text-teal-light mb-3" />
-            <p className="text-white/90 italic mb-4">
-              "I found my dream clients within the first month. The platform is
-              incredibly easy to use and the opportunities are endless!"
+            <p className="text-white font-semibold text-lg leading-snug mb-1">
+              "The right talent, at the right time — right here in India."
+            </p>
+            <p className="text-white/70 text-sm italic mb-4">
+              ConnectMeIndia transformed how I build creative teams. No
+              middlemen, no delays — just exceptional talent.
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal to-royal-blue flex items-center justify-center text-white font-bold text-sm">
-                SP
+                V
               </div>
               <div>
-                <div className="text-white font-semibold">Sneha Patel</div>
-                <div className="text-white/60 text-sm">Video Editor</div>
+                <div className="text-white font-semibold">Vignan</div>
+                <div className="text-white/60 text-sm">
+                  Founder, ConnectMeIndia
+                </div>
               </div>
             </div>
           </div>

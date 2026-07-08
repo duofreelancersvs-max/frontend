@@ -5,7 +5,9 @@
  * (limit reached or trial expired). Renders plan tiers with rich
  * metadata from the `meta` block returned by the backend.
  */
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { publicService } from "@/services";
 import { Crown, Check, X, Sparkles, AlertCircle } from "lucide-react";
 import {
   Dialog,
@@ -26,28 +28,32 @@ interface UpgradeModalProps {
   meta?: PlanErrorMeta;
 }
 
-const PLAN_BENEFITS: Array<{ name: string; price: string; features: string[]; highlight?: boolean }> = [
-  {
-    name: "Free",
-    price: "₹0",
-    features: ["5 applications / month", "1 active project", "Standard support"],
-  },
-  {
-    name: "Pro",
-    price: "₹399/mo",
-    features: [
-      "Unlimited applications",
-      "Unlimited active projects",
-      "Priority support",
-      "Advanced analytics",
-    ],
-    highlight: true,
-  },
-];
 
 const UpgradeModal = ({ open, onOpenChange, reason, meta }: UpgradeModalProps) => {
   const navigate = useNavigate();
+  const [plans, setPlans] = useState<Array<{ name: string; price: string; features: string[]; highlight?: boolean }>>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
 
+  useEffect(() => {
+    if (!open) return;
+    const fetchPlans = async () => {
+      try {
+        const dbPlans = await publicService.getSubscriptionPlans();
+        const monthlyPlans = dbPlans.filter(p => p.billingCycle === 'monthly').sort((a, b) => a.tier - b.tier);
+        setPlans(monthlyPlans.map(dbPlan => ({
+          name: dbPlan.name,
+          price: dbPlan.price === 0 ? "₹0" : `₹${dbPlan.price}/mo`,
+          features: dbPlan.features,
+          highlight: dbPlan.tier === 1,
+        })));
+      } catch (err) {
+        console.error("Failed to fetch plans", err);
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+    fetchPlans();
+  }, [open]);
   const title =
     reason === "limit"
       ? "You've hit your application limit"
@@ -112,7 +118,9 @@ const UpgradeModal = ({ open, onOpenChange, reason, meta }: UpgradeModalProps) =
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-          {PLAN_BENEFITS.map((plan) => (
+          {isLoadingPlans ? (
+            <div className="text-center py-4">Loading plans...</div>
+          ) : plans.map((plan) => (
             <div
               key={plan.name}
               className={`relative rounded-2xl border p-4 flex flex-col ${
