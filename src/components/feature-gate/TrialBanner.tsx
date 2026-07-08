@@ -43,13 +43,9 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
   const timeExpired = trialDaysRemaining === 0;
 
   if (timeExpired) {
-    bannerText = `Trial time expired. You have ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
+    bannerText = `You have ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
   } else if (expiringSoon) {
-    if (appsRunningOut && trialDaysRemaining > 2) {
-      bannerText = `Only ${usage!.remaining} application${usage!.remaining === 1 ? "" : "s"} left in trial`;
-    } else {
-      bannerText = `Only ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
-    }
+    bannerText = `You have ${usage?.remaining ?? 0} application${usage?.remaining === 1 ? "" : "s"} left`;
   }
 
   if (expired) {
@@ -65,7 +61,7 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
         <div className="flex items-center gap-2.5 overflow-hidden">
           <Crown className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
           <span className="text-xs sm:text-sm font-semibold text-red-900 dark:text-red-300 truncate">
-            Trial time expired. {usage?.remaining ?? 0} applications left.
+            You have {usage?.remaining ?? 0} applications left
           </span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
