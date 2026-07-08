@@ -2,12 +2,16 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
+import { enforceCanonicalDomain } from "@/lib/domain-normalizer";
 import App from "./App.tsx";
 import ScrollToTop from "./components/common/ScrollToTop.tsx";
 import { AnalyticsTracker } from "./components/shared/AnalyticsTracker.tsx";
 import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
+
+// Redirect www → non-www BEFORE mounting React to prevent split-brain auth state
+enforceCanonicalDomain();
 
 import { HelmetProvider } from "react-helmet-async";
 import { GoogleOAuthProvider } from "@react-oauth/google";

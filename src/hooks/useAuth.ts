@@ -58,8 +58,83 @@ export function useAuth(): UseAuthReturn {
         setLoading(true);
         setError(null);
 
-        // Login via backend (which handles session sync and auto-confirmation if unconfirmed)
-        const { data: response } = await axiosClient.post<{
+        // Strategy: authenticate with Supabase client-side FIRST, then verify
+        // with the backend.  This ensures the Supabase session the frontend
+        // holds is the same one the backend validates — no session mismatches.
+        const { data: supabaseData, error: supabaseError } =
+          await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          });
+
+        if (supabaseError) {
+          // If Supabase fails (e.g. user not confirmed), fall back to the
+          // backend login which handles auto-confirmation.
+          const { data: response } = await axiosClient.post<{
+            data: {
+              user: User;
+              tokens: {
+                accessToken: string;
+                refreshToken: string;
+                expiresIn: number;
+              };
+            };
+          }>(
+            "/auth/login",
+            {
+              email: credentials.email,
+              password: credentials.password,
+              ...(credentials.role ? { role: credentials.role } : {}),
+            },
+            {
+              skipAuth: true,
+              headers: (credentials.turnstileToken ? { "x-turnstile-token": credentials.turnstileToken } : {}) as AxiosRequestHeaders,
+            } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
+          );
+
+          const { user: apiUser, tokens: apiTokens } = response.data;
+
+          if (credentials.role && apiUser.role !== credentials.role) {
+            throw new Error(
+              `This account is registered as a ${apiUser.role}. Please log in as a ${apiUser.role} instead.`,
+            );
+          }
+
+          // Sync Supabase client with the backend-created session
+          await supabase.auth.setSession({
+            access_token: apiTokens.accessToken,
+            refresh_token: apiTokens.refreshToken,
+          });
+
+          setAuth(apiUser, {
+            accessToken: apiTokens.accessToken,
+            refreshToken: apiTokens.refreshToken,
+            expiresIn: apiTokens.expiresIn || 1800,
+          });
+
+          if (apiUser.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+          return;
+        }
+
+        // Supabase auth succeeded — now verify with backend
+        const session = supabaseData.session;
+        if (!session) {
+          throw new Error("No session established");
+        }
+
+        const verifyPayload: Record<string, string> = {
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+        };
+        if (credentials.role) {
+          verifyPayload.role = credentials.role;
+        }
+
+        const { data: verifyResponse } = await axiosClient.post<{
           data: {
             user: User;
             tokens: {
@@ -68,47 +143,26 @@ export function useAuth(): UseAuthReturn {
               expiresIn: number;
             };
           };
-        }>(
-          "/auth/login",
-          {
-            email: credentials.email,
-            password: credentials.password,
-            ...(credentials.role ? { role: credentials.role } : {}),
-          },
-          {
-            skipAuth: true,
-            headers: (credentials.turnstileToken ? { "x-turnstile-token": credentials.turnstileToken } : {}) as AxiosRequestHeaders,
-          } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig,
-        );
+        }>("/auth/login/verify", verifyPayload, {
+          skipAuth: true,
+        } satisfies Partial<CustomAxiosRequestConfig> as CustomAxiosRequestConfig);
 
-        const { user: apiUser, tokens: apiTokens } = response.data;
+        const { user: verifiedUser, tokens: verifiedTokens } = verifyResponse.data;
 
-        // Validate that the returned role matches the requested role
-        if (credentials.role && apiUser.role !== credentials.role) {
+        if (credentials.role && verifiedUser.role !== credentials.role) {
           throw new Error(
-            `This account is registered as a ${apiUser.role}. Please log in as a ${apiUser.role} instead.`,
+            `This account is registered as a ${verifiedUser.role}. Please log in as a ${verifiedUser.role} instead.`,
           );
         }
 
-        // Sync Supabase Client in the frontend with the session from the backend
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: apiTokens.accessToken,
-          refresh_token: apiTokens.refreshToken,
+        // Don't call setSession — Supabase session is already valid from signInWithPassword
+        setAuth(verifiedUser, {
+          accessToken: verifiedTokens.accessToken,
+          refreshToken: verifiedTokens.refreshToken || session.refresh_token,
+          expiresIn: verifiedTokens.expiresIn || 3600,
         });
 
-        if (sessionError) {
-          console.error("Supabase session sync error:", sessionError);
-        }
-
-        // Update local store
-        setAuth(apiUser, {
-          accessToken: apiTokens.accessToken,
-          refreshToken: apiTokens.refreshToken,
-          expiresIn: apiTokens.expiresIn || 1800,
-        });
-
-        // Redirect to entry route (root page)
-        if (apiUser.role === "admin") {
+        if (verifiedUser.role === "admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/");

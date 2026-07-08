@@ -242,6 +242,18 @@ axiosClient.interceptors.response.use(
           });
         }
 
+        // Inform backend about the new session_id so we don't get kicked out.
+        // Use raw axios to bypass interceptors and avoid refresh loops.
+        try {
+          await axios.post(
+            `${API_URL}/auth/session/sync`,
+            {},
+            { headers: { Authorization: `Bearer ${newToken}` } }
+          );
+        } catch (syncErr) {
+          console.warn("[axios-client] Failed to sync session after refresh:", syncErr);
+        }
+
         // Process all queued requests with the new token
         processQueue(null, newToken);
 

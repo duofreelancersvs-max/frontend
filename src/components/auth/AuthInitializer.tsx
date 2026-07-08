@@ -75,10 +75,12 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
     return payload.iat * 1000 > Date.now() - 10_000;
   };
 
-  const syncSessionWithBackend = async (tokenOverride?: string): Promise<boolean> => {
+  type SyncResult = "success" | "auth_failed" | "network_error";
+
+  const syncSessionWithBackend = async (tokenOverride?: string): Promise<SyncResult> => {
     const token = tokenOverride || useAuthStore.getState().tokens?.accessToken;
 
-    if (!token) return false;
+    if (!token) return "auth_failed";
 
     // Retry up to 2 times with backoff for transient network errors
     const MAX_RETRIES = 2;
@@ -100,7 +102,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           : useAuthStore.getState().tokens!;
 
         setAuth(data.data.user, latestTokens);
-        return true;
+        return "success";
       } catch (error: any) {
         lastError = error;
         const status = error?.response?.status;
@@ -121,11 +123,12 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
 
     // All retries exhausted — handle the failure
     const status = lastError?.response?.status;
+    const isAuthFailure = status === 401 || status === 404;
 
     // Only clear Supabase session for definitive auth failures outside of
     // the init window and OAuth callback.  During init the block has its
     // own fallback paths; during OAuth the callback page handles cleanup.
-    if ((status === 401 || status === 404) && !isOAuthCallbackRef.current && initializingRef.current === false) {
+    if (isAuthFailure && !isOAuthCallbackRef.current && initializingRef.current === false) {
       supabase.auth.signOut().catch(() => {});
       // Force wipe local storage to prevent flickering/loops
       Object.keys(localStorage).forEach((key) => {
@@ -136,7 +139,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
       logout();
     }
 
-    return false;
+    return isAuthFailure ? "auth_failed" : "network_error";
   };
 
   // ─── main effect ───────────────────────────────────────────────────────────
@@ -216,8 +219,8 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         if (error || !session?.user) {
           if (useAuthStore.getState().isAuthenticated) {
             // Last resort: verify with backend directly using Zustand token
-            const synced = await syncSessionWithBackend();
-            if (synced) {
+            const syncResult = await syncSessionWithBackend();
+            if (syncResult === "success") {
               const user = useAuthStore.getState().user;
               if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
                 navigate("/");
@@ -225,8 +228,15 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
               unblock();
               return;
             }
+            
+            if (syncResult === "network_error") {
+              console.warn("[AuthInitializer] Network error during fallback sync — unblocking and trusting offline state.");
+              unblock();
+              return;
+            }
+
             console.warn(
-              "[AuthInitializer] No session and sync failed — logging out."
+              "[AuthInitializer] No session and sync failed (auth rejected) — logging out."
             );
             forceLogout();
           } else {
@@ -242,27 +252,27 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
           expiresIn: session.expires_in || 3600,
         });
 
-        const synced = await syncSessionWithBackend(session.access_token);
+        const syncResult = await syncSessionWithBackend(session.access_token);
 
-        if (synced) {
+        if (syncResult === "success") {
           const user = useAuthStore.getState().user;
           if (user && ["/login", "/register", "/forgot-password"].includes(location.pathname)) {
             navigate("/");
           }
           unblock();
-        } else if (isFreshLogin()) {
+        } else if (isFreshLogin() || syncResult === "network_error") {
           // The login flow (signInWithGoogleIdToken / OAuthCallback) just
-          // wrote auth state < 10s ago.  Don't destroy that session just
-          // because the init sync had a transient failure (cold start,
-          // slow network).  Trust the existing Zustand state and unblock.
-          console.warn("[AuthInitializer] Backend sync failed but login was recent — trusting existing auth state.");
+          // wrote auth state < 10s ago, OR there was a network error.
+          // Don't destroy that session just because the init sync had a transient failure 
+          // (cold start, slow network, offline).  Trust the existing Zustand state and unblock.
+          console.warn(`[AuthInitializer] Backend sync failed (${syncResult}) but login was recent or offline — trusting existing auth state.`);
           unblock();
         } else {
-          // Backend rejected the token — the session is dead.  Force
+          // Backend rejected the token (auth_failed) — the session is dead. Force
           // logout instead of unblocking, because rendering the app with
           // stale tokens would trigger 401 cascades from every API call
           // (axios interceptor → window.location.replace("/login") → flicker).
-          console.warn("[AuthInitializer] Backend sync failed — session invalid.");
+          console.warn("[AuthInitializer] Backend sync auth failed — session invalid.");
           forceLogout();
         }
       } catch (err) {
