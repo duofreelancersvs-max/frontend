@@ -886,22 +886,24 @@ const FindWork = () => {
                     <ChevronLeft size={18} />
                   </button>
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={cn(
-                          "w-10 h-10 rounded-lg font-medium transition-colors",
-                          currentPage === page
-                            ? "bg-teal text-white shadow-lg shadow-teal/20"
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
-                        )}
-                      >
-                        {page}
-                      </button>
-                    ),
-                  )}
+                  <div className="flex items-center gap-2 max-w-[50vw] sm:max-w-full overflow-x-auto no-scrollbar px-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={cn(
+                            "w-10 h-10 shrink-0 rounded-lg font-medium transition-colors",
+                            currentPage === page
+                              ? "bg-teal text-white shadow-lg shadow-teal/20"
+                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      ),
+                    )}
+                  </div>
 
                   <button
                     onClick={() =>

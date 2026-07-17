@@ -57,12 +57,14 @@ export const NotificationBell = () => {
         )}
         aria-label="Notifications"
       >
-        <Bell size={18} />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center leading-none">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
+        <div className="relative flex items-center justify-center">
+          <Bell size={20} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2.5 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center leading-none shadow-sm">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </div>
       </button>
 
       {/* Dropdown Panel */}

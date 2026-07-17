@@ -242,13 +242,11 @@ const FreelancerProfile = () => {
     }),
   }));
 
-  const ratingBreakdown = [
-    { stars: 5, percentage: 85 },
-    { stars: 4, percentage: 10 },
-    { stars: 3, percentage: 3 },
-    { stars: 2, percentage: 1 },
-    { stars: 1, percentage: 1 },
-  ];
+  const ratingBreakdown = [5, 4, 3, 2, 1].map((stars) => {
+    const count = reviewsData.filter((r) => Math.round(r.rating) === stars).length;
+    const percentage = reviewsData.length > 0 ? Math.round((count / reviewsData.length) * 100) : 0;
+    return { stars, percentage };
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
@@ -736,7 +734,7 @@ const FreelancerProfile = () => {
                           ))}
                         </div>
 
-                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed break-words whitespace-pre-wrap">
                           {review.text}
                         </p>
                       </div>

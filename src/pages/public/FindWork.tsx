@@ -415,7 +415,7 @@ const FindWork = () => {
             >
               <ChevronLeft size={18} className="mr-1" /> Previous
             </Button>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 max-w-[50vw] sm:max-w-full overflow-x-auto no-scrollbar px-1">
               {Array.from({
                 length: Math.min(5, Math.ceil(totalCount / limit)),
               }).map((_, i) => (

@@ -314,7 +314,7 @@ const FreelancerProfileView = () => {
                           })}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600 leading-relaxed mb-2">
+                      <p className="text-sm text-slate-600 leading-relaxed mb-2 break-words whitespace-pre-wrap">
                         {review.comment}
                       </p>
                       {review.project && (

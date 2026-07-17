@@ -25,7 +25,11 @@ export function useHideOnScroll(threshold = 12) {
       if (y <= 0) {
         setHidden(false);
       } else if (delta > 0 && y > 80) {
-        setHidden(true);
+        // Prevent hiding the nav if we are near the bottom to avoid scroll height jumps & loops
+        const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight;
+        if (y < maxScroll - 150) {
+          setHidden(true);
+        }
       } else if (delta < 0) {
         setHidden(false);
       }

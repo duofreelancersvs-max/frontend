@@ -182,7 +182,7 @@ const DashboardHeader: React.FC<React.PropsWithChildren<DashboardHeaderProps>> =
               <MessageSquare size={18} />
 
               {totalUnreadCount > 0 && (
-                <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center leading-none">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background flex items-center justify-center leading-none">
                   {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
                 </span>
               )}

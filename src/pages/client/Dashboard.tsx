@@ -241,7 +241,7 @@ const ClientDashboard = () => {
 
 
   return (
-    <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-background transition-colors duration-300">
+    <div className="flex-1 bg-background transition-colors duration-300">
       {/* MAIN CONTENT */}
       <div className="min-h-full">
         <DashboardHeader
