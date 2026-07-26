@@ -31,7 +31,11 @@ const TrialBanner = ({ onDismiss, className }: TrialBannerProps) => {
     trialDaysRemaining,
     trialProgressPct,
     usage,
+    showUsageIndicator,
   } = useFeatureGate();
+
+  // When UsageIndicator is visible, don't show duplicate application count
+  if (trialExpired && showUsageIndicator) return null;
 
   if (!showTrialBanner && !trialExpired) return null;
 

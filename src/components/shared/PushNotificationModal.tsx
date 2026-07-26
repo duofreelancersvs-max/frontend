@@ -96,23 +96,23 @@ export const PushNotificationModal = () => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#18181b] border border-white/10 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-card border border-border rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="relative p-8 text-center flex flex-col items-center">
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 text-slate-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-1.5 transition-colors"
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground bg-muted hover:bg-accent rounded-full p-1.5 transition-colors"
           >
             <X size={16} />
           </button>
 
-          <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-indigo-500/5">
-            <BellRing className="w-8 h-8 text-indigo-400" />
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-primary/5">
+            <BellRing className="w-8 h-8 text-primary" />
           </div>
 
-          <h2 className="text-xl font-bold text-white mb-3 tracking-tight">
+          <h2 className="text-xl font-bold text-foreground mb-3 tracking-tight">
             Enable Notifications
           </h2>
-          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+          <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
             Get instant alerts for new messages, project updates, and important
             announcements.
           </p>
@@ -121,7 +121,8 @@ export const PushNotificationModal = () => {
             <Button
               onClick={handleEnable}
               disabled={isSubscribing}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-11 font-medium transition-colors"
+              variant="default"
+              className="w-full rounded-xl h-11 font-medium"
             >
               {isSubscribing ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -132,7 +133,7 @@ export const PushNotificationModal = () => {
             <Button
               onClick={handleDismiss}
               variant="ghost"
-              className="w-full text-slate-400 hover:text-white rounded-xl h-11 font-medium transition-colors"
+              className="w-full rounded-xl h-11 font-medium"
             >
               Maybe Later
             </Button>
