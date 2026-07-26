@@ -248,7 +248,7 @@ const Pricing = () => {
       buttonVariant: "outline" as const,
       buttonClass: "border-navy/20 dark:border-white/20 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10",
       buttonText: "Start Free",
-      features: ["5 Applications/month", "Standard Support"],
+      features: ["3 Applications/month", "Standard Support"],
     },
     {
       name: "Pro",

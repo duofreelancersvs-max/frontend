@@ -28,7 +28,7 @@ const planFeatures = {
   free: [
     { feature: "Profile Visibility", included: true },
     { feature: "Browse Projects", included: true },
-    { feature: "30 Applications/month", included: true },
+    { feature: "3 Applications/month", included: true },
     { feature: "Basic Search Filters", included: true },
     { feature: "Standard Support", included: true },
     { feature: "Unlimited Applications", included: false },

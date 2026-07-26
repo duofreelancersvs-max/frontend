@@ -69,7 +69,7 @@ export const NotificationBell = () => {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        <div className="fixed sm:absolute right-2 sm:right-0 top-[60px] sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-80 md:w-96 bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right sm:origin-top-right origin-top">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <h3 className="text-sm font-semibold text-foreground">
