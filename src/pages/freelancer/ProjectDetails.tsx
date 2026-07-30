@@ -305,8 +305,8 @@ const ProjectDetails = () => {
                 About the Project
               </h2>
 
-              <div className="space-y-6 text-slate-600 dark:text-slate-400 leading-relaxed">
-                <p className="text-lg whitespace-pre-line">
+              <div className="space-y-6 text-slate-600 dark:text-slate-400 leading-relaxed overflow-hidden">
+                <p className="text-lg whitespace-pre-line break-words">
                   {project.description}
                 </p>
               </div>

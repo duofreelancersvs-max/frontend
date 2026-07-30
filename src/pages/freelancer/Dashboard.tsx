@@ -300,18 +300,9 @@ const FreelancerDashboard = () => {
       skillsMatch = 0;
     }
 
-    const str = project.client?.id || project._id || "123";
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const randomStr = Math.abs(hash).toString();
-    const generatedRating = (4.0 + (parseInt(randomStr.substring(0, 2)) % 10) / 10).toFixed(1);
-
-    // Use the real rating from the backend if available and > 0, otherwise fallback to pseudo-rating
     const rating = project.client?.rating && project.client.rating > 0 
       ? project.client.rating.toFixed(1) 
-      : generatedRating;
+      : null;
 
     return {
       id: project._id || project.id || `project-${index}`,
@@ -581,12 +572,14 @@ const FreelancerDashboard = () => {
                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           {project.client.name}
                         </span>
-                        <div className="flex items-center gap-0.5 ml-auto">
-                          <Star size={12} className="text-gold fill-gold" />
-                          <span className="text-xs font-medium text-slate-600">
-                            {project.client.rating}
-                          </span>
-                        </div>
+                        {project.client.rating != null && project.client.rating !== "" && (
+                          <div className="flex items-center gap-0.5 ml-auto">
+                            <Star size={12} className="text-gold fill-gold" />
+                            <span className="text-xs font-medium text-slate-600">
+                              {project.client.rating}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap gap-1 mb-3">

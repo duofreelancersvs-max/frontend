@@ -12,7 +12,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowRight,
-  Users,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -324,18 +324,7 @@ const FindWork = () => {
         </div>
 
         {/* Results Info */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-slate-500">
-            Showing{" "}
-            <span className="text-navy dark:text-white font-bold">
-              {projects.length}
-            </span>{" "}
-            of{" "}
-            <span className="text-navy dark:text-white font-bold">
-              {totalCount}
-            </span>{" "}
-            projects
-          </p>
+        <div className="flex items-center justify-end mb-6">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-400 uppercase">
               Sort:
@@ -345,6 +334,31 @@ const FindWork = () => {
             </select>
           </div>
         </div>
+
+        {/* Pagination - Top */}
+        {!loading && totalCount > limit && (
+          <div className="mb-6 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              className="rounded-xl"
+            >
+              <ChevronLeft size={18} className="mr-1" /> Previous
+            </Button>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 px-4">
+              Page {currentPage} of {Math.ceil(totalCount / limit)}
+            </span>
+            <Button
+              variant="outline"
+              disabled={currentPage >= Math.ceil(totalCount / limit)}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              className="rounded-xl"
+            >
+              Next <ChevronRight size={18} className="ml-1" />
+            </Button>
+          </div>
+        )}
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 gap-6">
@@ -376,6 +390,7 @@ const FindWork = () => {
                     | undefined
                 }
                 onApply={() => handleApply(project._id)}
+                onViewDetails={() => navigate(`/freelancer/project/${project._id}`)}
               />
             ))
           ) : (
@@ -403,46 +418,6 @@ const FindWork = () => {
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {!loading && totalCount > limit && (
-          <div className="mt-12 flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              className="rounded-xl"
-            >
-              <ChevronLeft size={18} className="mr-1" /> Previous
-            </Button>
-            <div className="flex items-center gap-1 max-w-[50vw] sm:max-w-full overflow-x-auto no-scrollbar px-1">
-              {Array.from({
-                length: Math.min(5, Math.ceil(totalCount / limit)),
-              }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={cn(
-                    "w-10 h-10 rounded-xl text-sm font-bold transition-all",
-                    currentPage === i + 1
-                      ? "bg-teal text-white shadow-lg shadow-teal/20"
-                      : "text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10",
-                  )}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              disabled={currentPage >= Math.ceil(totalCount / limit)}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              className="rounded-xl"
-            >
-              Next <ChevronRight size={18} className="ml-1" />
-            </Button>
-          </div>
-        )}
       </div>
       </main>
     </div>
@@ -452,10 +427,12 @@ const FindWork = () => {
 const ProjectCard = ({
   project,
   onApply,
+  onViewDetails,
   applicationStatus,
 }: {
   project: Project;
   onApply: () => void;
+  onViewDetails: () => void;
   applicationStatus?: string;
 }) => {
   return (
@@ -516,17 +493,14 @@ const ProjectCard = ({
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
-              <Users size={16} />
-            </div>
-            <p className="text-xs font-bold text-slate-500">
-              <span className="text-navy dark:text-white">
-                {project.applications || 0}
-              </span>{" "}
-              proposals
-            </p>
-          </div>
+          <Button
+            variant="outline"
+            onClick={onViewDetails}
+            className="flex items-center gap-2 h-12 px-6 rounded-2xl font-bold border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
+          >
+            <Eye size={16} />
+            View Details
+          </Button>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Button

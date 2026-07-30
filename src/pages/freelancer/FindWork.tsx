@@ -6,7 +6,6 @@ import {
   BookmarkCheck,
   MapPin,
   Clock,
-  Users,
   ChevronLeft,
   ChevronRight,
   Briefcase,
@@ -672,33 +671,12 @@ const FindWork = () => {
                                 {project.client?.fullName ?? "Client"}
                               </p>
                               <div className="flex items-center gap-1">
-                                {(() => {
-                                  // Use the real rating from the backend if available and > 0
-                                  if (project.client?.rating && project.client.rating > 0) {
-                                    return (
-                                      <>
-                                        <Star size={10} className="text-gold fill-gold" />
-                                        <span className="text-xxs text-slate-500">{project.client.rating.toFixed(1)}</span>
-                                      </>
-                                    );
-                                  }
-
-                                  // Fallback to generated pseudo-rating if no real rating yet
-                                  const str = project.client?.id || project._id || "123";
-                                  let hash = 0;
-                                  for (let i = 0; i < str.length; i++) {
-                                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-                                  }
-                                  const randomStr = Math.abs(hash).toString();
-                                  const rating = (4.0 + (parseInt(randomStr.substring(0, 2)) % 10) / 10).toFixed(1);
-                                  const reviews = parseInt(randomStr.substring(2, 4)) % 50 + 1;
-                                  return (
-                                    <>
-                                      <Star size={10} className="text-gold fill-gold" />
-                                      <span className="text-xxs text-slate-500">{rating} ({reviews} reviews)</span>
-                                    </>
-                                  );
-                                })()}
+                                {project.client?.rating != null && project.client.rating > 0 && (
+                                  <>
+                                    <Star size={10} className="text-gold fill-gold" />
+                                    <span className="text-xxs text-slate-500">{project.client.rating.toFixed(1)}</span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -739,13 +717,13 @@ const FindWork = () => {
                         <div className="mt-auto space-y-4">
 
                           <div className="flex items-center justify-between text-xs text-slate-500 pb-2">
-                            <div className="flex items-center gap-1.5">
+                            {/* <div className="flex items-center gap-1.5">
                               <Users size={14} />
                               <span>
                                 {project.applications} applicant
                                 {project.applications !== 1 ? "s" : ""}
                               </span>
-                            </div>
+                            </div> */}
                             <div className="flex items-center gap-1.5">
                               <MapPin size={14} />
                               <span>
