@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import {
   ChevronRight,
   Mail,
@@ -408,6 +409,11 @@ const Contact = () => {
                   </div>
                 </AnimatedSection>
               </div>
+            </div>
+
+            {/* Ad: Below Form */}
+            <div className="mt-12">
+              <AdUnit adSlot="2819995173" format="auto" />
             </div>
 
             {/* Trust Badges */}

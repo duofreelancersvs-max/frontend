@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import {
   Target,
   Eye,
@@ -330,6 +331,13 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad: Between Story and Mission */}
+      <div className="bg-white dark:bg-background py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <AdUnit adSlot="5278637556" format="auto" />
+        </div>
+      </div>
 
       {/* 4. MISSION & VISION - GLASSY TILES */}
       <section className="py-32 bg-white dark:bg-white/5 border-y border-slate-200 dark:border-white/5 relative">

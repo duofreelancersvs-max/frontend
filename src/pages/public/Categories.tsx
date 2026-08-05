@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import {
   ArrowRight,
   TrendingUp,
@@ -202,6 +203,13 @@ const Categories = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad: Below Categories Grid */}
+      <div className="bg-slate-50 dark:bg-background py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <AdUnit adSlot="5446158512" format="auto" />
+        </div>
+      </div>
 
       {/* Statistics Section */}
       <section className="py-24 bg-slate-100 dark:bg-white/5 border-y border-slate-200 dark:border-white/5">

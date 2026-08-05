@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import {
   Check,
   X,
@@ -579,6 +580,13 @@ const Pricing = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad: Below Pricing Cards */}
+      <div className="bg-slate-50 dark:bg-background py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <AdUnit adSlot="2519064114" format="auto" />
+        </div>
+      </div>
 
       {/* 3. COMPARISON SECTION */}
       <section className="py-32 bg-slate-50 dark:bg-white/5 border-y border-slate-200 dark:border-white/5">

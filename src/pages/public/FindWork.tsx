@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PublicNavbar from "@/components/shared/PublicNavbar";
+import { AdUnit } from "@/components/shared/AdUnit";
 import { projectService } from "@/services";
 import { publicService } from "@/services/public.service";
 import type { Project } from "@/services";
@@ -199,6 +200,13 @@ const FindWork = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad: Below Hero */}
+      <div className="bg-slate-50 dark:bg-[#050B15] py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <AdUnit adSlot="9084472461" format="auto" />
+        </div>
+      </div>
 
       <div className="py-12 container mx-auto px-4 lg:px-8">
         <div className="flex flex-col gap-4 mb-6">

@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import ScrollToTop from "./components/common/ScrollToTop.tsx";
 import { AnalyticsTracker } from "./components/shared/AnalyticsTracker.tsx";
 import { ClarityTracker } from "./components/shared/ClarityTracker.tsx";
+import { AdSenseInitializer } from "./components/shared/AdSenseInitializer.tsx";
 import "./styles/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "nprogress/nprogress.css";
@@ -54,6 +55,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <ScrollToTop />
             <ClarityTracker />
             <AnalyticsTracker />
+            <AdSenseInitializer />
             <App />
           </AuthInitializer>
         </BrowserRouter>

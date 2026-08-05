@@ -23,6 +23,7 @@ import { ProPlanBadge } from "@/components/shared/ProPlanBadge";
 import { cn } from "@/lib/utils";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
+import { AdUnit } from "@/components/shared/AdUnit";
 import freelancerService from "@/services/freelancer.service";
 import type { FreelancerProfile } from "@/services/freelancer.service";
 import { useAuth } from "@/hooks/useAuth";
@@ -519,6 +520,13 @@ const Home = () => {
           </div>
         </section>
 
+        {/* Ad: Below Hero */}
+        <div className="bg-slate-50 dark:bg-white/5 py-4">
+          <div className="container mx-auto px-4 lg:px-8">
+            <AdUnit adSlot="4735712071" format="auto" />
+          </div>
+        </div>
+
         {/* Full-width Attached Disclaimer Ticker */}
         <div className="w-full overflow-hidden bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 py-3 flex items-center group relative z-20">
           <div className="whitespace-nowrap flex items-center animate-marquee font-medium text-slate-600 dark:text-slate-300 tracking-wide text-sm md:text-base">
@@ -955,6 +963,13 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Ad: Before CTA */}
+        <div className="bg-white dark:bg-[#050B15] py-4">
+          <div className="container mx-auto px-4 lg:px-8">
+            <AdUnit adSlot="7542104748" format="auto" />
+          </div>
+        </div>
 
         {/* 6. CTA SECTION */}
         {!isAuthenticated && (

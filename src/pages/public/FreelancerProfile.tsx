@@ -6,6 +6,7 @@ import { getCategoryStyle } from "@/lib/category-styles";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import {
   ArrowRight,
   Award,
@@ -756,6 +757,9 @@ const FreelancerProfile = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Ad: Sidebar */}
+              <AdUnit adSlot="3832145780" format="auto" className="mb-6" />
+
               {/* Sticky Contact Card */}
               <div className="sticky top-24">
                 <div className="bg-white dark:bg-transparent dark:glass-card rounded-2xl p-6 shadow-sm dark:shadow-none border border-slate-100 dark:border-white/5 mb-6">

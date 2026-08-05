@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import PublicNavbar from "@/components/shared/PublicNavbar";
 import PublicFooter from "@/components/shared/PublicFooter";
 import PublicMain from "@/components/shared/PublicMain";
+import { AdUnit } from "@/components/shared/AdUnit";
 import { BadgeCheck, ChevronLeft, ChevronRight, Frown, Grid3X3, List, Search, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -220,6 +221,13 @@ const FreelancerDirectory = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad: Below Filter Bar */}
+      <div className="bg-slate-50 dark:bg-[#050B15] py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <AdUnit adSlot="6579276787" format="auto" />
+        </div>
+      </div>
 
       {/* 3. MAIN CONTENT AREA */}
       <section className="py-12 pb-32">
