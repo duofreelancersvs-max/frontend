@@ -30,8 +30,8 @@ const Footer = () => {
       title: "Company",
       links: [
         { label: "About Us", href: "/about" },
-        { label: "Careers", href: "/careers" },
-        { label: "Press", href: "/press" },
+        { label: "Blog", href: "/blog" },
+        { label: "FAQ", href: "/faq" },
         { label: "Contact Us", href: "/contact" },
         { label: "Trust & Safety", href: "/trust" },
       ],
@@ -118,22 +118,28 @@ const Footer = () => {
           </p>
           <div className="flex flex-wrap gap-6 justify-center">
             <Link
-              to="/privacy"
+              to="/privacy-policy"
               className="text-slate-500 hover:text-white text-sm transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              to="/terms"
+              to="/terms-and-conditions"
               className="text-slate-500 hover:text-white text-sm transition-colors"
             >
               Terms of Service
             </Link>
             <Link
-              to="/cookies"
+              to="/faq"
               className="text-slate-500 hover:text-white text-sm transition-colors"
             >
-              Cookie Settings
+              FAQ
+            </Link>
+            <Link
+              to="/blog"
+              className="text-slate-500 hover:text-white text-sm transition-colors"
+            >
+              Blog
             </Link>
           </div>
         </div>

@@ -13,11 +13,7 @@ import {
   Shield,
   Linkedin,
   Twitter,
-  Users,
-  Briefcase,
-  Award,
   Rocket,
-  Star,
   ArrowRight,
   Play,
   Sparkles,
@@ -81,36 +77,36 @@ const AnimatedSection = ({
 const About = () => {
   const team = [
     {
-      name: "Vikram Reddy",
-      role: "Founder & CEO",
-      avatar: "VR",
-      bio: "10+ years in the creative industry",
-      linkedin: "#",
-      twitter: "#",
+      name: "Founder & CEO",
+      role: "Vision & Strategy",
+      avatar: "VC",
+      bio: "Leading ConnectMeIndia's mission to bridge Indian creative talent with global opportunities.",
+      linkedin: "https://www.linkedin.com/in/connectme-india-575362417",
+      twitter: "https://x.com/connectmeindia",
     },
     {
-      name: "Priya Sharma",
-      role: "Head of Operations",
-      avatar: "PS",
-      bio: "Scaling expert with focus on quality",
-      linkedin: "#",
-      twitter: "#",
+      name: "Head of Operations",
+      role: "Platform & Quality",
+      avatar: "OO",
+      bio: "Ensuring seamless platform operations and maintaining our high quality standards.",
+      linkedin: "https://www.linkedin.com/in/connectme-india-575362417",
+      twitter: "https://x.com/connectmeindia",
     },
     {
-      name: "Arjun Kumar",
-      role: "CTO",
-      avatar: "AK",
-      bio: "Architecting the future of creative work",
-      linkedin: "#",
-      twitter: "#",
+      name: "Community Lead",
+      role: "Freelancer Success",
+      avatar: "CL",
+      bio: "Building and nurturing our growing community of verified professionals.",
+      linkedin: "https://www.linkedin.com/in/connectme-india-575362417",
+      twitter: "https://x.com/connectmeindia",
     },
     {
-      name: "Lakshmi Devi",
-      role: "Community Lead",
-      avatar: "LD",
-      bio: "Bringing people together through creativity",
-      linkedin: "#",
-      twitter: "#",
+      name: "Technical Lead",
+      role: "Engineering",
+      avatar: "TT",
+      bio: "Architecting the platform that powers India's creative freelance ecosystem.",
+      linkedin: "https://www.linkedin.com/in/connectme-india-575362417",
+      twitter: "https://x.com/connectmeindia",
     },
   ];
 
@@ -174,13 +170,6 @@ const About = () => {
     },
   ];
 
-  const stats = [
-    { value: "500+", label: "Curated Talents", icon: Users },
-    { value: "1.2k+", label: "Completed Projects", icon: Briefcase },
-    { value: "85+", label: "Enterprise Clients", icon: Award },
-    { value: "4.9/5", label: "Global Rating", icon: Star },
-  ];
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-white overflow-x-hidden">
       <PublicNavbar dark />
@@ -214,30 +203,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* 2. STATS GRID */}
-      <section className="py-20 bg-white dark:bg-white/5 border-y border-slate-200 dark:border-white/5 backdrop-blur-sm">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
-            {stats.map((stat, idx) => (
-              <AnimatedSection key={idx} delay={idx * 100}>
-                <div className="text-center group">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-teal/20 transition-all border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none">
-                    <stat.icon className="text-teal" size={30} />
-                  </div>
-                  <div className="text-4xl md:text-5xl font-bold mb-2 tabular-nums text-navy dark:text-white">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">
-                    {stat.label}
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. OUR STORY SECTION */}
+      {/* 2. OUR STORY SECTION */}
       <section className="py-32 relative">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-20 items-center">

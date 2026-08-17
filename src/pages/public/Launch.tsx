@@ -538,9 +538,22 @@ const LaunchPage = () => {
                   : "opacity-0 translate-y-12 scale-90"
               }`}
             >
+              <div className="text-center mb-10">
+                <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">
+                    ConnectMeIndia
+                  </span>
+                </h1>
+                <p className="text-lg sm:text-xl text-slate-400 max-w-xl mx-auto mb-2">
+                  India's premier freelance marketplace for creative professionals.
+                </p>
+                <p className="text-sm text-slate-500 max-w-md mx-auto">
+                  Connecting top talent in Video Editing, VFX, Web Development, Design, and more with clients who value quality craftsmanship.
+                </p>
+              </div>
               <button
                 onClick={handleLaunch}
-                className="group relative flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal via-emerald-500 to-teal text-2xl sm:text-3xl font-black text-white overflow-hidden shadow-[0_0_50px_rgba(20,184,166,0.5)] hover:shadow-[0_0_80px_rgba(20,184,166,0.8)] hover:scale-105 active:scale-95 transition-all duration-300"
+                className="group relative flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br from-teal via-emerald-500 to-teal text-2xl sm:text-3xl font-black text-white overflow-hidden shadow-[0_0_50px_rgba(20,184,166,0.5)] hover:shadow-[0_0_80px_rgba(20,184,166,0.8)] hover:scale-105 active:scale-95 transition-all duration-300 mx-auto"
               >
                 {/* Animated shimmer */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:animate-[shimmer_2s_ease-in-out_infinite]" />
@@ -549,6 +562,9 @@ const LaunchPage = () => {
                   Launch
                 </span>
               </button>
+              <p className="text-xs text-slate-600 mt-6">
+                Click to experience our launch animation
+              </p>
             </div>
           )}
         </div>

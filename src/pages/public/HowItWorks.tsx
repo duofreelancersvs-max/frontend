@@ -257,8 +257,11 @@ const HowItWorks = () => {
                   Visual Guide
                 </span>
                 <h2 className="text-4xl font-bold text-navy dark:text-white">
-                  Watch the Experience
+                  See ConnectMeIndia in Action
                 </h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                  Explore our platform features and discover how we connect clients with India's top creative professionals.
+                </p>
               </div>
 
               <div className="aspect-video rounded-[3rem] bg-gradient-to-br from-teal/20 to-royal-blue/30 dark:from-navy dark:to-royal-blue/30 p-1 group cursor-pointer relative shadow-xl dark:shadow-2xl dark:shadow-navy/50">
@@ -276,7 +279,7 @@ const HowItWorks = () => {
                       Platform Walkthrough
                     </div>
                     <div className="text-slate-500 text-sm">
-                      3:24 mins • Quality Vetted
+                      Explore Features • Quality Vetted Freelancers
                     </div>
                   </div>
                 </div>

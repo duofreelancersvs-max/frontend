@@ -14,6 +14,7 @@ import UpgradeModalHost from "@/components/feature-gate/UpgradeModalHost";
 import { usePwaStore } from "@/stores/pwa.store";
 import { AppInstallPrompt } from "@/components/pwa/AppInstallPrompt";
 import SkipLink from "@/components/common/SkipLink";
+import CookieConsent from "@/components/common/CookieConsent";
 import { useThemeStore } from "@/stores/theme.store";
 import { PushNotificationModal } from "@/components/shared/PushNotificationModal";
 
@@ -24,8 +25,6 @@ const AdminLayout = lazy(() => import("@/components/layouts/AdminLayout"));
 
 // Public
 import Home from "@/pages/public/Home";
-const LaunchPage = lazy(() => import("@/pages/public/Launch"));
-
 const About = lazy(() => import("@/pages/public/About"));
 const HowItWorks = lazy(() => import("@/pages/public/HowItWorks"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
@@ -39,6 +38,9 @@ const Categories = lazy(() => import("@/pages/public/Categories"));
 const Contact = lazy(() => import("@/pages/public/Contact"));
 const FindWorkPublic = lazy(() => import("@/pages/public/FindWork"));
 const LegalPage = lazy(() => import("@/pages/public/LegalPage"));
+const Blog = lazy(() => import("@/pages/public/Blog"));
+const BlogPost = lazy(() => import("@/pages/public/BlogPost"));
+const FAQ = lazy(() => import("@/pages/public/FAQ"));
 const NotFound = lazy(() => import("@/pages/public/NotFound"));
 
 // Auth
@@ -159,19 +161,12 @@ function App() {
         theme={theme}
         toastClassName="!rounded-2xl !shadow-xl !mt-4 sm:!mt-0 !mx-4 sm:!mx-0 !w-auto"
       />
+      <CookieConsent />
       <Routes>
         {/* Public Pages (full-page Suspense is fine here — no persistent layout) */}
         <Route
           path="/"
           element={<Home />}
-        />
-        <Route
-          path="/launch"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <LaunchPage />
-            </Suspense>
-          }
         />
         <Route
           path="/about"
@@ -262,6 +257,30 @@ function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <LegalPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Blog />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <BlogPost />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <FAQ />
             </Suspense>
           }
         />

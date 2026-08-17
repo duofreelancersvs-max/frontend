@@ -6,7 +6,6 @@ import { AdUnit } from "@/components/shared/AdUnit";
 import {
   ChevronRight,
   Mail,
-  Phone,
   Clock,
   Send,
   Check,
@@ -15,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
 import { SEO } from "@/components/SEO/SEO";
 
 // Custom hook for intersection observer animations
@@ -71,8 +69,6 @@ const AnimatedSection = ({
 };
 
 const Contact = () => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -92,22 +88,11 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast({
-        title: "Message Sent Successfully",
-        description: "An elite representative will contact you shortly.",
-        className: "bg-teal text-white border-0",
-      });
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "General Inquiry",
-        message: "",
-      });
-    }, 1500);
+    const to = "support@connectmeindia.in";
+    const subject = `[${formData.subject}] From ${formData.name}`;
+    const body = `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone || "N/A"}\n\n${formData.message}`;
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailUrl, "_blank");
   };
 
   const contactOptions = [
@@ -119,13 +104,6 @@ const Contact = () => {
       subValue: "hello@connectmeindia.in",
       subLink: "mailto:hello@connectmeindia.in",
       color: "text-teal",
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      value: "+91 XXXXX XXXXX",
-      link: "#",
-      color: "text-royal-blue",
     },
   ];
 
@@ -371,33 +349,25 @@ const Contact = () => {
 
                         <Button
                           type="submit"
-                          disabled={isSubmitting}
                           className="w-full h-16 rounded-2xl bg-teal hover:bg-[#128a7f] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-navy font-bold text-lg transition-all shadow-xl shadow-teal/20 dark:shadow-none hover:shadow-teal/30 hover:scale-[1.01] active:scale-95"
                         >
-                          {isSubmitting ? (
-                            <div className="flex items-center gap-3">
-                              <div className="w-5 h-5 border-2 border-white/30 border-t-white dark:border-navy/30 dark:border-t-navy rounded-full animate-spin" />
-                              Processing...
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              Submit Request
-                              <Send size={18} />
-                            </div>
-                          )}
+                          <div className="flex items-center gap-3">
+                            Send via Email
+                            <Send size={18} />
+                          </div>
                         </Button>
 
                         <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-4">
                           By submitting this form, you agree to ConnectMeIndia's{" "}
                           <a
-                            href="/terms"
+                            href="/terms-and-conditions"
                             className="underline hover:text-teal transition-colors"
                           >
                             Terms &amp; Conditions
                           </a>{" "}
                           and{" "}
                           <a
-                            href="/privacy"
+                            href="/privacy-policy"
                             className="underline hover:text-teal transition-colors"
                           >
                             Privacy Policy
