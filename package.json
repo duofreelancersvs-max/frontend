@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:capacitor": "tsc -b && CAPACITOR_BUILD=true vite build",
+    "sync:android": "npm run build:capacitor && cap sync android",
+    "open:android": "cap open android",
     "build:static": "npm run build && node scripts/prerender-public.mjs",
     "prerender": "node scripts/prerender-public.mjs",
     "lint": "eslint .",
@@ -15,6 +18,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@hookform/resolvers": "^3.10.0",
     "@marsidev/react-turnstile": "^1.5.2",
     "@microsoft/clarity": "^1.0.2",

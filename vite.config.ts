@@ -8,6 +8,10 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
   plugins: [
     react(),
+    // Skip the PWA service worker for Capacitor mobile builds. A SW on the
+    // WebView origin would cache stale assets across APK updates. Set
+    // CAPACITOR_BUILD=true (see "build:capacitor" script) when building for mobile.
+    ...(process.env.CAPACITOR_BUILD === "true" ? [] : [
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "script-defer",
@@ -51,6 +55,7 @@ export default defineConfig({
         enabled: false,
       },
     }),
+    ]),
   ],
   build: {
     chunkSizeWarningLimit: 1000,

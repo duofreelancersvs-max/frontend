@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ConnectMeIndia</string>
+    <string name="title_activity_main">ConnectMeIndia</string>
+    <string name="package_name">com.connectmeindia.app</string>
+    <string name="custom_url_scheme">com.connectmeindia.app</string>
+</resources>
